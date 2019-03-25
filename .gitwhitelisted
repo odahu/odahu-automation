@@ -1,0 +1,37 @@
+# WARNING: PLEASE KEEP ONE EMPTY STRING AT THE END OF THIS FILE
+000000000000
+# Allow python documentation strings for values like login/password/etc.
+# Examples:
+# :param login: this is description
+# :type password: password for account
+:(param|type)\\s([Ll]ogin|[Pp]assword|[Pp]ass|[Tt]oken|[Uu]ser|[Uu]sername|[sS]ecret|[Pp]rivate)\\s*:
+# Allow python code like this
+# if login and password:
+# if token:
+# elif token:
+(and|if|elif)\\s([Ll]ogin|[Pp]assword|[Pp]ass|[Tt]oken|[Uu]ser|[Uu]sername|[sS]ecret|[Pp]rivate)\\s*:\\s*$
+# Allow particular login/passwords/etc. values like pass/~, function signature,
+# end of line, encoded base64 demo password
+# Examples:
+# def func(login: str,...)
+# password: ~
+# password:
+# connections.secret: |-
+([Ll]ogin|[Pp]assword|[Pp]ass|[Tt]oken|[Uu]ser|[Uu]sername|[sS]ecret|[Pp]rivate)\\s*:\\s*(~|example|\\s?str,|\\s\\|\\-|$)
+#Allow ansible substitution like password: {{ .... }}
+([Ll]ogin|[Pp]assword|[Pp]ass|[Tt]oken|[Uu]ser|[Uu]sername|[sS]ecret|[Pp]rivate)\\s*:\\s*(\"|\')?\\{\\{\\s.+\\s\\}\\}(\"|\')?
+# Allow localhost IPv4 address
+127.0.0.1
+# Allow demo netmask
+1.2.3.4/32
+172.17.0.1
+172.17.0.2
+# Allow IPv4 configuration for nonMasqueradeCIDR be stored
+nonMasqueradeCIDR:\\s*[0-9\\./]+
+# Allow user:tag
+user:tag
+# Empty user and password
+user: ""
+password: ""
+# Allow username : unicode (Jupyter config)
+username : unicode
