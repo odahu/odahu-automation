@@ -1,0 +1,3 @@
+---
+- include: aws.yaml
+- include: k8s.yaml
