@@ -23,7 +23,3 @@ staticPasswords: {{ dex.config.staticPasswords | to_json }}
 enablePasswordDB: {{ dex.config.enablePasswordDB | default('true') }}
 
 tls_secret: {{ cluster_name }}-tls
-
-##image:
-##  repository: {{ docker_repo }}/k8s-dex
-##  tag: {{ legion_version }}

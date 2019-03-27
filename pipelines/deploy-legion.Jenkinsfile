@@ -6,6 +6,7 @@ pipeline {
         param_git_branch = "${params.GitBranch}"
         param_profile = "${params.Profile}"
         param_legion_version = "${params.LegionVersion}"
+        param_legion_infra_version = "${params.LegionInfraVersion}"
         param_deploy_legion = "${params.DeployLegion}"
         param_create_jenkins_tests = "${params.CreateJenkinsTests}"
         param_use_regression_tests = "${params.UseRegressionTests}"
@@ -15,10 +16,10 @@ pipeline {
         param_helm_repo = "${params.HelmRepo}"
         param_debug_run = "${params.DebugRun}"
         //Job parameters
-        sharedLibPath = "deploy/legionPipeline.groovy"
+        sharedLibPath = "pipelines/legionPipeline.groovy"
         commitID = null
         cleanupContainerVersion = "latest"
-        ansibleHome =  "/opt/legion/deploy/ansible"
+        ansibleHome =  "/opt/legion/ansible"
         ansibleVerbose = '-v'
         helmLocalSrc = 'false'
     }
@@ -90,7 +91,7 @@ pipeline {
         }
         cleanup {
             script {
-                legion.cleanupClusterSg(param_legion_version ?: cleanupContainerVersion)
+                legion.cleanupClusterSg(env.param_legion_infra_version ?: cleanupContainerVersion)
             }
             deleteDir()
         }

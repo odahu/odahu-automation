@@ -64,7 +64,7 @@ pipeline {
                     print("Check code for security issues")
                     sh "bash install-git-secrets-hook.sh install_hooks && git secrets --scan -r"
 
-                    legion.setBuildMeta(env.versionFile)
+                    legion.setBuildMeta(env.updateVersionScript, env.versionFile)
                 }
             }
         }
@@ -73,7 +73,12 @@ pipeline {
         stage('Set GIT release Tag'){
             steps {
                 script {
-                    legion.setGitReleaseTag()
+                    if (env.param_stable_release && env.param_push_git_tag.toBoolean()){
+                        legion.setGitReleaseTag()
+                    }
+                    else {
+                        print("Skipping release git tag push")
+                    }
                 }
             }
         }
@@ -106,7 +111,7 @@ pipeline {
                 stage("Build Ansible") {
                     steps {
                         script {
-                            legion.buildLegionImage('k8s-ansible', '.', 'containers/ansible/Dockerfile')
+                            legion.buildLegionImage('k8s-ansible', ".", "containers/ansible/Dockerfile")
                             legion.uploadDockerImage('k8s-ansible')
                         }
                     }
@@ -135,13 +140,13 @@ pipeline {
                         }
                     }
                 }
-                
-                stage('Package and upload helm charts'){
-                    steps {
-                        script {
-                            legion.uploadHelmCharts()
-                        }
-                    }
+            }
+        }
+
+        stage('Package and upload helm charts'){
+            steps {
+                script {
+                    legion.uploadHelmCharts(env.pathToCharts)
                 }
             }
         }
@@ -149,8 +154,8 @@ pipeline {
         stage("Update version string") {
             steps {
                 script {
-                    if (env.param_stable_release && env.param_update_version_string.toBoolean()) {
-                        legion.updateVersionString(versionFile)
+                    if (env.param_stable_release && env.param_update_version_stringx) {
+                        legion.updateVersionString(env.versionFile)
                     }
                     else {
                         print("Skipping version string update")
@@ -162,8 +167,9 @@ pipeline {
         stage('Update Master branch'){
             steps {
                 script {
-                    if (env.param_update_master.toBoolean()){
+                    if (env.param_update_master){
                         legion.updateMasterBranch()
+                        print ("update master")
                         }
                     else {
                         print("Skipping Master branch update")
