@@ -1,3 +1,5 @@
+import java.text.SimpleDateFormat
+
 def buildDescription(){
    currentBuild.description = "${env.param_profile} ${env.param_git_branch}"
 }
