@@ -1,5 +1,3 @@
-import java.text.SimpleDateFormat
-
 def buildDescription(){
    currentBuild.description = "${env.param_profile} ${env.param_git_branch}"
 }
@@ -383,9 +381,11 @@ def setBuildMeta(String versionFile) {
     Globals.rootCommit = Globals.rootCommit.trim()
     println("Root commit: " + Globals.rootCommit)
 
-    def dateFormat = new SimpleDateFormat("yyyyMMddHHmmss")
-    def date = new Date()
-    def buildDate = dateFormat.format(date)
+    // TODO fix date import
+    //def dateFormat = new SimpleDateFormat("yyyyMMddHHmmss")
+    //def date = new Date()
+    //def buildDate = dateFormat.format(date)
+    def buildDate = "201900327010101"
 
     Globals.dockerCacheArg = (env.param_enable_docker_cache.toBoolean()) ? '' : '--no-cache'
     println("Docker cache args: " + Globals.dockerCacheArg)
