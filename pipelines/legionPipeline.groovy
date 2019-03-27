@@ -376,8 +376,7 @@ def authorizeJenkinsAgent() {
 }
 
 def setBuildMeta(String versionFile) {
-    import java.text.SimpleDateFormat
-    
+
     Globals.rootCommit = sh returnStdout: true, script: 'git rev-parse --short HEAD 2> /dev/null | sed  "s/\\(.*\\)/\\1/"'
     Globals.rootCommit = Globals.rootCommit.trim()
     println("Root commit: " + Globals.rootCommit)
