@@ -5,12 +5,12 @@ ENV DEBIAN_FRONTEND=noninteractive
 # install system utilities
 RUN apt-get update && apt-get install -y \
     python-pip apt-transport-https bash curl tar openssh-client \
-    sshpass git ca-certificates python-pip apt-utils locales && \
+    sshpass git ca-certificates python-pip apt-utils locales wget && \
     apt-get clean && apt-get autoclean
 
 # setup locale
 RUN locale-gen en_US.UTF-8 && update-locale LANG=en_US.UTF-8
-COPY k8s/ansible/default_locale /etc/default/locale
+COPY containers/ansible/default_locale /etc/default/locale
 RUN chmod 0755 /etc/default/locale
 ENV LC_ALL=en_US.UTF-8
 ENV LANG=en_US.UTF-8
@@ -29,25 +29,26 @@ RUN apt-get install -y \
 # Configure ansible
 RUN mkdir -p /etc/ansible/ && /bin/echo -e "[local]\nlocalhost ansible_connection=local" > /etc/ansible/hosts
 
-# Install Kops
-ENV KOPS_VERSION=1.11.0
-ADD https://github.com/kubernetes/kops/releases/download/${KOPS_VERSION}/kops-linux-amd64 /usr/local/bin/kops
-RUN chmod a+x /usr/local/bin/kops
-
 # Install kubectl
-ENV KUBECTL_VERSION=v1.11.6
-ADD https://storage.googleapis.com/kubernetes-release/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl /usr/local/bin/kubectl
-RUN chmod a+x /usr/local/bin/kubectl
+ENV KUBECTL_VERSION=v1.10.6
+RUN wget -qO /usr/local/bin/kubectl "https://storage.googleapis.com/kubernetes-release/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl" && \
+    chmod a+x /usr/local/bin/kubectl
+
+# Install Kops
+ENV KOPS_VERSION=1.10.0
+RUN wget -qO /usr/local/bin/kops "https://github.com/kubernetes/kops/releases/download/${KOPS_VERSION}/kops-linux-amd64"  && \
+    chmod a+x /usr/local/bin/kops
 
 # Install Helm
 ENV HELM_VERSION=v2.10.0
-ADD https://kubernetes-helm.storage.googleapis.com/helm-${HELM_VERSION}-linux-amd64.tar.gz /tmp/helm/
-RUN tar xzf /tmp/helm/helm-${HELM_VERSION}-linux-amd64.tar.gz -C /tmp/helm && \
+RUN curl -fsSLO https://kubernetes-helm.storage.googleapis.com/helm-${HELM_VERSION}-linux-amd64.tar.gz && \
+    mkdir -p /tmp/helm && mv helm-${HELM_VERSION}-linux-amd64.tar.gz /tmp/helm && \
+    tar xzf /tmp/helm/helm-${HELM_VERSION}-linux-amd64.tar.gz -C /tmp/helm && \
     mv /tmp/helm/linux-amd64/helm /usr/local/bin/helm && rm -rf /tmp/helm
 
 # Deploy Legion
-COPY deploy/ansible /opt/legion/deploy/ansible
-COPY deploy/profiles/profiles_template.yaml /opt/legion/deploy/profiles/profiles_template.yaml
-COPY deploy/profiles/secrets_template.yaml /opt/legion/deploy/profiles/secrets_template.yaml
+COPY ansible /opt/legion/ansible
+COPY profiles/profiles_template.yaml /opt/legion/profiles/profiles_template.yaml
+COPY profiles/secrets_template.yaml /opt/legion/profiles/secrets_template.yaml
 
-WORKDIR /opt/legion/deploy/
+WORKDIR /opt/legion

@@ -375,7 +375,7 @@ def authorizeJenkinsAgent() {
     }
 }
 
-def setBuildMeta(String versionFile) {
+def setBuildMeta(updateVersionScript, versionFile) {
 
     Globals.rootCommit = sh returnStdout: true, script: 'git rev-parse --short HEAD 2> /dev/null | sed  "s/\\(.*\\)/\\1/"'
     Globals.rootCommit = Globals.rootCommit.trim()
@@ -387,71 +387,64 @@ def setBuildMeta(String versionFile) {
     //def buildDate = dateFormat.format(date)
     def buildDate = "201900327010101"
 
-//    Globals.dockerCacheArg = (env.param_enable_docker_cache.toBoolean()) ? '' : '--no-cache'
-//    println("Docker cache args: " + Globals.dockerCacheArg)
-//
-//    wrap([$class: 'BuildUser']) {
-//        BUILD_USER = binding.hasVariable('BUILD_USER') ? "${BUILD_USER}" : "null"
-//    }
-//
-//    // Set Docker labels
-//    Globals.dockerLabels = "--label git_revision=${Globals.rootCommit} --label build_id=${env.BUILD_NUMBER} --label build_user='${BUILD_USER}' --label build_date=${buildDate}"
-//    println("Docker labels: " + Globals.dockerLabels)
-//
-//    // Define build version
-//    if (env.param_stable_release) {
-//        if (env.param_release_version ) {
-//            Globals.buildVersion = sh returnStdout: true, script: "python tools/update_version_id --build-version=${env.param_release_version} ${versionFile} ${env.BUILD_NUMBER} '${BUILD_USER}'"
-//        } else {
-//            print('Error: ReleaseVersion parameter must be specified for stable release')
-//            exit 1
-//        }
-//    } else {
-//        Globals.buildVersion = sh returnStdout: true, script: "python tools/update_version_id ${versionFile} ${env.BUILD_NUMBER} '${BUILD_USER}'"
-//    }
-//
-//    Globals.buildVersion = Globals.buildVersion.replaceAll("\n", "")
-//
-//    env.BuildVersion = Globals.buildVersion
-//
-//    currentBuild.description = "${Globals.buildVersion} ${env.param_git_branch}"
-//    print("Build version " + Globals.buildVersion)
-//    print('Building shared artifact')
-//    envFile = 'file.env'
-//    sh """
-//    rm -f $envFile
-//    touch $envFile
-//    echo "LEGION_VERSION=${Globals.buildVersion}" >> $envFile
-//    """
-//    archiveArtifacts envFile
-//    sh "rm -f $envFile"
-    print ("SetMeta")
+    Globals.dockerCacheArg = (env.param_enable_docker_cache.toBoolean()) ? '' : '--no-cache'
+    println("Docker cache args: " + Globals.dockerCacheArg)
+
+    wrap([$class: 'BuildUser']) {
+        BUILD_USER = binding.hasVariable('BUILD_USER') ? "${BUILD_USER}" : "null"
+    }
+
+    // Set Docker labels
+    Globals.dockerLabels = "--label git_revision=${Globals.rootCommit} --label build_id=${env.BUILD_NUMBER} --label build_user='${BUILD_USER}' --label build_date=${buildDate}"
+    println("Docker labels: " + Globals.dockerLabels)
+
+    // Define build version
+    if (env.param_stable_release) {
+        if (env.param_release_version ) {
+            Globals.buildVersion = sh returnStdout: true, script: "python ${updateVersionScript} --build-version=${env.param_release_version} ${versionFile} ${env.BUILD_NUMBER} '${BUILD_USER}'"
+        } else {
+            print('Error: ReleaseVersion parameter must be specified for stable release')
+            exit 1
+        }
+    } else {
+        Globals.buildVersion = sh returnStdout: true, script: "python ${updateVersionScript} ${versionFile} ${env.BUILD_NUMBER} '${BUILD_USER}'"
+    }
+
+    Globals.buildVersion = Globals.buildVersion.replaceAll("\n", "")
+
+    env.BuildVersion = Globals.buildVersion
+
+    currentBuild.description = "${Globals.buildVersion} ${env.param_git_branch}"
+    print("Build version " + Globals.buildVersion)
+    print('Building shared artifact')
+    envFile = 'file.env'
+    sh """
+    rm -f $envFile
+    touch $envFile
+    echo "LEGION_VERSION=${Globals.buildVersion}" >> $envFile
+    """
+    archiveArtifacts envFile
+    sh "rm -f $envFile"
 
 }
 
 def setGitReleaseTag() {
-    if (env.param_stable_release) {
-        if (env.param_push_git_tag.toBoolean()){
-            print('Set Release tag')
-            sshagent(["${env.param_git_deploy_key}"]) {
-                sh """
-                if [ `git tag |grep -x ${env.param_release_version}` ]; then
-                    if [ ${env.param_force_tag_push} = "true" ]; then
-                        echo 'Removing existing git tag'
-                        git tag -d ${env.param_release_version}
-                        git push origin :refs/tags/${env.param_release_version}
-                    else
-                        echo 'Specified tag already exists!'
-                        exit 1
-                    fi
-                fi
-                git tag ${env.param_release_version}
-                git push origin ${env.param_release_version}
-                """
-            }
-        } else {
-            print("Skipping release git tag push")
-        }
+    print('Set Release tag')
+    sshagent(["${env.param_git_deploy_key}"]) {
+        sh """
+        if [ `git tag |grep -x ${env.param_release_version}` ]; then
+            if [ ${env.param_force_tag_push} = "true" ]; then
+                echo 'Removing existing git tag'
+                git tag -d ${env.param_release_version}
+                git push origin :refs/tags/${env.param_release_version}
+            else
+                echo 'Specified tag already exists!'
+                exit 1
+            fi
+        fi
+        git tag ${env.param_release_version}
+        git push origin ${env.param_release_version}
+        """
     }
 }
 

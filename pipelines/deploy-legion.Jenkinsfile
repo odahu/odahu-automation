@@ -44,7 +44,6 @@ pipeline {
             }
         }
 
-
         stage('Deploy Legion') {
             when {
                 expression {return param_deploy_legion == "true" }
