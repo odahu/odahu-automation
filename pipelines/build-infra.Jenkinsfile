@@ -40,17 +40,16 @@ pipeline {
             // Release version to be used as docker cache source
             param_docker_cache_source = "${params.DockerCacheSource}"
             //Artifacts storage parameters
-            param_pypi_repository = "${params.PyPiRepository}"
-            param_local_pypi_distribution_target_name = "${params.LocalPyPiDistributionTargetName}"
-            param_test_pypi_distribution_target_name = "${params.testPyPiDistributionTargetName}"
-            param_public_pypi_distribution_target_name = "${params.PublicPyPiDistributionTargetName}"
-            param_pypi_distribution_target_name = "${params.PyPiDistributionTargetName}"
+            param_helm_repo_git_url = "${params.HelmRepoGitUrl}"
+            param_helm_repo_git_branch = "${params.HelmRepoGitBranch}"
+            param_helm_repository = "${params.HelmRepository}"
             param_docker_registry = "${params.DockerRegistry}"
             param_docker_hub_registry = "${params.DockerHubRegistry}"
             param_git_deploy_key = "${params.GitDeployKey}"
             ///Job parameters
-            sharedLibPath = "${WORKSPACE}/deploy/pipelines/legionPipeline.groovy"
+            sharedLibPath = "pipelines/legionPipeline.groovy"
             versionFile= "${WORKSPACE}/version.info"
+            updateVersionScript = "tools/update_version_id"
             pathToCharts= "${WORKSPACE}/helms"
     }
 
@@ -65,7 +64,7 @@ pipeline {
                     print("Check code for security issues")
                     sh "bash install-git-secrets-hook.sh install_hooks && git secrets --scan -r"
 
-                    setBuildMeta(env.versionFile)
+                    legion.setBuildMeta(env.versionFile)
                 }
             }
         }
@@ -107,7 +106,7 @@ pipeline {
                 stage("Build Ansible") {
                     steps {
                         script {
-                            legion.buildLegionImage('k8s-ansible', '.', 'k8s/ansible/Dockerfile')
+                            legion.buildLegionImage('k8s-ansible', '.', 'containers/ansible/Dockerfile')
                             legion.uploadDockerImage('k8s-ansible')
                         }
                     }
@@ -115,7 +114,7 @@ pipeline {
                 stage('Build kube-fluentd') {
                     steps {
                         script {
-                            legion.buildLegionImage('k8s-kube-fluentd', "k8s/k8s-infra/kube-fluentd")
+                            legion.buildLegionImage('k8s-kube-fluentd', "containers/kube-fluentd")
                             legion.uploadDockerImage('k8s-kube-fluentd')
                         }
                     }
@@ -123,7 +122,7 @@ pipeline {
                 stage('Build kube-elb-security') {
                     steps {
                         script {
-                            legion.buildLegionImage('k8s-kube-elb-security', "k8s/k8s-infra/kube-elb-security")
+                            legion.buildLegionImage('k8s-kube-elb-security', "containers/kube-elb-security")
                             legion.uploadDockerImage('k8s-kube-elb-security')
                         }
                     }
@@ -131,7 +130,7 @@ pipeline {
                 stage('Build oauth2-proxy') {
                     steps {
                         script {
-                            legion.buildLegionImage('k8s-oauth2-proxy', "k8s/k8s-infra/oauth2-proxy")
+                            legion.buildLegionImage('k8s-oauth2-proxy', "containers/oauth2-proxy")
                             legion.uploadDockerImage('k8s-oauth2-proxy')
                         }
                     }
@@ -147,7 +146,7 @@ pipeline {
             }
         }
 
-        stage("Update Legion version string") {
+        stage("Update version string") {
             steps {
                 script {
                     if (env.param_stable_release && env.param_update_version_string.toBoolean()) {
