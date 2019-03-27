@@ -1,5 +1,3 @@
-import java.text.SimpleDateFormat
-
 def buildDescription(){
    currentBuild.description = "${env.param_profile} ${env.param_git_branch}"
 }
@@ -383,48 +381,52 @@ def setBuildMeta(String versionFile) {
     Globals.rootCommit = Globals.rootCommit.trim()
     println("Root commit: " + Globals.rootCommit)
 
-    def dateFormat = new SimpleDateFormat("yyyyMMddHHmmss")
-    def date = new Date()
-    def buildDate = dateFormat.format(date)
+    // TODO fix date import
+    //def dateFormat = new SimpleDateFormat("yyyyMMddHHmmss")
+    //def date = new Date()
+    //def buildDate = dateFormat.format(date)
+    def buildDate = "201900327010101"
 
-    Globals.dockerCacheArg = (env.param_enable_docker_cache.toBoolean()) ? '' : '--no-cache'
-    println("Docker cache args: " + Globals.dockerCacheArg)
+//    Globals.dockerCacheArg = (env.param_enable_docker_cache.toBoolean()) ? '' : '--no-cache'
+//    println("Docker cache args: " + Globals.dockerCacheArg)
+//
+//    wrap([$class: 'BuildUser']) {
+//        BUILD_USER = binding.hasVariable('BUILD_USER') ? "${BUILD_USER}" : "null"
+//    }
+//
+//    // Set Docker labels
+//    Globals.dockerLabels = "--label git_revision=${Globals.rootCommit} --label build_id=${env.BUILD_NUMBER} --label build_user='${BUILD_USER}' --label build_date=${buildDate}"
+//    println("Docker labels: " + Globals.dockerLabels)
+//
+//    // Define build version
+//    if (env.param_stable_release) {
+//        if (env.param_release_version ) {
+//            Globals.buildVersion = sh returnStdout: true, script: "python tools/update_version_id --build-version=${env.param_release_version} ${versionFile} ${env.BUILD_NUMBER} '${BUILD_USER}'"
+//        } else {
+//            print('Error: ReleaseVersion parameter must be specified for stable release')
+//            exit 1
+//        }
+//    } else {
+//        Globals.buildVersion = sh returnStdout: true, script: "python tools/update_version_id ${versionFile} ${env.BUILD_NUMBER} '${BUILD_USER}'"
+//    }
+//
+//    Globals.buildVersion = Globals.buildVersion.replaceAll("\n", "")
+//
+//    env.BuildVersion = Globals.buildVersion
+//
+//    currentBuild.description = "${Globals.buildVersion} ${env.param_git_branch}"
+//    print("Build version " + Globals.buildVersion)
+//    print('Building shared artifact')
+//    envFile = 'file.env'
+//    sh """
+//    rm -f $envFile
+//    touch $envFile
+//    echo "LEGION_VERSION=${Globals.buildVersion}" >> $envFile
+//    """
+//    archiveArtifacts envFile
+//    sh "rm -f $envFile"
+    print ("SetMeta")
 
-    wrap([$class: 'BuildUser']) {
-        BUILD_USER = binding.hasVariable('BUILD_USER') ? "${BUILD_USER}" : "null"
-    }
-
-    // Set Docker labels
-    Globals.dockerLabels = "--label git_revision=${Globals.rootCommit} --label build_id=${env.BUILD_NUMBER} --label build_user='${BUILD_USER}' --label build_date=${buildDate}"
-    println("Docker labels: " + Globals.dockerLabels)
-
-    // Define build version
-    if (env.param_stable_release) {
-        if (env.param_release_version ) {
-            Globals.buildVersion = sh returnStdout: true, script: "python tools/update_version_id --build-version=${env.param_release_version} ${versionFile} ${env.BUILD_NUMBER} '${BUILD_USER}'"
-        } else {
-            print('Error: ReleaseVersion parameter must be specified for stable release')
-            exit 1
-        }
-    } else {
-        Globals.buildVersion = sh returnStdout: true, script: "python tools/update_version_id ${versionFile} ${env.BUILD_NUMBER} '${BUILD_USER}'"
-    }
-
-    Globals.buildVersion = Globals.buildVersion.replaceAll("\n", "")
-
-    env.BuildVersion = Globals.buildVersion
-
-    currentBuild.description = "${Globals.buildVersion} ${env.param_git_branch}"
-    print("Build version " + Globals.buildVersion)
-    print('Building shared artifact')
-    envFile = 'file.env'
-    sh """
-    rm -f $envFile
-    touch $envFile
-    echo "LEGION_VERSION=${Globals.buildVersion}" >> $envFile
-    """
-    archiveArtifacts envFile
-    sh "rm -f $envFile"
 }
 
 def setGitReleaseTag() {
