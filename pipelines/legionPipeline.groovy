@@ -116,7 +116,7 @@ def createjenkinsJobs(String commitID) {
     file(credentialsId: "vault-${env.param_profile}", variable: 'vault')]) {
         withAWS(credentials: 'kops') {
             wrap([$class: 'AnsiColorBuildWrapper', colorMapName: "xterm"]) {
-                docker.image("${env.param_docker_repo}/legion-docker-agent:${env.param_legion_version}").inside("-e HOME=/opt/legion/deploy -v ${WORKSPACE}/deploy/profiles:/opt/legion/deploy/profiles -u root") {
+                docker.image("${env.param_docker_repo}/legion-pipeline-agent:${env.param_legion_version}").inside("-e HOME=/opt/legion/deploy -v ${WORKSPACE}/deploy/profiles:/opt/legion/deploy/profiles -u root") {
                     stage('Create Jenkins jobs') {
                         dir("${WORKSPACE}"){
                             def creds
@@ -172,7 +172,7 @@ def runRobotTests(tags="") {
     file(credentialsId: "vault-${env.param_profile}", variable: 'vault')]) {
         withAWS(credentials: 'kops') {
             wrap([$class: 'AnsiColorBuildWrapper', colorMapName: "xterm"]) {
-                docker.image("${env.param_docker_repo}/legion-docker-agent:${env.param_legion_version}").inside("-e HOME=/opt/legion/deploy -v ${WORKSPACE}/deploy/profiles:/opt/legion/deploy/profiles -u root") {
+                docker.image("${env.param_docker_repo}/legion-pipeline-agent:${env.param_legion_version}").inside("-e HOME=/opt/legion/deploy -v ${WORKSPACE}/deploy/profiles:/opt/legion/deploy/profiles -u root") {
                     stage('Run Robot tests') {
                         dir("${WORKSPACE}"){
                             def nose_report = 0
@@ -376,6 +376,8 @@ def authorizeJenkinsAgent() {
 }
 
 def setBuildMeta(String versionFile) {
+    import java.text.SimpleDateFormat
+    
     Globals.rootCommit = sh returnStdout: true, script: 'git rev-parse --short HEAD 2> /dev/null | sed  "s/\\(.*\\)/\\1/"'
     Globals.rootCommit = Globals.rootCommit.trim()
     println("Root commit: " + Globals.rootCommit)
@@ -515,18 +517,7 @@ def notifyBuild(String buildStatus = 'STARTED') {
 
 }
 
-def buildTestBareModel(modelId, modelVersion, versionNumber) {
-    sh """
-        cd tests/models
-        rm -rf robot.model || true
-        mkdir /app || true
-        python3 simple.py --id "${modelId}" --version "${modelVersion}"
 
-        legionctl --verbose build \
-                  --docker-image-tag "legion/test-bare-model-api-model-${versionNumber}:${Globals.buildVersion}" \
-                  --model-file robot.model
-    """
-}
 
 def buildLegionImage(legion_image, build_context=".", dockerfile='Dockerfile', additional_parameters='') {
     // Copy .dockerignore because we can't specify it using docker cli. https://github.com/moby/moby/issues/12886
