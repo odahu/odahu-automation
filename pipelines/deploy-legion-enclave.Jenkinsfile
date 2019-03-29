@@ -31,7 +31,7 @@ pipeline {
                 }
             }
         }
-        
+
         stage('Deploy Legion Enclave') {
             steps {
                 script {
@@ -42,7 +42,7 @@ pipeline {
             }
         }
     }
-    
+
     post {
         always {
             script {
