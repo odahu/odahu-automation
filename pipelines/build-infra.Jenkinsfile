@@ -64,7 +64,7 @@ pipeline {
                     print("Check code for security issues")
                     sh "bash install-git-secrets-hook.sh install_hooks && git secrets --scan -r"
 
-                    legion.setBuildMeta(env.updateVersionScript, env.versionFile)
+                    legion.setBuildMeta(env.updateVersionScript)
                 }
             }
         }
