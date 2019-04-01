@@ -332,9 +332,9 @@ def setBuildMeta(updateVersionScript) {
     println("Docker labels: " + Globals.dockerLabels)
 
     // Define build version
-    if (env.param_stable_release) {
+    if (env.param_stable_release.toBoolean()) {
         if (env.param_release_version ) {
-            Globals.buildVersion = sh returnStdout: true, script: "python ${updateVersionScript} --build-version=${env.param_release_version} ${versionFile} ${env.BUILD_NUMBER} '${BUILD_USER}'"
+            Globals.buildVersion = sh returnStdout: true, script: "python ${updateVersionScript} --build-version=${env.param_release_version} ${env.BUILD_NUMBER} '${BUILD_USER}'"
         } else {
             print('Error: ReleaseVersion parameter must be specified for stable release')
             exit 1
@@ -453,10 +453,8 @@ def notifyBuild(String buildStatus = 'STARTED') {
 }
 
 def buildLegionImage(legion_image, build_context=".", dockerfile='Dockerfile', additional_parameters='') {
-    // Copy .dockerignore because we can't specify it using docker cli. https://github.com/moby/moby/issues/12886
-    sh "cp .gitignore ${build_context}/.dockerignore"
-
-    dir(build_context) {
+    dir (build_context) {
+        
         def cache_from_params = ''
 
         if (env.param_enable_docker_cache.toBoolean()) {
@@ -492,7 +490,7 @@ def buildLegionImage(legion_image, build_context=".", dockerfile='Dockerfile', a
 }
 
 def uploadDockerImage(String imageName) {
-    if (env.param_stable_release) {
+    if (env.param_stable_release.toBoolean()) {
         sh """
         # Push stable image to local registry
         docker tag legion/${imageName}:${Globals.buildVersion} ${env.param_docker_registry}/${imageName}:${Globals.buildVersion}
@@ -571,7 +569,7 @@ def uploadHelmCharts(String pathToCharts) {
         }
     }
     // Upload stable release
-    if (env.param_stable_release) {
+    if (env.param_stable_release.toBoolean()) {
         //checkout repo with existing charts  (needed for generating correct repo index file )
         sshagent(["${env.param_git_deploy_key}"]) {
             sh """

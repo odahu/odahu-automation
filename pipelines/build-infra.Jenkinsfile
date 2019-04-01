@@ -48,7 +48,6 @@ pipeline {
             param_git_deploy_key = "${params.GitDeployKey}"
             ///Job parameters
             sharedLibPath = "pipelines/legionPipeline.groovy"
-            versionFile= "${WORKSPACE}/version.info"
             updateVersionScript = "tools/update_version_id"
             pathToCharts= "${WORKSPACE}/helms"
     }
@@ -73,7 +72,7 @@ pipeline {
         stage('Set GIT release Tag'){
             steps {
                 script {
-                    if (env.param_stable_release && env.param_push_git_tag.toBoolean()){
+                    if (env.param_stable_release.toBoolean() && env.param_push_git_tag.toBoolean()){
                         legion.setGitReleaseTag()
                     }
                     else {
@@ -93,7 +92,7 @@ pipeline {
                     sh "docker login -u ${USERNAME} -p ${PASSWORD} ${env.param_docker_registry}"
                 }
                 script {
-                    if (env.param_stable_release) {
+                    if (env.param_stable_release.toBoolean()) {
                         withCredentials([[
                         $class: 'UsernamePasswordMultiBinding',
                         credentialsId: 'dockerhub',
@@ -154,7 +153,7 @@ pipeline {
         stage("Update version string") {
             steps {
                 script {
-                    if (env.param_stable_release && env.param_update_version_stringx) {
+                    if (env.param_stable_release.toBoolean() && env.param_update_version_string.toBoolean()) {
                         legion.updateVersionString(env.versionFile)
                     }
                     else {
@@ -167,9 +166,8 @@ pipeline {
         stage('Update Master branch'){
             steps {
                 script {
-                    if (env.param_update_master){
+                    if (env.param_update_master.toBoolean()){
                         legion.updateMasterBranch()
-                        print ("update master")
                         }
                     else {
                         print("Skipping Master branch update")
@@ -182,8 +180,10 @@ pipeline {
     post {
         always {
             script {
-                legion = load "${sharedLibPath}"
-                legion.notifyBuild(currentBuild.currentResult)
+                dir ("${WORKSPACE}") {
+                    legion = load "${env.sharedLibPath}"
+                    legion.notifyBuild(currentBuild.currentResult)
+                }
             }
             deleteDir()
         }
