@@ -13,17 +13,14 @@ pipeline {
         param_pypi_repo = "${params.PypiRepo}"
         param_docker_repo = "${params.DockerRepo}"
         param_helm_repo = "${params.HelmRepo}"
-        param_build_legion_job_name = "${params.BuildLegionJobName}"
+        param_build_legion_job_name = "${params.BuildLegionInfraJobName}"
         param_terminate_cluster_job_name = "${params.TerminateClusterJobName}"
         param_create_cluster_job_name = "${params.CreateClusterJobName}"
-        param_deploy_legion_job_name = "${params.DeployLegionJobName}"
-        param_deploy_legion_enclave_job_name = "${params.DeployLegionEnclaveJobName}"
-        param_terminate_legioin_enclave_job_name = "${params.TerminateLegionEnclaveJobName}"
         //Job parameters
-        sharedLibPath = "deploy/legionPipeline.groovy"
-        legionVersion = null
+        sharedLibPath = "pipelines/legionPipeline.groovy"
+        legionInfraVersion = null
         commitID = null
-        ansibleHome =  "/opt/legion/deploy/ansible"
+        ansibleHome =  "/opt/legion/ansible"
         ansibleVerbose = '-v'
         helmLocalSrc = 'false'
         mergeBranch = "ci/${params.GitBranch}"
@@ -86,12 +83,12 @@ pipeline {
                        map[kv[0]] = kv[1]
                    }
 
-                   legionVersion = map["LEGION_VERSION"]
+                   legionInfraVersion = map["LEGION_VERSION"]
 
-                   print "Loaded version ${legionVersion}"
+                   print "Loaded version ${legionInfraVersion}"
                    // Load variables
 
-                   if (!legionVersion) {
+                   if (!legionInfraVersion) {
                        error 'Cannot get legion release version number'
                    }
                }
@@ -103,7 +100,7 @@ pipeline {
                script {
                    result = build job: env.param_terminate_cluster_job_name, propagate: true, wait: true, parameters: [
                            [$class: 'GitParameterValue', name: 'GitBranch', value: env.mergeBranch],
-                           string(name: 'LegionVersion', value: legionVersion),
+                           string(name: 'LegionInfraVersion', value: legionInfraVersion),
                            string(name: 'Profile', value: env.param_profile),
                    ]
                }
@@ -116,56 +113,25 @@ pipeline {
                    result = build job: env.param_create_cluster_job_name, propagate: true, wait: true, parameters: [
                            [$class: 'GitParameterValue', name: 'GitBranch', value: env.mergeBranch],
                            string(name: 'Profile', value: env.param_profile),
-                           string(name: 'LegionVersion', value: legionVersion),
+                           string(name: 'LegionInfraVersion', value: legionInfraVersion),
                            booleanParam(name: 'SkipKops', value: false)
                    ]
                }
            }
        }
 
-       stage('Deploy Legion & run tests') {
+       stage('Terminate Cluster') {
            steps {
                script {
-                   result = build job: env.param_deploy_legion_job_name, propagate: true, wait: true, parameters: [
+                   result = build job: env.param_terminate_cluster_job_name, propagate: true, wait: true, parameters: [
                            [$class: 'GitParameterValue', name: 'GitBranch', value: env.mergeBranch],
+                           string(name: 'LegionInfraVersion', value: legionInfraVersion),
                            string(name: 'Profile', value: env.param_profile),
-                           string(name: 'LegionVersion', value: legionVersion),
-                           string(name: 'TestsTags', value: env.param_tests_tags ?: ""),
-                           booleanParam(name: 'DeployLegion', value: true),
-                           booleanParam(name: 'CreateJenkinsTests', value: true),
-                           booleanParam(name: 'UseRegressionTests', value: true)
                    ]
                }
            }
        }
-
-       stage('Deploy Legion Enclave') {
-           steps {
-               script {
-                   result = build job: env.param_deploy_legion_enclave_job_name, propagate: true, wait: true, parameters: [
-                           [$class: 'GitParameterValue', name: 'GitBranch', value: env.mergeBranch],
-                           string(name: 'Profile', value: env.param_profile),
-                           string(name: 'TestsTags', value: env.param_tests_tags ?: ""),
-                           string(name: 'LegionVersion', value: legionVersion),
-                           string(name: 'EnclaveName', value: 'enclave-ci')
-                   ]
-               }
-           }
-       }
-
-       stage('Terminate Legion Enclave') {
-           steps {
-               script {
-                   result = build job: env.param_terminate_legioin_enclave_job_name, propagate: true, wait: true, parameters: [
-                           [$class: 'GitParameterValue', name: 'GitBranch', value: env.mergeBranch],
-                           string(name: 'Profile', value: env.param_profile),
-                           string(name: 'LegionVersion', value: legionVersion),
-                           string(name: 'EnclaveName', value: 'enclave-ci')
-                   ]
-               }
-           }
-       }
-   }
+    }
 
     post {
         always {
@@ -173,7 +139,7 @@ pipeline {
                 legion = load "${sharedLibPath}"
                 result = build job: env.param_terminate_cluster_job_name, propagate: true, wait: true, parameters: [
                         [$class: 'GitParameterValue', name: 'GitBranch', value: env.mergeBranch],
-                       string(name: 'LegionVersion', value: legionVersion),
+                        string(name: 'legionInfraVersion', value: legionInfraVersion),
                         string(name: 'Profile', value: env.param_profile)]
 
                 legion.notifyBuild(currentBuild.currentResult)
