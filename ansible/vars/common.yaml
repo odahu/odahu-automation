@@ -23,6 +23,9 @@ default_cluster_roles:
   - masters.{{ cluster_name }}
   - nodes.{{ cluster_name }}
 
+# Clusterwide parameters
+monitoring_namespace: kube-monitoring
+
 # Legion
 model_docker_url: nexus-local.cc.epm.kharlamov.biz:8084
 persistent_jenkins_volume: true

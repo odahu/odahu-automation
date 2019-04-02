@@ -184,6 +184,8 @@ def runRobotTests(tags="") {
 
                                 echo "Starting python tests"
                                 make CLUSTER_NAME=${env.param_profile} LEGION_VERSION=${env.param_legion_version} e2e-python || true
+
+                                cp -R target/ ${WORKSPACE}
                             """
 
                             def robot_report = sh(script: 'find target/ -name "*.xml" | wc -l', returnStdout: true)

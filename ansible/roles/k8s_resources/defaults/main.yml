@@ -3,7 +3,6 @@ helm_local_src: false
 dashboard:
   version: "1.10.1"
   insecure: true
-monitoring_namespace: kube-monitoring
 source_secret_name: "{{ base_domain }}-tls"
 monitoring_values_file: "{{ tmp_dir }}/monitoring.{{ cluster_name }}.yml"
 # Cluster logs

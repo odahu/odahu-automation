@@ -14,3 +14,4 @@ collector:
   region: "{{ aws_region }}"
 model_resources_mem: 256Mi
 monitoring_namespace: kube-monitoring 
+log_level: debug
