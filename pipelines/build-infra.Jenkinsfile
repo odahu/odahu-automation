@@ -58,6 +58,7 @@ pipeline {
                 cleanWs()
                 checkout scm
                 script {
+                    sh 'echo RunningOn: $(curl http://checkip.amazonaws.com/)'
                     legion = load "${env.sharedLibPath}"
                     
                     print("Check code for security issues")
