@@ -17,6 +17,12 @@ dex:
 secrets_bucket: "legion-cluster"
 secrets_file: "/tmp/{{ cluster_name }}-secrets"
 
+# IAM cluster roles
+default_cluster_roles: 
+  - bastion.{{ cluster_name }}
+  - masters.{{ cluster_name }}
+  - nodes.{{ cluster_name }}
+
 # Legion
 model_docker_url: nexus-local.cc.epm.kharlamov.biz:8084
 persistent_jenkins_volume: true
