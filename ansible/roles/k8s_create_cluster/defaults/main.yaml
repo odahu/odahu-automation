@@ -43,9 +43,3 @@ tls_fullchain_file_name: "{{ tls_cert_common_name }}.fullchain.crt"
 tls_certificates_target_namespaces:
 - kube-system
 - default
-
-# IAM cluster roles
-default_cluster_roles: 
-  - bastion.{{ cluster_name }}
-  - masters.{{ cluster_name }}
-  - nodes.{{ cluster_name }}
