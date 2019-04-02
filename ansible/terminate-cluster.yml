@@ -11,6 +11,7 @@
   gather_facts: True
   vars_files:
     - "{{ lookup('env', 'PROFILES_PATH') or '../profiles' }}/{{ profile }}.yml"
+    - vars/common.yaml
 
   roles:
     - k8s_terminate_cluster

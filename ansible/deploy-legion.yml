@@ -16,6 +16,7 @@
   gather_facts: True
   vars_files:
     - "{{ lookup('env', 'PROFILES_PATH') or '../profiles' }}/{{ profile }}.yml"
+    - vars/common.yaml
 
   pre_tasks:
     - name: Download secrets from S3

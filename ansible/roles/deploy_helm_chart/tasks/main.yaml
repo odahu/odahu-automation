@@ -7,8 +7,13 @@
 - include: delete_chart.yaml
   when: chart_status.stdout_lines|length > 1
 
-- include: install_chart.yaml
-  when: helm_local_src != 'true'
+#- name: get list of infra charts 
+#  shell: "ls ../helms"
+#  register: infra_charts
 
-- include: install_chart_from_source.yaml
-  when: helm_local_src == 'true'
+# TODO: handle local helm sources for legion charts
+- include: install_chart.yaml
+#  when: helm_local_src != 'true' or infra_charts.find(chart_name) == -1
+
+#- include: install_chart_from_source.yaml
+#  when: helm_local_src == 'true' and infra_charts.find(chart_name) != -1

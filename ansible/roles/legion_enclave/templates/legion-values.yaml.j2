@@ -3,8 +3,6 @@ enclaveName: "{{ enclave }}"
 clusterName: "{{ cluster_name }}"
 namespace: default
 
-log_level: {{ log_level }}
-
 {% if dex.enabled == true %}
 auth:
   enabled: true
