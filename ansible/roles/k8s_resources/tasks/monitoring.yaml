@@ -35,4 +35,4 @@
     namespace: "{{ monitoring_namespace }}"
     src_chart_name: monitoring
     chart_name: legion-helm/monitoring
-    chart_version: "{{ legion_version }}"
+    chart_version: "{{ legion_infra_version }}"

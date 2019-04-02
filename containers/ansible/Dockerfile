@@ -50,5 +50,6 @@ RUN curl -fsSLO https://kubernetes-helm.storage.googleapis.com/helm-${HELM_VERSI
 COPY ansible /opt/legion/ansible
 COPY profiles/profiles_template.yaml /opt/legion/profiles/profiles_template.yaml
 COPY profiles/secrets_template.yaml /opt/legion/profiles/secrets_template.yaml
+COPY version.info /opt/legion/version.info
 
 WORKDIR /opt/legion
