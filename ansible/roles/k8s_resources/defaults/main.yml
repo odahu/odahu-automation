@@ -1,5 +1,19 @@
 ---
-
+helm_local_src: false
 prometheus_operator: 0.0.15
 kube_prometheus: 0.0.43
-helm_local_src: false
+dashboard:
+  version: "1.10.1"
+  insecure: true
+
+# Cluster logs
+kube_fluentd:
+  kube_s3_bucket_name: epm-legion-data-dev-logs
+  kube_s3_bucket_region: us-east-2
+  # kube_s3_bucket_prefix: cluster_logs
+  system_s3_bucket_name: epm-legion-data-dev-logs
+  system_s3_bucket_region: us-east-2
+  # system_s3_bucket_prefix: cluster_logs
+  services_s3_bucket_name: epm-legion-data-dev-logs
+  services_s3_bucket_region: us-east-2
+  # services_s3_bucket_prefix: cluster_logs

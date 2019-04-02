@@ -30,9 +30,10 @@ pipeline {
                 cleanWs()
                 checkout scm
                 script {
+                    sh 'echo RunningOn: $(curl http://checkip.amazonaws.com/)'
                     legion = load "${env.sharedLibPath}"
                     legion.buildDescription()
-                    commitID = env.GIT_COMMIT
+                    commitID = sh(script: "echo ${env.param_legion_version} | cut -f5 -d.", returnStdout: true)
                 }
             }
         }
@@ -40,6 +41,7 @@ pipeline {
         stage('Authorize Jenkins Agent') {
             steps {
                 script {
+                    legion.ansibleDebugRunCheck(env.param_debug_run)
                     legion.authorizeJenkinsAgent()
                 }
             }
@@ -64,7 +66,7 @@ pipeline {
             steps {
                 script {
                     legion.ansibleDebugRunCheck(env.param_debug_run)
-                    legion.createjenkinsJobs(commitID)
+                    legion.createJenkinsJobs(commitID)
                 }
             }
         }
@@ -91,6 +93,7 @@ pipeline {
         }
         cleanup {
             script {
+                legion.ansibleDebugRunCheck(env.param_debug_run)
                 legion.cleanupClusterSg(env.param_legion_infra_version ?: cleanupContainerVersion)
             }
             deleteDir()

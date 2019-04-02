@@ -12,6 +12,30 @@ kubectl_darwin_download_path: "https://storage.googleapis.com/kubernetes-release
 aws_image:  kope.io/k8s-1.11-debian-stretch-amd64-hvm-ebs-2018-08-17
 kubernetes_version: 1.11.6
 
+cluster_ssh_public_key_path: "{{ tmp_dir }}/legion_id_rsa.pub"
+
+# AWS 
+private_network: '172.31'
+node_autoscaler_min: 4
+node_autoscaler_max: 5
+bastion_shape: t2.micro
+master_shape: m4.xlarge
+node_shape: m4.xlarge
+
+# Ohio high memory instances
+node_extra_shapes:
+  - r4.large    # 2 cpu   / 15.25Gb / $0.133 ph
+  - r4.xlarge   # 4 cpu   / 30.5Gb  / $0.266 ph
+  - r4.2xlarge  # 8 cpu   / 61Gb    / $0.532 ph
+  - r4.4xlarge  # 16 cpu  / 122Gb   / $1.064 ph
+  - r4.8xlarge  # 32 cpu  / 244Gb   / $2.128 ph
+  - r4.16xlarge # 64 cpu  / 488Gb   / $4.256 ph
+  - x1.16xlarge # 64 cpu  / 976Gb   / $6.669 ph
+  - x1.32xlarge # 128 cpu / 1952Gb  / $13.338 ph
+
+node_extra_min: 0
+node_extra_max: 2
+
 # TLS defaults
 tls_cert_dir: /srv/ssl/{{ base_domain }}
 tls_cert_common_name: "{{ base_domain }}"
@@ -20,3 +44,9 @@ tls_fullchain_file_name: "{{ tls_cert_common_name }}.fullchain.crt"
 tls_certificates_target_namespaces:
 - kube-system
 - default
+
+# IAM cluster roles
+default_cluster_roles: 
+  - bastion.{{ cluster_name }}
+  - masters.{{ cluster_name }}
+  - nodes.{{ cluster_name }}

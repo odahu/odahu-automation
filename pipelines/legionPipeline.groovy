@@ -113,8 +113,9 @@ def updateTLSCert() {
 
 def downloadSecrets(String vault) {
     sh """
+        set -e
         export CLUSTER_NAME="${env.param_profile}"
-        export PATH_TO_PROFILE_FILE="deploy/profiles/${env.param_profile}.yml"
+        export PATH_TO_PROFILE_FILE="profiles/${env.param_profile}.yml"
         export CLUSTER_STATE_STORE=\"\$(yq -r .state_store \$PATH_TO_PROFILE_FILE)\"
         echo \"Loading kubectl config from \$CLUSTER_STATE_STORE for cluster \$CLUSTER_NAME\"
         export CREDENTIAL_SECRETS=".secrets.yaml"
@@ -131,12 +132,14 @@ def createJenkinsJobs(String commitID) {
     file(credentialsId: "vault-${env.param_profile}", variable: 'vault')]) {
         withAWS(credentials: 'kops') {
             wrap([$class: 'AnsiColorBuildWrapper', colorMapName: "xterm"]) {
-                docker.image("${env.param_docker_repo}/legion-pipeline-agent:${env.param_legion_version}").inside("-e HOME=/opt/legion/deploy -v ${WORKSPACE}/deploy/profiles:/opt/legion/deploy/profiles -u root") {
+                docker.image("${env.param_docker_repo}/legion-pipeline-agent:${env.param_legion_version}").inside("-e HOME=/opt/legion -v ${WORKSPACE}/profiles:/opt/legion/profiles -u root") {
                     stage('Create Jenkins jobs') {
                         dir("${WORKSPACE}"){
                             downloadSecrets(vault)
-
-                            sh "make COMMIT_ID=${commitID} CLUSTER_NAME=${env.param_profile} create-models-job"
+                            sh """
+                            cp .secrets.yaml /opt/legion/ && cd /opt/legion && sleep 9999
+                            make COMMIT_ID=${commitID} CLUSTER_NAME=${env.param_profile} create-models-job
+                            """
                         }
                     }
                 }
@@ -144,14 +147,15 @@ def createJenkinsJobs(String commitID) {
         }
     }
 }
+
 def runRobotTests(tags="") {
     withCredentials([
     file(credentialsId: "vault-${env.param_profile}", variable: 'vault')]) {
         withAWS(credentials: 'kops') {
             wrap([$class: 'AnsiColorBuildWrapper', colorMapName: "xterm"]) {
-                docker.image("${env.param_docker_repo}/legion-pipeline-agent:${env.param_legion_version}").inside("-e HOME=/opt/legion/deploy -v ${WORKSPACE}/deploy/profiles:/opt/legion/deploy/profiles -u root") {
+                docker.image("${env.param_docker_repo}/legion-pipeline-agent:${env.param_legion_version}").inside("-e HOME=/opt/legion -v ${WORKSPACE}/profiles:/opt/legion/profiles -u root") {
                     stage('Run Robot tests') {
-                        dir("${WORKSPACE}"){
+                        dir("/opt/legion/"){
                             def tags_list = tags.toString().trim().split(',')
                             def robot_tags = []
                             def nose_tags = []
@@ -334,13 +338,13 @@ def setBuildMeta(updateVersionScript) {
     // Define build version
     if (env.param_stable_release.toBoolean()) {
         if (env.param_release_version ) {
-            Globals.buildVersion = sh returnStdout: true, script: "python ${updateVersionScript} --build-version=${env.param_release_version} ${env.BUILD_NUMBER} '${BUILD_USER}'"
+            Globals.buildVersion = sh returnStdout: true, script: "python ${updateVersionScript} --build-version=${env.param_release_version} ${env.BUILD_NUMBER} '${BUILD_USER}' ${buildDate}"
         } else {
             print('Error: ReleaseVersion parameter must be specified for stable release')
             exit 1
         }
     } else {
-        Globals.buildVersion = sh returnStdout: true, script: "python ${updateVersionScript} ${env.BUILD_NUMBER} '${BUILD_USER}'"
+        Globals.buildVersion = sh returnStdout: true, script: "python ${updateVersionScript} ${env.BUILD_NUMBER} '${BUILD_USER}' ${buildDate}"
     }
 
     Globals.buildVersion = Globals.buildVersion.replaceAll("\n", "")
