@@ -22,8 +22,7 @@ pipeline {
         commitID = null
         ansibleHome =  "/opt/legion/ansible"
         ansibleVerbose = '-v'
-        helmLocalSrc = 'false'
-        mergeBranch = "ci/${params.GitBranch}"
+        mergeBranch = "ci-infra/${params.GitBranch}"
     }
 
     stages {

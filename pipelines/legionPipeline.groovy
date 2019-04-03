@@ -7,11 +7,9 @@ def ansibleDebugRunCheck(String debugRun) {
     if (debugRun == "true" ) {
       ansibleHome =  "${WORKSPACE}/ansible"
       ansibleVerbose = '-vvv'
-      helmLocalSrc = 'true'
     } else {
       ansibleHome = env.ansibleHome
       ansibleVerbose = env.ansibleVerbose
-      helmLocalSrc = env.helmLocalSrc
     }
 }
 
@@ -30,8 +28,7 @@ def createCluster() {
                         --extra-vars "profile=${env.param_profile} \
                         legion_infra_version=${env.param_legion_infra_version} \
                         skip_kops=${env.param_skip_kops} \
-                        helm_repo=${env.param_helm_repo} \
-                        helm_local_src=${helmLocalSrc}" 
+                        helm_repo=${env.param_helm_repo}" 
                         """
                     }
                 }
@@ -53,8 +50,7 @@ def terminateCluster() {
                         ${ansibleVerbose} \
                         --vault-password-file=${vault} \
                         --extra-vars "profile=${env.param_profile} \
-                        keep_jenkins_volume=${env.param_keep_jenkins_volume} \
-                        helm_local_src=${helmLocalSrc}"
+                        keep_jenkins_volume=${env.param_keep_jenkins_volume}"
                         """
                     }
                 }
@@ -79,8 +75,7 @@ def deployLegion() {
                         legion_version=${env.param_legion_version}  \
                         pypi_repo=${env.param_pypi_repo} \
                         helm_repo=${env.param_helm_repo} \
-                        docker_repo=${env.param_docker_repo} \
-                        helm_local_src=${helmLocalSrc}"
+                        docker_repo=${env.param_docker_repo}"
                         """
                     }
                 }
@@ -186,6 +181,7 @@ def runRobotTests(tags="") {
                                 make CLUSTER_NAME=${env.param_profile} LEGION_VERSION=${env.param_legion_version} e2e-python || true
 
                                 cp -R target/ ${WORKSPACE}
+                                ls -lsa  ${WORKSPACE}
                             """
 
                             def robot_report = sh(script: 'find target/ -name "*.xml" | wc -l', returnStdout: true)
@@ -247,8 +243,7 @@ def deployLegionEnclave() {
                         pypi_repo=${env.param_pypi_repo} \
                         docker_repo=${env.param_docker_repo} \
                         helm_repo=${env.param_helm_repo} \
-                        enclave_name=${env.param_enclave_name} \
-                        helm_local_src=${helmLocalSrc}"
+                        enclave_name=${env.param_enclave_name}"
                         """
                     }
                 }
