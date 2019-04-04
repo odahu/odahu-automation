@@ -33,6 +33,11 @@ pipeline {
         stage('Checkout') {
             steps {
                 cleanWs()
+                checkout scm
+                script {
+                    legion = load "${env.sharedLibPath}"
+                    legion.buildDescription()
+                }
             }
         }
 
@@ -55,7 +60,7 @@ pipeline {
                    archiveArtifacts 'build-log.txt'
 
                    // Copy artifacts
-                   copyArtifacts filter: '*', flatten: true, fingerprintArtifacts: true, projectName: env.param_build_legion_job_name, selector: specific      (buildNumber.toString()), target: ''
+                   copyArtifacts filter: '*', flatten: true, fingerprintArtifacts: true, projectName: env.param_build_legion_job_name, selector: specific (buildNumber.toString()), target: ''
                    sh 'ls -lah'
 
                    // \ Load variables

@@ -7,7 +7,7 @@ pipeline {
         param_profile = "${params.Profile}"
         param_legion_version = "${params.LegionVersion}"
         param_legion_infra_version = "${params.LegionInfraVersion}"
-        aram_enclave_name = "${params.EnclaveName}"
+        param_enclave_name = "${params.EnclaveName}"
         param_pypi_repo = "${params.PypiRepo}"
         param_docker_repo = "${params.DockerRepo}"
         param_helm_repo = "${params.HelmRepo}"

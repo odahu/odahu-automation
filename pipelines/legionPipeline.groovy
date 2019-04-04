@@ -181,11 +181,9 @@ def runRobotTests(tags="") {
                                 make CLUSTER_NAME=${env.param_profile} LEGION_VERSION=${env.param_legion_version} e2e-python || true
 
                                 cp -R target/ ${WORKSPACE}
-                                ls -lsa  ${WORKSPACE}
                             """
 
-                            def robot_report = sh(script: 'find target/ -name "*.xml" | wc -l', returnStdout: true)
-                            def nose_report = sh(script: 'cat target/nosetests.xml | wc -l', returnStdout: true)
+                            robot_report = sh(script: 'find target/ -name "*.xml" | wc -l', returnStdout: true)
 
                             if (robot_report.toInteger() > 0) {
                                 step([
@@ -201,23 +199,19 @@ def runRobotTests(tags="") {
                             }
                             else {
                                 echo "No '*.xml' files for generating robot report"
+                                currentBuild.result = 'UNSTABLE'
                             }
 
-                            if (nose_report.toInteger() > 1) {
+                            if (fileExists('target/nosetests.xml')) {
                                 junit 'target/nosetests.xml'
                             }
                             else {
-                                echo "No ''*.xml' files for generating nosetests report"
+                                echo "No '*.xml' files for generating nosetests report"
+                                currentBuild.result = 'UNSTABLE'
                             }
 
-                            if (!(nose_report.toInteger() > 1 && robot_report.toInteger() > 0) && !tags) {
-                                echo "All tests were run but no reports found. Marking build as UNSTABLE"
-                                currentBuild.result = 'UNSTABLE'
-                            }
-                            if (!(nose_report.toInteger() > 1 || robot_report.toInteger() > 0) && tags) {
-                                echo "No tests were run during this build. Marking build as UNSTABLE"
-                                currentBuild.result = 'UNSTABLE'
-                            }
+                            // Cleanup
+                            sh "rm -rf ${WORKSPACE}/target/"
                         }
                     }
                 }
