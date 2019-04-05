@@ -15,6 +15,7 @@ pipeline {
         param_docker_repo = "${params.DockerRepo}"
         param_helm_repo = "${params.HelmRepo}"
         param_debug_run = "${params.DebugRun}"
+        param_commitID = "${params.commitID}"
         //Job parameters
         sharedLibPath = "pipelines/legionPipeline.groovy"
         commitID = null
@@ -33,7 +34,16 @@ pipeline {
                     sh 'echo RunningOn: $(curl http://checkip.amazonaws.com/)'
                     legion = load "${env.sharedLibPath}"
                     legion.buildDescription()
-                    commitID = sh(script: "echo ${env.param_legion_version} | cut -f5 -d. | tr -d '\n'", returnStdout: true)
+
+                    // Set legion release commit id
+                    commitID = env.param_commitID ?: sh(script: "echo ${env.param_legion_version} | cut -f5 -d. | tr -d '\n'", returnStdout: true) 
+                    print ("Legion commit ID: ${commitID}")
+
+                    if (!(commitID)) {
+                        print ('Can\'t get commit id for legion package')
+                        currentBuild.result = 'FAILURE'
+                        return
+                    }
                 }
             }
         }
