@@ -1,0 +1,24 @@
+# Common
+env_name: ~    # short name of env, will be added in resource tags
+route53_zone: ~      # AWS Route53 zone on which domain will be created (zone should be parked before deploy)
+state_store: ~  # AWS S3 bucket for storing KOPS state
+
+# Networking
+private_network: ~         # private network prefix
+cluster_zones:                    # configuration of cluster zones
+  - zone_name: ~
+    kops_cidr: ~
+    kops_utility_cidr: ~
+k8s_master_zones: ~      #list of zones where to create k8s master
+
+# Tests
+examples_to_test: ~      # which Jenkins examples will be executed in tests
+model_id_to_test: ~  # id of model which will be tested in EDI tests
+enclaves: ~ # list of enclaves which will be automatically deployed after Legion deploy
+namespace: ~      # namespace of core deployment
+deployment: ~      # name of deployment
+base_domain: ~       # DNS name of environment
+cluster_name: ~ # unique KOPS cluster name
+docker_repo: ~ # docker registry with builded images
+legion_data_bucket_prefix: ~ # S3 bucket name prefix
+tmp_dir: ~                          # directory for storing temporary files (on host

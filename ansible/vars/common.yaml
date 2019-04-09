@@ -1,0 +1,39 @@
+---
+# Cluster
+vendor: legion
+base_domain: "{{ env_name }}.{{ route53_zone }}"
+cluster_name: "{{ env_name }}.{{ route53_zone }}"
+tmp_dir: /tmp/
+
+# AWS
+aws_region: us-east-2
+vpc_id: vpc-5729c13e
+
+# Dex
+dex:
+  enabled: true
+
+# Secrets
+secrets_bucket: "legion-cluster"
+secrets_file: "/tmp/{{ cluster_name }}-secrets"
+
+# IAM cluster roles
+default_cluster_roles: 
+  - bastion.{{ cluster_name }}
+  - masters.{{ cluster_name }}
+  - nodes.{{ cluster_name }}
+
+# Clusterwide parameters
+monitoring_namespace: kube-monitoring
+
+# Legion
+model_docker_url: nexus-local.cc.epm.kharlamov.biz:8084
+persistent_jenkins_volume: true
+use_https: "yes"
+pypi_repo: "https://nexus-local.cc.epm.kharlamov.biz/repository/pypi-hosted/simple"
+docker_repo: "nexus-local.cc.epm.kharlamov.biz:443/legion"
+enclaves:
+  - company-a
+storageclass: efs
+legion_data_bucket_prefix: legion-data
+legion_data_s3_bucket: "{{ legion_data_bucket_prefix }}-{{ env_name }}-{{ enclave }}"

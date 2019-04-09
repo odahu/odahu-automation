@@ -1,0 +1,34 @@
+# Common
+env_name: legion-ci
+route53_zone: epm.kharlamov.biz
+state_store: s3://legion-cluster
+
+# Networking
+private_network: '172.31'
+cluster_zones:
+  - zone_name: us-east-2a
+    kops_cidr: "{{ private_network }}.106.0/24"
+    kops_utility_cidr: "{{ private_network }}.107.0/24"
+  - zone_name: us-east-2b
+    kops_cidr: "{{ private_network }}.108.0/24"
+    kops_utility_cidr: "{{ private_network }}.109.0/24"
+  - zone_name: us-east-2c
+    kops_cidr: "{{ private_network }}.110.0/24"
+    kops_utility_cidr: "{{ private_network }}.111.0/24"
+k8s_master_zones:
+  - us-east-2a
+
+# Tests
+examples_to_test:
+  - Test-Summation
+  - Digit-Recognition
+model_id_to_test: income
+enclaves:
+  - company-a
+namespace: default
+deployment: legion
+base_domain: legion-ci.epm.kharlamov.biz
+cluster_name: legion-ci.epm.kharlamov.biz
+docker_repo: "nexus-local.cc.epm.kharlamov.biz:443/legion"
+tmp_dir: /tmp/
+legion_data_bucket_prefix: legion-data
