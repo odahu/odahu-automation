@@ -8,7 +8,6 @@ pipeline {
         param_legion_version = "${params.LegionVersion}"
         param_legion_infra_version = "${params.LegionInfraVersion}"
         param_deploy_legion = "${params.DeployLegion}"
-        param_create_jenkins_tests = "${params.CreateJenkinsTests}"
         param_use_regression_tests = "${params.UseRegressionTests}"
         param_tests_tags = "${params.TestsTags}"
         param_pypi_repo = "${params.PypiRepo}"
@@ -65,18 +64,6 @@ pipeline {
                 script {
                     legion.ansibleDebugRunCheck(env.param_debug_run)
                     legion.deployLegion()
-                }
-            }
-        }
-        
-        stage('Create jenkins jobs') {
-            when {
-                expression { return param_create_jenkins_tests == "true" }
-            }
-            steps {
-                script {
-                    legion.ansibleDebugRunCheck(env.param_debug_run)
-                    legion.createJenkinsJobs(commitID)
                 }
             }
         }

@@ -11,6 +11,32 @@
     dest: "{{ tmp_values_file }}"
     mode: 0644
 
+- name: Delete Legion CRDs
+  shell: "kubectl --context {{ cluster_name }} delete --ignore-not-found crd {{ item }}.legion.legion-platform.org"
+  loop:
+    - "modeltrainings"
+    - "vcscredentials"
+
+- name: Install legion-crds enclave helm chart
+  include_role:
+    name: deploy_helm_chart
+  vars:
+    release_name: legion-crds-{{ enclave }}
+    values_file: "{{ tmp_values_file }}"
+    namespace: "{{ enclave }}"
+    src_chart_name: legion-crds
+    chart_name: legion-helm/legion-crds
+    chart_version: "{{ legion_version }}"
+
+# TODO: removed after https://github.com/helm/charts/issues/9241 will be fixed
+- name: "Confirm that legion crds has been removed"
+  shell: "kubectl --context {{ cluster_name }} get crds vcscredentials.legion.legion-platform.org"
+  register: crd_check
+  until: crd_check.stderr.find('NotFound') != -1
+  retries: 10
+  delay: 5
+  ignore_errors: true
+
 - name: Install legion enclave helm chart
   include_role:
     name: deploy_helm_chart

@@ -49,8 +49,7 @@ def terminateCluster() {
                         ansible-playbook terminate-cluster.yml \
                         ${ansibleVerbose} \
                         --vault-password-file=${vault} \
-                        --extra-vars "profile=${env.param_profile} \
-                        keep_jenkins_volume=${env.param_keep_jenkins_volume}"
+                        --extra-vars "profile=${env.param_profile}
                         """
                     }
                 }
@@ -75,7 +74,8 @@ def deployLegion() {
                         legion_version=${env.param_legion_version}  \
                         pypi_repo=${env.param_pypi_repo} \
                         helm_repo=${env.param_helm_repo} \
-                        docker_repo=${env.param_docker_repo}"
+                        docker_repo=${env.param_docker_repo} \
+                        model_reference=${commitID}"
                         """
                     }
                 }
@@ -120,27 +120,6 @@ def downloadSecrets(String vault) {
 
         kops export kubecfg --name \$CLUSTER_NAME --state \$CLUSTER_STATE_STORE
     """
-}
-
-def createJenkinsJobs(String commitID) {
-    withCredentials([
-    file(credentialsId: "vault-${env.param_profile}", variable: 'vault')]) {
-        withAWS(credentials: 'kops') {
-            wrap([$class: 'AnsiColorBuildWrapper', colorMapName: "xterm"]) {
-                docker.image("${env.param_docker_repo}/legion-pipeline-agent:${env.param_legion_version}").inside("-e HOME=/opt/legion -v ${WORKSPACE}/profiles:/opt/legion/profiles -u root") {
-                    stage('Create Jenkins jobs') {
-                        dir("${WORKSPACE}"){
-                            downloadSecrets(vault)
-                            sh """
-                            cp .secrets.yaml /opt/legion/ && cd /opt/legion && \
-                            make COMMIT_ID=${commitID} CLUSTER_NAME=${env.param_profile} create-models-job
-                            """
-                        }
-                    }
-                }
-            }
-        }
-    }
 }
 
 def runRobotTests(tags="") {

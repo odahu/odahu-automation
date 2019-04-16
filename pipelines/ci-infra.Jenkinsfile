@@ -7,7 +7,6 @@ pipeline {
         param_profile = "${params.Profile}"
         param_enable_docker_cache = "${params.EnableDockerCache}"
         param_deploy_legion = "${params.DeployLegion}"
-        param_create_jenkins_tests = "${params.CreateJenkinsTests}"
         param_use_regression_tests = "${params.UseRegressionTests}"
         param_tests_tags = "${params.TestsTags}"
         param_pypi_repo = "${params.PypiRepo}"

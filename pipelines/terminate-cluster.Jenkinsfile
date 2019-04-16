@@ -7,7 +7,6 @@ pipeline {
         param_profile = "${params.Profile}"
         param_legion_version = "${params.LegionVersion}"
         param_legion_infra_version = "${params.LegionInfraVersion}"
-        param_keep_jenkins_volume = "${params.keepJenkinsVolume}"
         param_docker_repo = "${params.DockerRepo}"
         param_debug_run = "${params.DebugRun}"
         //Job parameters

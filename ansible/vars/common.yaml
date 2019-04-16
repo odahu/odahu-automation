@@ -28,7 +28,6 @@ monitoring_namespace: kube-monitoring
 
 # Legion
 model_docker_url: nexus-local.cc.epm.kharlamov.biz:8084
-persistent_jenkins_volume: true
 use_https: "yes"
 pypi_repo: "https://nexus-local.cc.epm.kharlamov.biz/repository/pypi-hosted/simple"
 docker_repo: "nexus-local.cc.epm.kharlamov.biz:443/legion"

@@ -7,7 +7,6 @@ pipeline {
         param_profile = "${params.Profile}"
         param_legion_version = "${params.LegionVersion}"
         param_deploy_legion = "${params.DeployLegion}"
-        param_create_jenkins_tests = "${params.CreateJenkinsTests}"
         param_use_regression_tests = "${params.UseRegressionTests}"
         param_tests_tags = "${params.TestsTags}"
         param_pypi_repo = "${params.PypiRepo}"
@@ -92,7 +91,6 @@ pipeline {
                             string(name: 'LegionVersion', value: legionVersion),
                             string(name: 'TestsTags', value: env.param_tests_tags ?: ""),
                             booleanParam(name: 'DeployLegion', value: true),
-                            booleanParam(name: 'CreateJenkinsTests', value: true),
                             booleanParam(name: 'UseRegressionTests', value: true)
                     ]
                 }

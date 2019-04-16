@@ -9,7 +9,6 @@ pipeline {
         param_deploy_legion = "${params.DeployLegion}"
         param_legion_infra_version = "${params.LegionInfraVersion}"
         param_legion_infra_repo = "${params.LegionInfraRepo}"
-        param_create_jenkins_tests = "${params.CreateJenkinsTests}"
         param_use_regression_tests = "${params.UseRegressionTests}"
         param_tests_tags = "${params.TestsTags}"
         param_pypi_repo = "${params.PypiRepo}"
@@ -121,7 +120,6 @@ pipeline {
                            string(name: 'TestsTags', value: env.param_tests_tags ?: ""),
                            string(name: 'commitID', value: env.commitID),
                            booleanParam(name: 'DeployLegion', value: true),
-                           booleanParam(name: 'CreateJenkinsTests', value: true),
                            booleanParam(name: 'UseRegressionTests', value: true)
                    ]
                }

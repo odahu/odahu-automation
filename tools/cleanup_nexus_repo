@@ -37,7 +37,7 @@ Options = NamedTuple('Options', [
 
 NEXUS_SEARCH_URL = '{host}/service/rest/v1/components'
 NEXUS_DELETE_URL = '{host}/service/rest/v1/components/{resource}'
-NEXUS_DEFAULT_RESOURCE_REPOSITORIES = 'jenkins_plugins', 'main-docker', 'pypi-hosted', 'helm-main'
+NEXUS_DEFAULT_RESOURCE_REPOSITORIES = 'main-docker', 'pypi-hosted', 'helm-main'
 FIELDS_TO_ANALYZE = 'version', 'name'
 VERSION_SEARCH_REGEX = r'\d{12,14}'
 ALLOWED_RESPONSE_CODES = [200, 201, 202, 204]
