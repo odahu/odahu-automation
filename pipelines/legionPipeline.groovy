@@ -49,7 +49,7 @@ def terminateCluster() {
                         ansible-playbook terminate-cluster.yml \
                         ${ansibleVerbose} \
                         --vault-password-file=${vault} \
-                        --extra-vars "profile=${env.param_profile}
+                        --extra-vars "profile=${env.param_profile}"
                         """
                     }
                 }
