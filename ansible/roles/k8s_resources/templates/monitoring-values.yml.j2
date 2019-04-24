@@ -1,7 +1,9 @@
 namespace: "{{ monitoring_namespace }}"
 
 prometheus-operator:
-  createCustomResource: false
+  prometheusOperator:
+    createCustomResource: false
+
   alertmanager:
     templateFiles:
       default.tmpl: |-{% raw %}
