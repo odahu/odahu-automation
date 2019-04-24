@@ -33,7 +33,7 @@
   until: crd_check.stdout.find("0") != -1
   retries: 10
   delay: 5
-  ignore_errors: true
+  ignore_errors: false
 
 # TODO: removed after https://github.com/helm/charts/issues/9241 will be fixed
 - name: Install Prometheus CRDs
@@ -51,7 +51,7 @@
   until: crd_check.stdout.find("4") != -1
   retries: 10
   delay: 5
-  ignore_errors: true
+  ignore_errors: false
 
 - name: Install monitoring helm chart
   include_role:
