@@ -27,6 +27,15 @@
     - "alertmanagers"
 
 # TODO: removed after https://github.com/helm/charts/issues/9241 will be fixed
+- name: "Confirm that prometheus crds has been removed"
+  shell: "kubectl --context {{ cluster_name }} get crds | grep -E \"^(alertmanagers|prometheuses|prometheusrules|servicemonitors)\\.monitoring\\.coreos\\.com\" | wc -l"
+  register: crd_check
+  until: crd_check.stdout.find("0") != -1
+  retries: 10
+  delay: 5
+  ignore_errors: true
+
+# TODO: removed after https://github.com/helm/charts/issues/9241 will be fixed
 - name: Install Prometheus CRDs
   shell: "kubectl --context {{ cluster_name }} apply -f {{ monitoring_prometheus_operator_crd_url }}/{{ item }}.crd.yaml"
   loop:
@@ -37,7 +46,7 @@
 
 # TODO: removed after https://github.com/helm/charts/issues/9241 will be fixed
 - name: "Confirm that prometheus crds has been installed"
-  shell: "kubectl --context {{ cluster_name }} | grep -E \"^(alertmanagers|prometheuses|prometheusrules|servicemonitors)\\.monitoring\\.coreos\\.com\" | wc -l"
+  shell: "kubectl --context {{ cluster_name }} get crds | grep -E \"^(alertmanagers|prometheuses|prometheusrules|servicemonitors)\\.monitoring\\.coreos\\.com\" | wc -l"
   register: crd_check
   until: crd_check.stdout.find("4") != -1
   retries: 10
