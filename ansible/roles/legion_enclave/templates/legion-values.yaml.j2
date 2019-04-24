@@ -5,9 +5,9 @@ logLevel: debug
 
 ingress:
   enabled: true
-  globalDomain: "{{ root_domain }}"
+  globalDomain: "{{ base_domain }}"
   tlsEnabled: true
-  tlsSecretName: "{{ root_domain }}-tls"
+  tlsSecretName: "{{ base_domain }}-tls"
 
 {% if dex.enabled == true %}
 security:
