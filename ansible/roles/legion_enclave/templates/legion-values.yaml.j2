@@ -29,7 +29,7 @@ modelMetrics:
   enabled: true
 
 modelStorage:
-  buildPrefix: legion-ci
+  buildPrefix: "{{ model_storage_prefix }}"
   external:
     protocol: "{{ model_docker_protocol }}"
     url: "{{ model_docker_url }}"
