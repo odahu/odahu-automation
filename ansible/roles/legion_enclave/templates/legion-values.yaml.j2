@@ -29,7 +29,7 @@ modelMetrics:
   enabled: true
 
 modelStorage:
-  buildPrefix: "{{ model_storage_prefix }}"
+  buildPrefix: "{{ env_name }}"
   external:
     protocol: "{{ model_docker_protocol }}"
     url: "{{ model_docker_url }}"

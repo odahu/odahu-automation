@@ -10,7 +10,6 @@ collector:
   region: "{{ aws_region }}"
 model_resources_mem: 256Mi
 log_level: debug
-model_storage_prefix: legion-ci
 monitoring_namespace: kube-monitoring
 model_examples_git_url: "git@github.com:legion-platform/legion.git"
 model_reference: "origin/develop"
