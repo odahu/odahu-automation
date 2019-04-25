@@ -1,6 +1,4 @@
 ---
-root_domain: "{{ enclave }}.{{ base_domain }}"
-domain_delimiter: "-"
 namespace: "{{ enclave }}"
 source_secret_name: "{{ base_domain }}-tls"
 k8s_api_retry_number_max_limit: 10
@@ -9,7 +7,6 @@ model_docker_protocol: https
 model_resources_cpu: 256m
 max_token_ttl_minutes: 259200  # 60*24*180, 180 days
 collector:
-  replicas: 1
   region: "{{ aws_region }}"
 model_resources_mem: 256Mi
 log_level: debug
