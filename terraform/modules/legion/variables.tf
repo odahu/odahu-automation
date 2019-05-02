@@ -47,8 +47,9 @@ variable "allowed_ips" {
 ##################
 # Prometheus monitoring
 ##################
+
 variable "monitoring_namespace" {
-  default     = "kube-monitoring"
+  default     = "monitoring"
   description = "clusterwide monitoring namespace"
 }
 
@@ -79,40 +80,3 @@ variable "docker_repo" {
   description = "Legion Docker repo url"
 }
 
-variable "monitoring_prometheus_operator_crd_url" {
-  default     = "https://raw.githubusercontent.com/coreos/prometheus-operator/v0.29.0/example/prometheus-operator-crd"
-  description = "Prometheus operator CRD url"
-}
-
-variable "cluster_context" {
-  description = "Kubectl cluster context"
-}
-
-variable "prometheus_crds" {
-  default = ["alertmanager", "prometheus", "prometheusrule", "servicemonitor"]
-  description = "Default namespaces with TLS secret"
-}
-
-##################
-# Dex auth
-##################
-variable "dex_replicas" {
-  default = 1
-  description = "Number of dex replicas"
-}
-
-variable "github_org_name" {
-  description = "Github Organization for dex authentication"
-}
-
-variable "dex_github_clientid" {
-  description = "Github Organization clientID"
-}
-
-variable "dex_github_clientSecret" {
-  description = "Github Organization client Secret"
-}
-
-variable "dex_client_secret" {
-  description = "Github default client Secret"
-}

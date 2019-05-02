@@ -87,6 +87,14 @@ resource "google_container_cluster" "cluster" {
 
 }
 
+# Configure kubectl
+# TODO add startup timeout
+# resource "null_resource" "kubectl_config" {
+#   provisioner "local-exec" {
+#     command = "gcloud container clusters get-credentials ${var.cluster_name} --zone ${var.zone} --project ${var.project_id}"
+#   }
+# }
+
 ########################################################
 # Node Pool
 ########################################################
@@ -145,7 +153,6 @@ data "google_storage_bucket_object" "ssh_public_key" {
 resource "google_compute_project_metadata_item" "ssh_public_keys" {
   key   = "ssh-keys"
   value = "${data.google_storage_bucket_object.ssh_public_key.self_link}"
-}
 
 ########################################################
 # Bastion Host

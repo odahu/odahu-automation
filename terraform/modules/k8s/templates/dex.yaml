@@ -1,0 +1,33 @@
+replicaCount: "${dex_replicas}"
+
+issuer: "https://dex.${var.cluster_name}.${root_domain}"
+
+connectors:
+  - type: github
+    id: github
+    name: GitHub
+    config:
+      clientID: "${var.dex_github_clientid}"
+      clientSecret: "${var.dex_github_clientSecret}"
+      redirectURI: https://dex.${var.cluster_name}.${root_domain}/callback # DEX callback URL
+      orgs:
+      - name: "${var.github_org_name}"
+
+staticClients:
+- id: "${var.cluster_name}.${root_domain}"
+  secret: "${var.client_secret}"
+  redirectURIs:
+  - "https://auth.${var.cluster_name}.${root_domain}/oauth2/callback"
+  - "https://jenkins.${var.cluster_name}.${root_domain}/securityRealm/finishLogin"
+  - "https://auth.${var.cluster_name}.${root_domain}/callback/${var.cluster_name}"
+  name: "${var.cluster_name} Cluster"
+
+staticPasswords: {{ dex.config.staticPasswords | to_json }}
+
+enablePasswordDB: {{ dex.config.enablePasswordDB | default('true') }}
+
+tls_secret: "${var.cluster_name}-tls"
+
+##image:
+##  repository: {{ docker_repo }}/k8s-dex
+##  tag: {{ legion_infra_version }}

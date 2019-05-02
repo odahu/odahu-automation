@@ -56,7 +56,10 @@ resource "helm_release" "nginx-ingress" {
     #     name  = "controller.service.loadBalancerSourceRanges"
     #     value = "${var.allowed_ips}"
     # }
-
+    set {
+      name    = "defaultBackend.service.type"
+      value  = "LoadBalancer"
+    }
 }
 
 ########################################################
@@ -71,7 +74,16 @@ resource "helm_release" "kubernetes-dashboard" {
         name  = "ingress.enabled"
         value = "true"
     }
+    set {
+        name  = "service.type"
+        value = "LoadBalancer"
+    }
 }
+
+########################################################
+# Dex setup
+########################################################
+
 
 
 ########################################################
@@ -84,7 +96,8 @@ resource "kubernetes_namespace" "monitoring" {
     }
 
     labels {
-      project = "legion"
+      project         = "legion"
+      k8s-component   = "monitoring"
     }
 
     name = "${var.monitoring_namespace}"
@@ -92,7 +105,6 @@ resource "kubernetes_namespace" "monitoring" {
 }
 
 resource "kubernetes_secret" "tls_monitoring" {
-  count   = "${length(var.tls_namespaces)}"
   metadata {
     name        = "${var.cluster_name}-tls"
     namespace   = "${var.monitoring_namespace}"
@@ -102,4 +114,44 @@ resource "kubernetes_secret" "tls_monitoring" {
     "tls.crt"   = "${data.google_storage_bucket_object.tls-secret-crt.self_link}}"
   }
   type          = "kubernetes.io/tls"
+  depends_on    = ["kubernetes_namespace.monitoring"]
+}
+
+resource "null_resource" "prometheus_crd_alertmanager" {
+  count   = "${length(var.prometheus_crds)}"
+  provisioner "local-exec" {
+    command = "kubectl --context ${var.cluster_context} apply -f ${var.monitoring_prometheus_operator_crd_url}/${element(var.prometheus_crds, count.index)}.crd.yaml"
+  }
+}
+
+data "helm_repository" "legion" {
+    name = "legion_github"
+    url  = "${var.legion_helm_repo}"
+}
+
+data "template_file" "monitoring_values" {
+  template = "${file("${path.module}/templates/monitoring.yaml")}"
+  vars = {
+    monitoring_namespace  = "${var.monitoring_namespace}"
+    alert_slack_url       = "${var.alert_slack_url}"
+    root_domain           = "${var.root_domain}"
+    cluster_name          = "${var.cluster_name}"
+    grafana_admin         = "${var.grafana_admin}"
+    grafana_pass          = "${var.grafana_pass}"
+    docker_repo           = "${var.docker_repo}"
+    legion_infra_version  = "${var.legion_infra_version}"
+
+  }
+}
+
+resource "helm_release" "monitoring" {
+    name        = "monitoring"
+    chart       = "monitoring"
+    version     = "${var.legion_infra_version}"
+    namespace   = "${var.monitoring_namespace}"
+    repository  = "${data.helm_repository.legion.metadata.0.name}"
+
+    values = [
+      "${data.template_file.monitoring_values.rendered}"
+    ]
 }

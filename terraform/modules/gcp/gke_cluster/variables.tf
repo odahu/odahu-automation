@@ -79,7 +79,7 @@ variable "node_disk_size_gb" {
 }
 
 variable "gke_node_machine_type" {
-  default = "n1-standard-1"
+  default = "n1-standard-2"
   description = "Machine type of GKE nodes"
 }
 
