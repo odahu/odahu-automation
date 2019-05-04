@@ -40,4 +40,10 @@ module "k8s_setup" {
   dex_github_clientid       = "${var.dex_github_clientid}"
   dex_github_clientSecret   = "${var.dex_github_clientSecret}"
   dex_client_secret         = "${var.dex_client_secret}"
+  monitoring_namespace      = "${var.monitoring_namespace}"
+  dex_static_user_email     = "${var.dex_static_user_email}"
+  dex_static_user_pass      = "${var.dex_static_user_pass}"
+  dex_static_user_hash      = "${var.dex_static_user_hash}"
+  dex_static_user_name      = "${var.dex_static_user_name}"
+  dex_static_user_id        = "${var.dex_static_user_id}"
 }

@@ -79,5 +79,30 @@ variable "dex_github_clientSecret" {
 }
 
 variable "dex_client_secret" {
-  description = "Github default client Secret"
+  description = "Dex default client Secret"
+}
+
+variable "dex_static_user_email" {
+  description = "Dex static user email"
+}
+
+variable "dex_static_user_pass" {
+  description = "Dex static user pass"
+}
+
+variable "dex_static_user_hash" {
+  description = "Dex static user hash"
+}
+
+variable "dex_static_user_name" {
+  description = "Dex static user name"
+}
+
+variable "dex_static_user_id" {
+  description = "Dex static user user id"
+}
+
+variable "monitoring_namespace" {
+  default     = "kube-monitoring"
+  description = "clusterwide monitoring namespace"
 }

@@ -25,7 +25,3 @@ output bastion_address {
 output k8s_api_address {
   value = "api.${var.cluster_name}.${var.root_domain}"
 }
-
-output ssh_key {
-  value = "file(data.google_storage_bucket_object.ssh_public_key.self_link)"
-}

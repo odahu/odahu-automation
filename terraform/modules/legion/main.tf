@@ -22,23 +22,19 @@ provider "google" {
 # Legion intallation
 ########################################################
 data "template_file" "legion_values" {
-  template = "${file("${path.module}/templates/legion-values.yaml")}"
+  template = "${file("${path.module}/templates/legion.yaml")}"
   vars = {
-    monitoring_namespace  = "${var.monitoring_namespace}"
-    alert_slack_url       = "${var.alert_slack_url}"
+    monitoring_namespace  = "${var.legion_namespace}"
     root_domain           = "${var.root_domain}"
     cluster_name          = "${var.cluster_name}"
-    grafana_admin         = "${var.grafana_admin}"
-    grafana_pass          = "${var.grafana_pass}"
     docker_repo           = "${var.docker_repo}"
     legion_infra_version  = "${var.legion_infra_version}"
-
   }
 }
 
 resource "local_file" "foo" {
     content     = "${data.template_file.legion_values.rendered}"
-    filename = "/tmp/mv.yaml"
+    filename = "/tmp/${var.cluster_name}-legion-values.yaml"
 }
 
 # resource "helm_release" "monitoring" {

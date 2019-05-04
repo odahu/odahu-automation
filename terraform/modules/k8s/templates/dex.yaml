@@ -1,32 +1,37 @@
 replicaCount: "${dex_replicas}"
 
-issuer: "https://dex.${var.cluster_name}.${root_domain}"
+issuer: "https://dex.${cluster_name}.${root_domain}"
 
 connectors:
   - type: github
     id: github
     name: GitHub
     config:
-      clientID: "${var.dex_github_clientid}"
-      clientSecret: "${var.dex_github_clientSecret}"
-      redirectURI: https://dex.${var.cluster_name}.${root_domain}/callback # DEX callback URL
+      clientID: "${dex_github_clientid}"
+      clientSecret: "${dex_github_clientSecret}"
+      redirectURI: https://dex.${cluster_name}.${root_domain}/callback # DEX callback URL
       orgs:
-      - name: "${var.github_org_name}"
+      - name: "${github_org_name}"
 
 staticClients:
-- id: "${var.cluster_name}.${root_domain}"
-  secret: "${var.client_secret}"
-  redirectURIs:
-  - "https://auth.${var.cluster_name}.${root_domain}/oauth2/callback"
-  - "https://jenkins.${var.cluster_name}.${root_domain}/securityRealm/finishLogin"
-  - "https://auth.${var.cluster_name}.${root_domain}/callback/${var.cluster_name}"
-  name: "${var.cluster_name} Cluster"
+  - id: "${cluster_name}.${root_domain}"
+    secret: "${dex_client_secret}"
+    redirectURIs:
+    - "https://auth.${cluster_name}.${root_domain}/oauth2/callback"
+    - "https://jenkins.${cluster_name}.${root_domain}/securityRealm/finishLogin"
+    - "https://auth.${cluster_name}.${root_domain}/callback/${cluster_name}"
+    name: "${cluster_name} Cluster"
 
-staticPasswords: {{ dex.config.staticPasswords | to_json }}
+staticPasswords:
+  - email: "${dex_static_user_email}"
+    password: "${dex_static_user_pass}"
+    hash: "${dex_static_user_hash}"  # bcrypt hash of the password string
+    username: "${dex_static_user_name}" 
+    userID: "${dex_static_user_id}" 
 
-enablePasswordDB: {{ dex.config.enablePasswordDB | default('true') }}
+enablePasswordDB: true
 
-tls_secret: "${var.cluster_name}-tls"
+tls_secret: "${cluster_name}-tls"
 
 ##image:
 ##  repository: {{ docker_repo }}/k8s-dex

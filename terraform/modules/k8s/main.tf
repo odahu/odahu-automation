@@ -17,17 +17,23 @@ provider "google" {
   project     = "${var.project_id}"
 }
 
+provider "aws" {
+  region                    = "${var.region_aws}"
+  shared_credentials_file   = "~/.aws/config"
+  profile                   = "bdcc"
+}
+
 ########################################################
 # K8S Cluster Setup
 ########################################################
-data "google_storage_bucket_object" "tls-secret-key" {
-  bucket   = "${var.secrets_storage}"
-  name     =  "${var.tls_name}.key"
+data "aws_s3_bucket_object" "tls-secret-key" {
+  bucket = "${var.secrets_storage}"
+  key    = "${var.cluster_name}/tls/${var.cluster_name}.key"
 }
 
-data "google_storage_bucket_object" "tls-secret-crt" {
+data "aws_s3_bucket_object" "tls-secret-crt" {
   bucket   = "${var.secrets_storage}"
-  name     = "${var.tls_name}.fullchain.crt"
+  key      = "${var.cluster_name}/tls/${var.cluster_name}.fullchain.crt"
 }
 
 # Install TLS cert as a secret
@@ -38,8 +44,8 @@ resource "kubernetes_secret" "tls_default" {
     namespace   = "${element(var.tls_namespaces, count.index)}"
   }
   data {
-    "tls.key"   = "${data.google_storage_bucket_object.tls-secret-key.self_link}}"
-    "tls.crt"   = "${data.google_storage_bucket_object.tls-secret-crt.self_link}}"
+    "tls.key"   = "${data.aws_s3_bucket_object.tls-secret-key.body}}"
+    "tls.crt"   = "${data.aws_s3_bucket_object.tls-secret-crt.body}}"
   }
   type          = "kubernetes.io/tls"
 }
@@ -62,6 +68,9 @@ resource "helm_release" "nginx-ingress" {
     }
 }
 
+# Nginx ingress public DNS
+#TODO
+
 ########################################################
 # Kubernetes Dashboard
 ########################################################
@@ -70,22 +79,56 @@ resource "helm_release" "kubernetes-dashboard" {
     chart     = "stable/kubernetes-dashboard"
     namespace = "kube-system"
     version   = "0.6.8"
-    set {
-        name  = "ingress.enabled"
-        value = "true"
-    }
-    set {
-        name  = "service.type"
-        value = "LoadBalancer"
-    }
+
+    values = [
+      "${file("${path.module}/templates/dashboard-ingress.yaml")}"
+    ]
+}
+
+resource "kubernetes_secret" "tls_dashboard" {
+  metadata {
+    name        = "kubernetes-dashboard-certs"
+    namespace   = "kube-system"
+  }
+  data {
+    "tls.key"   = "${data.aws_s3_bucket_object.tls-secret-key.body}}"
+    "tls.crt"   = "${data.aws_s3_bucket_object.tls-secret-crt.body}}"
+  }
+  type          = "kubernetes.io/tls"
 }
 
 ########################################################
 # Dex setup
 ########################################################
+data "template_file" "dex_values" {
+  template = "${file("${path.module}/templates/dex.yaml")}"
+  vars = {
+    cluster_name              = "${var.cluster_name}"
+    root_domain               = "${var.root_domain}"
+    dex_replicas              = "${var.dex_replicas}"
+    dex_github_clientid       = "${var.dex_github_clientid}"
+    dex_github_clientSecret   = "${var.dex_github_clientSecret}"
+    github_org_name           = "${var.github_org_name}"
+    dex_client_secret         = "${var.dex_client_secret}"
+    dex_static_user_email     = "${var.dex_static_user_email}"
+    dex_static_user_pass      = "${var.dex_static_user_pass}"
+    dex_static_user_hash      = "${var.dex_static_user_hash}"
+    dex_static_user_name      = "${var.dex_static_user_name}"
+    dex_static_user_id        = "${var.dex_static_user_id}"
+  }
+}
 
+resource "helm_release" "dex" {
+    name        = "dex"
+    chart       = "dex"
+    version     = "${var.legion_infra_version}"
+    namespace   = "kube-system"
+    repository  = "${data.helm_repository.legion.metadata.0.name}"
 
-
+    values = [
+      "${data.template_file.dex_values.rendered}"
+    ]
+}
 ########################################################
 # Prometheus monitoring
 ########################################################
@@ -94,15 +137,25 @@ resource "kubernetes_namespace" "monitoring" {
     annotations {
       name = "${var.monitoring_namespace}"
     }
-
     labels {
       project         = "legion"
       k8s-component   = "monitoring"
     }
-
     name = "${var.monitoring_namespace}"
   }
 }
+
+# resource "kubernetes_storage_class" "pd_standard" {
+#   metadata {
+#     name = "${var.grafana_storage_class}"
+#   }
+#   storage_provisioner = "kubernetes.io/gce-pd"
+#   reclaim_policy = "Retain"
+#   parameters {
+#     type = "${var.grafana_storage_class}"
+#     zone = "${var.zone}"
+#   }
+# }
 
 resource "kubernetes_secret" "tls_monitoring" {
   metadata {
@@ -110,13 +163,14 @@ resource "kubernetes_secret" "tls_monitoring" {
     namespace   = "${var.monitoring_namespace}"
   }
   data {
-    "tls.key"   = "${data.google_storage_bucket_object.tls-secret-key.self_link}"
-    "tls.crt"   = "${data.google_storage_bucket_object.tls-secret-crt.self_link}}"
+    "tls.key"   = "${data.aws_s3_bucket_object.tls-secret-key.body}"
+    "tls.crt"   = "${data.aws_s3_bucket_object.tls-secret-crt.body}}"
   }
   type          = "kubernetes.io/tls"
   depends_on    = ["kubernetes_namespace.monitoring"]
 }
 
+# TODO: replace raw exec after terraform crd resource release
 resource "null_resource" "prometheus_crd_alertmanager" {
   count   = "${length(var.prometheus_crds)}"
   provisioner "local-exec" {
@@ -132,15 +186,18 @@ data "helm_repository" "legion" {
 data "template_file" "monitoring_values" {
   template = "${file("${path.module}/templates/monitoring.yaml")}"
   vars = {
-    monitoring_namespace  = "${var.monitoring_namespace}"
-    alert_slack_url       = "${var.alert_slack_url}"
-    root_domain           = "${var.root_domain}"
-    cluster_name          = "${var.cluster_name}"
-    grafana_admin         = "${var.grafana_admin}"
-    grafana_pass          = "${var.grafana_pass}"
-    docker_repo           = "${var.docker_repo}"
-    legion_infra_version  = "${var.legion_infra_version}"
-
+    monitoring_namespace      = "${var.monitoring_namespace}"
+    alert_slack_url           = "${var.alert_slack_url}"
+    root_domain               = "${var.root_domain}"
+    cluster_name              = "${var.cluster_name}"
+    grafana_admin             = "${var.grafana_admin}"
+    grafana_pass              = "${var.grafana_pass}"
+    docker_repo               = "${var.docker_repo}"
+    legion_infra_version      = "${var.legion_infra_version}"
+    docker_repo               = "${var.docker_repo}"
+    cluster_context           = "${var.cluster_context}"
+    github_org_name           = "${var.github_org_name}"
+    grafana_storage_class     = "${var.grafana_storage_class}"
   }
 }
 

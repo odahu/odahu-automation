@@ -132,4 +132,5 @@ variable "bastion_hostname" {
 variable "ssh_user_bastion" {
   default = "ubuntu"
   description = "SSH user for bastion connections"
+
 }

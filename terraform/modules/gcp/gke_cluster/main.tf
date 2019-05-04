@@ -84,7 +84,6 @@ resource "google_container_cluster" "cluster" {
     "project"       = "legion"
     "cluster_name"  = "${var.cluster_name}"
   }
-
 }
 
 # Configure kubectl
@@ -145,14 +144,20 @@ resource "google_container_node_pool" "cluster_nodes" {
 ########################################################
 # SSH keys
 ########################################################
-data "google_storage_bucket_object" "ssh_public_key" {
-  bucket   = "${var.secrets_storage}"
-  name     = "${var.cluster_name}.pub"
+# data "google_storage_bucket_object" "ssh_public_key" {
+#   bucket   = "${var.secrets_storage}"
+#   name     = "${var.cluster_name}.pub"
+# }
+
+data "aws_s3_bucket_object" "ssh_public_key" {
+  bucket = "${var.secrets_storage}"
+  key    = "${var.cluster_name}/ssh/${var.cluster_name}.pub"
 }
 
 resource "google_compute_project_metadata_item" "ssh_public_keys" {
   key   = "ssh-keys"
-  value = "${data.google_storage_bucket_object.ssh_public_key.self_link}"
+  value = "${var.ssh_user}:${data.aws_s3_bucket_object.ssh_public_key.body}"
+}
 
 ########################################################
 # Bastion Host
@@ -184,7 +189,7 @@ resource "google_compute_instance" "gke_bastion" {
   }
 
   metadata {
-    ssh-keys = "${var.ssh_user_bastion}:${data.google_storage_bucket_object.ssh_public_key.self_link}"
+    ssh-keys = "${var.ssh_user_bastion}:${data.aws_s3_bucket_object.ssh_public_key.body}"
   }
 
   // Necessary scopes for administering kubernetes.
