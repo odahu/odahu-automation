@@ -1,22 +1,19 @@
-provider "google" {
-  version     = "~> 2.2"
-  region      = "${var.region}"
-  zone        = "${var.zone}"
-  project     = "${var.project_id}"
-}
-
-
 ########################################################
 # Networking
 ########################################################
 module "networking" {
   source                      = "../../../modules/gcp/networking/network"
+  project_id                  = "${var.project_id}"
   region                      = "${var.region}"
+  zone                        = "${var.zone}"
   cluster_name                = "${var.cluster_name}"
 }
 
 module "firewall" {
   source                      = "../../../modules/gcp/networking/firewall"
+  project_id                  = "${var.project_id}"
+  region                      = "${var.region}"
+  zone                        = "${var.zone}"
   allowed_ips                 = "${var.allowed_ips}"
   cluster_name                = "${var.cluster_name}"
   network_name                = "${module.networking.network_name}"
@@ -41,7 +38,11 @@ module "gke_cluster" {
   source                      = "../../modules/gcp/gke_cluster"
   project_id                  = "${var.project_id}"
   cluster_name                = "${var.cluster_name}"
+  region                      = "${var.region}"
   zone                        = "${var.zone}"
+  region_aws                  = "${var.region_aws}"
+  aws_profile                 = "${var.aws_profile}"
+  aws_credentials_file        = "${var.aws_credentials_file}"
   location                    = "${var.location}"
   allowed_ips                 = "${var.allowed_ips}"
   nodes_sa                    = "${module.iam.service_account}"

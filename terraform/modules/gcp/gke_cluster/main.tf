@@ -1,41 +1,38 @@
 provider "google" {
-  version     = "~> 2.2"
-  region      = "${var.region}"
-  zone        = "${var.zone}"
-  project     = "${var.project_id}"
+  version                   = "~> 2.2"
+  region                    = "${var.region}"
+  zone                      = "${var.zone}"
+  project                   = "${var.project_id}"
 }
 
 provider "aws" {
   region                    = "${var.region_aws}"
-  shared_credentials_file   = "~/.aws/config"
-  profile                   = "bdcc"
+  shared_credentials_file   = "${var.aws_credentials_file}"
+  profile                   = "${var.aws_profile}"
 }
-
-# Get GCP metadata from local gcloud config
-data "google_client_config" "gcloud" {}
 
 ########################################################
 # GKE Cluster
 ########################################################
 
 resource "google_container_cluster" "cluster" {
-  project               = "${var.project_id}"
-  name                  = "${var.cluster_name}"
-  location              = "${var.location}"
-  network               = "${var.network}"
-  subnetwork            = "${var.subnetwork}"
-  min_master_version    = "${var.k8s_version}"
+  project                   = "${var.project_id}"
+  name                      = "${var.cluster_name}"
+  location                  = "${var.location}"
+  network                   = "${var.network}"
+  subnetwork                = "${var.subnetwork}"
+  min_master_version        = "${var.k8s_version}"
   
   # We can't create a cluster with no node pool defined, but we want to only use
   # separately managed node pools. So we create the smallest possible default
   # node pool and immediately delete it.
-  remove_default_node_pool = true
-  initial_node_count = 1
+  remove_default_node_pool  = true
+  initial_node_count        = 1
 
   # Setting an empty username and password explicitly disables basic auth
   master_auth {
-    username = ""
-    password = ""
+    username  = ""
+    password  = ""
   }
 
   lifecycle {
@@ -144,19 +141,20 @@ resource "google_container_node_pool" "cluster_nodes" {
 ########################################################
 # SSH keys
 ########################################################
+# TODO: consider gcs as secrets storage?
 # data "google_storage_bucket_object" "ssh_public_key" {
 #   bucket   = "${var.secrets_storage}"
 #   name     = "${var.cluster_name}.pub"
 # }
 
 data "aws_s3_bucket_object" "ssh_public_key" {
-  bucket = "${var.secrets_storage}"
-  key    = "${var.cluster_name}/ssh/${var.cluster_name}.pub"
+  bucket  = "${var.secrets_storage}"
+  key     = "${var.cluster_name}/ssh/${var.cluster_name}.pub"
 }
 
 resource "google_compute_project_metadata_item" "ssh_public_keys" {
-  key   = "ssh-keys"
-  value = "${var.ssh_user}:${data.aws_s3_bucket_object.ssh_public_key.body}"
+  key     = "ssh-keys"
+  value   = "${var.ssh_user}:${data.aws_s3_bucket_object.ssh_public_key.body}"
 }
 
 ########################################################
@@ -189,7 +187,7 @@ resource "google_compute_instance" "gke_bastion" {
   }
 
   metadata {
-    ssh-keys = "${var.ssh_user_bastion}:${data.aws_s3_bucket_object.ssh_public_key.body}"
+    ssh-keys = "${var.ssh_user}:${data.aws_s3_bucket_object.ssh_public_key.body}"
   }
 
   // Necessary scopes for administering kubernetes.
@@ -203,17 +201,17 @@ resource "google_compute_instance" "gke_bastion" {
 ########################################################
 
 resource "google_dns_record_set" "gke_bastion" {
-  name = "bastion.${var.cluster_name}.${var.root_domain}."
-  type = "A"
-  ttl  = 300
-  managed_zone = "${var.dns_zone_name}"
-  rrdatas = ["${google_compute_instance.gke_bastion.network_interface.0.access_config.0.nat_ip}"]
+  name          = "bastion.${var.cluster_name}.${var.root_domain}."
+  type          = "A"
+  ttl           = 300
+  managed_zone  = "${var.dns_zone_name}"
+  rrdatas       = ["${google_compute_instance.gke_bastion.network_interface.0.access_config.0.nat_ip}"]
 }
 
 resource "google_dns_record_set" "gke_api" {
-  name = "api.${var.cluster_name}.${var.root_domain}."
-  type = "A"
-  ttl  = 300
-  managed_zone = "${var.dns_zone_name}"
-  rrdatas = ["${google_container_cluster.cluster.endpoint}"]
+  name          = "api.${var.cluster_name}.${var.root_domain}."
+  type          = "A"
+  ttl           = 300
+  managed_zone  = "${var.dns_zone_name}"
+  rrdatas       = ["${google_container_cluster.cluster.endpoint}"]
 }

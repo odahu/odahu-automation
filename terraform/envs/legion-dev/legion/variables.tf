@@ -18,6 +18,7 @@ variable "aws_profile" {
   description = "AWS profile name"
 }
 variable "aws_credentials_file" {
+  default     = "~/.aws/config"
   description = "AWS credentials file location"
 }
 variable "zone" {
@@ -48,10 +49,6 @@ variable "root_domain" {
 variable "legion_version" {
   description = "Legion release version"
 }
-variable "legion_namespace" {
-  default     = "legion"
-  description = "Legion k8s namespace"
-}
 variable "docker_repo" {
   description = "Legion Docker repo url"
 }
@@ -64,35 +61,23 @@ variable "docker_password" {
 variable "enclave_jwt_secret" {
   description = "Legion enclave JWT secret"
 }
-variable "api_jwt_ttl_minutes" {
-  default     = "120"
-  description = "API JWT secret ttl"
-}
-variable "api_jwt_exp_datetime" {
-  default     = ""
-  description = "API JWT secret expiration"
-}
-variable "max_token_ttl_minutes" {
-  default     = "259200"
-  description = "Max token ttl"
-}
-variable "model_docker_protocol" {
-  default     = "https"
-  description = "Model docker protocol"
-}
 variable "model_docker_url" {
   description = "Model docker url"
 }
 variable "model_examples_git_url" {
+  default     = "git@github.com:legion-platform/legion.git"
   description = "Model examples git url"
 }
 variable "model_reference" {
+  default     = "origin/develop"
   description = "Model reference"
 }
 variable "model_resources_cpu" {
+  default     = "256m"
   description = "Model pod cpu limit"
 }
 variable "model_resources_mem" {
+  default     = "256Mi"
   description = "Model pod mem limit"
 }
 variable "jenkins_git_key" {
@@ -102,5 +87,6 @@ variable "legion_data_bucket" {
   description = "Legion data storage bucket"
 }
 variable "collector_region" {
+  default = "us-east1"
   description = "Collector's storage bucket region"
 }

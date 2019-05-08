@@ -105,9 +105,3 @@ variable "bastion_hostname" {
   default = "bastion"
   description = "bastion hpstname"
 }
-
-
-variable "ssh_user_bastion" {
-  default = "ubuntu"
-  description = "SSH user for bastion connections"
-}

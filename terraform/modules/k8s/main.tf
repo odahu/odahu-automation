@@ -1,6 +1,6 @@
 provider "kubernetes" {
-  config_context_auth_info  = "gke_or2-msq-epmd-legn-t1iylu_us-east1-b_legion-dev"
-  config_context_cluster    = "gke_or2-msq-epmd-legn-t1iylu_us-east1-b_legion-dev"
+  config_context_auth_info  = "${var.config_context_auth_info}"
+  config_context_cluster    = "${var.config_context_cluster}"
 }
 
 provider "helm" {
@@ -19,8 +19,8 @@ provider "google" {
 
 provider "aws" {
   region                    = "${var.region_aws}"
-  shared_credentials_file   = "~/.aws/config"
-  profile                   = "bdcc"
+  shared_credentials_file   = "${var.aws_credentials_file}"
+  profile                   = "${var.aws_profile}"
 }
 
 ########################################################
@@ -58,18 +58,19 @@ resource "helm_release" "nginx-ingress" {
     chart     = "stable/nginx-ingress"
     namespace = "kube-system"
     version   = "0.20.1"
+    # TODO: restrict access to Ingress LBs
     # set {
     #     name  = "controller.service.loadBalancerSourceRanges"
     #     value = "${var.allowed_ips}"
     # }
     set {
       name    = "defaultBackend.service.type"
-      value  = "LoadBalancer"
+      value   = "LoadBalancer"
     }
 }
 
 # Nginx ingress public DNS
-#TODO
+# TODO: add public DNS wildcard record
 
 ########################################################
 # Kubernetes Dashboard
@@ -79,7 +80,6 @@ resource "helm_release" "kubernetes-dashboard" {
     chart     = "stable/kubernetes-dashboard"
     namespace = "kube-system"
     version   = "0.6.8"
-
     values = [
       "${file("${path.module}/templates/dashboard-ingress.yaml")}"
     ]
@@ -187,16 +187,13 @@ data "template_file" "monitoring_values" {
   template = "${file("${path.module}/templates/monitoring.yaml")}"
   vars = {
     monitoring_namespace      = "${var.monitoring_namespace}"
-    alert_slack_url           = "${var.alert_slack_url}"
-    root_domain               = "${var.root_domain}"
+    legion_infra_version      = "${var.legion_infra_version}"
     cluster_name              = "${var.cluster_name}"
+    root_domain               = "${var.root_domain}"
+    docker_repo               = "${var.docker_repo}"
+    alert_slack_url           = "${var.alert_slack_url}"
     grafana_admin             = "${var.grafana_admin}"
     grafana_pass              = "${var.grafana_pass}"
-    docker_repo               = "${var.docker_repo}"
-    legion_infra_version      = "${var.legion_infra_version}"
-    docker_repo               = "${var.docker_repo}"
-    cluster_context           = "${var.cluster_context}"
-    github_org_name           = "${var.github_org_name}"
     grafana_storage_class     = "${var.grafana_storage_class}"
   }
 }
