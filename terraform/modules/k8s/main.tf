@@ -53,28 +53,56 @@ resource "kubernetes_secret" "tls_default" {
 ########################################################
 # Nginx Ingress
 ########################################################
-resource "helm_release" "nginx-ingress" {
-    name      = "nginx-ingress"
-    chart     = "stable/nginx-ingress"
-    namespace = "kube-system"
-    version   = "0.20.1"
-    # TODO: restrict access to Ingress LBs
-    # set {
-    #     name  = "controller.service.loadBalancerSourceRanges"
-    #     value = "${var.allowed_ips}"
-    # }
-    set {
-      name    = "defaultBackend.service.type"
-      value   = "LoadBalancer"
-    }
+resource "google_compute_address" "ingress_lb_address" {
+  name              = "${var.cluster_name}-ingress-main"
+  region            = "${var.region}"
+  address_type      = "EXTERNAL"
 }
 
-# Nginx ingress public DNS
-# TODO: add public DNS wildcard record
+resource "google_dns_record_set" "ingress_lb" {
+  name          = "*.${var.cluster_name}.${var.root_domain}."
+  type          = "A"
+  ttl           = 300
+  managed_zone  = "${var.dns_zone_name}"
+  rrdatas       = ["${google_compute_address.ingress_lb_address.address}"]
+}
+
+resource "helm_release" "nginx-ingress" {
+    name        = "nginx-ingress"
+    chart       = "stable/nginx-ingress"
+    namespace   = "kube-system"
+    version     = "0.20.1"
+    set {
+        name    = "controller.service.loadBalancerSourceRanges"
+        value   = "{${join(",", var.allowed_ips)}}"
+    }
+    set {
+        name    = "defaultBackend.service.loadBalancerSourceRanges"
+        value   = "{${join(",", var.allowed_ips)}}"
+    }
+    set {
+      name      = "defaultBackend.service.type"
+      value     = "LoadBalancer"
+    }
+    set {
+      name      = "controller.service.loadBalancerIP"
+      value     = "${google_compute_address.ingress_lb_address.address}"
+    }
+    depends_on  = ["google_compute_address.ingress_lb_address"]
+}
 
 ########################################################
 # Kubernetes Dashboard
 ########################################################
+data "template_file" "dashboard_values" {
+  template = "${file("${path.module}/templates/dashboard-ingress.yaml")}"
+  vars = {
+    cluster_name              = "${var.cluster_name}"
+    root_domain               = "${var.root_domain}"
+    dashboard_tls_secret_name = "${var.dashboard_tls_secret_name}"
+  }
+}
+
 resource "helm_release" "kubernetes-dashboard" {
     name      = "kubernetes-dashboard"
     chart     = "stable/kubernetes-dashboard"
@@ -87,7 +115,7 @@ resource "helm_release" "kubernetes-dashboard" {
 
 resource "kubernetes_secret" "tls_dashboard" {
   metadata {
-    name        = "kubernetes-dashboard-certs"
+    name        = "${var.dashboard_tls_secret_name}"
     namespace   = "kube-system"
   }
   data {
@@ -100,35 +128,35 @@ resource "kubernetes_secret" "tls_dashboard" {
 ########################################################
 # Dex setup
 ########################################################
-data "template_file" "dex_values" {
-  template = "${file("${path.module}/templates/dex.yaml")}"
-  vars = {
-    cluster_name              = "${var.cluster_name}"
-    root_domain               = "${var.root_domain}"
-    dex_replicas              = "${var.dex_replicas}"
-    dex_github_clientid       = "${var.dex_github_clientid}"
-    dex_github_clientSecret   = "${var.dex_github_clientSecret}"
-    github_org_name           = "${var.github_org_name}"
-    dex_client_secret         = "${var.dex_client_secret}"
-    dex_static_user_email     = "${var.dex_static_user_email}"
-    dex_static_user_pass      = "${var.dex_static_user_pass}"
-    dex_static_user_hash      = "${var.dex_static_user_hash}"
-    dex_static_user_name      = "${var.dex_static_user_name}"
-    dex_static_user_id        = "${var.dex_static_user_id}"
-  }
-}
+# data "template_file" "dex_values" {
+#   template = "${file("${path.module}/templates/dex.yaml")}"
+#   vars = {
+#     cluster_name              = "${var.cluster_name}"
+#     root_domain               = "${var.root_domain}"
+#     dex_replicas              = "${var.dex_replicas}"
+#     dex_github_clientid       = "${var.dex_github_clientid}"
+#     dex_github_clientSecret   = "${var.dex_github_clientSecret}"
+#     github_org_name           = "${var.github_org_name}"
+#     dex_client_secret         = "${var.dex_client_secret}"
+#     dex_static_user_email     = "${var.dex_static_user_email}"
+#     dex_static_user_pass      = "${var.dex_static_user_pass}"
+#     dex_static_user_hash      = "${var.dex_static_user_hash}"
+#     dex_static_user_name      = "${var.dex_static_user_name}"
+#     dex_static_user_id        = "${var.dex_static_user_id}"
+#   }
+# }
 
-resource "helm_release" "dex" {
-    name        = "dex"
-    chart       = "dex"
-    version     = "${var.legion_infra_version}"
-    namespace   = "kube-system"
-    repository  = "${data.helm_repository.legion.metadata.0.name}"
+# resource "helm_release" "dex" {
+#     name        = "dex"
+#     chart       = "dex"
+#     version     = "${var.legion_infra_version}"
+#     namespace   = "kube-system"
+#     repository  = "${data.helm_repository.legion.metadata.0.name}"
 
-    values = [
-      "${data.template_file.dex_values.rendered}"
-    ]
-}
+#     values = [
+#       "${data.template_file.dex_values.rendered}"
+#     ]
+# }
 ########################################################
 # Prometheus monitoring
 ########################################################
@@ -145,6 +173,7 @@ resource "kubernetes_namespace" "monitoring" {
   }
 }
 
+# TODO: consider optional custom storage class for the cluster
 # resource "kubernetes_storage_class" "pd_standard" {
 #   metadata {
 #     name = "${var.grafana_storage_class}"

@@ -29,9 +29,6 @@ variable "aws_credentials_file" {
   default     = "~/.aws/config"
   description = "AWS credentials file location"
 }
-variable "tls_name" {
-  description = "Cluster TLS certificate name"
-}
 variable "secrets_storage" {
   description = "Cluster secrets storage"
 }
@@ -50,6 +47,9 @@ variable "root_domain" {
 }
 variable "docker_repo" {
   description = "Legion Docker repo url"
+}
+variable "dns_zone_name" {
+  description = "Cluster root DNS zone name"
 }
 
 ########################

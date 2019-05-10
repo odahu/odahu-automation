@@ -39,18 +39,25 @@ variable "root_domain" {
   description = "Legion cluster root domain"
 }
 variable "allowed_ips" {
+  type    = "list"
   description = "CIDR to allow access from"
 }
 variable "tls_namespaces" {
   default = ["default", "kube-system"]
   description = "Default namespaces with TLS secret"
 }
-#TODO ???vars
-variable "tls_name" {
-  description = "Cluster TLS certificate name"
-}
 variable "cluster_context" {
   description = "Kubectl cluster context"
+}
+variable "dns_zone_name" {
+  description = "Cluster root DNS zone name"
+}
+########################
+# Kubernetes Dashboard
+########################
+variable "dashboard_tls_secret_name" {
+  default     = "kubernetes-dashboard-certs"
+  description = "Cluster root DNS zone name"
 }
 
 ########################

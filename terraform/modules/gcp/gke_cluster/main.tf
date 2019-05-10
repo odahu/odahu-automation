@@ -141,7 +141,7 @@ resource "google_container_node_pool" "cluster_nodes" {
 ########################################################
 # SSH keys
 ########################################################
-# TODO: consider gcs as secrets storage?
+# TODO: consider gcs as secrets storage. The problem is missed object body in terraform data resource
 # data "google_storage_bucket_object" "ssh_public_key" {
 #   bucket   = "${var.secrets_storage}"
 #   name     = "${var.cluster_name}.pub"
@@ -189,6 +189,8 @@ resource "google_compute_instance" "gke_bastion" {
   metadata {
     ssh-keys = "${var.ssh_user}:${data.aws_s3_bucket_object.ssh_public_key.body}"
   }
+
+  metadata_startup_script = "sed -i '/AllowAgentForwarding/s/^#//g' /etc/ssh/sshd_config && service sshd restart"
 
   // Necessary scopes for administering kubernetes.
   service_account {

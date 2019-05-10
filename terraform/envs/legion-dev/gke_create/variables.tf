@@ -33,6 +33,21 @@ variable "secrets_storage" {
 variable "root_domain" {
   description = "Legion cluster root domain"
 }
+variable "aws_vpc_id" {
+  description = "AWS VPC id to establish peering with"
+}
+variable "gcp_cidr" {
+  description = "GCP network CIDR"
+}
+variable "aws_sg" {
+  description = "AWS SG id for gcp access"
+}
+variable "aws_cidr" {
+  description = "AWS network CIDR"
+}
+variable "aws_route_table_id" {
+  description = "AWS Route table ID"
+}
 
 #############
 # GKE
@@ -40,12 +55,6 @@ variable "root_domain" {
 variable "location" {
   default = "us-east1-b"
   description = "The location (region or zone) in which the cluster master will be created"
-}
-variable "network" {
-  description = "The VPC network to host the cluster in"
-}
-variable "subnetwork" {
-  description = "The subnetwork to host the cluster in"
 }
 variable "k8s_version" {
   default = "1.12.7-gke.7"
@@ -70,7 +79,7 @@ variable "node_disk_size_gb" {
   description = "Persistent disk size for cluster worker nodes"
 }
 variable "gke_node_machine_type" {
-  default = "n1-standard-1"
+  default = "n1-standard-2"
   description = "Machine type of GKE nodes"
 }
 variable "gke_num_nodes_min" {
@@ -85,7 +94,7 @@ variable "nodes_sa" {
   default = "default"
   description = "Service account for cluster nodes"
 }
-# TODO: custom k8s resources cidrs
+# TODO: custom k8s resources cidrs?
 # variable "ip_range_pods" {
 #   default = "10.1.1.0/24"
 #   description = "The secondary ip range to use for pods"
