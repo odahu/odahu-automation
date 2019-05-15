@@ -33,6 +33,10 @@ resource "google_container_cluster" "cluster" {
   master_auth {
     username  = ""
     password  = ""
+
+    client_certificate_config {
+      issue_client_certificate = false
+    }
   }
 
   lifecycle {
@@ -201,6 +205,29 @@ resource "google_compute_instance" "gke_bastion" {
 ########################################################
 #  DNS records
 ########################################################
+
+# TODO: consider local dns for DEX
+# local DNS zone
+# data "google_compute_network" "vpc" {
+#   name = "${var.network}"
+# }
+
+# resource "google_dns_managed_zone" "local_zone" {
+#   name          = "${var.cluster_name}-local"
+#   dns_name      = "local-legion-dev.gcp.epm.kharlamov.biz."
+#   description   = "Local ${var.cluster_name} zone"
+#   visibility    = "private"
+#   private_visibility_config {
+#     networks {
+#       network_url =  "https://www.googleapis.com/compute/v1/projects/${var.project_id}/global/networks/${var.network}"
+#     }
+#   }
+#   labels = {
+#     project = "legion"
+#     cluster = "${var.cluster_name}"
+#   }
+#   # depends_on    = ["google_compute_network.vpc"]
+# }
 
 resource "google_dns_record_set" "gke_bastion" {
   name          = "bastion.${var.cluster_name}.${var.root_domain}."

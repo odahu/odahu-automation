@@ -1,0 +1,37 @@
+keycloak:
+  username: admin
+  password: "kcadmpass!"
+
+  ingress:
+    enabled: true
+    path: /    
+    annotations:
+      kubernetes.io/ingress.class: nginx
+    hosts:
+      - "keycloak.${cluster_name}.${root_domain}"
+    tls:
+      - hosts:
+          - "keycloak.${cluster_name}.${root_domain}"
+        secretName: "${cluster_name}-tls"
+
+  ## Persistence configuration
+  persistence:
+    dbVendor: postgres
+    deployPostgres: true
+    dbName: keycloak
+    dbHost: mykeycloak
+    dbPort: 5432
+    dbUser: "${keycloak_db_user}"
+
+    # Only used if no existing secret is specified. In this case a new secret is created
+    dbPassword: "${keycloak_db_pass}"
+
+postgresql:
+  ### PostgreSQL User to create.
+  ##
+  postgresUser: "${keycloak_pg_user}"
+
+  ## PostgreSQL Password for the new user.
+  ## If not set, a random 10 characters password will be used.
+  ##
+  postgresPassword: "${keycloak_pg_pass}"

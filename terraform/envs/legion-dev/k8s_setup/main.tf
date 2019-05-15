@@ -33,4 +33,11 @@ module "k8s_setup" {
   dex_static_user_hash      = "${var.dex_static_user_hash}"
   dex_static_user_name      = "${var.dex_static_user_name}"
   dex_static_user_id        = "${var.dex_static_user_id}"
+  dex_client_id             = "${var.dex_client_id}"
+  keycloak_admin_user       = "${var.keycloak_admin_user}"
+  keycloak_admin_pass       = "${var.keycloak_admin_pass}"
+  keycloak_db_user          = "${var.keycloak_db_user}"
+  keycloak_db_pass          = "${var.keycloak_db_pass}"
+  keycloak_pg_user          = "${var.keycloak_pg_user}"
+  keycloak_pg_pass          = "${var.keycloak_pg_pass}"
 }

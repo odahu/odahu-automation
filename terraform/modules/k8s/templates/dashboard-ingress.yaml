@@ -3,10 +3,15 @@ ingress:
   annotations:
     kubernetes.io/ingress.class: nginx
     nginx.ingress.kubernetes.io/secure-backends: "true"
-    external-dns.alpha.kubernetes.io/hostname: "dashboard.${cluster_name}.${root_domain}."
+    nginx.ingress.kubernetes.io/auth-signin: "https://auth.${cluster_name}.${root_domain}/oauth2/start?rd=https://$host$escaped_request_uri"
+    nginx.ingress.kubernetes.io/auth-url: "http://oauth2-proxy.kube-system.svc.cluster.local:4180/oauth2/auth"
+    # nginx.ingress.kubernetes.io/configuration-snippet: |
+    #   auth_request_set $token $upstream_http_authorization;
+    #   set_escape_uri $escaped_request_uri $request_uri;
+    #   proxy_set_header Authorization $token;
   hosts:
-    - dashboard.${cluster_name}.${root_domain}
+    - "dashboard.${cluster_name}.${root_domain}"
   tls:
-    - secretName: ${dashboard_tls_secret_name}
+    - secretName: "${dashboard_tls_secret_name}"
       hosts:
-        - dashboard.${cluster_name}.${root_domain}
+        - "dashboard.${cluster_name}.${root_domain}"

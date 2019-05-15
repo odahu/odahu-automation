@@ -12,6 +12,7 @@ provider "helm" {
 
 provider "google" {
   version     = "~> 2.2"
+  # credentials = "${var.gcp_credentials}"
   region      = "${var.region}"
   zone        = "${var.zone}"
   project     = "${var.project_id}"

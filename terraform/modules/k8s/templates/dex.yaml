@@ -14,7 +14,7 @@ connectors:
       - name: "${github_org_name}"
 
 staticClients:
-  - id: "${cluster_name}.${root_domain}"
+  - id: "${dex_client_id}"
     secret: "${dex_client_secret}"
     redirectURIs:
     - "https://auth.${cluster_name}.${root_domain}/oauth2/callback"

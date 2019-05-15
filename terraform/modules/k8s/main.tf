@@ -109,7 +109,7 @@ resource "helm_release" "kubernetes-dashboard" {
     namespace = "kube-system"
     version   = "0.6.8"
     values = [
-      "${file("${path.module}/templates/dashboard-ingress.yaml")}"
+      "${data.template_file.dashboard_values.rendered}"
     ]
 }
 
@@ -126,37 +126,40 @@ resource "kubernetes_secret" "tls_dashboard" {
 }
 
 ########################################################
-# Dex setup
+# Auth setup
 ########################################################
-# data "template_file" "dex_values" {
-#   template = "${file("${path.module}/templates/dex.yaml")}"
-#   vars = {
-#     cluster_name              = "${var.cluster_name}"
-#     root_domain               = "${var.root_domain}"
-#     dex_replicas              = "${var.dex_replicas}"
-#     dex_github_clientid       = "${var.dex_github_clientid}"
-#     dex_github_clientSecret   = "${var.dex_github_clientSecret}"
-#     github_org_name           = "${var.github_org_name}"
-#     dex_client_secret         = "${var.dex_client_secret}"
-#     dex_static_user_email     = "${var.dex_static_user_email}"
-#     dex_static_user_pass      = "${var.dex_static_user_pass}"
-#     dex_static_user_hash      = "${var.dex_static_user_hash}"
-#     dex_static_user_name      = "${var.dex_static_user_name}"
-#     dex_static_user_id        = "${var.dex_static_user_id}"
-#   }
-# }
+# Keycloak sso
+data "helm_repository" "codecentric" {
+    name = "codecentric"
+    url  = "${var.codecentric_helm_repo}"
+}
 
-# resource "helm_release" "dex" {
-#     name        = "dex"
-#     chart       = "dex"
-#     version     = "${var.legion_infra_version}"
-#     namespace   = "kube-system"
-#     repository  = "${data.helm_repository.legion.metadata.0.name}"
+data "template_file" "keycloak_values" {
+  template = "${file("${path.module}/templates/keycloak.yaml")}"
+  vars = {
+    cluster_name              = "${var.cluster_name}"
+    root_domain               = "${var.root_domain}"
+    keycloak_admin_user       = "${var.keycloak_admin_user}"
+    keycloak_admin_pass       = "${var.keycloak_admin_pass}"
+    keycloak_db_user          = "${var.keycloak_db_user}"
+    keycloak_db_pass          = "${var.keycloak_db_pass}"
+    keycloak_pg_user          = "${var.keycloak_pg_user}"
+    keycloak_pg_pass          = "${var.keycloak_pg_pass}"
+  }
+}
 
-#     values = [
-#       "${data.template_file.dex_values.rendered}"
-#     ]
-# }
+resource "helm_release" "keycloak" {
+    name        = "keycloak"
+    chart       = "codecentric/keycloak"
+    version     = "4.14.0"
+    namespace   = "kube-system"
+    repository  = "${data.helm_repository.codecentric.metadata.0.name}"
+
+    values = [
+      "${data.template_file.keycloak_values.rendered}"
+    ]
+}
+
 ########################################################
 # Prometheus monitoring
 ########################################################
