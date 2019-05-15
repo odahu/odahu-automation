@@ -125,34 +125,6 @@ pipeline {
                }
            }
        }
-
-       stage('Deploy Legion Enclave') {
-           steps {
-               script {
-                   result = build job: env.param_deploy_legion_enclave_job_name, propagate: true, wait: true, parameters: [
-                           [$class: 'GitParameterValue', name: 'GitBranch', value: env.param_legion_infra_version],
-                           string(name: 'Profile', value: env.param_profile),
-                           string(name: 'LegionInfraVersion', value: env.param_legion_infra_version),
-                           string(name: 'TestsTags', value: env.param_tests_tags ?: ""),
-                           string(name: 'LegionVersion', value: legionVersion),
-                           string(name: 'EnclaveName', value: 'enclave-ci')
-                   ]
-               }
-           }
-       }
-
-       stage('Terminate Legion Enclave') {
-           steps {
-               script {
-                   result = build job: env.param_terminate_legioin_enclave_job_name, propagate: true, wait: true, parameters: [
-                           [$class: 'GitParameterValue', name: 'GitBranch', value: env.param_legion_infra_version],
-                           string(name: 'Profile', value: env.param_profile),
-                           string(name: 'LegionInfraVersion', value: env.param_legion_infra_version),
-                           string(name: 'EnclaveName', value: 'enclave-ci')
-                   ]
-               }
-           }
-       }
    }
 
     post {
