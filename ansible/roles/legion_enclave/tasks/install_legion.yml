@@ -11,6 +11,14 @@
     dest: "{{ tmp_values_file }}"
     mode: 0644
 
+# TODO: Remove after resolving of the issue https://github.com/legion-platform/legion/issues/150
+- name: Delete Legion Validationg Webhook
+  shell: "kubectl --context {{ cluster_name }} delete --ignore-not-found validatingwebhookconfigurations legion-validating-webhook-configuration"
+
+# TODO: Remove after resolving of the issue https://github.com/legion-platform/legion/issues/150
+- name: Delete Legion Mutating Webhook
+  shell: "kubectl --context {{ cluster_name }} delete --ignore-not-found mutatingwebhookconfigurations legion-mutating-webhook-configuration"
+
 - name: Delete Legion CRDs
   shell: "kubectl --context {{ cluster_name }} delete --ignore-not-found crd {{ item }}.legion.legion-platform.org"
   loop:
