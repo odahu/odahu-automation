@@ -84,6 +84,22 @@ def deployLegion() {
     }
 }
 
+def legionScope(Closure body) {
+    withCredentials([file(credentialsId: "vault-${env.param_profile}", variable: 'vault')]) {
+        withAWS(credentials: 'kops') {
+            docker.image("${env.param_docker_repo}/legion-pipeline-agent:${env.param_legion_version}").inside("-e HOME=/opt/legion -v ${WORKSPACE}/profiles:/opt/legion/profiles -u root") {
+                downloadSecrets(vault)
+                sh """
+                    kubectl config set-context \$(kubectl config current-context) --namespace=${env.param_legion_namespace}
+                    legionctl login --edi https://edi-${env.param_legion_namespace}.${env.param_profile} --token "${env.param_dex_token}"
+                """
+
+                body()
+            }
+        }
+    }
+}
+
 def updateTLSCert() {
     withCredentials([
     file(credentialsId: "vault-${env.param_profile}", variable: 'vault')]) {
