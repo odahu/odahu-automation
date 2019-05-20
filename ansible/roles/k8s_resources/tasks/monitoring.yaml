@@ -17,7 +17,7 @@
 - name: Copy TLS secret
   shell: "kubectl --context {{ cluster_name }} get secret {{ source_secret_name }} -o json --namespace kube-system | jq '.metadata.namespace = \"{{ monitoring_namespace }}\"' | jq '.metadata.name = \"{{ base_domain }}-tls\"' | kubectl apply -n {{ monitoring_namespace }} --context {{ cluster_name }} -f -"
 
-
+# TODO: Remove after resolving of the issue https://github.com/legion-platform/legion/issues/150
 - name: Delete Prometheus CRDs
   shell: "kubectl --context {{ cluster_name }} delete --ignore-not-found crd {{ item }}.monitoring.coreos.com"
   loop:
@@ -25,37 +25,6 @@
     - "prometheusrules"
     - "servicemonitors"
     - "alertmanagers"
-
-# TODO: removed after https://github.com/helm/charts/issues/9241 will be fixed
-- name: "Confirm that prometheus CRDs has been removed"
-  shell: "kubectl --context {{ cluster_name }} get crds | grep -E \"^(alertmanagers|prometheuses|prometheusrules|servicemonitors)\\.monitoring\\.coreos\\.com\" | wc -l"
-  register: crd_check
-  until: crd_check.stdout.find("0") != -1
-  retries: 10
-  delay: 5
-  ignore_errors: false
-
-# TODO: removed after https://github.com/helm/charts/issues/9241 will be fixed
-- name: Install Prometheus CRDs
-  shell: "kubectl --context {{ cluster_name }} apply -f {{ monitoring_prometheus_operator_crd_url }}/{{ item }}.crd.yaml"
-  loop:
-    - "alertmanager"
-    - "prometheus"
-    - "prometheusrule"
-    - "servicemonitor"
-
-# TODO: removed after https://github.com/helm/charts/issues/9241 will be fixed
-- name: "Confirm that prometheus CRDs has been installed"
-  shell: |
-    kubectl --context {{ cluster_name }} get --all-namespaces prometheuses.monitoring.coreos.com && \
-    kubectl --context {{ cluster_name }} get --all-namespaces prometheusrules.monitoring.coreos.com && \
-    kubectl --context {{ cluster_name }} get --all-namespaces servicemonitors.monitoring.coreos.com && \
-    kubectl --context {{ cluster_name }} get --all-namespaces alertmanagers.monitoring.coreos.com
-  register: crd_check
-  until: crd_check.rc == 0
-  retries: 10
-  delay: 5
-  ignore_errors: false
 
 - name: Install monitoring helm chart
   include_role:
