@@ -81,12 +81,6 @@ pipeline {
     }
 
     post {
-        always {
-            script {
-                legion = load "${sharedLibPath}"
-                legion.notifyBuild(currentBuild.currentResult)
-            }
-        }
         cleanup {
             script {
                 legion.ansibleDebugRunCheck(env.param_debug_run)

@@ -408,9 +408,9 @@ def notifyBuild(String buildStatus = 'STARTED') {
     """.stripIndent()
 
     // Override default values based on build status
-    if (buildStatus == 'STARTED') {
+    if (buildStatus == 'UNSTABLE') {
         colorCode = '#FFFF00'
-    } else if (buildStatus == 'SUCCESSFUL') {
+    } else if (buildStatus == 'SUCCESS') {
         colorCode = '#00FF00'
     } else {
         colorCode = '#FF0000'
