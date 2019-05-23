@@ -18,7 +18,6 @@ staticClients:
     secret: "${dex_client_secret}"
     redirectURIs:
     - "https://auth.${cluster_name}.${root_domain}/oauth2/callback"
-    - "https://jenkins.${cluster_name}.${root_domain}/securityRealm/finishLogin"
     - "https://auth.${cluster_name}.${root_domain}/callback/${cluster_name}"
     name: "${cluster_name} Cluster"
 
@@ -27,12 +26,8 @@ staticPasswords:
     password: "${dex_static_user_pass}"
     hash: "${dex_static_user_hash}"  # bcrypt hash of the password string
     username: "${dex_static_user_name}" 
-    userID: "${dex_static_user_id}" 
+    userID: "${dex_static_user_id}"
 
-enablePasswordDB: true
+enablePasswordDB: false
 
 tls_secret: "${cluster_name}-tls"
-
-##image:
-##  repository: {{ docker_repo }}/k8s-dex
-##  tag: {{ legion_infra_version }}

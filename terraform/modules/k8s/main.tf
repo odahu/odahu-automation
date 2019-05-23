@@ -23,6 +23,11 @@ provider "aws" {
   profile                   = "${var.aws_profile}"
 }
 
+data "helm_repository" "legion" {
+    name = "legion_github"
+    url  = "${var.legion_helm_repo}"
+}
+
 ########################################################
 # K8S Cluster Setup
 ########################################################
@@ -128,6 +133,91 @@ resource "kubernetes_secret" "tls_dashboard" {
 ########################################################
 # Auth setup
 ########################################################
+
+# Dex
+# TODO: set dex dns automtically (now should be updated manually)
+# resource "google_compute_address" "dex_lb_address" {
+#   name              = "${var.cluster_name}-dex"
+#   region            = "${var.region}"
+#   address_type      = "EXTERNAL"
+# }
+
+# resource "google_dns_record_set" "dex_lb" {
+#   name          = "dex.${var.cluster_name}.${var.root_domain}."
+#   type          = "A"
+#   ttl           = 300
+#   managed_zone  = "${var.dns_zone_name}"
+#   rrdatas       = ["${google_compute_address.dex_lb_address.address}"]
+# }
+
+
+data "template_file" "dex_values" {
+  template = "${file("${path.module}/templates/dex.yaml")}"
+  vars = {
+    cluster_name              = "${var.cluster_name}"
+    root_domain               = "${var.root_domain}"
+    dex_replicas              = "${var.dex_replicas}"
+    dex_github_clientid       = "${var.dex_github_clientid}"
+    dex_github_clientSecret   = "${var.dex_github_clientSecret}"
+    github_org_name           = "${var.github_org_name}"
+    dex_client_id             = "${var.dex_client_id}"
+    dex_client_secret         = "${var.dex_client_secret}"
+    dex_static_user_email     = "${var.dex_static_user_email}"
+    dex_static_user_pass      = "${var.dex_static_user_pass}"
+    dex_static_user_hash      = "${var.dex_static_user_hash}"
+    dex_static_user_name      = "${var.dex_static_user_name}"
+    dex_static_user_id        = "${var.dex_static_user_id}"
+  }
+}
+
+resource "helm_release" "dex" {
+    name        = "dex"
+    chart       = "legion_github/dex"
+    version     = "${var.legion_infra_version}"
+    namespace   = "kube-system"
+    repository  = "${data.helm_repository.legion.metadata.0.name}"
+
+    values = [
+      "${data.template_file.dex_values.rendered}"
+    ]
+}
+
+# Oauth2 proxy
+data "template_file" "oauth2-proxy_values" {
+  template = "${file("${path.module}/templates/oauth2-proxy.yaml")}"
+  vars = {
+    cluster_name              = "${var.cluster_name}"
+    root_domain               = "${var.root_domain}"
+    dex_client_id             = "${var.dex_client_id}"
+    dex_client_secret         = "${var.dex_client_secret}"
+    dex_cookie_expire         = "${var.dex_cookie_expire}"
+  }
+}
+
+resource "helm_release" "oauth2-proxy" {
+    name        = "oauth2-proxy"
+    chart       = "legion_github/oauth2-proxy"
+    version     = "${var.legion_infra_version}"
+    namespace   = "kube-system"
+    repository  = "${data.helm_repository.legion.metadata.0.name}"
+
+    values = [
+      "${data.template_file.oauth2-proxy_values.rendered}"
+    ]
+}
+
+resource "helm_release" "oauth2-proxy" {
+    name        = "oauth2-proxy"
+    chart       = "legion_github/oauth2-proxy"
+    version     = "${var.legion_infra_version}"
+    namespace   = "kube-system"
+    repository  = "${data.helm_repository.legion.metadata.0.name}"
+
+    values = [
+      "${data.template_file.oauth2-proxy_values.rendered}"
+    ]
+}
+
 # Keycloak sso
 data "helm_repository" "codecentric" {
     name = "codecentric"
@@ -159,6 +249,32 @@ resource "helm_release" "keycloak" {
       "${data.template_file.keycloak_values.rendered}"
     ]
 }
+
+# # Keycloak gatekeeper proxy
+# data "helm_repository" "gatekeeper" {
+#     name = "gabibbo97"
+#     url  = "${var.gatekeeper_helm_repo}"
+# }
+
+# data "template_file" "gatekeeper_values" {
+#   template = "${file("${path.module}/templates/gatekeeper.yaml")}"
+#   vars = {
+#     cluster_name              = "${var.cluster_name}"
+#     root_domain               = "${var.root_domain}"
+#   }
+# }
+
+# resource "helm_release" "gatekeeper" {
+#     name        = "keycloak-gatekeeper"
+#     chart       = "gabibbo97/keycloak-gatekeeper"
+#     version     = "1.2.1"
+#     namespace   = "kube-system"
+#     repository  = "${data.helm_repository.gatekeeper.metadata.0.name}"
+
+#     values = [
+#       "${data.template_file.gatekeeper_values.rendered}"
+#     ]
+# }
 
 ########################################################
 # Prometheus monitoring
@@ -208,11 +324,6 @@ resource "null_resource" "prometheus_crd_alertmanager" {
   provisioner "local-exec" {
     command = "kubectl --context ${var.cluster_context} apply -f ${var.monitoring_prometheus_operator_crd_url}/${element(var.prometheus_crds, count.index)}.crd.yaml"
   }
-}
-
-data "helm_repository" "legion" {
-    name = "legion_github"
-    url  = "${var.legion_helm_repo}"
 }
 
 data "template_file" "monitoring_values" {

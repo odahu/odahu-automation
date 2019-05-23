@@ -102,6 +102,10 @@ variable "codecentric_helm_repo" {
   default = "https://codecentric.github.io/helm-charts"
   description = "Codecentric helm repo for Kyecloak"
 }
+variable "gatekeeper_helm_repo" {
+  default = "https://gabibbo97.github.io/charts/"
+  description = "Keycloak gatekeeper helm repo"
+}
 variable "dex_replicas" {
   default = 1
   description = "Number of dex replicas"

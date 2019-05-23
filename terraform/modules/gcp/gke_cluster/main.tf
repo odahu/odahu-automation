@@ -68,7 +68,7 @@ resource "google_container_cluster" "cluster" {
 
   addons_config {
     http_load_balancing {
-      disabled = false
+      disabled = true
     }
     kubernetes_dashboard {
       disabled = true
@@ -211,7 +211,6 @@ resource "google_compute_instance" "gke_bastion" {
 # data "google_compute_network" "vpc" {
 #   name = "${var.network}"
 # }
-
 # resource "google_dns_managed_zone" "local_zone" {
 #   name          = "${var.cluster_name}-local"
 #   dns_name      = "local-legion-dev.gcp.epm.kharlamov.biz."
