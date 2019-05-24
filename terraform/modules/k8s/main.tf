@@ -171,11 +171,12 @@ data "template_file" "dex_values" {
 }
 
 resource "helm_release" "dex" {
-    name        = "dex"
-    chart       = "legion_github/dex"
-    version     = "${var.legion_infra_version}"
-    namespace   = "kube-system"
-    repository  = "${data.helm_repository.legion.metadata.0.name}"
+    name            = "dex"
+    chart           = "legion_github/dex"
+    version         = "${var.legion_infra_version}"
+    namespace       = "kube-system"
+    repository      = "${data.helm_repository.legion.metadata.0.name}"
+    recreate_pods   = "true"
 
     values = [
       "${data.template_file.dex_values.rendered}"
@@ -195,23 +196,12 @@ data "template_file" "oauth2-proxy_values" {
 }
 
 resource "helm_release" "oauth2-proxy" {
-    name        = "oauth2-proxy"
-    chart       = "legion_github/oauth2-proxy"
-    version     = "${var.legion_infra_version}"
-    namespace   = "kube-system"
-    repository  = "${data.helm_repository.legion.metadata.0.name}"
-
-    values = [
-      "${data.template_file.oauth2-proxy_values.rendered}"
-    ]
-}
-
-resource "helm_release" "oauth2-proxy" {
-    name        = "oauth2-proxy"
-    chart       = "legion_github/oauth2-proxy"
-    version     = "${var.legion_infra_version}"
-    namespace   = "kube-system"
-    repository  = "${data.helm_repository.legion.metadata.0.name}"
+    name            = "oauth2-proxy"
+    chart           = "legion_github/oauth2-proxy"
+    version         = "${var.legion_infra_version}"
+    namespace       = "kube-system"
+    repository      = "${data.helm_repository.legion.metadata.0.name}"
+    recreate_pods   = "true"
 
     values = [
       "${data.template_file.oauth2-proxy_values.rendered}"

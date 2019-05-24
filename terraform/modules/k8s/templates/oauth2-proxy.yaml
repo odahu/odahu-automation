@@ -1,8 +1,8 @@
 config:
   provider: oidc
   redirect_url: "https://auth.${cluster_name}.${root_domain}/oauth2/callback"
-  # oidc_issuer_url: "https://dex.${cluster_name}.${root_domain}"
-  oidc_issuer_url: "https://keycloak.${cluster_name}.${root_domain}"
+  oidc_issuer_url: "https://dex.${cluster_name}.${root_domain}"
+  # oidc_issuer_url: "https://keycloak.${cluster_name}.${root_domain}"
   whitelist_domain: ".${cluster_name}.${root_domain}"
   cookie_domain: ".${cluster_name}.${root_domain}"
   cookie_secure: true
