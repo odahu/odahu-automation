@@ -194,6 +194,7 @@ resource "google_compute_instance" "gke_bastion" {
     ssh-keys = "${var.ssh_user}:${data.aws_s3_bucket_object.ssh_public_key.body}"
   }
 
+  # TODO: check on file with uncommented AllowAgentForwarding
   metadata_startup_script = "sed -i '/AllowAgentForwarding/s/^#//g' /etc/ssh/sshd_config && service sshd restart"
 
   // Necessary scopes for administering kubernetes.
@@ -213,7 +214,7 @@ resource "google_compute_instance" "gke_bastion" {
 # }
 # resource "google_dns_managed_zone" "local_zone" {
 #   name          = "${var.cluster_name}-local"
-#   dns_name      = "local-legion-dev.gcp.epm.kharlamov.biz."
+#   dns_name      = "local-${var.root_domain}."
 #   description   = "Local ${var.cluster_name} zone"
 #   visibility    = "private"
 #   private_visibility_config {

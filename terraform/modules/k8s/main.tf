@@ -77,14 +77,14 @@ resource "helm_release" "nginx-ingress" {
     chart       = "stable/nginx-ingress"
     namespace   = "kube-system"
     version     = "0.20.1"
-    set {
-        name    = "controller.service.loadBalancerSourceRanges"
-        value   = "{${join(",", var.allowed_ips)}}"
-    }
-    set {
-        name    = "defaultBackend.service.loadBalancerSourceRanges"
-        value   = "{${join(",", var.allowed_ips)}}"
-    }
+    # set {
+    #     name    = "controller.service.loadBalancerSourceRanges"
+    #     value   = "{${join(",", var.allowed_ips)}}"
+    # }
+    # set {
+    #     name    = "defaultBackend.service.loadBalancerSourceRanges"
+    #     value   = "{${join(",", var.allowed_ips)}}"
+    # }
     set {
       name      = "defaultBackend.service.type"
       value     = "LoadBalancer"
@@ -95,6 +95,7 @@ resource "helm_release" "nginx-ingress" {
     }
     depends_on  = ["google_compute_address.ingress_lb_address"]
 }
+# TODO: restrict access to ingress LB by adding var.allowed_ips and gcp nat ip
 
 ########################################################
 # Kubernetes Dashboard
@@ -151,37 +152,37 @@ resource "kubernetes_secret" "tls_dashboard" {
 # }
 
 
-data "template_file" "dex_values" {
-  template = "${file("${path.module}/templates/dex.yaml")}"
-  vars = {
-    cluster_name              = "${var.cluster_name}"
-    root_domain               = "${var.root_domain}"
-    dex_replicas              = "${var.dex_replicas}"
-    dex_github_clientid       = "${var.dex_github_clientid}"
-    dex_github_clientSecret   = "${var.dex_github_clientSecret}"
-    github_org_name           = "${var.github_org_name}"
-    dex_client_id             = "${var.dex_client_id}"
-    dex_client_secret         = "${var.dex_client_secret}"
-    dex_static_user_email     = "${var.dex_static_user_email}"
-    dex_static_user_pass      = "${var.dex_static_user_pass}"
-    dex_static_user_hash      = "${var.dex_static_user_hash}"
-    dex_static_user_name      = "${var.dex_static_user_name}"
-    dex_static_user_id        = "${var.dex_static_user_id}"
-  }
-}
+# data "template_file" "dex_values" {
+#   template = "${file("${path.module}/templates/dex.yaml")}"
+#   vars = {
+#     cluster_name              = "${var.cluster_name}"
+#     root_domain               = "${var.root_domain}"
+#     dex_replicas              = "${var.dex_replicas}"
+#     dex_github_clientid       = "${var.dex_github_clientid}"
+#     dex_github_clientSecret   = "${var.dex_github_clientSecret}"
+#     github_org_name           = "${var.github_org_name}"
+#     dex_client_id             = "${var.dex_client_id}"
+#     dex_client_secret         = "${var.dex_client_secret}"
+#     dex_static_user_email     = "${var.dex_static_user_email}"
+#     dex_static_user_pass      = "${var.dex_static_user_pass}"
+#     dex_static_user_hash      = "${var.dex_static_user_hash}"
+#     dex_static_user_name      = "${var.dex_static_user_name}"
+#     dex_static_user_id        = "${var.dex_static_user_id}"
+#   }
+# }
 
-resource "helm_release" "dex" {
-    name            = "dex"
-    chart           = "legion_github/dex"
-    version         = "${var.legion_infra_version}"
-    namespace       = "kube-system"
-    repository      = "${data.helm_repository.legion.metadata.0.name}"
-    recreate_pods   = "true"
+# resource "helm_release" "dex" {
+#     name            = "dex"
+#     chart           = "legion_github/dex"
+#     version         = "${var.legion_infra_version}"
+#     namespace       = "kube-system"
+#     repository      = "${data.helm_repository.legion.metadata.0.name}"
+#     recreate_pods   = "true"
 
-    values = [
-      "${data.template_file.dex_values.rendered}"
-    ]
-}
+#     values = [
+#       "${data.template_file.dex_values.rendered}"
+#     ]
+# }
 
 # Oauth2 proxy
 data "template_file" "oauth2-proxy_values" {
@@ -189,8 +190,8 @@ data "template_file" "oauth2-proxy_values" {
   vars = {
     cluster_name              = "${var.cluster_name}"
     root_domain               = "${var.root_domain}"
-    dex_client_id             = "${var.dex_client_id}"
-    dex_client_secret         = "${var.dex_client_secret}"
+    keycloak_client_secret    = "${var.keycloak_client_secret}"
+    keycloak_client_id        = "${var.keycloak_client_id}"
     dex_cookie_expire         = "${var.dex_cookie_expire}"
   }
 }

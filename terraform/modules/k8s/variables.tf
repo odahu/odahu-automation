@@ -96,7 +96,7 @@ variable "grafana_storage_class" {
 }
 
 ##################
-# Dex auth
+# Auth setup
 ##################
 variable "codecentric_helm_repo" {
   default = "https://codecentric.github.io/helm-charts"
@@ -144,10 +144,6 @@ variable "dex_cookie_expire" {
   default = "3600"
   description = "Dex oauth2 cookie expiration"
 }
-
-##################
-# Keycloak
-##################
 variable "keycloak_admin_user" {
   description = "Keycloak admin user"
 }
@@ -165,4 +161,10 @@ variable "keycloak_pg_user" {
 }
 variable "keycloak_pg_pass" {
   description = "Keycloak postgres pass"
+}
+variable "keycloak_client_secret" {
+  description = "keycloak default client Secret"
+}
+variable "keycloak_client_id" {
+  description = "keycloak default client Secret"
 }
