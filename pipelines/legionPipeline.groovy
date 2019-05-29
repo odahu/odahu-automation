@@ -37,6 +37,29 @@ def createCluster() {
     }
 }
 
+def createGCPCluster() {
+    withCredentials([
+    file(credentialsId: "${env.gcpCredential}", variable: 'gcp-auth')]) {
+        withCredentials([
+        file(credentialsId: "${env.cluster_name}-gcp-secrets", variable: 'secrets')]) {
+            withAWS(credentials: 'kops') {
+                wrap([$class: 'AnsiColorBuildWrapper', colorMapName: "xterm"]) {
+                    docker.image("${env.param_docker_repo}/k8s-terraform:${env.param_legion_infra_version}").inside("-e GOOGLE_CREDENTIALS=${gcp-auth}") {
+                        stage('Create cluster') {
+                            sh """
+                            gcloud auth activate-service-account --key-file=${gcp-auth} --project=${env.param_gcp_project}
+                            cd ${terraformHome}/envs/${env.cluster_name}/gke_cluster/ && \
+                            terraform plan --var-file=${secrets} && \
+                            terraform apply -auto-approve --var-file=${secrets} 
+                            """
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
 def terminateCluster() {
     withCredentials([
     file(credentialsId: "vault-${env.param_profile}", variable: 'vault')]) {

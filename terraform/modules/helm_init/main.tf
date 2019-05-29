@@ -6,6 +6,12 @@ provider "kubernetes" {
 ##############
 # HELM Init
 ##############
+# Configure kubectl
+resource "null_resource" "kubectl_config" {
+  provisioner "local-exec" {
+    command = "sleep 10 && gcloud container clusters get-credentials ${var.cluster_name} --zone ${var.zone} --project ${var.project_id}"
+  }
+}
 
 resource "kubernetes_service_account" "tiller" {
   metadata {

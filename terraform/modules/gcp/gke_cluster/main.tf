@@ -88,10 +88,9 @@ resource "google_container_cluster" "cluster" {
 }
 
 # Configure kubectl
-# TODO add startup timeout
 # resource "null_resource" "kubectl_config" {
 #   provisioner "local-exec" {
-#     command = "gcloud container clusters get-credentials ${var.cluster_name} --zone ${var.zone} --project ${var.project_id}"
+#     command = "sleep 10 && gcloud container clusters get-credentials ${var.cluster_name} --zone ${var.zone} --project ${var.project_id}"
 #   }
 # }
 
@@ -145,7 +144,7 @@ resource "google_container_node_pool" "cluster_nodes" {
 ########################################################
 # SSH keys
 ########################################################
-# TODO: consider gcs as secrets storage. The problem is missed object body in terraform data resource
+# TODO: consider gcs as secrets storage. The problem is missed object body in terraform data resource as for now
 # data "google_storage_bucket_object" "ssh_public_key" {
 #   bucket   = "${var.secrets_storage}"
 #   name     = "${var.cluster_name}.pub"

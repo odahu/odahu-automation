@@ -116,6 +116,14 @@ pipeline {
                         }
                     }
                 }
+                stage("Build Terraform") {
+                    steps {
+                        script {
+                            legion.buildLegionImage('k8s-terraform', ".", "containers/terraform/Dockerfile")
+                            legion.uploadDockerImage('k8s-terraform')
+                        }
+                    }
+                }
                 stage('Build kube-fluentd') {
                     steps {
                         script {

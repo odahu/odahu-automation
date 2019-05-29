@@ -12,7 +12,6 @@ provider "helm" {
 
 provider "google" {
   version     = "~> 2.2"
-  # credentials = "${var.gcp_credentials}"
   region      = "${var.region}"
   zone        = "${var.zone}"
   project     = "${var.project_id}"
@@ -105,12 +104,6 @@ data "template_file" "legion_values" {
     model_resources_cpu     = "${var.model_resources_cpu}"
     model_resources_mem     = "${var.model_resources_mem}"
   }
-}
-
-# TODO: debug
-resource "local_file" "foo" {
-    content     = "${data.template_file.legion_values.rendered}"
-    filename = "/tmp/${var.cluster_name}-legion-values.yaml"
 }
 
 resource "helm_release" "legion_crds" {

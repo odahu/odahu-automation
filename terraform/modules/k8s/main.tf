@@ -137,52 +137,52 @@ resource "kubernetes_secret" "tls_dashboard" {
 
 # Dex
 # TODO: set dex dns automtically (now should be updated manually)
-# resource "google_compute_address" "dex_lb_address" {
-#   name              = "${var.cluster_name}-dex"
-#   region            = "${var.region}"
-#   address_type      = "EXTERNAL"
-# }
+resource "google_compute_address" "dex_lb_address" {
+  name              = "${var.cluster_name}-dex"
+  region            = "${var.region}"
+  address_type      = "EXTERNAL"
+}
 
-# resource "google_dns_record_set" "dex_lb" {
-#   name          = "dex.${var.cluster_name}.${var.root_domain}."
-#   type          = "A"
-#   ttl           = 300
-#   managed_zone  = "${var.dns_zone_name}"
-#   rrdatas       = ["${google_compute_address.dex_lb_address.address}"]
-# }
+resource "google_dns_record_set" "dex_lb" {
+  name          = "dex.${var.cluster_name}.${var.root_domain}."
+  type          = "A"
+  ttl           = 300
+  managed_zone  = "${var.dns_zone_name}"
+  rrdatas       = ["${google_compute_address.dex_lb_address.address}"]
+}
 
 
-# data "template_file" "dex_values" {
-#   template = "${file("${path.module}/templates/dex.yaml")}"
-#   vars = {
-#     cluster_name              = "${var.cluster_name}"
-#     root_domain               = "${var.root_domain}"
-#     dex_replicas              = "${var.dex_replicas}"
-#     dex_github_clientid       = "${var.dex_github_clientid}"
-#     dex_github_clientSecret   = "${var.dex_github_clientSecret}"
-#     github_org_name           = "${var.github_org_name}"
-#     dex_client_id             = "${var.dex_client_id}"
-#     dex_client_secret         = "${var.dex_client_secret}"
-#     dex_static_user_email     = "${var.dex_static_user_email}"
-#     dex_static_user_pass      = "${var.dex_static_user_pass}"
-#     dex_static_user_hash      = "${var.dex_static_user_hash}"
-#     dex_static_user_name      = "${var.dex_static_user_name}"
-#     dex_static_user_id        = "${var.dex_static_user_id}"
-#   }
-# }
+data "template_file" "dex_values" {
+  template = "${file("${path.module}/templates/dex.yaml")}"
+  vars = {
+    cluster_name              = "${var.cluster_name}"
+    root_domain               = "${var.root_domain}"
+    dex_replicas              = "${var.dex_replicas}"
+    dex_github_clientid       = "${var.dex_github_clientid}"
+    dex_github_clientSecret   = "${var.dex_github_clientSecret}"
+    github_org_name           = "${var.github_org_name}"
+    dex_client_id             = "${var.dex_client_id}"
+    dex_client_secret         = "${var.dex_client_secret}"
+    dex_static_user_email     = "${var.dex_static_user_email}"
+    dex_static_user_pass      = "${var.dex_static_user_pass}"
+    dex_static_user_hash      = "${var.dex_static_user_hash}"
+    dex_static_user_name      = "${var.dex_static_user_name}"
+    dex_static_user_id        = "${var.dex_static_user_id}"
+  }
+}
 
-# resource "helm_release" "dex" {
-#     name            = "dex"
-#     chart           = "legion_github/dex"
-#     version         = "${var.legion_infra_version}"
-#     namespace       = "kube-system"
-#     repository      = "${data.helm_repository.legion.metadata.0.name}"
-#     recreate_pods   = "true"
+resource "helm_release" "dex" {
+    name            = "dex"
+    chart           = "legion_github/dex"
+    version         = "${var.legion_infra_version}"
+    namespace       = "kube-system"
+    repository      = "${data.helm_repository.legion.metadata.0.name}"
+    recreate_pods   = "true"
 
-#     values = [
-#       "${data.template_file.dex_values.rendered}"
-#     ]
-# }
+    values = [
+      "${data.template_file.dex_values.rendered}"
+    ]
+}
 
 # Oauth2 proxy
 data "template_file" "oauth2-proxy_values" {
@@ -210,38 +210,38 @@ resource "helm_release" "oauth2-proxy" {
 }
 
 # Keycloak sso
-data "helm_repository" "codecentric" {
-    name = "codecentric"
-    url  = "${var.codecentric_helm_repo}"
-}
+# data "helm_repository" "codecentric" {
+#     name = "codecentric"
+#     url  = "${var.codecentric_helm_repo}"
+# }
 
-data "template_file" "keycloak_values" {
-  template = "${file("${path.module}/templates/keycloak.yaml")}"
-  vars = {
-    cluster_name              = "${var.cluster_name}"
-    root_domain               = "${var.root_domain}"
-    keycloak_admin_user       = "${var.keycloak_admin_user}"
-    keycloak_admin_pass       = "${var.keycloak_admin_pass}"
-    keycloak_db_user          = "${var.keycloak_db_user}"
-    keycloak_db_pass          = "${var.keycloak_db_pass}"
-    keycloak_pg_user          = "${var.keycloak_pg_user}"
-    keycloak_pg_pass          = "${var.keycloak_pg_pass}"
-  }
-}
+# data "template_file" "keycloak_values" {
+#   template = "${file("${path.module}/templates/keycloak.yaml")}"
+#   vars = {
+#     cluster_name              = "${var.cluster_name}"
+#     root_domain               = "${var.root_domain}"
+#     keycloak_admin_user       = "${var.keycloak_admin_user}"
+#     keycloak_admin_pass       = "${var.keycloak_admin_pass}"
+#     keycloak_db_user          = "${var.keycloak_db_user}"
+#     keycloak_db_pass          = "${var.keycloak_db_pass}"
+#     keycloak_pg_user          = "${var.keycloak_pg_user}"
+#     keycloak_pg_pass          = "${var.keycloak_pg_pass}"
+#   }
+# }
 
-resource "helm_release" "keycloak" {
-    name        = "keycloak"
-    chart       = "codecentric/keycloak"
-    version     = "4.14.0"
-    namespace   = "kube-system"
-    repository  = "${data.helm_repository.codecentric.metadata.0.name}"
+# resource "helm_release" "keycloak" {
+#     name        = "keycloak"
+#     chart       = "codecentric/keycloak"
+#     version     = "4.14.0"
+#     namespace   = "kube-system"
+#     repository  = "${data.helm_repository.codecentric.metadata.0.name}"
 
-    values = [
-      "${data.template_file.keycloak_values.rendered}"
-    ]
-}
+#     values = [
+#       "${data.template_file.keycloak_values.rendered}"
+#     ]
+# }
 
-# # Keycloak gatekeeper proxy
+# Keycloak gatekeeper proxy
 # data "helm_repository" "gatekeeper" {
 #     name = "gabibbo97"
 #     url  = "${var.gatekeeper_helm_repo}"
