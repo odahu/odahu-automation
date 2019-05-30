@@ -45,7 +45,7 @@ resource "google_container_cluster" "cluster" {
   }
 
   lifecycle {
-    ignore_changes  = ["node_count", "master_auth", "network"]
+    ignore_changes  = ["node_count", "network"]
   }
 
   private_cluster_config {
@@ -258,11 +258,18 @@ resource "google_dns_record_set" "gke_api" {
 # HELM Init
 ##############
 # Configure kube access
-resource "null_resource" "kubectl_config" {
+resource "null_resource" "gke_startup_check" {
   provisioner "local-exec" {
-    command     = "sleep 10 && gcloud container clusters get-credentials ${var.cluster_name} --zone ${var.zone} --project ${var.project_id}"
+    command     = "timeout 180 bash -c 'until curl -sk https://${google_container_cluster.cluster.endpoint}; do sleep 1; done' "
   }
   depends_on    = ["google_dns_record_set.gke_api"]
+}
+
+resource "null_resource" "kubectl_config" {
+  provisioner "local-exec" {
+    command     = "gcloud container clusters get-credentials ${var.cluster_name} --zone ${var.zone} --project ${var.project_id}"
+  }
+  depends_on    = ["null_resource.gke_startup_check"]
 }
 
 resource "kubernetes_service_account" "tiller" {
