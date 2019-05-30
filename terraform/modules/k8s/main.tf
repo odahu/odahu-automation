@@ -95,6 +95,11 @@ resource "helm_release" "nginx-ingress" {
     }
     depends_on  = ["google_compute_address.ingress_lb_address"]
 }
+# Whitelist Cluster NAT ip on the cluster ingress
+data "google_compute_address" "nat_gw_ip" {
+  name = "${var.cluster_name}-nat-gw-ip"
+}
+
 # TODO: restrict access to ingress LB by adding var.allowed_ips and gcp nat ip
 
 ########################################################

@@ -34,17 +34,23 @@ resource "aws_customer_gateway" "to_gcp" {
 }
 
 # Virtual Private gateway at AWS
-resource "aws_vpn_gateway" "vpn_gateway" {
-  vpc_id    = "${var.aws_vpc_id}"
-  tags = {
-    Name    = "${var.cluster_name}-gcp"
-    Project = "legion"
+# resource "aws_vpn_gateway" "vpn_gateway" {
+#   vpc_id    = "${var.aws_vpc_id}"
+#   tags = {
+#     Name    = "${var.cluster_name}-gcp"
+#     Project = "legion"
+#   }
+# }
+data "aws_vpn_gateway" "vpn_gateway" {
+  filter {
+    name   = "tag:Name"
+    values = ["${var.aws_private_gw_name}"]
   }
 }
 
 # VPN Connection at AWS
 resource "aws_vpn_connection" "to_gcp" {
-  vpn_gateway_id      = "${aws_vpn_gateway.vpn_gateway.id}"
+  vpn_gateway_id      = "${data.aws_vpn_gateway.vpn_gateway.id}"
   customer_gateway_id = "${aws_customer_gateway.to_gcp.id}"
   type                = "ipsec.1"
   static_routes_only  = true
@@ -62,8 +68,8 @@ resource "aws_vpn_connection_route" "gcp" {
 
 resource "aws_route" "gcp" {
   route_table_id         = "${var.aws_route_table_id}"
-  gateway_id             = "${aws_vpn_gateway.vpn_gateway.id}"
-  destination_cidr_block = "${var.gcp_cidr}"
+  gateway_id             = "${data.aws_vpn_gateway.vpn_gateway.id}"
+  destination_cidr_block    = "${var.gcp_cidr}"
 }
 
 # Allow inbound access to VPC resources from GCP CIDR
@@ -91,13 +97,13 @@ resource "aws_security_group_rule" "google_egress_vpn" {
 #############################
 
 resource "google_compute_vpn_gateway" "gcp" {
-  name    = "gcp-vpn"
+  name    = "${var.cluster_name}-gcp-vpn"
   network = "${var.gcp_network}"
   region  = "${var.region}"
 }
 
 resource "google_compute_forwarding_rule" "fr_esp" {
-  name        = "fr-esp"
+  name        = "${var.cluster_name}-fr-esp"
   region      = "${var.region}"
   ip_protocol = "ESP"
   ip_address  = "${google_compute_address.vpn_gateway_ip_address.address}"
@@ -105,7 +111,7 @@ resource "google_compute_forwarding_rule" "fr_esp" {
 }
 
 resource "google_compute_forwarding_rule" "fr_udp500" {
-  name        = "fr-udp500"
+  name        = "${var.cluster_name}-fr-udp500"
   region      = "${var.region}"
   ip_protocol = "UDP"
   port_range  = "500-500"
@@ -114,7 +120,7 @@ resource "google_compute_forwarding_rule" "fr_udp500" {
 }
 
 resource "google_compute_forwarding_rule" "fr_udp4500" {
-  name        = "fr-udp4500"
+  name        = "${var.cluster_name}-fr-udp4500"
   region      = "${var.region}"
   ip_protocol = "UDP"
   port_range  = "4500-4500"
@@ -123,7 +129,7 @@ resource "google_compute_forwarding_rule" "fr_udp4500" {
 }
 
 resource "google_compute_vpn_tunnel" "tunnel1" {
-  name          = "gcp-tunnel-1"
+  name          = "${var.cluster_name}-gcp-tunnel-1"
   ike_version   = "1"
   region        = "${var.region}"
   peer_ip       = "${aws_vpn_connection.to_gcp.tunnel1_address}"
@@ -139,7 +145,7 @@ resource "google_compute_vpn_tunnel" "tunnel1" {
 }
 
 resource "google_compute_route" "gcp_route1" {
-  name       = "gcp-route1"
+  name       = "${var.cluster_name}-gcp-route1"
   network    = "${var.gcp_network}"
   dest_range = "${var.aws_cidr}"
   priority   = 1000
@@ -148,7 +154,7 @@ resource "google_compute_route" "gcp_route1" {
 }
 
 resource "google_compute_vpn_tunnel" "tunnel2" {
-  name                    = "gcp-tunnel-2"
+  name                    = "${var.cluster_name}-gcp-tunnel-2"
   ike_version             = "1"
   region                  = "${var.region}"
   peer_ip                 = "${aws_vpn_connection.to_gcp.tunnel2_address}"
@@ -164,7 +170,7 @@ resource "google_compute_vpn_tunnel" "tunnel2" {
 }
 
 resource "google_compute_route" "gcp_route2" {
-  name       = "gcp-route2"
+  name       = "${var.cluster_name}-gcp-route2"
   network    = "${var.gcp_network}"
   dest_range = "${var.aws_cidr}"
   priority   = 1000
@@ -173,7 +179,7 @@ resource "google_compute_route" "gcp_route2" {
 }
 
 resource "google_compute_firewall" "aws_vpn" {
-  name          = "aws"
+  name          = "${var.cluster_name}-to-aws"
   network       = "${var.gcp_network}"
   source_ranges = ["${var.aws_cidr}"]
 

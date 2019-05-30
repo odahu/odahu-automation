@@ -11,6 +11,11 @@ provider "aws" {
   profile                   = "${var.aws_profile}"
 }
 
+provider "kubernetes" {
+  config_context_auth_info  = "${var.config_context_auth_info}"
+  config_context_cluster    = "${var.config_context_cluster}"
+}
+
 ########################################################
 # GKE Cluster
 ########################################################
@@ -54,6 +59,10 @@ resource "google_container_cluster" "cluster" {
       {
         cidr_block    = "${var.allowed_ips}"
         display_name  = "default-access"
+      },
+      {
+        cidr_block    = "${var.agent_cidr}"
+        display_name  = "agent-access"
       },
     ]
   }
@@ -164,7 +173,7 @@ resource "google_compute_project_metadata_item" "ssh_public_keys" {
 # Bastion Host
 ########################################################
 resource "google_compute_instance" "gke_bastion" {
-  name                      = "${var.bastion_hostname}"
+  name                      = "${var.cluster_name}-${var.bastion_hostname}"
   machine_type              = "${var.bastion_machine_type}"
   zone                      = "${var.zone}"
   project                   = "${var.project_id}"
@@ -242,4 +251,42 @@ resource "google_dns_record_set" "gke_api" {
   ttl           = 300
   managed_zone  = "${var.dns_zone_name}"
   rrdatas       = ["${google_container_cluster.cluster.endpoint}"]
+}
+
+
+##############
+# HELM Init
+##############
+# Configure kube access
+resource "null_resource" "kubectl_config" {
+  provisioner "local-exec" {
+    command     = "sleep 10 && gcloud container clusters get-credentials ${var.cluster_name} --zone ${var.zone} --project ${var.project_id}"
+  }
+  depends_on    = ["google_dns_record_set.gke_api"]
+}
+
+resource "kubernetes_service_account" "tiller" {
+  metadata {
+    name        = "tiller"
+    namespace   = "kube-system"
+  }
+  depends_on    = ["null_resource.kubectl_config"]
+}
+
+resource "kubernetes_cluster_role_binding" "tiller" {
+  metadata {
+        name    = "tiller"
+  }
+  subject {
+    api_group   = "rbac.authorization.k8s.io"
+    kind        = "User"
+    name        = "system:serviceaccount:kube-system:tiller"
+  }
+
+  role_ref {
+    api_group   = "rbac.authorization.k8s.io"
+    kind        = "ClusterRole"
+    name        = "cluster-admin"
+  }
+  depends_on    = ["kubernetes_service_account.tiller"]
 }

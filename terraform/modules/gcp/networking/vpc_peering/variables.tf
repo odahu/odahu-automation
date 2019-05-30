@@ -32,6 +32,10 @@ variable "gcp_cidr" {
 variable "aws_sg" {
   description = "AWS SG id for gcp access"
 }
+variable "aws_private_gw_name" {
+  default     = "legion-gcp-gw"
+  description = "AWS SG id for gcp access"
+}
 variable "aws_cidr" {
   description = "AWS network CIDR"
 }

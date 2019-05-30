@@ -6,10 +6,10 @@ provider "kubernetes" {
 ##############
 # HELM Init
 ##############
-# Configure kubectl
+# Configure kube access
 resource "null_resource" "kubectl_config" {
   provisioner "local-exec" {
-    command = "sleep 10 && gcloud container clusters get-credentials ${var.cluster_name} --zone ${var.zone} --project ${var.project_id}"
+    command     = "sleep 10 && gcloud container clusters get-credentials ${var.cluster_name} --zone ${var.zone} --project ${var.project_id}"
   }
 }
 
