@@ -14,8 +14,9 @@ def ansibleDebugRunCheck(String debugRun) {
 }
 
 def getWanIp() {
-    agentWanIp = sh returnStdout: true, script: 'curl http://checkip.amazonaws.com/'
-    println("Running on: " agentWanIp)
+    Globals.agentWanIp = sh returnStdout: true, script: 'curl -s http://checkip.amazonaws.com/'
+    print("Running on: " + Globals.agentWanIp)
+    env.agentWanIp = Globals.agentWanIp
 }
 
 def createCluster() {
@@ -56,7 +57,7 @@ def createGCPCluster() {
                             gcloud auth activate-service-account --key-file=${gcp-auth} --project=${env.param_gcp_project}
                             cd ${terraformHome}/envs/${env.cluster_name}/gke_cluster/ && \
                             terraform plan --var-file=${secrets} && \
-                            terraform apply -auto-approve --var-file=${secrets} -var="agent_cidr=${agentWanIp}"
+                            terraform apply -auto-approve --var-file=${secrets} -var="agent_cidr=${env.agentWanIp}"
                             gcloud container clusters update ${env.cluster_name} --no-enable-master-authorized-networks
 
                             # Setup Legion K8S dependencies
