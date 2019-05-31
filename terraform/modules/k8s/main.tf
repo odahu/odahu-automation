@@ -28,6 +28,34 @@ data "helm_repository" "legion" {
     url  = "${var.legion_helm_repo}"
 }
 
+##############
+# HELM Init
+##############
+resource "kubernetes_service_account" "tiller" {
+  metadata {
+    name        = "tiller"
+    namespace   = "kube-system"
+  }
+}
+
+resource "kubernetes_cluster_role_binding" "tiller" {
+  metadata {
+        name    = "tiller"
+  }
+  subject {
+    api_group   = "rbac.authorization.k8s.io"
+    kind        = "User"
+    name        = "system:serviceaccount:kube-system:tiller"
+  }
+
+  role_ref {
+    api_group   = "rbac.authorization.k8s.io"
+    kind        = "ClusterRole"
+    name        = "cluster-admin"
+  }
+  depends_on    = ["kubernetes_service_account.tiller"]
+}
+
 ########################################################
 # K8S Cluster Setup
 ########################################################
@@ -93,10 +121,10 @@ resource "helm_release" "nginx-ingress" {
       name      = "controller.service.loadBalancerIP"
       value     = "${google_compute_address.ingress_lb_address.address}"
     }
-    depends_on  = ["google_compute_address.ingress_lb_address"]
+    depends_on  = ["google_compute_address.ingress_lb_address", "kubernetes_service_account.tiller"]
 }
 
-# Whitelist Cluster NAT ip on the cluster ingress
+# Whitelist allowed_ips and cluster NAT ip on the cluster ingress
 data "google_compute_address" "nat_gw_ip" {
   name = "${var.cluster_name}-nat-gw-ip"
 }
@@ -123,6 +151,7 @@ resource "helm_release" "kubernetes-dashboard" {
     values = [
       "${data.template_file.dashboard_values.rendered}"
     ]
+    depends_on  = ["kubernetes_service_account.tiller"]
 }
 
 resource "kubernetes_secret" "tls_dashboard" {
@@ -189,6 +218,8 @@ resource "helm_release" "dex" {
     values = [
       "${data.template_file.dex_values.rendered}"
     ]
+
+    depends_on  = ["kubernetes_service_account.tiller"]
 }
 
 # Oauth2 proxy
@@ -215,6 +246,8 @@ resource "helm_release" "oauth2-proxy" {
     values = [
       "${data.template_file.oauth2-proxy_values.rendered}"
     ]
+
+    depends_on  = ["kubernetes_service_account.tiller"]
 }
 
 # Keycloak sso
@@ -350,4 +383,6 @@ resource "helm_release" "monitoring" {
     values = [
       "${data.template_file.monitoring_values.rendered}"
     ]
+
+    depends_on  = ["kubernetes_service_account.tiller"]
 }

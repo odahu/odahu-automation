@@ -9,7 +9,6 @@ pipeline {
         param_docker_repo = "${params.DockerRepo}"
         param_helm_repo = "${params.HelmRepo}"
         param_gcp_project = "${params.GcpProject}"
-        param_gcp_zone = "${params.GcpZone}"
         //Job parameters
         gcpCredential = "gcp-epmd-legn-legion-automation"
         sharedLibPath = "pipelines/legionPipeline.groovy"
@@ -30,10 +29,10 @@ pipeline {
             }
         }
 
-        stage('Create Kubernetes Cluster') {
+        stage('Deploy Legion') {
             steps {
                 script {
-                    legion.createGCPCluster()
+                    legion.DeployLegionGCP()
                 }
             }
         }

@@ -14,9 +14,9 @@ def ansibleDebugRunCheck(String debugRun) {
 }
 
 def getWanIp() {
-    Globals.agentWanIp = sh returnStdout: true, script: 'curl -s http://checkip.amazonaws.com/'
-    print("Running on: " + Globals.agentWanIp)
-    env.agentWanIp = Globals.agentWanIp
+    agentWanIp = sh returnStdout: true, script: "curl -s http://checkip.amazonaws.com/ |tr -d '\n'"
+    print("Running on: " + agentWanIp)
+    env.agentWanIp = agentWanIp
 }
 
 def createCluster() {
@@ -45,26 +45,29 @@ def createCluster() {
 
 def createGCPCluster() {
     withCredentials([
-    file(credentialsId: "${env.gcpCredential}", variable: 'gcp-auth')]) {
+    file(credentialsId: "${env.gcpCredential}", variable: 'gcpCredential')]) {
         withCredentials([
-        file(credentialsId: "${env.cluster_name}-gcp-secrets", variable: 'secrets')]) {
+        file(credentialsId: "${env.param_cluster_name}-gcp-secrets", variable: 'secrets')]) {
             withAWS(credentials: 'kops') {
                 wrap([$class: 'AnsiColorBuildWrapper', colorMapName: "xterm"]) {
-                    docker.image("${env.param_docker_repo}/k8s-terraform:${env.param_legion_infra_version}").inside("-e GOOGLE_CREDENTIALS=${gcp-auth}") {
+                    docker.image("${env.param_docker_repo}/k8s-terraform:${env.param_legion_infra_version}").inside("-e GOOGLE_CREDENTIALS=${gcpCredential} -u root") {
                         stage('Create cluster') {
                             sh """
+                            # TODO: update terraform path
                             # Create GCP resources
-                            gcloud auth activate-service-account --key-file=${gcp-auth} --project=${env.param_gcp_project}
-                            cd ${terraformHome}/envs/${env.cluster_name}/gke_cluster/ && \
-                            terraform plan --var-file=${secrets} && \
-                            terraform apply -auto-approve --var-file=${secrets} -var="agent_cidr=${env.agentWanIp}"
-                            gcloud container clusters update ${env.cluster_name} --no-enable-master-authorized-networks
+                            gcloud auth activate-service-account --key-file=${gcpCredential} --project=${env.param_gcp_project} && \
+                            cd ${terraformHome}/envs/${env.param_cluster_name}/gke_create/ && \
+                            terraform init && \
+                            terraform plan --var-file=${secrets} -var="agent_cidr=${env.agentWanIp}/32"
+                            terraform apply -auto-approve --var-file=${secrets} -var="agent_cidr=${env.agentWanIp}/32"
+
+                            gcloud container clusters get-credentials ${env.param_cluster_name} --zone ${env.param_gcp_zone} --project=${env.param_gcp_project}
 
                             # Setup Legion K8S dependencies
-                            cd ${terraformHome}/envs/${env.cluster_name}/k8s_setup/ && \
-                            terraform plan --var-file=${secrets} && \
-                            terraform apply -auto-approve --var-file=${secrets}
-                            gcloud container clusters update ${env.cluster_name} --no-enable-master-authorized-networks
+                            # cd ${terraformHome}/envs/${env.param_cluster_name}/k8s_setup/ && \
+                            # terraform plan --var-file=${secrets} && \
+                            # terraform apply -auto-approve --var-file=${secrets}
+                            # gcloud container clusters update ${env.param_cluster_name} --no-enable-master-authorized-networks
                             """
                         }
                     }

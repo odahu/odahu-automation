@@ -11,11 +11,6 @@ provider "aws" {
   profile                   = "${var.aws_profile}"
 }
 
-provider "kubernetes" {
-  config_context_auth_info  = "${var.config_context_auth_info}"
-  config_context_cluster    = "${var.config_context_cluster}"
-}
-
 ########################################################
 # GKE Cluster
 ########################################################
@@ -63,7 +58,7 @@ resource "google_container_cluster" "cluster" {
       {
         cidr_block    = "${var.agent_cidr}"
         display_name  = "agent-access"
-      },
+      }
     ]
   }
   ip_allocation_policy {
@@ -146,7 +141,7 @@ resource "google_container_node_pool" "cluster_nodes" {
 ########################################################
 # SSH keys
 ########################################################
-# TODO: consider gcs as secrets storage. The problem is missed object body in terraform data resource as for now
+# TODO: consider gcs as secrets storage. The problem is missed object body in terraform data resource
 # data "google_storage_bucket_object" "ssh_public_key" {
 #   bucket   = "${var.secrets_storage}"
 #   name     = "${var.cluster_name}.pub"
@@ -166,7 +161,7 @@ resource "google_compute_project_metadata_item" "ssh_public_keys" {
 # Bastion Host
 ########################################################
 resource "google_compute_instance" "gke_bastion" {
-  name                      = "${var.cluster_name}-${var.bastion_hostname}"
+  name                      = "${var.bastion_hostname}"
   machine_type              = "${var.bastion_machine_type}"
   zone                      = "${var.zone}"
   project                   = "${var.project_id}"
@@ -245,40 +240,11 @@ resource "google_dns_record_set" "gke_api" {
   rrdatas       = ["${google_container_cluster.cluster.endpoint}"]
 }
 
-
-##############
-# HELM Init
-##############
-# Configure kube access
+# Wait for cluster startup
 resource "null_resource" "kubectl_config" {
+  triggers { build_number = "${timestamp()}" }
   provisioner "local-exec" {
-    command     = "timeout 600 bash -c 'until curl -sk https://${google_container_cluster.cluster.endpoint}; do sleep 20; done' && gcloud container clusters get-credentials ${var.cluster_name} --zone ${var.zone} --project ${var.project_id}"
+    command     = "timeout 600 bash -c 'until curl -sk https://${google_container_cluster.cluster.endpoint}; do sleep 20; done'"
   }
   depends_on    = ["google_container_node_pool.cluster_nodes"]
-}
-
-resource "kubernetes_service_account" "tiller" {
-  metadata {
-    name        = "tiller"
-    namespace   = "kube-system"
-  }
-  depends_on    = ["null_resource.kubectl_config"]
-}
-
-resource "kubernetes_cluster_role_binding" "tiller" {
-  metadata {
-        name    = "tiller"
-  }
-  subject {
-    api_group   = "rbac.authorization.k8s.io"
-    kind        = "User"
-    name        = "system:serviceaccount:kube-system:tiller"
-  }
-
-  role_ref {
-    api_group   = "rbac.authorization.k8s.io"
-    kind        = "ClusterRole"
-    name        = "cluster-admin"
-  }
-  depends_on    = ["kubernetes_service_account.tiller"]
 }
