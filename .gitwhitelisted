@@ -38,6 +38,8 @@ username : unicode
 # Allow templated entries
 username: ${
 password: ${
+username: "${
+password: "${
 # Allow internal CIDRs
 10.0.*
 10.1.*
