@@ -8,7 +8,7 @@ pipeline {
         param_legion_infra_version = "${params.LegionInfraVersion}"
         param_docker_repo = "${params.DockerRepo}"
         param_helm_repo = "${params.HelmRepo}"
-        param_gcp_project = "${param.gcpProject}"
+        param_gcp_project = "${param.GcpProject}"
         //Job parameters
         gcpCredential = "gcp-epmd-legn-legion-automation"
         sharedLibPath = "pipelines/legionPipeline.groovy"
@@ -40,7 +40,7 @@ pipeline {
     post {
         always {
             script {
-                legion = load "${sharedLibPath}"
+                legion = load "${env.sharedLibPath}"
                 legion.notifyBuild(currentBuild.currentResult)
             }
         }

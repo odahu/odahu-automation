@@ -174,6 +174,7 @@ data "template_file" "dex_values" {
     dex_static_user_hash      = "${var.dex_static_user_hash}"
     dex_static_user_name      = "${var.dex_static_user_name}"
     dex_static_user_id        = "${var.dex_static_user_id}"
+    dex_external_ip           = "${google_compute_address.dex_lb_address.address}"
   }
 }
 

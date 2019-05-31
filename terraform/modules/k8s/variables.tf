@@ -113,10 +113,10 @@ variable "dex_replicas" {
 variable "github_org_name" {
   description = "Github Organization for dex authentication"
 }
-variable "github_clientid" {
+variable "dex_github_clientid" {
   description = "Github Organization clientID"
 }
-variable "github_clientSecret" {
+variable "dex_github_clientSecret" {
   description = "Github Organization client Secret"
 }
 variable "dex_client_secret" {

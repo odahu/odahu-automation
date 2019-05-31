@@ -2,6 +2,9 @@ replicaCount: "${dex_replicas}"
 
 issuer: "https://dex.${cluster_name}.${root_domain}"
 
+service:
+  externalIPs: "${dex_external_ip}"
+
 connectors:
   - type: github
     id: github
