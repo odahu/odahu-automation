@@ -95,6 +95,7 @@ resource "helm_release" "nginx-ingress" {
     }
     depends_on  = ["google_compute_address.ingress_lb_address"]
 }
+
 # Whitelist Cluster NAT ip on the cluster ingress
 data "google_compute_address" "nat_gw_ip" {
   name = "${var.cluster_name}-nat-gw-ip"
@@ -195,8 +196,9 @@ data "template_file" "oauth2-proxy_values" {
   vars = {
     cluster_name              = "${var.cluster_name}"
     root_domain               = "${var.root_domain}"
-    keycloak_client_secret    = "${var.keycloak_client_secret}"
-    keycloak_client_id        = "${var.keycloak_client_id}"
+    github_org_name           = "${var.github_org_name}"
+    client_secret             = "${var.dex_client_secret}"
+    client_id                 = "${var.dex_client_id}"
     dex_cookie_expire         = "${var.dex_cookie_expire}"
   }
 }

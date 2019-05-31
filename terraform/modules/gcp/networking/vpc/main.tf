@@ -41,6 +41,5 @@ resource "google_compute_router_nat" "nat" {
   region                             = "${var.region}"
   nat_ip_allocate_option             = "MANUAL_ONLY"
   nat_ips                            = ["${google_compute_address.nat_gw_ip.self_link}"]
-  # nat_ips     = "35.229.51.209"
   source_subnetwork_ip_ranges_to_nat = "ALL_SUBNETWORKS_ALL_PRIMARY_IP_RANGES"
 }

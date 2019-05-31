@@ -96,13 +96,6 @@ resource "google_container_cluster" "cluster" {
   }
 }
 
-# Configure kubectl
-# resource "null_resource" "kubectl_config" {
-#   provisioner "local-exec" {
-#     command = "sleep 10 && gcloud container clusters get-credentials ${var.cluster_name} --zone ${var.zone} --project ${var.project_id}"
-#   }
-# }
-
 ########################################################
 # Node Pool
 ########################################################
@@ -202,7 +195,6 @@ resource "google_compute_instance" "gke_bastion" {
     ssh-keys = "${var.ssh_user}:${data.aws_s3_bucket_object.ssh_public_key.body}"
   }
 
-  # TODO: check on file with uncommented AllowAgentForwarding
   metadata_startup_script = "sed -i '/AllowAgentForwarding/s/^#//g' /etc/ssh/sshd_config && service sshd restart"
 
   // Necessary scopes for administering kubernetes.
@@ -258,18 +250,11 @@ resource "google_dns_record_set" "gke_api" {
 # HELM Init
 ##############
 # Configure kube access
-resource "null_resource" "gke_startup_check" {
-  provisioner "local-exec" {
-    command     = "timeout 180 bash -c 'until curl -sk https://${google_container_cluster.cluster.endpoint}; do sleep 1; done' "
-  }
-  depends_on    = ["google_dns_record_set.gke_api"]
-}
-
 resource "null_resource" "kubectl_config" {
   provisioner "local-exec" {
-    command     = "gcloud container clusters get-credentials ${var.cluster_name} --zone ${var.zone} --project ${var.project_id}"
+    command     = "timeout 600 bash -c 'until curl -sk https://${google_container_cluster.cluster.endpoint}; do sleep 20; done' && gcloud container clusters get-credentials ${var.cluster_name} --zone ${var.zone} --project ${var.project_id}"
   }
-  depends_on    = ["null_resource.gke_startup_check"]
+  depends_on    = ["google_container_node_pool.cluster_nodes"]
 }
 
 resource "kubernetes_service_account" "tiller" {
