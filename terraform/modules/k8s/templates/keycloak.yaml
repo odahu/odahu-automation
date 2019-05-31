@@ -1,6 +1,6 @@
 keycloak:
-  username: admin
-  password: "kcadmpass!"
+  username: ${keycloak_admin_user}
+  password: ${keycloak_admin_pass}
 
   ingress:
     enabled: true
