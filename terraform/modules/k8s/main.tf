@@ -23,11 +23,6 @@ provider "aws" {
   profile                   = "${var.aws_profile}"
 }
 
-data "helm_repository" "legion" {
-    name = "legion_github"
-    url  = "${var.legion_helm_repo}"
-}
-
 ##############
 # HELM Init
 ##############
@@ -54,6 +49,11 @@ resource "kubernetes_cluster_role_binding" "tiller" {
     name        = "cluster-admin"
   }
   depends_on    = ["kubernetes_service_account.tiller"]
+}
+
+data "helm_repository" "legion" {
+    name = "legion_github"
+    url  = "${var.legion_helm_repo}"
 }
 
 ########################################################

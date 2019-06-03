@@ -53,7 +53,6 @@ def createGCPCluster() {
                     docker.image("${env.param_docker_repo}/k8s-terraform:${env.param_legion_infra_version}").inside("-e GOOGLE_CREDENTIALS=${gcpCredential} -u root") {
                         stage('Create cluster') {
                             sh """
-                            # TODO: update terraform path
                             # Create GCP resources
                             gcloud auth activate-service-account --key-file=${gcpCredential} --project=${env.param_gcp_project} && \
                             cd ${terraformHome}/envs/${env.param_cluster_name}/gke_create/ && \
@@ -61,13 +60,15 @@ def createGCPCluster() {
                             terraform plan --var-file=${secrets} -var="agent_cidr=${env.agentWanIp}/32"
                             terraform apply -auto-approve --var-file=${secrets} -var="agent_cidr=${env.agentWanIp}/32"
 
+                            # Authorize kube api access
                             gcloud container clusters get-credentials ${env.param_cluster_name} --zone ${env.param_gcp_zone} --project=${env.param_gcp_project}
 
                             # Setup Legion K8S dependencies
-                            # cd ${terraformHome}/envs/${env.param_cluster_name}/k8s_setup/ && \
-                            # terraform plan --var-file=${secrets} && \
-                            # terraform apply -auto-approve --var-file=${secrets}
-                            # gcloud container clusters update ${env.param_cluster_name} --no-enable-master-authorized-networks
+                            cd ${terraformHome}/envs/${env.param_cluster_name}/k8s_setup/ && \
+                            terraform init && \
+                            terraform plan --var-file=${secrets} && \
+                            terraform apply -auto-approve --var-file=${secrets}
+                            gcloud container clusters update ${env.param_cluster_name} --zone ${env.param_gcp_zone} --no-enable-master-authorized-networks
                             """
                         }
                     }
