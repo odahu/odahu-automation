@@ -74,6 +74,8 @@ def createGCPCluster() {
                             terraform init && \
                             terraform plan --var-file=${secrets} && \
                             terraform apply -auto-approve --var-file=${secrets}
+
+                            # TODO: move cleanup to post stage
                             gcloud container clusters update ${env.param_cluster_name} --zone ${env.param_gcp_zone} --no-enable-master-authorized-networks
                             """
                         }

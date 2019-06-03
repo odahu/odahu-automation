@@ -161,7 +161,7 @@ resource "google_compute_project_metadata_item" "ssh_public_keys" {
 # Bastion Host
 ########################################################
 resource "google_compute_instance" "gke_bastion" {
-  name                      = "${var.bastion_hostname}"
+  name                      = "${var.bastion_hostname}-${var.cluster_name}"
   machine_type              = "${var.bastion_machine_type}"
   zone                      = "${var.zone}"
   project                   = "${var.project_id}"
