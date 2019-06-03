@@ -63,6 +63,7 @@ module "gke_cluster" {
   aws_credentials_file        = "${var.aws_credentials_file}"
   location                    = "${var.location}"
   allowed_ips                 = "${var.allowed_ips}"
+  agent_cidr                  = "${var.agent_cidr}"
   nodes_sa                    = "${module.iam.service_account}"
   gke_node_machine_type       = "${var.gke_node_machine_type}"
   location                    = "${var.location}"
@@ -72,4 +73,7 @@ module "gke_cluster" {
   root_domain                 = "${var.root_domain}"
   secrets_storage             = "${var.secrets_storage}"
   bastion_tags                = ["${var.cluster_name}-bastion"]
+  config_context_auth_info    = "${var.config_context_auth_info}"
+  config_context_cluster      = "${var.config_context_cluster}"
 }
+
