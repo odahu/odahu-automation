@@ -18,6 +18,11 @@ provider "aws" {
   profile                   = "${var.aws_profile}"
 }
 
+data "helm_repository" "legion" {
+    name = "legion_github"
+    url  = "${var.legion_helm_repo}"
+}
+
 ########################################################
 # K8S Cluster Setup
 ########################################################
@@ -83,7 +88,7 @@ resource "helm_release" "nginx-ingress" {
       name      = "controller.service.loadBalancerIP"
       value     = "${google_compute_address.ingress_lb_address.address}"
     }
-    depends_on  = ["google_compute_address.ingress_lb_address", "kubernetes_service_account.tiller"]
+    depends_on  = ["google_compute_address.ingress_lb_address"]
 }
 
 # Whitelist allowed_ips and cluster NAT ip on the cluster ingress
@@ -113,7 +118,6 @@ resource "helm_release" "kubernetes-dashboard" {
     values = [
       "${data.template_file.dashboard_values.rendered}"
     ]
-    depends_on  = ["kubernetes_service_account.tiller"]
 }
 
 resource "kubernetes_secret" "tls_dashboard" {
@@ -180,8 +184,6 @@ resource "helm_release" "dex" {
     values = [
       "${data.template_file.dex_values.rendered}"
     ]
-
-    depends_on  = ["kubernetes_service_account.tiller"]
 }
 
 # Oauth2 proxy
@@ -208,8 +210,6 @@ resource "helm_release" "oauth2-proxy" {
     values = [
       "${data.template_file.oauth2-proxy_values.rendered}"
     ]
-
-    depends_on  = ["kubernetes_service_account.tiller"]
 }
 
 # Keycloak sso
@@ -345,6 +345,4 @@ resource "helm_release" "monitoring" {
     values = [
       "${data.template_file.monitoring_values.rendered}"
     ]
-
-    depends_on  = ["kubernetes_service_account.tiller"]
 }

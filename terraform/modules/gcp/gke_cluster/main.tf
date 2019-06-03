@@ -244,7 +244,7 @@ resource "google_dns_record_set" "gke_api" {
 resource "null_resource" "kubectl_config" {
   triggers { build_number = "${timestamp()}" }
   provisioner "local-exec" {
-    command     = "timeout 600 bash -c 'until curl -sk https://${google_container_cluster.cluster.endpoint}; do sleep 20; done'"
+    command     = "timeout 1200 bash -c 'until curl -sk https://${google_container_cluster.cluster.endpoint}; do sleep 20; done'"
   }
   depends_on    = ["google_container_node_pool.cluster_nodes"]
 }
