@@ -63,6 +63,12 @@ def createGCPCluster() {
                             # Authorize kube api access
                             gcloud container clusters get-credentials ${env.param_cluster_name} --zone ${env.param_gcp_zone} --project=${env.param_gcp_project}
 
+                            # Init HELM on cluster
+                            cd ${terraformHome}/envs/${env.param_cluster_name}/helm_init/ && \
+                            terraform init && \
+                            terraform plan --var-file=${secrets} && \
+                            terraform apply -auto-approve --var-file=${secrets}
+
                             # Setup Legion K8S dependencies
                             cd ${terraformHome}/envs/${env.param_cluster_name}/k8s_setup/ && \
                             terraform init && \
