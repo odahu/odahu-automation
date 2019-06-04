@@ -51,7 +51,7 @@ def createGCPCluster() {
             withAWS(credentials: 'kops') {
                 wrap([$class: 'AnsiColorBuildWrapper', colorMapName: "xterm"]) {
                     docker.image("${env.param_docker_repo}/k8s-terraform:${env.param_legion_infra_version}").inside("-e GOOGLE_CREDENTIALS=${gcpCredential} -u root") {
-                        stage('Create cluster') {
+                        stage('Create GCP resources') {
                             sh """
                             # Create GCP resources
                             gcloud auth activate-service-account --key-file=${gcpCredential} --project=${env.param_gcp_project} && \
@@ -62,13 +62,22 @@ def createGCPCluster() {
 
                             # Authorize kube api access
                             gcloud container clusters get-credentials ${env.param_cluster_name} --zone ${env.param_gcp_zone} --project=${env.param_gcp_project}
-
+                            """
+                        }
+                        stage('Init HELM') {
+                            sh """
                             # Init HELM on cluster
                             cd ${terraformHome}/envs/${env.param_cluster_name}/helm_init/ && \
                             terraform init && \
                             terraform plan --var-file=${secrets} && \
                             terraform apply -auto-approve --var-file=${secrets}
 
+                            # Init Helm repo (workaround for https://github.com/terraform-providers/terraform-provider-helm/issues/23)
+                            helm init --client-only
+                            """
+                        }
+                        stage('Setup K8S Legion dependencies') {
+                            sh """
                             # Setup Legion K8S dependencies
                             cd ${terraformHome}/envs/${env.param_cluster_name}/k8s_setup/ && \
                             terraform init && \
