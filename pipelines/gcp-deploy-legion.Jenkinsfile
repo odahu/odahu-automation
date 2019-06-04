@@ -32,7 +32,7 @@ pipeline {
         stage('Deploy Legion') {
             steps {
                 script {
-                    legion.DeployLegionGCP()
+                    legion.deployLegionToGCP()
                 }
             }
         }

@@ -60,7 +60,7 @@ def createGCPCluster() {
                             terraform plan --var-file=${secrets} -var="agent_cidr=${env.agentWanIp}/32"
                             terraform apply -auto-approve --var-file=${secrets} -var="agent_cidr=${env.agentWanIp}/32"
 
-                            # Authorize kube api access
+                            # Authorize Kube api access
                             gcloud container clusters get-credentials ${env.param_cluster_name} --zone ${env.param_gcp_zone} --project=${env.param_gcp_project}
                             """
                         }
@@ -135,6 +135,39 @@ def deployLegion() {
                         docker_repo=${env.param_docker_repo} \
                         model_reference=${commitID}"
                         """
+                    }
+                }
+            }
+        }
+    }
+}
+
+def deployLegionToGCP() {
+    withCredentials([
+    file(credentialsId: "${env.gcpCredential}", variable: 'gcpCredential')]) {
+        withCredentials([
+        file(credentialsId: "${env.param_cluster_name}-gcp-secrets", variable: 'secrets')]) {
+            withAWS(credentials: 'kops') {
+                wrap([$class: 'AnsiColorBuildWrapper', colorMapName: "xterm"]) {
+                    docker.image("${env.param_docker_repo}/k8s-terraform:${env.param_legion_infra_version}").inside("-e GOOGLE_CREDENTIALS=${gcpCredential} -u root") {
+                        stage('Create GCP resources') {
+                            sh """
+                            # Authorize GCP access
+                            gcloud auth activate-service-account --key-file=${gcpCredential} --project=${env.param_gcp_project} && \
+
+                            # Setup Kube api access
+                            gcloud container clusters get-credentials ${env.param_cluster_name} --zone ${env.param_gcp_zone} --project=${env.param_gcp_project}
+                            gcloud container clusters update ${env.param_cluster_name} --zone ${env.param_gcp_zone} --enable-master-authorized-networks --master-authorized-networks "${env.agentWanIp}/32"
+
+                            cd ${terraformHome}/envs/${env.param_cluster_name}/gke_create/ && \
+                            terraform init && \
+                            terraform plan --var-file=${secrets}
+                            terraform apply -auto-approve --var-file=${secrets}
+
+                            # Revoke Kube api access
+                            gcloud container clusters update ${env.param_cluster_name} --zone ${env.param_gcp_zone} --no-enable-master-authorized-networks
+                            """
+                        }
                     }
                 }
             }
