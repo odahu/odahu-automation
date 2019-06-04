@@ -73,6 +73,4 @@ module "gke_cluster" {
   root_domain                 = "${var.root_domain}"
   secrets_storage             = "${var.secrets_storage}"
   bastion_tags                = ["${var.cluster_name}-bastion"]
-  config_context_auth_info    = "${var.config_context_auth_info}"
-  config_context_cluster      = "${var.config_context_cluster}"
 }

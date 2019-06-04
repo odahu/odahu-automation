@@ -1,7 +1,7 @@
 terraform {
   backend "gcs" {
     bucket  = "legion-dev-tfstate"
-    prefix  = "/gke_create/"
+    prefix  = "gke_create"
   }
 }
 

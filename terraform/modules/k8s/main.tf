@@ -2,7 +2,7 @@ provider "helm" {
   install_tiller  = true
   namespace       = "kube-system"
   service_account = "tiller"
-  tiller_image    = "gcr.io/kubernetes-helm/tiller:v2.11.0"
+  tiller_image    = "gcr.io/kubernetes-helm/tiller:v2.14.0"
 }
 
 provider "google" {

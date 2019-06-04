@@ -48,12 +48,6 @@ variable "aws_cidr" {
 variable "aws_route_table_id" {
   description = "AWS Route table ID"
 }
-variable "config_context_auth_info" {
-  description = "Legion cluster context auth"
-}
-variable "config_context_cluster" {
-  description = "Legion cluster context name"
-}
 
 #############
 # GKE
