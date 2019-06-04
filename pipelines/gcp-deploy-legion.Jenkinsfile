@@ -8,6 +8,7 @@ pipeline {
         param_legion_infra_version = "${params.LegionInfraVersion}"
         param_docker_repo = "${params.DockerRepo}"
         param_helm_repo = "${params.HelmRepo}"
+        param_gcp_zone = "${params.GcpZone}"
         param_gcp_project = "${params.GcpProject}"
         //Job parameters
         gcpCredential = "gcp-epmd-legn-legion-automation"

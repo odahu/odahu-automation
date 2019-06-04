@@ -1,4 +1,5 @@
 provider "helm" {
+  version         = "0.9.1"
   install_tiller  = true
   namespace       = "kube-system"
   service_account = "tiller"
@@ -13,6 +14,7 @@ provider "google" {
 }
 
 provider "aws" {
+  version                   = "2.13"
   region                    = "${var.region_aws}"
   shared_credentials_file   = "${var.aws_credentials_file}"
   profile                   = "${var.aws_profile}"
@@ -313,12 +315,12 @@ resource "kubernetes_secret" "tls_monitoring" {
 }
 
 # TODO: replace raw exec after terraform crd resource release
-resource "null_resource" "prometheus_crd_alertmanager" {
-  count   = "${length(var.prometheus_crds)}"
-  provisioner "local-exec" {
-    command = "kubectl --context ${var.cluster_context} apply -f ${var.monitoring_prometheus_operator_crd_url}/${element(var.prometheus_crds, count.index)}.crd.yaml"
-  }
-}
+# resource "null_resource" "prometheus_crd_alertmanager" {
+#   count   = "${length(var.prometheus_crds)}"
+#   provisioner "local-exec" {
+#     command = "kubectl --context ${var.cluster_context} apply -f ${var.monitoring_prometheus_operator_crd_url}/${element(var.prometheus_crds, count.index)}.crd.yaml"
+#   }
+# }
 
 data "template_file" "monitoring_values" {
   template = "${file("${path.module}/templates/monitoring.yaml")}"

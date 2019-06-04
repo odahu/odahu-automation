@@ -82,7 +82,13 @@ def createGCPCluster() {
                             cd ${terraformHome}/envs/${env.param_cluster_name}/k8s_setup/ && \
                             terraform init && \
                             terraform plan --var-file=${secrets} && \
-                            terraform apply -auto-approve --var-file=${secrets}
+                            -var="legion_infra_version=${env.param_legion_infra_version}" \
+                            -var="legion_helm_repo=${env.param_helm_repo}" \
+                            -var="docker_repo=${env.param_docker_repo}" && \
+                            terraform apply -auto-approve --var-file=${secrets} \
+                            -var="legion_infra_version=${env.param_legion_infra_version}" \
+                            -var="legion_helm_repo=${env.param_helm_repo}" \
+                            -var="docker_repo=${env.param_docker_repo}"
 
                             # TODO: move cleanup to post stage
                             gcloud container clusters update ${env.param_cluster_name} --zone ${env.param_gcp_zone} --no-enable-master-authorized-networks
@@ -150,19 +156,30 @@ def deployLegionToGCP() {
             withAWS(credentials: 'kops') {
                 wrap([$class: 'AnsiColorBuildWrapper', colorMapName: "xterm"]) {
                     docker.image("${env.param_docker_repo}/k8s-terraform:${env.param_legion_infra_version}").inside("-e GOOGLE_CREDENTIALS=${gcpCredential} -u root") {
-                        stage('Create GCP resources') {
+                        stage('Deploy Legion') {
                             sh """
+                            set -ex
                             # Authorize GCP access
-                            gcloud auth activate-service-account --key-file=${gcpCredential} --project=${env.param_gcp_project} && \
+                            gcloud auth activate-service-account --key-file=${gcpCredential} --project=${env.param_gcp_project}
 
                             # Setup Kube api access
                             gcloud container clusters get-credentials ${env.param_cluster_name} --zone ${env.param_gcp_zone} --project=${env.param_gcp_project}
                             gcloud container clusters update ${env.param_cluster_name} --zone ${env.param_gcp_zone} --enable-master-authorized-networks --master-authorized-networks "${env.agentWanIp}/32"
 
-                            cd ${terraformHome}/envs/${env.param_cluster_name}/gke_create/ && \
-                            terraform init && \
-                            terraform plan --var-file=${secrets}
-                            terraform apply -auto-approve --var-file=${secrets}
+                            # Init Helm repo (workaround for https://github.com/terraform-providers/terraform-provider-helm/issues/23)
+                            helm init --client-only
+
+                            cd ${terraformHome}/envs/${env.param_cluster_name}/legion/
+                            terraform init
+                            terraform plan --var-file=${secrets} \
+                            -var="legion_infra_version=${env.param_legion_infra_version}" \
+                            -var="legion_helm_repo=${env.param_helm_repo}" \
+                            -var="docker_repo=${env.param_docker_repo}"
+
+                            terraform apply -auto-approve --var-file=${secrets} \
+                            -var="legion_infra_version=${env.param_legion_infra_version}" \
+                            -var="legion_helm_repo=${env.param_helm_repo}" \
+                            -var="docker_repo=${env.param_docker_repo}"
 
                             # Revoke Kube api access
                             gcloud container clusters update ${env.param_cluster_name} --zone ${env.param_gcp_zone} --no-enable-master-authorized-networks
