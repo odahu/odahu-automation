@@ -139,7 +139,6 @@ resource "kubernetes_secret" "tls_dashboard" {
 ########################################################
 
 # Dex
-# TODO: set dex dns automtically (now should be updated manually)
 resource "google_compute_address" "dex_lb_address" {
   name              = "${var.cluster_name}-dex"
   region            = "${var.region}"
@@ -288,19 +287,6 @@ resource "kubernetes_namespace" "monitoring" {
   }
 }
 
-# TODO: consider optional custom storage class for the cluster
-# resource "kubernetes_storage_class" "pd_standard" {
-#   metadata {
-#     name = "${var.grafana_storage_class}"
-#   }
-#   storage_provisioner = "kubernetes.io/gce-pd"
-#   reclaim_policy = "Retain"
-#   parameters {
-#     type = "${var.grafana_storage_class}"
-#     zone = "${var.zone}"
-#   }
-# }
-
 resource "kubernetes_secret" "tls_monitoring" {
   metadata {
     name        = "${var.cluster_name}-tls"
@@ -313,14 +299,6 @@ resource "kubernetes_secret" "tls_monitoring" {
   type          = "kubernetes.io/tls"
   depends_on    = ["kubernetes_namespace.monitoring"]
 }
-
-# TODO: replace raw exec after terraform crd resource release
-# resource "null_resource" "prometheus_crd_alertmanager" {
-#   count   = "${length(var.prometheus_crds)}"
-#   provisioner "local-exec" {
-#     command = "kubectl --context ${var.cluster_context} apply -f ${var.monitoring_prometheus_operator_crd_url}/${element(var.prometheus_crds, count.index)}.crd.yaml"
-#   }
-# }
 
 data "template_file" "monitoring_values" {
   template = "${file("${path.module}/templates/monitoring.yaml")}"

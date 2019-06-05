@@ -141,11 +141,6 @@ resource "google_container_node_pool" "cluster_nodes" {
 ########################################################
 # SSH keys
 ########################################################
-# TODO: consider gcs as secrets storage. The problem is missed object body in terraform data resource
-# data "google_storage_bucket_object" "ssh_public_key" {
-#   bucket   = "${var.secrets_storage}"
-#   name     = "${var.cluster_name}.pub"
-# }
 
 data "aws_s3_bucket_object" "ssh_public_key" {
   bucket  = "${var.secrets_storage}"
@@ -201,28 +196,6 @@ resource "google_compute_instance" "gke_bastion" {
 ########################################################
 #  DNS records
 ########################################################
-
-# TODO: consider local dns for DEX
-# local DNS zone
-# data "google_compute_network" "vpc" {
-#   name = "${var.network}"
-# }
-# resource "google_dns_managed_zone" "local_zone" {
-#   name          = "${var.cluster_name}-local"
-#   dns_name      = "local-${var.root_domain}."
-#   description   = "Local ${var.cluster_name} zone"
-#   visibility    = "private"
-#   private_visibility_config {
-#     networks {
-#       network_url =  "https://www.googleapis.com/compute/v1/projects/${var.project_id}/global/networks/${var.network}"
-#     }
-#   }
-#   labels = {
-#     project = "legion"
-#     cluster = "${var.cluster_name}"
-#   }
-#   # depends_on    = ["google_compute_network.vpc"]
-# }
 
 resource "google_dns_record_set" "gke_bastion" {
   name          = "bastion.${var.cluster_name}.${var.root_domain}."

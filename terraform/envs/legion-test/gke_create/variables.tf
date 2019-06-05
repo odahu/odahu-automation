@@ -103,15 +103,6 @@ variable "nodes_sa" {
   default = "default"
   description = "Service account for cluster nodes"
 }
-# TODO: custom k8s resources cidrs?
-# variable "ip_range_pods" {
-#   default = "10.1.1.0/24"
-#   description = "The secondary ip range to use for pods"
-# }
-# variable "ip_range_services" {
-#   default = "10.1.2.0/24"
-#   description = "The secondary ip range to use for pods"
-# }
 
 ################
 # Bastion host
