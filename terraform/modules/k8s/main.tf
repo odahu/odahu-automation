@@ -69,6 +69,10 @@ resource "google_dns_record_set" "ingress_lb" {
   rrdatas       = ["${google_compute_address.ingress_lb_address.address}"]
 }
 
+# Whitelist allowed_ips and cluster NAT ip on the cluster ingress
+data "google_compute_address" "nat_gw_ip" {
+  name = "${var.cluster_name}-nat-gw-ip"
+}
 resource "helm_release" "nginx-ingress" {
     name        = "nginx-ingress"
     chart       = "stable/nginx-ingress"
@@ -92,12 +96,6 @@ resource "helm_release" "nginx-ingress" {
     }
     depends_on  = ["google_compute_address.ingress_lb_address"]
 }
-
-# Whitelist allowed_ips and cluster NAT ip on the cluster ingress
-data "google_compute_address" "nat_gw_ip" {
-  name = "${var.cluster_name}-nat-gw-ip"
-}
-
 # TODO: restrict access to ingress LB by adding var.allowed_ips and gcp nat ip
 
 ########################################################
@@ -185,6 +183,11 @@ resource "helm_release" "dex" {
     values = [
       "${data.template_file.dex_values.rendered}"
     ]
+
+    # set {
+    #     name    = "service.loadBalancerSourceRanges"
+    #     value   = "{${join(",", var.allowed_ips)}}"
+    # }
 }
 
 # Oauth2 proxy
