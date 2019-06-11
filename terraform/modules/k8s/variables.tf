@@ -52,6 +52,14 @@ variable "cluster_context" {
 variable "dns_zone_name" {
   description = "Cluster root DNS zone name"
 }
+variable "network_name" {
+  description = "The VPC network to host the cluster in"
+}
+variable "ingress_whitelist_cidr" {
+  default = ["127.0.0.1/32"]
+  description = "Nginx ingress authorized cidr"
+}
+
 ########################
 # Kubernetes Dashboard
 ########################

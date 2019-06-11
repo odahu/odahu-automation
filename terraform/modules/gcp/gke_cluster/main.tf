@@ -120,6 +120,7 @@ resource "google_container_node_pool" "cluster_nodes" {
     disk_size_gb     = "${var.node_disk_size_gb}"
     service_account  = "${var.nodes_sa}"
     image_type       = "COS"
+    tags             = ["${var.cluster_name}-gke-node"]
 
     metadata {
       disable-legacy-endpoints = "true"

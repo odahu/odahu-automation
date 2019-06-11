@@ -78,10 +78,14 @@ resource "helm_release" "nginx-ingress" {
     chart       = "stable/nginx-ingress"
     namespace   = "kube-system"
     version     = "0.20.1"
-    # set {
-    #     name    = "controller.service.loadBalancerSourceRanges"
-    #     value   = "{${join(",", var.allowed_ips)}}"
-    # }
+    set {
+        name    = "controller.service.loadBalancerSourceRanges"
+        value   = "{${join(",", var.ingress_whitelist_cidr  )}}"
+    }
+    set {
+        name    = "defaultBackend.service.loadBalancerSourceRanges"
+        value   = "{${join(",", var.ingress_whitelist_cidr)}}"
+    }
     # set {
     #     name    = "defaultBackend.service.loadBalancerSourceRanges"
     #     value   = "{${join(",", var.allowed_ips)}}"
@@ -96,7 +100,30 @@ resource "helm_release" "nginx-ingress" {
     }
     depends_on  = ["google_compute_address.ingress_lb_address"]
 }
-# TODO: restrict access to ingress LB by adding var.allowed_ips and gcp nat ip
+
+resource "google_compute_firewall" "ingress_access" {
+  name                      = "${var.cluster_name}-ingress-access"
+  network                   = "${var.network_name}"
+  source_ranges             = "${var.allowed_ips}"
+  target_tags               = ["${var.cluster_name}-gke-node"]
+
+  allow {
+    protocol = "tcp"
+    ports    = ["80", "443"]
+  }
+}
+
+resource "google_compute_firewall" "auth_loop_access" {
+  name                      = "${var.cluster_name}-auth-access"
+  network                   = "${var.network_name}"
+  source_ranges             = ["${data.google_compute_address.nat_gw_ip.address}/32"]
+  target_tags               = ["${var.cluster_name}-gke-node"]
+
+  allow {
+    protocol = "tcp"
+    ports    = ["80", "443"]
+  }
+}
 
 ########################################################
 # Kubernetes Dashboard

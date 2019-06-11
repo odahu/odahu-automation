@@ -210,7 +210,7 @@ def destroyGcpCluster() {
             withAWS(credentials: 'kops') {
                 wrap([$class: 'AnsiColorBuildWrapper', colorMapName: "xterm"]) {
                     docker.image("${env.param_docker_repo}/k8s-terraform:${env.param_legion_infra_version}").inside("-e GOOGLE_CREDENTIALS=${gcpCredential} -u root") {
-                        stage('Deploy Legion') {
+                        stage('Destroy Legion cluster') {
                             sh """
                             set -ex
                             # Authorize GCP access
