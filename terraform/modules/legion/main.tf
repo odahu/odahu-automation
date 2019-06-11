@@ -44,6 +44,7 @@ resource "google_storage_bucket" "legion_store" {
   name            = "${var.legion_data_bucket}"
   location        = "${var.region}"
   storage_class   = "REGIONAL"
+  force_destroy   = true
   labels  {
     project = "legion"
     env     = "${var.cluster_name}"
