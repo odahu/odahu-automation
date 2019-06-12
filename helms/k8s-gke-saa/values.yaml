@@ -1,0 +1,29 @@
+# Default values for k8s-gke-saa.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+defaultScopes: "https://www.googleapis.com/auth/logging.write,https://www.googleapis.com/auth/monitoring,https://www.googleapis.com/auth/servicecontrol,https://www.googleapis.com/auth/service.management.readonly,https://www.googleapis.com/auth/trace.append"
+# defaultSA: ""
+# serviceAccountName: ""
+
+image:
+  repository: imduffy15/k8s-gke-service-account-assigner
+  tag: "v0.0.2"
+  pullPolicy: IfNotPresent
+
+nameOverride: ""
+fullnameOverride: ""
+
+daemonset:
+  hostPort: 8181
+  containerPort: 8181
+
+resources: {}
+
+podAnnotations: {}
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

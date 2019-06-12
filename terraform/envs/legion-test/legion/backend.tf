@@ -1,5 +1,6 @@
 terraform {
-  backend "local" {
-    path = "../../../../_tfstate/legion-test-legion.tfstate"
+  backend "gcs" {
+    bucket  = "legion-dev-tfstate"
+    prefix  = "legion"
   }
 }

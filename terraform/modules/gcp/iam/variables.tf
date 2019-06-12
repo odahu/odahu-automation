@@ -23,6 +23,7 @@ variable "service_account_iam_roles" {
      "roles/monitoring.metricWriter",
      "roles/monitoring.viewer",
      "roles/storage.objectViewer",
+     "roles/iam.serviceAccountTokenCreator",
   ]
   description = "Nodes SA roles"
 }

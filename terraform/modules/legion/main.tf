@@ -51,6 +51,18 @@ resource "google_storage_bucket" "legion_store" {
   }
 }
 
+resource "google_service_account" "collector_sa" {
+  account_id   = "${var.cluster_name}-collector-sa"
+  display_name = "${var.cluster_name}-collector-sa"
+  project      = "${var.project_id}"
+}
+
+resource "google_storage_bucket_iam_member" "legion_store" {
+  bucket = "${google_storage_bucket.legion_store.name}"
+  member = "serviceAccount:${google_service_account.collector_sa.email}"
+  role   = "roles/storage.legacyBucketWriter"
+}
+
 data "aws_s3_bucket_object" "tls-secret-key" {
   bucket = "${var.secrets_storage}"
   key    = "${var.cluster_name}/tls/${var.cluster_name}.key"
@@ -98,6 +110,7 @@ data "template_file" "legion_values" {
     docker_user             = "${var.docker_user}"
     docker_password         = "${var.docker_password}"
     legion_data_bucket      = "${var.legion_data_bucket}"
+    legion_collector_sa     = "${google_service_account.collector_sa.email}"
     collector_region        = "${var.collector_region}"
     model_examples_git_url  = "${var.model_examples_git_url}"
     model_reference         = "${var.model_reference}"
@@ -105,18 +118,6 @@ data "template_file" "legion_values" {
     model_resources_cpu     = "${var.model_resources_cpu}"
     model_resources_mem     = "${var.model_resources_mem}"
   }
-}
-
-resource "helm_release" "legion_crds" {
-    name        = "legion-crds"
-    chart       = "legion-crds"
-    version     = "${var.legion_version}"
-    namespace   = "${var.legion_namespace}"
-    repository  = "${data.helm_repository.legion.metadata.0.name}"
-
-    values = [
-      "${data.template_file.legion_values.rendered}"
-    ]
 }
 
 resource "helm_release" "legion" {

@@ -1,0 +1,25 @@
+defaultScopes: "${default_scopes}"
+defaultSA: "${default_sa}"
+serviceAccountName: "${sa_name}"
+
+image:
+  repository: "${image_repo}"
+  tag: "${image_tag}"
+  pullPolicy: IfNotPresent
+
+nameOverride: "${name}"
+fullnameOverride: ""
+
+daemonset:
+  hostPort: ${host_port}
+  containerPort: ${container_port}
+
+resources: {}
+
+podAnnotations: {}
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

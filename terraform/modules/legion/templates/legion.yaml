@@ -37,9 +37,10 @@ modelStorage:
 feedback:
   enabled: true
   output:
-    s3:
+    target: gcs
+    gcs:
       bucket: "${legion_data_bucket}"
-      region: "${collector_region}"
+      customSA: "${legion_collector_sa}"
 
 edge:
   replicas: 2
