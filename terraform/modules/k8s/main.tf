@@ -79,18 +79,6 @@ resource "helm_release" "nginx-ingress" {
     namespace   = "kube-system"
     version     = "0.20.1"
     set {
-        name    = "controller.service.loadBalancerSourceRanges"
-        value   = "{${join(",", var.ingress_whitelist_cidr  )}}"
-    }
-    set {
-        name    = "defaultBackend.service.loadBalancerSourceRanges"
-        value   = "{${join(",", var.ingress_whitelist_cidr)}}"
-    }
-    # set {
-    #     name    = "defaultBackend.service.loadBalancerSourceRanges"
-    #     value   = "{${join(",", var.allowed_ips)}}"
-    # }
-    set {
       name      = "defaultBackend.service.type"
       value     = "LoadBalancer"
     }
@@ -123,6 +111,16 @@ resource "google_compute_firewall" "auth_loop_access" {
     protocol = "tcp"
     ports    = ["80", "443"]
   }
+}
+
+# Remove default nginx-ingress fw rules created by controller
+resource "null_resource" "ingress_fw_cleanup" {
+  triggers { build_number = "${timestamp()}" }
+  provisioner "local-exec" {
+    command     = "gcloud compute firewall-rules list --filter='name:k8s-fw- AND network:${var.network_name}' --format='value(name)' --project='${var.project_id}'| while read i; do if (gcloud compute firewall-rules describe --project='${var.project_id}' $i |grep -q 'kube-system/dex\\|kube-system/nginx-ingress'); then gcloud compute firewall-rules delete $i --quiet; fi; done"
+
+  }
+  depends_on    = ["helm_release.nginx-ingress"]
 }
 
 ########################################################
