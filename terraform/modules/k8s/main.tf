@@ -380,6 +380,6 @@ resource "helm_release" "gke_saa" {
     namespace   = "kube-system"
 
     values = [
-      "${data.template_file.gke_saa.rendered}"
+      "${data.template_file.gke_saa_values.rendered}"
     ]
 }
