@@ -6,6 +6,7 @@ pipeline {
         param_git_branch = "${params.GitBranch}"
         param_cluster_name = "${params.ClusterName}"
         param_legion_infra_version = "${params.LegionInfraVersion}"
+        param_legion_version = "${params.LegionVersion}"
         param_docker_repo = "${params.DockerRepo}"
         param_helm_repo = "${params.HelmRepo}"
         param_gcp_zone = "${params.GcpZone}"

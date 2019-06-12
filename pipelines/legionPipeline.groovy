@@ -183,11 +183,13 @@ def deployLegionToGCP() {
                             terraform init
                             terraform plan --var-file=${secrets} \
                             -var="legion_infra_version=${env.param_legion_infra_version}" \
+                            -var="legion_version=${env.param_legion_version}" \
                             -var="legion_helm_repo=${env.param_helm_repo}" \
                             -var="docker_repo=${env.param_docker_repo}"
 
                             terraform apply -auto-approve --var-file=${secrets} \
                             -var="legion_infra_version=${env.param_legion_infra_version}" \
+                            -var="legion_version=${env.param_legion_version}" \
                             -var="legion_helm_repo=${env.param_helm_repo}" \
                             -var="docker_repo=${env.param_docker_repo}"
 
