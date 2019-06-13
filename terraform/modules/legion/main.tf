@@ -85,6 +85,14 @@ resource "kubernetes_secret" "tls_legion" {
   type          = "kubernetes.io/tls"
 }
 
+# TODO: fix the hack with k8s resources cleanup
+resource "null_resource" "cleanup_crds" {
+  triggers { build_number = "${timestamp()}" }
+  provisioner "local-exec" {
+    command     = "kubectl delete crd modeldeployments.legion.legion-platform.org modeltrainings.legion.legion-platform.org vcscredentials.legion.legion-platform.org; kubectl delete validatingwebhookconfigurations.admissionregistration.k8s.io legion-validating-webhook-configuration; kubectl delete mutatingwebhookconfigurations.admissionregistration.k8s.io legion-mutating-webhook-configuration || true"
+  }
+}
+
 ########################################################
 # Install Legion charts
 ########################################################
@@ -130,5 +138,6 @@ resource "helm_release" "legion" {
     values = [
       "${data.template_file.legion_values.rendered}"
     ]
-    depends_on    = ["helm_release.legion"]
+    depends_on    = ["helm_release.legion", "null_resource.cleanup_crds"]
+
 }
