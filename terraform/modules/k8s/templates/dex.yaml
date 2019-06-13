@@ -31,6 +31,6 @@ staticPasswords:
     username: "${dex_static_user_name}" 
     userID: "${dex_static_user_id}"
 
-enablePasswordDB: false
+enablePasswordDB: true
 
 tls_secret: "${cluster_name}-tls"

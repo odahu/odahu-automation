@@ -22,6 +22,7 @@ pipeline {
         ansibleHome =  "/opt/legion/ansible"
         ansibleVerbose = '-v'
         helmLocalSrc = 'false'
+        credentials_name = "vault-${params.Profile}"
     }
 
     stages {

@@ -11,11 +11,15 @@ pipeline {
         param_helm_repo = "${params.HelmRepo}"
         param_gcp_zone = "${params.GcpZone}"
         param_gcp_project = "${params.GcpProject}"
+        param_deploy_legion = "${params.DeployLegion}"
+        param_use_regression_tests = "${params.UseRegressionTests}"
+        param_tests_tags = "${params.TestsTags}"
         //Job parameters
         gcpCredential = "gcp-epmd-legn-legion-automation"
         sharedLibPath = "pipelines/legionPipeline.groovy"
         cleanupContainerVersion = "latest"
         terraformHome =  "/opt/legion/terraform"
+        credentials_name = "${params.ClusterName}-gcp-secrets"
     }
 
     stages {
@@ -32,9 +36,24 @@ pipeline {
         }
 
         stage('Deploy Legion') {
+            when {
+                expression { return param_deploy_legion == "true" }
+            }
             steps {
                 script {
                     legion.deployLegionToGCP()
+                }
+            }
+        }
+
+        stage('Run regression tests'){
+            when {
+                expression { return param_use_regression_tests == "true" }
+            }
+            steps {
+                script {
+                    legion.ansibleDebugRunCheck(env.param_debug_run)
+                    legion.runRobotTestsAtGcp(env.param_tests_tags ?: "")
                 }
             }
         }
