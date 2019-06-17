@@ -14,12 +14,14 @@ pipeline {
         param_deploy_legion = "${params.DeployLegion}"
         param_use_regression_tests = "${params.UseRegressionTests}"
         param_tests_tags = "${params.TestsTags}"
+        param_full_cluster_name = "${params.FullClusterName}"
         //Job parameters
         gcpCredential = "gcp-epmd-legn-legion-automation"
         sharedLibPath = "pipelines/legionPipeline.groovy"
         cleanupContainerVersion = "latest"
         terraformHome =  "/opt/legion/terraform"
         credentials_name = "${params.ClusterName}-gcp-secrets"
+
     }
 
     stages {
