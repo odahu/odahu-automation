@@ -383,6 +383,7 @@ def runRobotTests(tags="") {
 def runRobotTestsAtGcp(tags="") {
     withCredentials([
     file(credentialsId: "${env.credentials_name}", variable: 'vault')]) {
+        withCredentials([
         file(credentialsId: "${env.credentials_name}-tests", variable: 'testcreds')]) {
             withAWS(credentials: 'kops') {
                 wrap([$class: 'AnsiColorBuildWrapper', colorMapName: "xterm"]) {
