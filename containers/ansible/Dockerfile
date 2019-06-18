@@ -16,14 +16,13 @@ ENV LC_ALL=en_US.UTF-8
 ENV LANG=en_US.UTF-8
 ENV LANGUAGE=en_US.UTF-8
 
-# Install ansible from pip
-RUN pip install ansible==2.7.2
+# Install ansible with dependencies from pip
+RUN pip install ansible==2.7.11 boto==2.49.0 boto3==1.9.169 awscli==1.14.44 cryptography==2.7
 
  # Install ansible dependencies
 RUN apt-get install -y \
-    python-yaml=3.12-1build2 python-jinja2=2.10-1 python-boto=2.44.0-1ubuntu2 python-boto3=1.4.2-1 \
-    python-psycopg2=2.7.4-1 postgresql-client=10+190 python-crypto=2.6.1-8ubuntu2 \
-    python-cryptography=2.1.4-1ubuntu1.2 awscli=1.14.44-1ubuntu1 && \
+    python-yaml=3.12-1build2 python-jinja2=2.10-1 \
+    python-psycopg2=2.7.4-1 postgresql-client=10+190 python-crypto=2.6.1-8ubuntu2 && \
     apt-get clean && apt-get autoclean
 
 # Configure ansible
