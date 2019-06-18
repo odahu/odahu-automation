@@ -71,6 +71,11 @@ pipeline {
         cleanup {
             script {
                 legion = load "${env.sharedLibPath}"
+                sh """
+                # Revoke agent access
+                gcloud compute firewall-rules delete ${env.param_cluster_name}-jenkins-access \
+                --project=${env.param_gcp_project} --network=${env.param_cluster_name}-vpc ||true
+                """
             }
             deleteDir()
         }

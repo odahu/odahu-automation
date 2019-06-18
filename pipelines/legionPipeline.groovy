@@ -303,6 +303,25 @@ def downloadSecrets(String vault) {
     """
 }
 
+def setupGcpAccess() {
+    sh """
+        set -ex
+        # Authorize GCP access
+        gcloud auth activate-service-account --key-file=${gcpCredential} --project=${env.param_gcp_project}
+
+        # Setup Kube api access
+        gcloud container clusters get-credentials ${env.param_cluster_name} --zone ${env.param_gcp_zone} --project=${env.param_gcp_project}
+        gcloud container clusters update ${env.param_cluster_name} --zone ${env.param_gcp_zone} --enable-master-authorized-networks --master-authorized-networks "${env.agentWanIp}/32"
+        
+        # Setup firewall rule
+        gcloud compute firewall-rules create ${env.param_cluster_name}-jenkins-access \
+        --project=${env.param_gcp_project} --network=${env.param_cluster_name}-vpc \
+        --description "Allow incoming traffic from Jenkins agent" \
+        --allow tcp:443 --direction INGRESS --source-ranges="${env.agentWanIp}/32"
+
+    """
+}
+
 def runRobotTests(tags="") {
     withCredentials([
     file(credentialsId: "${env.credentials_name}", variable: 'vault')]) {
@@ -382,12 +401,12 @@ def runRobotTests(tags="") {
 
 def runRobotTestsAtGcp(tags="") {
     withCredentials([
-    file(credentialsId: "${env.credentials_name}", variable: 'vault')]) {
+    file(credentialsId: "${env.gcpCredential}", variable: 'gcpCredential')]) {
         withCredentials([
         file(credentialsId: "${env.credentials_name}-tests", variable: 'testcreds')]) {
             withAWS(credentials: 'kops') {
                 wrap([$class: 'AnsiColorBuildWrapper', colorMapName: "xterm"]) {
-                    docker.image("${env.param_docker_repo}/legion-pipeline-agent:${env.param_legion_version}").inside("-e HOME=/opt/legion -v ${WORKSPACE}/profiles:/opt/legion/profiles -u root") {
+                    docker.image("${env.param_docker_repo}/legion-pipeline-agent:${env.param_legion_version}").inside("-e HOME=/opt/legion -u root") {
                         stage('Run Robot tests') {
                             dir("${WORKSPACE}"){
                                 def tags_list = tags.toString().trim().split(',')
@@ -409,17 +428,17 @@ def runRobotTestsAtGcp(tags="") {
                                 env.robot_tags= robot_tags.join(" ")
                                 env.nose_tags = nose_tags.join(" ")
 
-                                downloadSecrets(vault)
+                                setupGcpAccess()
 
                                 sh """
-                                    cp ${testcreds} /opt/legion/.secrets.yaml && cd /opt/legion && \
-                                    ln -sf /opt/legion/.secrets.yaml /opt/legion/profiles/${env.param_full_cluster_name}
+                                    cp ${testcreds} /opt/legion/.secrets.yaml && cd /opt/legion && mkdir /opt/legion/profiles && \
+                                    ln -sf /opt/legion/.secrets.yaml /opt/legion/profiles/${env.param_full_cluster_name}.yml
 
                                     echo "Starting robot tests"
-                                    make CREDENTIAL_SECRETS=/opt/legion/.secrets.yaml PATH_TO_PROFILES_DIR=/opt/legion/profiles/ CLUSTER_NAME=${env.param_full_cluster_name} LEGION_VERSION=${env.param_legion_version}  -v PATH_TO_PROFILES_DIR:profiles e2e-robot || true
+                                    make  CREDENTIAL_SECRETS=/opt/legion/.secrets.yaml PATH_TO_PROFILES_DIR=/opt/legion/profiles/ CLUSTER_NAME=${env.param_full_cluster_name} LEGION_VERSION=${env.param_legion_version} e2e-robot || true
 
-                                    echo "Starting python tests"
-                                    make CCREDENTIAL_SECRETS=/opt/legion/.secrets.yaml PATH_TO_PROFILES_DIR=/opt/legion/profiles/ CLUSTER_NAME=${env.param_full_cluster_name} LEGION_VERSION=${env.param_legion_version}  -v PATH_TO_PROFILES_DIR:profiles e2e-python || true
+                                    #echo "Starting python tests"
+                                    #make CREDENTIAL_SECRETS=/opt/legion/.secrets.yaml PATH_TO_PROFILES_DIR=/opt/legion/profiles/ CLUSTER_NAME=${env.param_full_cluster_name} LEGION_VERSION=${env.param_legion_version} || true
 
                                     cp -R target/ ${WORKSPACE}
                                 """

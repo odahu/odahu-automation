@@ -96,7 +96,7 @@ resource "null_resource" "cleanup_crds" {
 resource "null_resource" "delete_legion_chart" {
   triggers { build_number = "${timestamp()}" }
   provisioner "local-exec" {
-    command     = "helm delete --purge legion"
+    command     = "helm ls |grep legion && helm delete --purge legion ||true"
   }
   depends_on    = ["null_resource.cleanup_crds"]
 }
