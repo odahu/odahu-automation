@@ -192,9 +192,6 @@ def deployLegionToGCP() {
                             -var="legion_version=${env.param_legion_version}" \
                             -var="legion_helm_repo=${env.param_helm_repo}" \
                             -var="docker_repo=${env.param_docker_repo}"
-
-                            # Revoke Kube api access
-                            gcloud container clusters update ${env.param_cluster_name} --zone ${env.param_gcp_zone} --no-enable-master-authorized-networks
                             """
                         }
                     }
@@ -320,6 +317,28 @@ def setupGcpAccess() {
         --allow tcp:443 --direction INGRESS --source-ranges="${env.agentWanIp}/32"
 
     """
+}
+
+def revokeGcpAccess() {
+    withCredentials([
+    file(credentialsId: "${env.gcpCredential}", variable: 'gcpCredential')]) {
+        wrap([$class: 'AnsiColorBuildWrapper', colorMapName: "xterm"]) {
+            docker.image("${env.param_docker_repo}/k8s-terraform:${env.param_legion_infra_version}").inside("-e GOOGLE_CREDENTIALS=${gcpCredential} -u root") {
+                stage('Revoke jenkins access') {
+                    sh """
+                        # Authorize GCP access
+                        gcloud auth activate-service-account --key-file=${gcpCredential} --project=${env.param_gcp_project}
+
+                        # Revoke Kube api access
+                        gcloud container clusters update ${env.param_cluster_name} --zone ${env.param_gcp_zone} --no-enable-master-authorized-networks
+
+                        # Revoke agent access
+                        gcloud compute firewall-rules delete ${env.param_cluster_name}-jenkins-access --project=${env.param_gcp_project} --quiet ||true
+                    """
+                }
+            }
+        }
+    }
 }
 
 def runRobotTests(tags="") {
