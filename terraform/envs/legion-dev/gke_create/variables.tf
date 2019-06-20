@@ -57,12 +57,12 @@ variable "location" {
   description = "The location (region or zone) in which the cluster master will be created"
 }
 variable "k8s_version" {
-  default = "1.12.7-gke.7"
+  default = "1.13.6-gke.6 "
   description = "Kubernetes master version"
 }
 variable "node_version" {
   description = "K8s version for Nodes. If no value is provided, this defaults to the value of k8s_version."
-  default     = "1.12.7-gke.7"
+  default     = "1.13.6-gke.6 "
 }
 variable "allowed_ips" {
   description = "CIDR to allow access from"

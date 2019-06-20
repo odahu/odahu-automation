@@ -73,4 +73,6 @@ module "gke_cluster" {
   root_domain                 = "${var.root_domain}"
   secrets_storage             = "${var.secrets_storage}"
   bastion_tags                = ["${var.cluster_name}-bastion"]
+  k8s_version                 = "${var.k8s_version}"
+  node_version                = "${var.node_version}"
 }
