@@ -1,5 +1,5 @@
-provider "google" {
-  version                   = "~> 2.2"
+provider "google-beta" {
+  version                   = "2.9"
   region                    = "${var.region}"
   zone                      = "${var.zone}"
   project                   = "${var.project_id}"
@@ -16,6 +16,7 @@ provider "aws" {
 ########################################################
 
 resource "google_container_cluster" "cluster" {
+  provider                  = "google-beta"
   project                   = "${var.project_id}"
   name                      = "${var.cluster_name}"
   location                  = "${var.location}"
@@ -41,6 +42,26 @@ resource "google_container_cluster" "cluster" {
 
   lifecycle {
     ignore_changes  = ["node_count", "network"]
+  }
+
+  vertical_pod_autoscaling {
+    enabled = true
+  }
+
+  cluster_autoscaling {
+    enabled = true
+
+    resource_limits {
+      resource_type = "cpu"
+      maximum       = "${var.cluster_autoscaling_cpu_max_limit}"
+      minimum       = "${var.cluster_autoscaling_cpu_min_limit}"
+    }
+
+    resource_limits {
+      resource_type = "memory"
+      maximum       = "${var.cluster_autoscaling_memory_max_limit}"
+      minimum       = "${var.cluster_autoscaling_memory_min_limit}"
+    }
   }
 
   private_cluster_config {
@@ -96,6 +117,7 @@ resource "google_container_cluster" "cluster" {
 ########################################################
 
 resource "google_container_node_pool" "cluster_nodes" {
+  provider              = "google-beta"
   project               = "${var.project_id}"
   name                  = "${var.cluster_name}-node-pool"
   location              = "${var.location}"
@@ -150,8 +172,10 @@ data "aws_s3_bucket_object" "ssh_public_key" {
 }
 
 resource "google_compute_project_metadata_item" "ssh_public_keys" {
-  key     = "ssh-keys"
-  value   = "${var.ssh_user}:${data.aws_s3_bucket_object.ssh_public_key.body}"
+  provider  = "google-beta"
+  project   = "${var.project_id}"
+  key       = "ssh-keys"
+  value     = "${var.ssh_user}:${data.aws_s3_bucket_object.ssh_public_key.body}"
 }
 
 ########################################################

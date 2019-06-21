@@ -64,6 +64,26 @@ variable "ssh_user" {
   description = "default ssh user"
 }
 
+variable "cluster_autoscaling_cpu_max_limit" {
+  default     = 20
+  description = "Maximum CPU limit for autoscaling if it is enabled."
+}
+
+variable "cluster_autoscaling_cpu_min_limit" {
+  default     = 2
+  description = "Minimum CPU limit for autoscaling if it is enabled."
+}
+
+variable "cluster_autoscaling_memory_max_limit" {
+  default     = 64
+  description = "Maximum memory limit for autoscaling if it is enabled."
+}
+
+variable "cluster_autoscaling_memory_min_limit" {
+  default     = 4
+  description = "Minimum memory limit for autoscaling if it is enabled."
+}
+
 #############
 # Node pool
 #############
