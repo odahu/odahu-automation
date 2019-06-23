@@ -425,7 +425,7 @@ def runRobotTestsAtGcp(tags="") {
         file(credentialsId: "${env.credentials_name}-tests", variable: 'testcreds')]) {
             withAWS(credentials: 'kops') {
                 wrap([$class: 'AnsiColorBuildWrapper', colorMapName: "xterm"]) {
-                    docker.image("${env.param_docker_repo}/legion-pipeline-agent:${env.param_legion_version}").inside("-e HOME=/opt/legion -u root") {
+                    docker.image("${env.param_docker_repo}/legion-pipeline-agent:${env.param_legion_version}").inside("-e HOME=/opt/legion -u root -e GOOGLE_APPLICATION_CREDENTIALS=${gcpCredential} -e CLUSTER_NAME=${env.param_full_cluster_name} -e CREDENTIAL_SECRETS=/opt/legion/.secrets.yaml -e PATH_TO_PROFILES_DIR=/opt/legion/profiles/ -e LEGION_VERSION=${env.param_legion_version}") {
                         stage('Run Robot tests') {
                             dir("${WORKSPACE}"){
                                 def tags_list = tags.toString().trim().split(',')
@@ -454,10 +454,10 @@ def runRobotTestsAtGcp(tags="") {
                                     ln -sf /opt/legion/.secrets.yaml /opt/legion/profiles/${env.param_full_cluster_name}.yml
 
                                     echo "Starting robot tests"
-                                    make  CREDENTIAL_SECRETS=/opt/legion/.secrets.yaml PATH_TO_PROFILES_DIR=/opt/legion/profiles/ CLUSTER_NAME=${env.param_full_cluster_name} LEGION_VERSION=${env.param_legion_version} e2e-robot || true
+                                    make e2e-robot || true
 
                                     #echo "Starting python tests"
-                                    #make CREDENTIAL_SECRETS=/opt/legion/.secrets.yaml PATH_TO_PROFILES_DIR=/opt/legion/profiles/ CLUSTER_NAME=${env.param_full_cluster_name} LEGION_VERSION=${env.param_legion_version} || true
+                                    #make e2e-python || true
 
                                     cp -R target/ ${WORKSPACE}
                                 """
