@@ -67,7 +67,7 @@ resource "google_container_cluster" "cluster" {
   private_cluster_config {
     enable_private_endpoint = false
     enable_private_nodes    = true
-    master_ipv4_cidr_block  = "172.25.100.0/28"
+    master_ipv4_cidr_block  = "${var.master_ipv4_cidr_block}"
   }
   # workaround #2231 issue with master access
   master_authorized_networks_config {

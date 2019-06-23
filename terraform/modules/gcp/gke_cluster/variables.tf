@@ -83,6 +83,10 @@ variable "cluster_autoscaling_memory_min_limit" {
   default     = 4
   description = "Minimum memory limit for autoscaling if it is enabled."
 }
+variable "master_ipv4_cidr_block" {
+  default = "172.25.100.0/28"
+  description = "GKE master CIDR"
+}
 
 #############
 # Node pool
