@@ -86,20 +86,20 @@ resource "kubernetes_secret" "tls_legion" {
 }
 
 # TODO: fix the hack with k8s resources cleanup
-resource "null_resource" "cleanup_crds" {
-  triggers { build_number = "${timestamp()}" }
-  provisioner "local-exec" {
-    command     = "kubectl delete crd modeldeployments.legion.legion-platform.org modeltrainings.legion.legion-platform.org vcscredentials.legion.legion-platform.org; kubectl delete validatingwebhookconfigurations.admissionregistration.k8s.io legion-validating-webhook-configuration; kubectl delete mutatingwebhookconfigurations.admissionregistration.k8s.io legion-mutating-webhook-configuration || true"
-  }
-}
+# resource "null_resource" "cleanup_crds" {
+#   triggers { build_number = "${timestamp()}" }
+#   provisioner "local-exec" {
+#     command     = "kubectl delete crd modeldeployments.legion.legion-platform.org modeltrainings.legion.legion-platform.org vcscredentials.legion.legion-platform.org; kubectl delete validatingwebhookconfigurations.admissionregistration.k8s.io legion-validating-webhook-configuration; kubectl delete mutatingwebhookconfigurations.admissionregistration.k8s.io legion-mutating-webhook-configuration || true"
+#   }
+# }
 # TODO: fix legion chart to add support of helm upgrade
-resource "null_resource" "delete_legion_chart" {
-  triggers { build_number = "${timestamp()}" }
-  provisioner "local-exec" {
-    command     = "helm ls |grep legion && helm delete --purge legion ||true"
-  }
-  depends_on    = ["null_resource.cleanup_crds"]
-}
+# resource "null_resource" "delete_legion_chart" {
+#   triggers { build_number = "${timestamp()}" }
+#   provisioner "local-exec" {
+#     command     = "helm ls |grep legion && helm delete --purge legion ||true"
+#   }
+#   depends_on    = ["null_resource.cleanup_crds"]
+# }
 
 ########################################################
 # Install Legion charts
@@ -146,5 +146,4 @@ resource "helm_release" "legion" {
     values = [
       "${data.template_file.legion_values.rendered}"
     ]
-    depends_on    = ["helm_release.legion", "null_resource.delete_legion_chart"]
 }
