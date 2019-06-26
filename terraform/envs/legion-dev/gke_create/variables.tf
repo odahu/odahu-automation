@@ -48,6 +48,9 @@ variable "aws_cidr" {
 variable "aws_route_table_id" {
   description = "AWS Route table ID"
 }
+variable "gke_node_tag" {
+  description = "GKE cluster nodes tag"
+}
 
 #############
 # GKE
@@ -57,7 +60,7 @@ variable "location" {
   description = "The location (region or zone) in which the cluster master will be created"
 }
 variable "k8s_version" {
-  default = "1.13.6-gke.6"
+  default = "1.13.6"
   description = "Kubernetes master version"
 }
 variable "node_version" {
@@ -104,7 +107,7 @@ variable "nodes_sa" {
 variable "bastion_machine_type" {
   default = "f1-micro"
 }
-variable "bastion_tags" {
+variable "bastion_tag" {
   default = ""
   description = "Bastion network tags"
 }

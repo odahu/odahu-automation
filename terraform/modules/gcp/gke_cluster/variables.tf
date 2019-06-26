@@ -116,6 +116,9 @@ variable "nodes_sa" {
   default = "default"
   description = "Service account for cluster nodes"
 }
+variable "gke_node_tag" {
+  description = "GKE cluster nodes tag"
+}
 # variable "ip_range_pods" {
 #   default = "10.1.1.0/24"
 #   description = "The secondary ip range to use for pods"
@@ -133,11 +136,11 @@ variable "nodes_sa" {
 variable "bastion_machine_type" {
   default = "f1-micro"
 }
-variable "bastion_tags" {
-  type    = "list"
-  default = []
-}
 variable "bastion_hostname" {
   default = "bastion"
   description = "bastion hostname"
+}
+variable "bastion_tag" {
+  default = ""
+  description = "Bastion network tags"
 }

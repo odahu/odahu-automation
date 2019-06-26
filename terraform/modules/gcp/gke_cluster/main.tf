@@ -142,7 +142,7 @@ resource "google_container_node_pool" "cluster_nodes" {
     disk_size_gb     = "${var.node_disk_size_gb}"
     service_account  = "${var.nodes_sa}"
     image_type       = "COS"
-    tags             = ["${var.cluster_name}-gke-node"]
+    tags             = ["${var.gke_node_tag}"]
 
     metadata {
       disable-legacy-endpoints = "true"
@@ -192,7 +192,7 @@ resource "google_container_node_pool" "cluster_nodes_highcpu" {
     disk_size_gb     = "${var.node_disk_size_gb}"
     service_account  = "${var.nodes_sa}"
     image_type       = "COS"
-    tags             = ["${var.cluster_name}-gke-node"]
+    tags             = ["${var.gke_node_tag}"]
 
     metadata {
       disable-legacy-endpoints = "true"
@@ -246,12 +246,12 @@ resource "google_compute_instance" "gke_bastion" {
     }
   }
 
-  tags = ["${var.bastion_tags}"]
+  tags = ["${var.bastion_tag}"]
 
   // Define a network interface in the correct subnet.
   network_interface {
-    subnetwork = "${var.subnetwork}"
-
+    subnetwork          = "${var.subnetwork}"
+    subnetwork_project  = "${var.project_id}"
     access_config {
       // Implicit ephemeral IP
     }
@@ -274,6 +274,7 @@ resource "google_compute_instance" "gke_bastion" {
 ########################################################
 
 resource "google_dns_record_set" "gke_bastion" {
+  project       = "${var.project_id}"
   name          = "bastion.${var.cluster_name}.${var.root_domain}."
   type          = "A"
   ttl           = 300
@@ -282,6 +283,7 @@ resource "google_dns_record_set" "gke_bastion" {
 }
 
 resource "google_dns_record_set" "gke_api" {
+  project       = "${var.project_id}"
   name          = "api.${var.cluster_name}.${var.root_domain}."
   type          = "A"
   ttl           = 300
