@@ -43,7 +43,7 @@ variable "subnetwork" {
   description = "The subnetwork to host the cluster in"
 }
 variable "k8s_version" {
-  default = "1.13.6-gke.6 "
+  default = "1.13.6 "
   description = "Kubernetes master version"
 }
 variable "node_version" {

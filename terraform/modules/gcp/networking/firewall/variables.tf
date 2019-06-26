@@ -27,6 +27,6 @@ variable "gke_node_tag" {
   description = "GKE cluster nodes tag"
 }
 variable "master_ipv4_cidr_block" {
-  default = "{var.cluster_name}-gke-node}"
+  default = "172.25.100.0/28"
   description = "GKE master CIDR"
 }
