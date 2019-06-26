@@ -48,21 +48,21 @@ resource "google_container_cluster" "cluster" {
     enabled = true
   }
 
-  cluster_autoscaling {
-    enabled = true
+  # cluster_autoscaling {
+  #   enabled = true
 
-    resource_limits {
-      resource_type = "cpu"
-      maximum       = "${var.cluster_autoscaling_cpu_max_limit}"
-      minimum       = "${var.cluster_autoscaling_cpu_min_limit}"
-    }
+  #   resource_limits {
+  #     resource_type = "cpu"
+  #     maximum       = "${var.cluster_autoscaling_cpu_max_limit}"
+  #     minimum       = "${var.cluster_autoscaling_cpu_min_limit}"
+  #   }
 
-    resource_limits {
-      resource_type = "memory"
-      maximum       = "${var.cluster_autoscaling_memory_max_limit}"
-      minimum       = "${var.cluster_autoscaling_memory_min_limit}"
-    }
-  }
+  #   resource_limits {
+  #     resource_type = "memory"
+  #     maximum       = "${var.cluster_autoscaling_memory_max_limit}"
+  #     minimum       = "${var.cluster_autoscaling_memory_min_limit}"
+  #   }
+  # }
 
   private_cluster_config {
     enable_private_endpoint = false
@@ -87,7 +87,7 @@ resource "google_container_cluster" "cluster" {
   }
 
   network_policy {
-    enabled  = true
+    enabled  = false
     provider = "CALICO"
   }
 
@@ -139,6 +139,56 @@ resource "google_container_node_pool" "cluster_nodes" {
   node_config {
     preemptible      = false
     machine_type     = "${var.gke_node_machine_type}"
+    disk_size_gb     = "${var.node_disk_size_gb}"
+    service_account  = "${var.nodes_sa}"
+    image_type       = "COS"
+    tags             = ["${var.cluster_name}-gke-node"]
+
+    metadata {
+      disable-legacy-endpoints = "true"
+    }
+
+    labels {
+      "project" = "legion"
+    }
+
+    oauth_scopes = [
+      "https://www.googleapis.com/auth/compute",
+      "https://www.googleapis.com/auth/devstorage.read_only",
+      "https://www.googleapis.com/auth/cloud-platform",
+      "https://www.googleapis.com/auth/logging.write",
+      "https://www.googleapis.com/auth/monitoring",
+    ]
+  }
+}
+
+########################################################
+# Node Pool High CPU
+########################################################
+
+resource "google_container_node_pool" "cluster_nodes_highcpu" {
+  provider              = "google-beta"
+  project               = "${var.project_id}"
+  name                  = "${var.cluster_name}-highcpu-node-pool"
+  location              = "${var.location}"
+  cluster               = "${var.cluster_name}"
+  initial_node_count    = 0
+  depends_on            = ["google_container_cluster.cluster"]
+  version               = "${var.node_version}"
+
+  autoscaling {
+    min_node_count = "0"
+    max_node_count = "${var.gke_num_nodes_max}"
+  }
+
+  management {
+    auto_repair  = false
+    auto_upgrade = false
+  }
+
+  node_config {
+    preemptible      = false
+    machine_type     = "${var.gke_node_machine_type_highcpu}"
     disk_size_gb     = "${var.node_disk_size_gb}"
     service_account  = "${var.nodes_sa}"
     image_type       = "COS"

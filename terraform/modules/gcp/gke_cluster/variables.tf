@@ -100,6 +100,10 @@ variable "gke_node_machine_type" {
   default = "n1-standard-2"
   description = "Machine type of GKE nodes"
 }
+variable "gke_node_machine_type_highcpu" {
+  default = "n1-highcpu-8"
+  description = "Machine type of GKE nodes for high cpu pods"
+}
 variable "gke_num_nodes_min" {
   default = "1"
   description = "Number of nodes in each GKE cluster zone"
