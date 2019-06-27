@@ -62,7 +62,7 @@ def createGCPCluster() {
                             gcloud auth activate-service-account --key-file=${gcpCredential} --project=${env.param_gcp_project}
                             """
 
-                            terraformRun("apply", "gke_create", '-var="agent_cidr=${env.agentWanIp}/32"')
+                            terraformRun("apply", "gke_create", "-var=\"agent_cidr=${env.agentWanIp}/32\"")
 
                             sh """
                             # Authorize Kube api access
@@ -159,10 +159,10 @@ def deployLegionToGCP() {
                             helm init --client-only
                             """
                             
-                            tfDeployVars='-var="legion_infra_version=${env.param_legion_infra_version}" \
-                            -var="legion_version=${env.param_legion_version}" \
-                            -var="legion_helm_repo=${env.param_helm_repo}" \
-                            -var="docker_repo=${env.param_docker_repo}"'
+                            tfDeployVars = "-var=\"legion_infra_version=${env.param_legion_infra_version}\" \
+                            -var=\"legion_version=${env.param_legion_version}\" \
+                            -var=\"legion_helm_repo=${env.param_helm_repo}\" \
+                            -var=\"docker_repo=${env.param_docker_repo}\""
 
                             terraformRun("apply", "legion", "${tfDeployVars}")
                         }
@@ -181,7 +181,7 @@ def destroyGcpCluster() {
             withAWS(credentials: 'kops') {
                 wrap([$class: 'AnsiColorBuildWrapper', colorMapName: "xterm"]) {
                     docker.image("${env.param_docker_repo}/k8s-terraform:${env.param_legion_infra_version}").inside("-e GOOGLE_CREDENTIALS=${gcpCredential} -u root") {
-                        stage('Destroy Legion cluster') {
+                        stage('Setup cluster access') {
                             sh """
                             set -ex
                             # Authorize GCP access
@@ -194,11 +194,26 @@ def destroyGcpCluster() {
                             # Init Helm repo (workaround for https://github.com/terraform-providers/terraform-provider-helm/issues/23)
                             helm init --client-only
                             """
+                        }
 
+                        stage('Destroy legion TF state') {
                             terraformRun("destroy", "legion")
+                        }
+
+                        stage('Destroy legion TF state') {
                             terraformRun("destroy", "k8s_setup")
+                        }
+
+                        stage('Destroy k8s_setup TF state') {
+                            terraformRun("destroy", "k8s_setup")
+                        }
+
+                         stage('Destroy helm_init TF state') {
                             terraformRun("destroy", "helm_init")
-                            terraformRun("destroy", "gke_create", '-var="agent_cidr=${env.agentWanIp}/32"')
+                        }
+
+                         stage('Destroy gke_create TF state') {
+                            terraformRun("destroy", "gke_create", "-var=\"agent_cidr=${env.agentWanIp}/32\"")
                         }
                     }
                 }
@@ -291,7 +306,7 @@ def revokeGcpAccess() {
                         gcloud auth activate-service-account --key-file=${gcpCredential} --project=${env.param_gcp_project}
 
                         # Revoke Kube api access
-                        gcloud container clusters update ${env.param_cluster_name} --zone ${env.param_gcp_zone} --no-enable-master-authorized-networks
+                        gcloud container clusters update ${env.param_cluster_name} --zone ${env.param_gcp_zone} --no-enable-master-authorized-networks ||true
 
                         # Revoke agent access
                         gcloud compute firewall-rules delete ${env.param_cluster_name}-jenkins-access --project=${env.param_gcp_project} --quiet ||true
@@ -562,12 +577,11 @@ def authorizeJenkinsAgent() {
     }
 }
 
-def terraformRun(command, tfModule, extraVars="") {
-    sh """
-        set -ex
+def terraformRun(command, tfModule, extraVars='') {
+    sh """ #!/bin/bash -xe
         cd ${terraformHome}/env_types/${env.param_cluster_type}/${tfModule}/
 
-        export TF_DATA_DIR=/tmp/.terraform-${env.param_cluster_name}-\$(basename "$PWD")
+        export TF_DATA_DIR=/tmp/.terraform-${env.param_cluster_name}-${tfModule}
         
         terraform init -backend-config="bucket=${env.param_cluster_name}-tfstate"
 
@@ -577,10 +591,11 @@ def terraformRun(command, tfModule, extraVars="") {
             -var-file=../../../env_profiles/${env.param_cluster_name}.tfvars
         fi
 
+        echo "Execute ${command} on ${tfModule} state"
+
         terraform ${command} -auto-approve ${extraVars} \
         -var-file=${secrets} \
         -var-file=../../../env_profiles/${env.param_cluster_name}.tfvars
-        
     """
 }
 
