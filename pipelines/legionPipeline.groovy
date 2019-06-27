@@ -567,19 +567,19 @@ def terraformRun(command, tfModule, extraVars="") {
         set -ex
         cd ${terraformHome}/env_types/${env.param_cluster_type}/${tfModule}/
 
-        export TF_DATA_DIR=/tmp/.terraform-${CLUSTER_NAME}-\$(basename "$PWD")
+        export TF_DATA_DIR=/tmp/.terraform-${env.param_cluster_name}-\$(basename "$PWD")
         
-        terraform init -backend-config="bucket=${CLUSTER_NAME}-tfstate"
+        terraform init -backend-config="bucket=${env.param_cluster_name}-tfstate"
 
         if [ ${command} = "apply" ]; then
             terraform plan ${extraVars} \
             -var-file=${secrets} \
-            -var-file=../../../env_profiles/${CLUSTER_NAME}.tfvars
+            -var-file=../../../env_profiles/${env.param_cluster_name}.tfvars
         fi
 
         terraform ${command} -auto-approve ${extraVars} \
         -var-file=${secrets} \
-        -var-file=../../../env_profiles/${CLUSTER_NAME}.tfvars
+        -var-file=../../../env_profiles/${env.param_cluster_name}.tfvars
         
     """
 }
