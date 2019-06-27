@@ -1,5 +1,5 @@
 def buildDescription(){
-   if ( "${env.param_cluster_name}" ) {
+   if (env.param_cluster_name) {
         currentBuild.description = "${env.param_cluster_name} ${env.param_git_branch}"
     } else {
         currentBuild.description = "${env.param_profile} ${env.param_git_branch}"
@@ -308,7 +308,7 @@ def setupGcpAccess() {
 
         # Setup Kube api access
         gcloud container clusters get-credentials ${env.param_cluster_name} --zone ${env.param_gcp_zone} --project=${env.param_gcp_project}
-        gcloud container clusters update ${env.param_cluster_name} --zone ${env.param_gcp_zone} --enable-master-authorized-networks --master-authorized-networks "${env.agentWanIp}/32"
+        gcloud container clusters update ${env.param_cluster_name} --zone ${env.param_gcp_zone} --enable-master-authorized-networks --master-authorized-networks "${env.agentWanIp}/32,86.57.255.92/32"
         
         # Setup firewall rule
         gcloud compute firewall-rules create ${env.param_cluster_name}-jenkins-access \
@@ -371,12 +371,15 @@ def runRobotTests(tags="") {
                             downloadSecrets(vault)
 
                             sh """
-                                cp .secrets.yaml /opt/legion/ && cd /opt/legion && \
+                                cp .secrets.yaml /opt/legion/ && cd /opt/legion
+
                                 echo "Starting robot tests"
-                                make CLUSTER_NAME=${env.param_profile} LEGION_VERSION=${env.param_legion_version} e2e-robot || true
+                                make CLUSTER_NAME=${env.param_profile} \
+                                     LEGION_VERSION=${env.param_legion_version} e2e-robot || true
 
                                 echo "Starting python tests"
-                                make CLUSTER_NAME=${env.param_profile} LEGION_VERSION=${env.param_legion_version} e2e-python || true
+                                make CLUSTER_NAME=${env.param_profile} \
+                                     LEGION_VERSION=${env.param_legion_version} e2e-python || true
 
                                 cp -R target/ ${WORKSPACE}
                             """
@@ -425,7 +428,7 @@ def runRobotTestsAtGcp(tags="") {
         file(credentialsId: "${env.credentials_name}-tests", variable: 'testcreds')]) {
             withAWS(credentials: 'kops') {
                 wrap([$class: 'AnsiColorBuildWrapper', colorMapName: "xterm"]) {
-                    docker.image("${env.param_docker_repo}/legion-pipeline-agent:${env.param_legion_version}").inside("-e HOME=/opt/legion -u root -e GOOGLE_APPLICATION_CREDENTIALS=${gcpCredential} -e CLUSTER_NAME=${env.param_full_cluster_name} -e CREDENTIAL_SECRETS=/opt/legion/.secrets.yaml -e PATH_TO_PROFILES_DIR=/opt/legion/profiles/ -e LEGION_VERSION=${env.param_legion_version}") {
+                    docker.image("${env.param_docker_repo}/legion-pipeline-agent:${env.param_legion_version}").inside("-e HOME=/opt/legion -u root") {
                         stage('Run Robot tests') {
                             dir("${WORKSPACE}"){
                                 def tags_list = tags.toString().trim().split(',')
@@ -450,14 +453,24 @@ def runRobotTestsAtGcp(tags="") {
                                 setupGcpAccess()
 
                                 sh """
-                                    cp ${testcreds} /opt/legion/.secrets.yaml && cd /opt/legion && mkdir /opt/legion/profiles && \
+                                    cp ${testcreds} /opt/legion/.secrets.yaml 
+                                    cd /opt/legion 
+                                    mkdir /opt/legion/profiles
                                     ln -sf /opt/legion/.secrets.yaml /opt/legion/profiles/${env.param_full_cluster_name}.yml
 
                                     echo "Starting robot tests"
-                                    make e2e-robot || true
+                                    make GOOGLE_APPLICATION_CREDENTIALS=${gcpCredential} \
+                                         CLUSTER_NAME=${env.param_full_cluster_name} \
+                                         CREDENTIAL_SECRETS=/opt/legion/.secrets.yaml \
+                                         PATH_TO_PROFILES_DIR=/opt/legion/profiles/ \
+                                         LEGION_VERSION=${env.param_legion_version} e2e-robot || true
 
-                                    #echo "Starting python tests"
-                                    #make e2e-python || true
+                                    echo "Starting python tests"
+                                    make GOOGLE_APPLICATION_CREDENTIALS=${gcpCredential} \
+                                         CLUSTER_NAME=${env.param_full_cluster_name} \
+                                         CREDENTIAL_SECRETS=/opt/legion/.secrets.yaml \
+                                         PATH_TO_PROFILES_DIR=/opt/legion/profiles/ \
+                                         LEGION_VERSION=${env.param_legion_version} e2e-python || true
 
                                     cp -R target/ ${WORKSPACE}
                                 """

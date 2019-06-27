@@ -20,5 +20,6 @@ deployment: ~      # name of deployment
 base_domain: ~       # DNS name of environment
 cluster_name: ~ # unique KOPS cluster name
 docker_repo: ~ # docker registry with builded images
-legion_data_bucket_prefix: ~ # S3 bucket name prefix
+legion_data_bucket: ~ # S3 bucket name
 tmp_dir: ~                          # directory for storing temporary files (on host
+cloud_type: ~ # name of a cloud provider
