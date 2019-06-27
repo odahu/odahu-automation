@@ -5,6 +5,7 @@ pipeline {
         //Input parameters
         param_git_branch = "${params.GitBranch}"
         param_cluster_name = "${params.ClusterName}"
+        param_cluster_type = "${params.ClusterType}"
         param_legion_infra_version = "${params.LegionInfraVersion}"
         param_legion_version = "${params.LegionVersion}"
         param_docker_repo = "${params.DockerRepo}"
@@ -14,8 +15,8 @@ pipeline {
         param_deploy_legion = "${params.DeployLegion}"
         param_use_regression_tests = "${params.UseRegressionTests}"
         param_tests_tags = "${params.TestsTags}"
-        param_full_cluster_name = "${params.FullClusterName}"
         //Job parameters
+        full_cluster_name = "gke_${params.GcpProject}_${params.GcpZone}_${params.ClusterName}"
         gcpCredential = "gcp-epmd-legn-legion-automation"
         sharedLibPath = "pipelines/legionPipeline.groovy"
         cleanupContainerVersion = "latest"

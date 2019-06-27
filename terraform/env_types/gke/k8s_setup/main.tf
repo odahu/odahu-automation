@@ -42,4 +42,5 @@ module "k8s_setup" {
   keycloak_db_pass          = "${var.keycloak_db_pass}"
   keycloak_pg_user          = "${var.keycloak_pg_user}"
   keycloak_pg_pass          = "${var.keycloak_pg_pass}"
+  network_name              = "${var.network_name}"
 }

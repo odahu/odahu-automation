@@ -51,6 +51,9 @@ variable "docker_repo" {
 variable "dns_zone_name" {
   description = "Cluster root DNS zone name"
 }
+variable "network_name" {
+  description = "The VPC network to host the cluster in"
+}
 
 ########################
 # Prometheus monitoring

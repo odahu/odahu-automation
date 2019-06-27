@@ -18,7 +18,8 @@ module "firewall" {
   allowed_ips                 = "${var.allowed_ips}"
   cluster_name                = "${var.cluster_name}"
   network_name                = "${module.vpc.network_name}"
-  bastion_tag                 = "${var.cluster_name}-bastion"
+  bastion_tag                 = "${var.bastion_tag}"
+  gke_node_tag                = "${var.gke_node_tag}"
 }
 
 module "vpc_peering" {
@@ -72,6 +73,8 @@ module "gke_cluster" {
   dns_zone_name               = "${var.dns_zone_name}"
   root_domain                 = "${var.root_domain}"
   secrets_storage             = "${var.secrets_storage}"
-  bastion_tags                = ["${var.cluster_name}-bastion"]
+  k8s_version                 = "${var.k8s_version}"
+  node_version                = "${var.node_version}"
+  bastion_tag                 = "${var.bastion_tag}"
+  gke_node_tag                = "${var.gke_node_tag}"
 }
-

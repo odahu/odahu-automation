@@ -5,6 +5,7 @@ pipeline {
         //Input parameters
         param_git_branch = "${params.GitBranch}"
         param_cluster_name = "${params.ClusterName}"
+        param_cluster_type = "${params.ClusterType}"
         param_legion_infra_version = "${params.LegionInfraVersion}"
         param_docker_repo = "${params.DockerRepo}"
         param_helm_repo = "${params.HelmRepo}"

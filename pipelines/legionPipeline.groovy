@@ -54,52 +54,31 @@ def createGCPCluster() {
         file(credentialsId: "${env.param_cluster_name}-gcp-secrets", variable: 'secrets')]) {
             withAWS(credentials: 'kops') {
                 wrap([$class: 'AnsiColorBuildWrapper', colorMapName: "xterm"]) {
-                    docker.image("${env.param_docker_repo}/k8s-terraform:${env.param_legion_infra_version}").inside("-e GOOGLE_CREDENTIALS=${gcpCredential} -u root") {
+                    docker.image("${env.param_docker_repo}/k8s-terraform:${env.param_legion_infra_version}").inside("-e GOOGLE_CREDENTIALS=${gcpCredential} CLUSTER_NAME=${env.param_cluster_name} -u root") {
                         stage('Create GCP resources') {
                             sh """
                             set -ex
-                            # Create GCP resources
+                            # Activate service account
                             gcloud auth activate-service-account --key-file=${gcpCredential} --project=${env.param_gcp_project}
-                            cd ${terraformHome}/envs/${env.param_cluster_name}/gke_create/
+                            """
 
-                            terraform init
-                            terraform plan --var-file=${secrets} -var="agent_cidr=${env.agentWanIp}/32"
-                            terraform apply -auto-approve --var-file=${secrets} -var="agent_cidr=${env.agentWanIp}/32"
+                            terraformRun("apply", "gke_create", '-var="agent_cidr=${env.agentWanIp}/32"')
 
+                            sh """
                             # Authorize Kube api access
                             gcloud container clusters get-credentials ${env.param_cluster_name} --zone ${env.param_gcp_zone} --project=${env.param_gcp_project}
                             """
                         }
                         stage('Init HELM') {
+                            terraformRun("apply", "helm_init")
                             sh """
-                            set -ex
-                            # Init HELM on cluster
-                            cd ${terraformHome}/envs/${env.param_cluster_name}/helm_init/
-                            terraform init
-                            terraform plan --var-file=${secrets}
-                            terraform apply -auto-approve --var-file=${secrets}
-
                             # Init Helm repo (workaround for https://github.com/terraform-providers/terraform-provider-helm/issues/23)
                             helm init --client-only
                             """
                         }
                         stage('Setup K8S Legion dependencies') {
+                            terraformRun("apply", "k8s_setup")
                             sh """
-                            set -ex
-                            # Setup Legion K8S dependencies
-                            cd ${terraformHome}/envs/${env.param_cluster_name}/k8s_setup/
-
-                            terraform init
-                            terraform plan --var-file=${secrets} \
-                            -var="legion_infra_version=${env.param_legion_infra_version}" \
-                            -var="legion_helm_repo=${env.param_helm_repo}" \
-                            -var="docker_repo=${env.param_docker_repo}"
-
-                            terraform apply -auto-approve --var-file=${secrets} \
-                            -var="legion_infra_version=${env.param_legion_infra_version}" \
-                            -var="legion_helm_repo=${env.param_helm_repo}" \
-                            -var="docker_repo=${env.param_docker_repo}"
-
                             # TODO: move cleanup to post stage
                             gcloud container clusters update ${env.param_cluster_name} --zone ${env.param_gcp_zone} --no-enable-master-authorized-networks
                             """
@@ -178,21 +157,14 @@ def deployLegionToGCP() {
 
                             # Init Helm repo (workaround for https://github.com/terraform-providers/terraform-provider-helm/issues/23)
                             helm init --client-only
-
-                            cd ${terraformHome}/envs/${env.param_cluster_name}/legion/
-                            terraform init
-                            terraform plan --var-file=${secrets} \
-                            -var="legion_infra_version=${env.param_legion_infra_version}" \
-                            -var="legion_version=${env.param_legion_version}" \
-                            -var="legion_helm_repo=${env.param_helm_repo}" \
-                            -var="docker_repo=${env.param_docker_repo}"
-
-                            terraform apply -auto-approve --var-file=${secrets} \
-                            -var="legion_infra_version=${env.param_legion_infra_version}" \
-                            -var="legion_version=${env.param_legion_version}" \
-                            -var="legion_helm_repo=${env.param_helm_repo}" \
-                            -var="docker_repo=${env.param_docker_repo}"
                             """
+                            
+                            tfDeployVars='-var="legion_infra_version=${env.param_legion_infra_version}" \
+                            -var="legion_version=${env.param_legion_version}" \
+                            -var="legion_helm_repo=${env.param_helm_repo}" \
+                            -var="docker_repo=${env.param_docker_repo}"'
+
+                            terraformRun("apply", "legion", "${tfDeployVars}")
                         }
                     }
                 }
@@ -221,23 +193,12 @@ def destroyGcpCluster() {
 
                             # Init Helm repo (workaround for https://github.com/terraform-providers/terraform-provider-helm/issues/23)
                             helm init --client-only
-
-                            cd ${terraformHome}/envs/${env.param_cluster_name}/legion/
-                            terraform init
-                            terraform destroy -auto-approve --var-file=${secrets}
-
-                            cd ${terraformHome}/envs/${env.param_cluster_name}/k8s_setup/
-                            terraform init
-                            terraform destroy -auto-approve --var-file=${secrets}
-
-                            cd ${terraformHome}/envs/${env.param_cluster_name}/helm_init/
-                            terraform init
-                            terraform destroy -auto-approve --var-file=${secrets}
-
-                            cd ${terraformHome}/envs/${env.param_cluster_name}/gke_create/
-                            terraform init
-                            terraform destroy -auto-approve --var-file=${secrets} -var="agent_cidr=${env.agentWanIp}/32"
                             """
+
+                            terraformRun("destroy", "legion")
+                            terraformRun("destroy", "k8s_setup")
+                            terraformRun("destroy", "helm_init")
+                            terraformRun("destroy", "gke_create", '-var="agent_cidr=${env.agentWanIp}/32"')
                         }
                     }
                 }
@@ -599,6 +560,28 @@ def authorizeJenkinsAgent() {
             }
         }
     }
+}
+
+def terraformRun(command, tfModule, extraVars="") {
+    sh """
+        set -ex
+        cd ${terraformHome}/env_types/${env.param_cluster_type}/${tfModule}/
+
+        export TF_DATA_DIR=/tmp/.terraform-${CLUSTER_NAME}-$(basename "$PWD")
+        
+        terraform init -backend-config="bucket=${CLUSTER_NAME}-tfstate"
+
+        if [ ${command} = "apply" ]; then
+            terraform plan ${extraVars} \
+            -var-file=${secrets} \
+            -var-file=../../../env_profiles/${CLUSTER_NAME}.tfvars
+        fi
+
+        terraform ${command} -auto-approve ${extraVars} \
+        -var-file=${secrets} \
+        -var-file=../../../env_profiles/${CLUSTER_NAME}.tfvars
+        
+    """
 }
 
 def setBuildMeta(updateVersionScript) {

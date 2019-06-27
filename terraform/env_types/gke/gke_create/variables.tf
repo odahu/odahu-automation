@@ -48,11 +48,8 @@ variable "aws_cidr" {
 variable "aws_route_table_id" {
   description = "AWS Route table ID"
 }
-variable "config_context_auth_info" {
-  description = "Legion cluster context auth"
-}
-variable "config_context_cluster" {
-  description = "Legion cluster context name"
+variable "gke_node_tag" {
+  description = "GKE cluster nodes tag"
 }
 
 #############
@@ -63,12 +60,12 @@ variable "location" {
   description = "The location (region or zone) in which the cluster master will be created"
 }
 variable "k8s_version" {
-  default = "1.12.7-gke.7"
+  default = "1.13.6"
   description = "Kubernetes master version"
 }
 variable "node_version" {
   description = "K8s version for Nodes. If no value is provided, this defaults to the value of k8s_version."
-  default     = "1.12.7-gke.7"
+  default     = "1.13.6-gke.6"
 }
 variable "allowed_ips" {
   description = "CIDR to allow access from"
@@ -110,7 +107,7 @@ variable "nodes_sa" {
 variable "bastion_machine_type" {
   default = "f1-micro"
 }
-variable "bastion_tags" {
+variable "bastion_tag" {
   default = ""
   description = "Bastion network tags"
 }
