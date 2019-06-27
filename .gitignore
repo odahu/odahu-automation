@@ -68,7 +68,6 @@ hosts
 # Compiled files
 *.tfstate
 *.tfstate.backup
-*.tfvars
 _tfstate
 
 .DS_Store
