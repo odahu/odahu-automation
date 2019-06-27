@@ -567,7 +567,7 @@ def terraformRun(command, tfModule, extraVars="") {
         set -ex
         cd ${terraformHome}/env_types/${env.param_cluster_type}/${tfModule}/
 
-        export TF_DATA_DIR=/tmp/.terraform-${CLUSTER_NAME}-$(basename "$PWD")
+        export TF_DATA_DIR=/tmp/.terraform-${CLUSTER_NAME}-\$(basename "$PWD")
         
         terraform init -backend-config="bucket=${CLUSTER_NAME}-tfstate"
 
