@@ -2,7 +2,7 @@
 # Legion setup
 ########################################################
 module "legion" {
-  source                    = "../../../modules/legion"
+  source                    = "../../../../modules/legion"
   config_context_auth_info  = "${var.config_context_auth_info}"
   config_context_cluster    = "${var.config_context_cluster}"
   aws_profile               = "${var.aws_profile}"

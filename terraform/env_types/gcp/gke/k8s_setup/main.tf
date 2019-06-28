@@ -2,7 +2,7 @@
 # K8S setup
 ########################################################
 module "k8s_setup" {
-  source                    = "../../../modules/k8s"
+  source                    = "../../../../modules/k8s"
   config_context_auth_info  = "${var.config_context_auth_info}"
   config_context_cluster    = "${var.config_context_cluster}"
   aws_profile               = "${var.aws_profile}"

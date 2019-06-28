@@ -23,10 +23,10 @@ CLUSTER_NAME=<CLUSTER_NAME_HERE> TF_DATA_DIR=/tmp/.terraform_${CLUSTER_NAME}_$(b
 # TERRAFORM PLAN
 CLUSTER_NAME=<CLUSTER_NAME_HERE> TF_DATA_DIR=/tmp/.terraform_${CLUSTER_NAME}_$(basename "$PWD") bash -c  'terraform plan \
 -var-file=/PATH/TO/SECRET/VARIABLES.tfvars \
--var-file=../../../env_profiles/${CLUSTER_NAME}.tfvars \
+-var-file=../../../../env_profiles/${CLUSTER_NAME}.tfvars \
 -var="agent_cidr=<YOUR_IP_HERE>/32"'
 # TERRAFORM APPLY
-CLUSTER_NAME=<CLUSTER_NAME_HERE> TF_DATA_DIR=/tmp/.terraform_${CLUSTER_NAME}_$(basename "$PWD") bash -c  'terraform plan \
+CLUSTER_NAME=<CLUSTER_NAME_HERE> TF_DATA_DIR=/tmp/.terraform_${CLUSTER_NAME}_$(basename "$PWD") bash -c  'terraform apply \
 -var-file=/PATH/TO/SECRET/VARIABLES.tfvars \
--var-file=../../../env_profiles/${CLUSTER_NAME}.tfvars \
+-var-file=../../../../env_profiles/${CLUSTER_NAME}.tfvars \
 -var="agent_cidr=<YOUR_IP_HERE>/32"'

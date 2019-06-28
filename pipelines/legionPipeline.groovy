@@ -77,11 +77,12 @@ def createGCPCluster() {
                             """
                         }
                         stage('Setup K8S Legion dependencies') {
-                            terraformRun("apply", "k8s_setup")
-                            sh """
-                            # TODO: move cleanup to post stage
-                            gcloud container clusters update ${env.param_cluster_name} --zone ${env.param_gcp_zone} --no-enable-master-authorized-networks
-                            """
+
+                            tfExtraVars = "-var=\"legion_infra_version=${env.param_legion_infra_version}\" \
+                            -var=\"legion_helm_repo=${env.param_helm_repo}\" \
+                            -var=\"docker_repo=${env.param_docker_repo}\""
+
+                            terraformRun("apply", "k8s_setup", "${tfExtraVars}")
                         }
                     }
                 }
@@ -582,16 +583,16 @@ def terraformRun(command, tfModule, extraVars='') {
         terraform init -backend-config="bucket=${env.param_cluster_name}-tfstate"
 
         if [ ${command} = "apply" ]; then
-            terraform plan ${extraVars} \
+            terraform plan  \
             -var-file=${secrets} \
-            -var-file=../../../env_profiles/${env.param_cluster_name}.tfvars
+            -var-file=../../../../env_profiles/${env.param_cluster_name}.tfvars ${extraVars}
         fi
 
         echo "Execute ${command} on ${tfModule} state"
 
-        terraform ${command} -auto-approve ${extraVars} \
+        terraform ${command} -auto-approve \
         -var-file=${secrets} \
-        -var-file=../../../env_profiles/${env.param_cluster_name}.tfvars
+        -var-file=../../../../env_profiles/${env.param_cluster_name}.tfvars  ${extraVars} 
     """
 }
 

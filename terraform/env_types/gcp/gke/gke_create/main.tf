@@ -2,7 +2,7 @@
 # Networking
 ########################################################
 module "vpc" {
-  source                      = "../../../modules/gcp/networking/vpc"
+  source                      = "../../../../modules/gcp/networking/vpc"
   project_id                  = "${var.project_id}"
   region                      = "${var.region}"
   zone                        = "${var.zone}"
@@ -11,7 +11,7 @@ module "vpc" {
 }
 
 module "firewall" {
-  source                      = "../../../modules/gcp/networking/firewall"
+  source                      = "../../../../modules/gcp/networking/firewall"
   project_id                  = "${var.project_id}"
   region                      = "${var.region}"
   zone                        = "${var.zone}"
@@ -23,7 +23,7 @@ module "firewall" {
 }
 
 module "vpc_peering" {
-  source                      = "../../../modules/gcp/networking/vpc_peering"
+  source                      = "../../../../modules/gcp/networking/vpc_peering"
   project_id                  = "${var.project_id}"
   region                      = "${var.region}"
   zone                        = "${var.zone}"
@@ -43,7 +43,7 @@ module "vpc_peering" {
 # IAM
 ########################################################
 module "iam" {
-  source                      = "../../../modules/gcp/iam"
+  source                      = "../../../../modules/gcp/iam"
   project_id                  = "${var.project_id}"
   cluster_name                = "${var.cluster_name}"
   region                      = "${var.region}"
@@ -54,7 +54,7 @@ module "iam" {
 # GKE Cluster
 ########################################################
 module "gke_cluster" {
-  source                      = "../../../modules/gcp/gke_cluster"
+  source                      = "../../../../modules/gcp/gke_cluster"
   project_id                  = "${var.project_id}"
   cluster_name                = "${var.cluster_name}"
   region                      = "${var.region}"
