@@ -35,6 +35,7 @@ resource "kubernetes_namespace" "legion" {
     labels {
       project         = "legion"
       k8s-component   = "legion-app"
+      enclave         = "legion"
     }
     name = "${var.legion_namespace}"
   }

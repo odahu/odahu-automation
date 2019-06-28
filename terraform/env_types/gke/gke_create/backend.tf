@@ -1,6 +1,6 @@
 terraform {
   backend "gcs" {
-    prefix  = "helm_init"
+    prefix  = "gke_create"
   }
 }
 

@@ -200,10 +200,6 @@ def destroyGcpCluster() {
                             terraformRun("destroy", "legion")
                         }
 
-                        stage('Destroy legion TF state') {
-                            terraformRun("destroy", "k8s_setup")
-                        }
-
                         stage('Destroy k8s_setup TF state') {
                             terraformRun("destroy", "k8s_setup")
                         }

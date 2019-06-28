@@ -297,5 +297,5 @@ resource "null_resource" "kubectl_config" {
   provisioner "local-exec" {
     command     = "timeout 1200 bash -c 'until curl -sk https://${google_container_cluster.cluster.endpoint}; do sleep 20; done'"
   }
-  depends_on    = ["google_container_node_pool.cluster_nodes"]
+  depends_on    = ["google_container_node_pool.cluster_nodes", "google_container_node_pool.cluster_nodes_highcpu"]
 }
