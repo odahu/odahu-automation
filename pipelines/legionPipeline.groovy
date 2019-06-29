@@ -592,7 +592,7 @@ def terraformRun(command, tfModule, extraVars='') {
 
         terraform ${command} -auto-approve \
         -var-file=${secrets} \
-        -var-file=../../../../env_profiles/${env.param_cluster_name}.tfvars  ${extraVars} 
+        -var-file=../../../../env_profiles/${env.param_cluster_name}.tfvars ${extraVars}
     """
 }
 
