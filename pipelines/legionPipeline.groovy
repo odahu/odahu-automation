@@ -51,7 +51,7 @@ def createGCPCluster() {
     withCredentials([
     file(credentialsId: "${env.gcpCredential}", variable: 'gcpCredential')]) {
         withCredentials([
-        file(credentialsId: "${env.param_cluster_name}-gcp-secrets", variable: 'secrets')]) {
+        file(credentialsId: "${env.param_cluster_name}-secrets", variable: 'secrets')]) {
             withAWS(credentials: 'kops') {
                 wrap([$class: 'AnsiColorBuildWrapper', colorMapName: "xterm"]) {
                     docker.image("${env.param_docker_repo}/k8s-terraform:${env.param_legion_infra_version}").inside("-e GOOGLE_CREDENTIALS=${gcpCredential} -e CLUSTER_NAME=${env.param_cluster_name} -u root") {
@@ -142,7 +142,7 @@ def deployLegionToGCP() {
     withCredentials([
     file(credentialsId: "${env.gcpCredential}", variable: 'gcpCredential')]) {
         withCredentials([
-        file(credentialsId: "${env.param_cluster_name}-gcp-secrets", variable: 'secrets')]) {
+        file(credentialsId: "${env.param_cluster_name}-secrets", variable: 'secrets')]) {
             withAWS(credentials: 'kops') {
                 wrap([$class: 'AnsiColorBuildWrapper', colorMapName: "xterm"]) {
                     docker.image("${env.param_docker_repo}/k8s-terraform:${env.param_legion_infra_version}").inside("-e GOOGLE_CREDENTIALS=${gcpCredential} -u root") {
@@ -178,7 +178,7 @@ def destroyGcpCluster() {
     withCredentials([
     file(credentialsId: "${env.gcpCredential}", variable: 'gcpCredential')]) {
         withCredentials([
-        file(credentialsId: "${env.param_cluster_name}-gcp-secrets", variable: 'secrets')]) {
+        file(credentialsId: "${env.param_cluster_name}-secrets", variable: 'secrets')]) {
             withAWS(credentials: 'kops') {
                 wrap([$class: 'AnsiColorBuildWrapper', colorMapName: "xterm"]) {
                     docker.image("${env.param_docker_repo}/k8s-terraform:${env.param_legion_infra_version}").inside("-e GOOGLE_CREDENTIALS=${gcpCredential} -u root") {
@@ -398,7 +398,7 @@ def runRobotTestsAtGcp(tags="") {
     withCredentials([
     file(credentialsId: "${env.gcpCredential}", variable: 'gcpCredential')]) {
         withCredentials([
-        file(credentialsId: "${env.credentials_name}-tests", variable: 'testcreds')]) {
+        file(credentialsId: "${env.param_cluster_name}-testvars", variable: 'testcreds')]) {
             withAWS(credentials: 'kops') {
                 wrap([$class: 'AnsiColorBuildWrapper', colorMapName: "xterm"]) {
                     docker.image("${env.param_docker_repo}/legion-pipeline-agent:${env.param_legion_version}").inside("-e HOME=/opt/legion -u root") {
@@ -429,18 +429,18 @@ def runRobotTestsAtGcp(tags="") {
                                     cp ${testcreds} /opt/legion/.secrets.yaml 
                                     cd /opt/legion 
                                     mkdir /opt/legion/profiles
-                                    ln -sf /opt/legion/.secrets.yaml /opt/legion/profiles/${env.param_full_cluster_name}.yml
+                                    ln -sf /opt/legion/.secrets.yaml /opt/legion/profiles/${env.full_cluster_name}.yml
 
                                     echo "Starting robot tests"
                                     make GOOGLE_APPLICATION_CREDENTIALS=${gcpCredential} \
-                                         CLUSTER_NAME=${env.param_full_cluster_name} \
+                                         CLUSTER_NAME=${env.full_cluster_name} \
                                          CREDENTIAL_SECRETS=/opt/legion/.secrets.yaml \
                                          PATH_TO_PROFILES_DIR=/opt/legion/profiles/ \
                                          LEGION_VERSION=${env.param_legion_version} e2e-robot || true
 
                                     echo "Starting python tests"
                                     make GOOGLE_APPLICATION_CREDENTIALS=${gcpCredential} \
-                                         CLUSTER_NAME=${env.param_full_cluster_name} \
+                                         CLUSTER_NAME=${env.full_cluster_name} \
                                          CREDENTIAL_SECRETS=/opt/legion/.secrets.yaml \
                                          PATH_TO_PROFILES_DIR=/opt/legion/profiles/ \
                                          LEGION_VERSION=${env.param_legion_version} e2e-python || true

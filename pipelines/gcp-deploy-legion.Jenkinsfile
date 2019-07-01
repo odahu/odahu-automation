@@ -21,8 +21,6 @@ pipeline {
         sharedLibPath = "pipelines/legionPipeline.groovy"
         cleanupContainerVersion = "latest"
         terraformHome =  "/opt/legion/terraform"
-        credentials_name = "${params.ClusterName}-gcp-secrets"
-
     }
 
     stages {

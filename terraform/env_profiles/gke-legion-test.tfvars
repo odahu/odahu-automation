@@ -3,18 +3,18 @@
 ########################################################
 # set GOOGLE_CREDENTIALS=/path/to/creds/.json or enable the property below
 # gcp_credentials             = "/Users/alex/Work/legion/secrets/gcp-epmd-legn-legion-automation.json"
-cluster_name                = "gcp-legion-alpha"
+cluster_name                = "gke-legion-test"
 region                      = "us-east1"
 zone                        = "us-east1-b"
 root_domain                 = "gcp.epm.kharlamov.biz"
 secrets_storage             = "epm-legion-gcp-storage"
 aws_profile                 = "bdcc"
-config_context_auth_info    = "gke_or2-msq-epmd-legn-t1iylu_us-east1-b_gcp-legion-alpha"
-config_context_cluster      = "gke_or2-msq-epmd-legn-t1iylu_us-east1-b_gcp-legion-alpha"
+config_context_auth_info    = "gke_or2-msq-epmd-legn-t1iylu_us-east1-b_gke-legion-test"
+config_context_cluster      = "gke_or2-msq-epmd-legn-t1iylu_us-east1-b_gke-legion-test"
 aws_vpc_id                  = "vpc-5729c13e"
-network_name                = "gcp-legion-alpha-vpc"
-bastion_tag                 = "gcp-legion-alpha-bastion"
-gke_node_tag                = "gcp-legion-alpha-gke-node"
+network_name                = "gke-legion-test-vpc"
+bastion_tag                 = "gke-legion-test-bastion"
+gke_node_tag                = "gke-legion-test-gke-node"
 
 ########################################################
 # GKE module
@@ -27,7 +27,7 @@ dns_zone_name               = "legion"
 ########################################################
 legion_helm_repo            = "https://raw.githubusercontent.com/legion-platform/legion-helm-charts/master/"    
 docker_repo                 = "registry.hub.docker.com/legionplatformtest"
-cluster_context             = "gke_or2-msq-epmd-legn-t1iylu_us-east1-b_gcp-legion-alpha"
+cluster_context             = "gke_or2-msq-epmd-legn-t1iylu_us-east1-b_gke-legion-test"
 legion_infra_version        = "1.0.0-rc8"
 github_org_name             = "legion-auth-gcp"
 
@@ -35,4 +35,4 @@ github_org_name             = "legion-auth-gcp"
 # Legion
 ########################################################
 legion_version            = "1.0.0-rc12"
-legion_data_bucket        = "gcp-legion-alpha-data-store"
+legion_data_bucket        = "gke-legion-test-data-store"

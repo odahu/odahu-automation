@@ -202,6 +202,12 @@ resource "google_container_node_pool" "cluster_nodes_highcpu" {
       "project" = "legion"
     }
 
+    taint = {
+      key = "dedicated"
+      value = "jenkins-slave"
+      effect = "NO_SCHEDULE"
+    }
+
     oauth_scopes = [
       "https://www.googleapis.com/auth/compute",
       "https://www.googleapis.com/auth/devstorage.read_only",
