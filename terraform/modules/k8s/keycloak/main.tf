@@ -1,9 +1,6 @@
 provider "helm" {
   version         = "0.9.1"
-  install_tiller  = true
-  namespace       = "kube-system"
-  service_account = "tiller"
-  tiller_image    = "gcr.io/kubernetes-helm/tiller:v2.14.0"
+  install_tiller  = false
 }
 
 data "helm_repository" "legion" {

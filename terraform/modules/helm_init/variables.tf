@@ -4,3 +4,6 @@ variable "config_context_auth_info" {
 variable "config_context_cluster" {
   description = "Legion cluster context name"
 }
+variable "tiller_image" {
+  default = "gcr.io/kubernetes-helm/tiller:v2.14.0"
+}
