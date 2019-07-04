@@ -182,28 +182,30 @@ def destroyGcpCluster() {
             withAWS(credentials: 'kops') {
                 wrap([$class: 'AnsiColorBuildWrapper', colorMapName: "xterm"]) {
                     docker.image("${env.param_docker_repo}/k8s-terraform:${env.param_legion_infra_version}").inside("-e GOOGLE_CREDENTIALS=${gcpCredential} -u root") {
-                        stage('Setup cluster access') {
-                            setupGcpAccess()
-                            sh """
-                            # Init Helm repo (workaround for https://github.com/terraform-providers/terraform-provider-helm/issues/23)
-                            helm init --client-only
+                        stage('Remove Legion cluster if exists') {
+                            sh"""
+                            # Setup GCP credentials
+                            gcloud auth activate-service-account --key-file=${gcpCredential} --project=${env.param_gcp_project}
                             """
-                        }
-
-                        stage('Destroy legion TF state') {
-                            terraformRun("destroy", "legion")
-                        }
-
-                        stage('Destroy k8s_setup TF state') {
-                            terraformRun("destroy", "k8s_setup")
-                        }
-
-                         stage('Destroy helm_init TF state') {
-                            terraformRun("destroy", "helm_init")
-                        }
-
-                         stage('Destroy gke_create TF state') {
-                            terraformRun("destroy", "gke_create", "-var=\"agent_cidr=${env.agentWanIp}/32\"")
+                            cluster_status = sh(script: "gcloud container clusters list --zone ${env.param_gcp_zone}", returnStdout: true)
+                            if (!cluster_status.contains("${env.param_cluster_name}")) {
+                                currentBuild.result = 'SUCCESS'
+                                return
+                            }
+                            else {
+                                setupGcpAccess()
+                                sh """
+                                # Init Helm repo (workaround for https://github.com/terraform-providers/terraform-provider-helm/issues/23)
+                                helm init --client-only
+                                """
+                                terraformRun("destroy", "legion")
+                                terraformRun("destroy", "k8s_setup")
+                                terraformRun("destroy", "helm_init")
+                                sh"""
+                                gcloud compute firewall-rules delete ${env.param_cluster_name}-jenkins-access --project=${env.param_gcp_project} --quiet ||true
+                                """
+                                terraformRun("destroy", "gke_create", "-var=\"agent_cidr=${env.agentWanIp}/32\"")
+                            }
                         }
                     }
                 }
@@ -275,14 +277,13 @@ def setupGcpAccess() {
         # Setup Kube api access
         gcloud container clusters get-credentials ${env.param_cluster_name} --zone ${env.param_gcp_zone} --project=${env.param_gcp_project}
         gcloud container clusters update ${env.param_cluster_name} --zone ${env.param_gcp_zone} --enable-master-authorized-networks --master-authorized-networks "${env.agentWanIp}/32"
-        
+
         # Setup firewall rule
         gcloud compute firewall-rules create ${env.param_cluster_name}-jenkins-access \
         --project=${env.param_gcp_project} --network=${env.param_cluster_name}-vpc \
         --description "Allow incoming traffic from Jenkins agent" \
         --allow tcp:443 --direction INGRESS --source-ranges="${env.agentWanIp}/32"
-
-    """
+        """
 }
 
 def revokeGcpAccess() {
