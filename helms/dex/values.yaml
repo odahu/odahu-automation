@@ -58,6 +58,8 @@ service:
   port: 443
   targetPort: 5556
   name: dex
+  loadBalancerIP: ""
+  loadBalancerSourceRanges: []
 
 tls_secret: chart-example-tls
 

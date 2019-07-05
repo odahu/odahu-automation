@@ -1,0 +1,58 @@
+---
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: {{ template "k8s-gke-saa.fullname" . }}
+  namespace: kube-system
+  labels:
+    app: {{ template "k8s-gke-saa.fullname" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+spec:
+  template:
+    metadata:
+      labels:
+        app: {{ template "k8s-gke-saa.fullname" . }}
+{{- with .Values.podLabels }}
+{{ toYaml . | indent 8 }}
+{{- end }}
+{{- with .Values.podAnnotations }}
+      annotations:
+{{ toYaml . | indent 8 }}
+{{- end }}
+    spec:
+      hostNetwork: true
+      serviceAccountName: {{ template "k8s-gke-saa.serviceAccountName" . }}
+      containers:
+        - image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          name: {{ template "k8s-gke-saa.fullname" . }}
+          args:
+            - "--iptables=true"
+            - "--host-ip=$(HOST_IP)"
+            - "--node=$(NODE_NAME)"
+            - "--debug"
+            - "--verbose"
+            {{- if .Values.defaultSA }}
+            - "--default-service-account={{ .Values.defaultSA }}"
+            {{- end }}
+            {{- if .Values.defaultScopes }}
+            - "--default-scopes={{ .Values.defaultScopes }}"
+            {{- end }}
+          securityContext:
+            privileged: true
+            capabilities:
+              add: ["CAP_NET_ADMIN", "CAP_NET_RAW"]
+          env:
+            - name: HOST_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+          ports:
+            - containerPort: {{ .Values.daemonset.containerPort }}
+              hostPort: {{ .Values.daemonset.hostPort }}
+              name: http
+

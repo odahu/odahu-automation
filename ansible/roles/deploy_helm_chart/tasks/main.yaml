@@ -1,7 +1,7 @@
 ---
 
-- name: Get {{ src_chart_name }} chart status
-  shell: helm --kube-context {{ cluster_name }} ls --all {{ release_name }}
+- name: Get {{ release_name }} chart status
+  shell: helm --kube-context {{ cluster_name }} ls --all '^{{ release_name }}$'
   register: chart_status
 
 - include: delete_chart.yaml

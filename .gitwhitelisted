@@ -20,6 +20,8 @@
 ([Ll]ogin|[Pp]assword|[Pp]ass|[Tt]oken|[Uu]ser|[Uu]sername|[sS]ecret|[Pp]rivate)\\s*:\\s*(~|example|\\s?str,|\\s\\|\\-|$)
 #Allow ansible substitution like password: {{ .... }}
 ([Ll]ogin|[Pp]assword|[Pp]ass|[Tt]oken|[Uu]ser|[Uu]sername|[sS]ecret|[Pp]rivate)\\s*:\\s*(\"|\')?\\{\\{\\s.+\\s\\}\\}(\"|\')?
+#Allow terraform substitution like password: ${...}
+([Ll]ogin|[Pp]assword|[Pp]ass|[Tt]oken|[Uu]ser|[Uu]sername|[sS]ecret|[Pp]rivate)\\s*:\\s*(\"|\')?\\$\\{.+\\}(\"|\')?
 # Allow localhost IPv4 address
 127.0.0.1
 # Allow demo netmask
@@ -35,3 +37,9 @@ user: ""
 password: ""
 # Allow username : unicode (Jupyter config)
 username : unicode
+# Allow internal CIDRs
+10.0.*
+10.1.*
+0.0.0.0/0
+172.25.*
+86.57.255.92/32

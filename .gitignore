@@ -68,10 +68,13 @@ hosts
 # Compiled files
 *.tfstate
 *.tfstate.backup
+_tfstate
 
+.DS_Store
 # Module directory
 .terraform/
 
 # Chart dependencies
 /helms/legion/charts/
 /helms/legion-core/charts/
+

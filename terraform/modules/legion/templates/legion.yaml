@@ -1,0 +1,62 @@
+
+legionVersion: "${legion_version}"
+imagesRegistry: "${docker_repo}/"
+logLevel: debug
+
+ingress:
+  enabled: true
+  globalDomain: "${cluster_name}.${root_domain}"
+  tlsEnabled: true
+  tlsSecretName: "${cluster_name}-tls"
+
+security:
+  enabled: true
+
+modelApiSecurity:
+  enabled: true
+  jwt:
+    secret: "${enclave_jwt_secret}"
+    defaultTokenTTLInMinutes: "${api_jwt_ttl_minutes}"
+    maxTokenTTLInMinutes: "${max_token_ttl_minutes}"
+    defaultTokenTTLEndDate: "${api_jwt_exp_datetime}"
+
+metrics:
+  enabled: true
+
+modelMetrics:
+  enabled: true
+
+modelStorage:
+  buildPrefix: "${cluster_name}"
+  external:
+    protocol: "${model_docker_protocol}"
+    url: "${model_docker_url}"
+    user: "${docker_user}"
+    password: "${docker_password}"
+
+feedback:
+  enabled: true
+  output:
+    target: gcs
+    gcs:
+      bucket: "${legion_data_bucket}"
+      customSA: "${legion_collector_sa}"
+
+edge:
+  replicas: 2
+
+edi:
+  replicas: 2
+
+vcs:
+- name: "legion"
+  type: "git"
+  uri: "${model_examples_git_url}"
+  defaultReference: "${model_reference}"
+  creds: "${jenkins_git_key}"
+
+
+modelExecution:
+  limits:
+    cpu: "${model_resources_cpu}"
+    mem: "${model_resources_mem}"

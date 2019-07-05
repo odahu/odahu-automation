@@ -1,0 +1,12 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ template "k8s-gke-saa.serviceAccountName" . }}
+  namespace: kube-system
+  labels:
+    app: {{ template "k8s-gke-saa.name" . }}
+    chart: {{ template "k8s-gke-saa.chart" . }}
+    release: {{ .Release.Name }}
+---
+

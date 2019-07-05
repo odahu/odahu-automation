@@ -1,0 +1,9 @@
+**
+!Makefile
+!containers/**
+!ansible/**
+!helms/**
+!terraform/**
+!profiles/*_template.yaml
+!version.info
+**/.terraform

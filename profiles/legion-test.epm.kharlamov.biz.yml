@@ -31,4 +31,5 @@ base_domain: legion-test.epm.kharlamov.biz
 cluster_name: legion-test.epm.kharlamov.biz
 docker_repo: "nexus-local.cc.epm.kharlamov.biz:443/legion"
 tmp_dir: /tmp/
-legion_data_bucket_prefix: legion-data
+legion_data_bucket: "legion-test-data-store"
+cloud_type: aws

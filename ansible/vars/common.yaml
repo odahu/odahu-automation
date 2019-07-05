@@ -34,5 +34,3 @@ docker_repo: "nexus-local.cc.epm.kharlamov.biz:443/legion"
 enclaves:
   - company-a
 storageclass: efs
-legion_data_bucket_prefix: legion-data
-legion_data_s3_bucket: "{{ legion_data_bucket_prefix }}-{{ env_name }}-{{ enclave }}"
