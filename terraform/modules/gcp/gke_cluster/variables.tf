@@ -104,6 +104,18 @@ variable "gke_node_machine_type_highcpu" {
   default = "n1-highcpu-8"
   description = "Machine type of GKE nodes for high cpu pods"
 }
+variable "gke_node_machine_type_gpu" {
+  default = "n1-standard-2"
+  description = "Machine type of GKE nodes for gpu pods"
+}
+variable "gke_gpu_accelerator" {
+  default = "nvidia-tesla-p100"
+  description = "GPU accelerator for GPU node pool VMs"
+}
+variable "gpu_accelerators_count" {
+  default = "2"
+  description = "Number of GPU accelerators attached to node"
+}
 variable "gke_num_nodes_min" {
   default = "1"
   description = "Number of nodes in each GKE cluster zone"
@@ -111,6 +123,14 @@ variable "gke_num_nodes_min" {
 variable "gke_num_nodes_max" {
   default = "5"
   description = "Number of nodes in each GKE cluster zone"
+}
+variable "gke_highcpu_num_nodes_max" {
+  default = "2"
+  description = "Number of nodes in High CPU node pool"
+}
+variable "gke_gpu_num_nodes_max" {
+  default = "2"
+  description = "Number of nodes in GPU node pool"
 }
 variable "nodes_sa" {
   default = "default"

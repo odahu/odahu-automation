@@ -178,7 +178,7 @@ resource "google_container_node_pool" "cluster_nodes_highcpu" {
 
   autoscaling {
     min_node_count = "0"
-    max_node_count = "${var.gke_num_nodes_max}"
+    max_node_count = "${var.gke_highcpu_num_nodes_max}"
   }
 
   management {
@@ -206,6 +206,62 @@ resource "google_container_node_pool" "cluster_nodes_highcpu" {
       key = "dedicated"
       value = "jenkins-slave"
       effect = "NO_SCHEDULE"
+    }
+
+    oauth_scopes = [
+      "https://www.googleapis.com/auth/compute",
+      "https://www.googleapis.com/auth/devstorage.read_only",
+      "https://www.googleapis.com/auth/cloud-platform",
+      "https://www.googleapis.com/auth/logging.write",
+      "https://www.googleapis.com/auth/monitoring",
+    ]
+  }
+}
+
+
+########################################################
+# Node Pool GPU
+########################################################
+
+resource "google_container_node_pool" "cluster_nodes_gpu" {
+  provider              = "google-beta"
+  project               = "${var.project_id}"
+  name                  = "${var.cluster_name}-gpu-node-pool"
+  location              = "${var.location}"
+  cluster               = "${var.cluster_name}"
+  initial_node_count    = 0
+  depends_on            = ["google_container_cluster.cluster"]
+  version               = "${var.node_version}"
+
+  autoscaling {
+    min_node_count = "0"
+    max_node_count = "${var.gke_gpu_num_nodes_max}"
+  }
+
+  management {
+    auto_repair  = false
+    auto_upgrade = false
+  }
+
+  node_config {
+    preemptible      = false
+    machine_type     = "${var.gke_node_machine_type_gpu}"
+    disk_size_gb     = "${var.node_disk_size_gb}"
+    service_account  = "${var.nodes_sa}"
+    image_type       = "COS"
+    tags             = ["${var.gke_node_tag}"]
+
+    guest_accelerator{
+      type = "${var.gke_gpu_accelerator}"
+      count = "${var.gpu_accelerators_count}"
+    }
+
+    metadata {
+      disable-legacy-endpoints = "true"
+    }
+
+    labels {
+      "project" = "legion"
     }
 
     oauth_scopes = [
