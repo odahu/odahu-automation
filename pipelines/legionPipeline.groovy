@@ -252,6 +252,26 @@ def updateTLSCert() {
     }
 }
 
+def updateTLSCertGCP() {
+    withCredentials([
+    file(credentialsId: "${env.gcpCredential}", variable: 'gcpCredential')]) {
+        withAWS(credentials: 'kops') {
+            wrap([$class: 'AnsiColorBuildWrapper', colorMapName: "xterm"]) {
+                docker.image("${env.param_docker_repo}/k8s-ansible:${env.param_legion_infra_version}").inside("-e HOME=/opt/legion -e HOME=/opt/legion -e GCE_EMAIL=${env.param_gcp_sa_email} -e GCE_PROJECT=${env.param_gcp_project} -e GCE_CREDENTIALS_FILE_PATH=${gcpCredential} -u root") {
+                    stage('Reissue TLS Certificates') {
+                        sh """
+                        cd ${ansibleHome} && \
+                        ansible-playbook update-tls-certificate-gcp.yml \
+                        ${ansibleVerbose} \
+                        --extra-vars "cluster_name=${env.param_cluster_name}"
+                        """
+                    }
+                }
+            }
+        }
+    }
+}
+
 def downloadSecrets(String vault) {
     sh """
         set -e

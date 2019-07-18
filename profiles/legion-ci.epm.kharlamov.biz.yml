@@ -33,3 +33,4 @@ docker_repo: "nexus-local.cc.epm.kharlamov.biz:443/legion"
 tmp_dir: /tmp/
 legion_data_bucket: "legion-ci-data-store"
 cloud_type: aws
+dns_hosting: "route53"

@@ -5,12 +5,16 @@ ler52_acme_certificate_check: yes
 tls_acme_url_debug: "https://acme-staging-v02.api.letsencrypt.org/directory"
 tls_cert_remaining_days_before_renewal: 10
 tls_cert_common_name: "{{ base_domain }}"
+tls_subject_domain: "{{ base_domain }}"
 tls_route_53_domain: "{{ route53_zone }}"
 tls_cert_sans: []
 tls_cert_key_usages:
 - digitalSignature
 - keyEncipherment
 tls_key_size: 2048
+remote_tls_location: "vault/certificates"
+remote_tls_key_location: "{{ remote_tls_location }}/{{ tls_key_file_name }}"
+remote_tls_fullchain_location: "{{ remote_tls_location }}/{{ tls_fullchain_file_name }}"
 tmp_ssl_dir: "/srv/ssl"
 tls_cert_dir: "{{ tmp_ssl_dir }}/{{ tls_cert_common_name }}"
 tls_new_cert_dir: "{{ tmp_ssl_dir }}/new_cert"

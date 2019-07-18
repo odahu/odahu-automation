@@ -40,9 +40,9 @@
   openssl_csr:
     path: "{{ tls_new_cert_dir }}/{{ tls_csr_file_name }}"
     privatekey_path: "{{ tls_new_cert_dir }}/{{ tls_key_file_name }}"
-    common_name: "{{ tls_cert_common_name }}"
+    common_name: "{{ tls_subject_domain }}"
     key_usage: "{{ tls_cert_key_usages }}"
-    subject_alt_name: "DNS:{{ tls_cert_common_name }},DNS:*.{{ tls_cert_common_name }}"
+    subject_alt_name: "DNS:{{ tls_subject_domain }},DNS:*.{{ tls_subject_domain }}"
   register: generate_csr
 
 - name: set the CSR file permissions

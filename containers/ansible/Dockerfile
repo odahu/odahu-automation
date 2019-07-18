@@ -17,7 +17,7 @@ ENV LANG=en_US.UTF-8
 ENV LANGUAGE=en_US.UTF-8
 
 # Install ansible with dependencies from pip
-RUN pip install ansible==2.7.11 boto==2.49.0 boto3==1.9.169 awscli==1.14.44 cryptography==2.7
+RUN pip install ansible==2.7.11 boto==2.49.0 boto3==1.9.169 awscli==1.14.44 cryptography==2.7 apache-libcloud==2.5.0
 
  # Install ansible dependencies
 RUN apt-get install -y \

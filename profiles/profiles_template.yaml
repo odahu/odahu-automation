@@ -23,3 +23,4 @@ docker_repo: ~ # docker registry with builded images
 legion_data_bucket: ~ # S3 bucket name
 tmp_dir: ~                          # directory for storing temporary files (on host
 cloud_type: ~ # name of a cloud provider
+dns_hosting: ~ # route53 or cloudDNS where the DNS zone hosted
