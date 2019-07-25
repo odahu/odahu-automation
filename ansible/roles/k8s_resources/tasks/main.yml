@@ -15,3 +15,5 @@
 - include: kube2iam.yaml
 - include: kube-fluentd.yaml
 - include: monitoring.yaml
+- include: istio.yaml
+- include: knative.yaml

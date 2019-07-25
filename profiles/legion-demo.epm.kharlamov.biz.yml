@@ -26,7 +26,7 @@ examples_to_test:
   - Digit-Recognition
 model_id_to_test: income
 enclaves:
-  - company-a
+  - legion
 namespace: default
 deployment: legion
 base_domain: legion-demo.epm.kharlamov.biz

@@ -28,6 +28,7 @@ pipeline {
         param_hatch_rate = "${params.HatchRate}"
         param_model_git_verify_host = "${params.ModelGitVerifyHost}"
         param_model_git_jenkins_credential_id = "${params.modelGitJenkinsCredentialID}"
+        param_model_name = "${params.ModelName}"
     }
 
     stages {
@@ -67,7 +68,9 @@ pipeline {
                     legion.legionScope {
                         dir("${WORKSPACE}/ml_source") {
                             sh """
-                                export MODEL_SERVER_URL="https://edge-${env.param_legion_namespace}.${env.param_profile}"
+                                export MODEL_HOST="https://edge.${env.param_profile}"
+                                export MODEL_DEPLOYMENT_NAME="${env.param_model_name}"
+
                                 pip3 install locustio==0.8.1
                                 locust -f ${env.param_model_performance_script} --no-web -c ${env.param_number_of_clients} -r ${env.param_hatch_rate} -n ${env.param_number_of_requests} --host "https://edge-${env.param_legion_namespace}.${env.param_profile}" --logfile "locust.log"
                             """

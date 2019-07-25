@@ -1,5 +1,5 @@
 provider "helm" {
-  version         = "0.9.1"
+  version         = "v0.9.1"
   install_tiller  = false
 }
 
@@ -89,16 +89,17 @@ data "template_file" "oauth2-proxy_values" {
     github_org_name           = "${var.github_org_name}"
     client_secret             = "${var.dex_client_secret}"
     client_id                 = "${var.dex_client_id}"
+    cookie_secret             = "${var.dex_cookie_secret}"
     dex_cookie_expire         = "${var.dex_cookie_expire}"
+    oauth2_image_tag          = "${var.oauth2_image_tag}"
   }
 }
 
 resource "helm_release" "oauth2-proxy" {
     name            = "oauth2-proxy"
-    chart           = "legion_github/oauth2-proxy"
-    version         = "${var.legion_infra_version}"
+    chart           = "stable/oauth2-proxy"
+    version         = "${var.oauth2_helm_chart_version}"
     namespace       = "kube-system"
-    repository      = "${data.helm_repository.legion.metadata.0.name}"
     recreate_pods   = "true"
 
     values = [

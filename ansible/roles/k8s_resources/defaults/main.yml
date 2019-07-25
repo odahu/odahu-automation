@@ -15,3 +15,14 @@ kube_fluentd:
   services_s3_bucket_name: epm-legion-data-dev-logs
   services_s3_bucket_region: us-east-2
   # services_s3_bucket_prefix: cluster_logs
+
+oauth_proxy_values_file: "{{ tmp_dir }}/oauth2-proxy.{{ cluster_name }}.yml"
+oauth_proxy_chart_version: "0.12.2"
+
+istio_version: "1.2.2"
+istio_cni_version: "0.1.0"
+istio_chart_rep_url: https://storage.googleapis.com/istio-release/releases/{{ istio_version }}/charts
+istio_namespace: istio-system
+istio_values_file: "{{ tmp_dir }}/istio.{{ cluster_name }}.yml"
+
+knative_namespace: "knative-serving"

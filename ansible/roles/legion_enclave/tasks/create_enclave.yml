@@ -1,11 +1,11 @@
 ---
 
 # Create kubernetes namespace for enclave
-- name: "Remove {{ enclave }} namespace"
-  shell: "kubectl --context {{ cluster_name }} delete namespace {{ enclave }} --ignore-not-found=true --grace-period=10"
+- name: "Remove {{ legion_namespace }} namespace"
+  shell: "kubectl --context {{ cluster_name }} delete namespace {{ legion_namespace }} --ignore-not-found=true --grace-period=10"
 
-- name: "Check that {{ enclave }} namespace has been removed"
-  shell: "kubectl --context {{ cluster_name }} get namespace {{ enclave }}"
+- name: "Check that {{ legion_namespace }} namespace has been removed"
+  shell: "kubectl --context {{ cluster_name }} get namespace {{ legion_namespace }}"
   register: namespace_check
   until: namespace_check.stderr.find(' not found') != -1
   retries: 10
@@ -13,24 +13,24 @@
   ignore_errors: true
 
 - name: WORKAROUND delete pods in phase terminating
-  shell: kubectl --context {{ cluster_name }} --namespace {{ enclave }}  delete --grace-period=0 --force po $(kubectl --namespace {{ enclave }} get po -o wide | grep Terminating | awk '{ print $1 }') || true
+  shell: kubectl --context {{ cluster_name }} --namespace {{ legion_namespace }}  delete --grace-period=0 --force po $(kubectl --namespace {{ legion_namespace }} get po -o wide | grep Terminating | awk '{ print $1 }') || true
 
-- name: "Confirm that {{ enclave }} namespace has been removed"
-  shell: "kubectl --context {{ cluster_name }} get namespace {{ enclave }}"
+- name: "Confirm that {{ legion_namespace }} namespace has been removed"
+  shell: "kubectl --context {{ cluster_name }} get namespace {{ legion_namespace }}"
   register: namespace_check
   until: namespace_check.stderr.find(' not found') != -1
   retries: 10
   delay: 10
   ignore_errors: true
 
-- name: "Create {{ enclave }} namespace"
-  shell: "kubectl --context {{ cluster_name }} create namespace {{ enclave }}"
+- name: "Create {{ legion_namespace }} namespace"
+  shell: "kubectl --context {{ cluster_name }} create namespace {{ legion_namespace }}"
 
-- name: "Label {{ enclave }} namespace"
-  shell: "kubectl --context {{ cluster_name }} label ns {{ enclave }} enclave={{ enclave }} --overwrite"
+- name: "Label {{ legion_namespace }} namespace"
+  shell: "kubectl --context {{ cluster_name }} label ns {{ legion_namespace }} enclave={{ enclave }} istio-injection=enabled --overwrite"
 
 - name: Copy TLS secret
-  shell: "kubectl --context {{ cluster_name }} get secret {{ source_secret_name }} -o json --namespace default | jq '.metadata.namespace = \"{{ enclave }}\"' | jq '.metadata.name = \"{{ base_domain }}-tls\"' | kubectl create --context {{ cluster_name }} -f -"
+  shell: "kubectl --context {{ cluster_name }} get secret {{ source_secret_name }} -o json --namespace default | jq '.metadata.namespace = \"{{ legion_namespace }}\"' | jq '.metadata.name = \"{{ base_domain }}-tls\"' | kubectl create --context {{ cluster_name }} -f -"
 
 # Create S3 resources
 - name: Create S3 buckets for enclave resources

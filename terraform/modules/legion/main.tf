@@ -36,6 +36,7 @@ resource "kubernetes_namespace" "legion" {
       project         = "legion"
       k8s-component   = "legion-app"
       enclave         = "legion"
+      istio-injection = "enabled"
     }
     name = "${var.legion_namespace}"
   }
@@ -84,23 +85,9 @@ resource "kubernetes_secret" "tls_legion" {
     "tls.crt"   = "${data.aws_s3_bucket_object.tls-secret-crt.body}}"
   }
   type          = "kubernetes.io/tls"
-}
 
-# TODO: fix the hack with k8s resources cleanup
-# resource "null_resource" "cleanup_crds" {
-#   triggers { build_number = "${timestamp()}" }
-#   provisioner "local-exec" {
-#     command     = "kubectl delete crd modeldeployments.legion.legion-platform.org modeltrainings.legion.legion-platform.org vcscredentials.legion.legion-platform.org; kubectl delete validatingwebhookconfigurations.admissionregistration.k8s.io legion-validating-webhook-configuration; kubectl delete mutatingwebhookconfigurations.admissionregistration.k8s.io legion-mutating-webhook-configuration || true"
-#   }
-# }
-# TODO: fix legion chart to add support of helm upgrade
-# resource "null_resource" "delete_legion_chart" {
-#   triggers { build_number = "${timestamp()}" }
-#   provisioner "local-exec" {
-#     command     = "helm ls |grep legion && helm delete --purge legion ||true"
-#   }
-#   depends_on    = ["null_resource.cleanup_crds"]
-# }
+  depends_on = ["kubernetes_namespace.legion"]
+}
 
 ########################################################
 # Install Legion charts
@@ -118,7 +105,8 @@ data "template_file" "legion_values" {
     cluster_name            = "${var.cluster_name}"
     docker_repo             = "${var.docker_repo}"
     legion_version          = "${var.legion_version}"
-    enclave_jwt_secret      = "${var.enclave_jwt_secret}"
+    api_private_key         = "${var.api_private_key}"
+    api_public_key          = "${var.api_public_key}"
     api_jwt_ttl_minutes     = "${var.api_jwt_ttl_minutes}"
     max_token_ttl_minutes   = "${var.max_token_ttl_minutes}"
     api_jwt_exp_datetime    = "${var.api_jwt_exp_datetime}"
@@ -147,4 +135,6 @@ resource "helm_release" "legion" {
     values = [
       "${data.template_file.legion_values.rendered}"
     ]
+
+    depends_on = ["kubernetes_namespace.legion"]
 }

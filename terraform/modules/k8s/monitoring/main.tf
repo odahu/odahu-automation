@@ -1,20 +1,6 @@
 provider "helm" {
-  version         = "0.9.1"
+  version         = "v0.9.1"
   install_tiller  = false
-}
-
-provider "google" {
-  version     = "~> 2.2"
-  region      = "${var.region}"
-  zone        = "${var.zone}"
-  project     = "${var.project_id}"
-}
-
-provider "aws" {
-  version                   = "2.13"
-  region                    = "${var.region_aws}"
-  shared_credentials_file   = "${var.aws_credentials_file}"
-  profile                   = "${var.aws_profile}"
 }
 
 data "helm_repository" "legion" {

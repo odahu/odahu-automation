@@ -15,13 +15,15 @@ security:
 modelApiSecurity:
   enabled: true
   jwt:
-    secret: "${enclave_jwt_secret}"
+    private_key: "${api_private_key}"
+    public_key: "${api_public_key}"
     defaultTokenTTLInMinutes: "${api_jwt_ttl_minutes}"
     maxTokenTTLInMinutes: "${max_token_ttl_minutes}"
     defaultTokenTTLEndDate: "${api_jwt_exp_datetime}"
 
 metrics:
   enabled: true
+  dashboardFolder: "/tmp/dashboards/legion"
 
 modelMetrics:
   enabled: true
@@ -41,9 +43,6 @@ feedback:
     gcs:
       bucket: "${legion_data_bucket}"
       customSA: "${legion_collector_sa}"
-
-edge:
-  replicas: 2
 
 edi:
   replicas: 2

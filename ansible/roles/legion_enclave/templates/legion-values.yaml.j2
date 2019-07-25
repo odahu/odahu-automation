@@ -1,4 +1,3 @@
-
 legionVersion: "{{ legion_version }}"
 imagesRegistry: "{{ docker_repo }}/"
 logLevel: debug
@@ -17,13 +16,16 @@ security:
 modelApiSecurity:
   enabled: true
   jwt:
-    secret: "{{ enclave_jwt_secret }}"
+    private_key: "{{ api.private_key }}"
+    public_key: "{{ api.public_key }}"
+
     defaultTokenTTLInMinutes: "{{ api.jwt_ttl_minutes | default('120') }}"
     maxTokenTTLInMinutes: "{{ max_token_ttl_minutes | default('259200') }}"
     defaultTokenTTLEndDate: "{{ api.jwt_exp_datetime | default('') }}"
 
 metrics:
   enabled: true
+  dashboardFolder: "/tmp/dashboards/legion"
 
 modelMetrics:
   enabled: true
@@ -42,9 +44,6 @@ feedback:
     s3:
       bucket: "{{ legion_data_bucket }}"
       region: "{{ collector.region }}"
-
-edge:
-  replicas: 2
 
 edi:
   replicas: 2

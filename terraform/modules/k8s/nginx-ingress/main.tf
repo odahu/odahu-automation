@@ -1,5 +1,5 @@
 provider "helm" {
-  version         = "0.9.1"
+  version         = "v0.9.1"
   install_tiller  = false
 }
 

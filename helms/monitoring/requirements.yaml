@@ -1,4 +1,8 @@
 dependencies:
-- name: prometheus-operator
-  version: "4.3.0"
-  repository: "@stable"
+  - name: grafana
+    alias: legion-grafana
+    version: "3.5.3"
+    repository: "@stable"
+  - name: prometheus-operator
+    version: "5.12.3"
+    repository: "@stable"

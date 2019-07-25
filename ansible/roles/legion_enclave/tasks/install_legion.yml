@@ -26,6 +26,7 @@
     - "modeltrainings"
     - "vcscredentials"
     - "modeldeployments"
+    - "modelroutes"
 
 - name: Install legion enclave helm chart
   include_role:
@@ -33,7 +34,6 @@
   vars:
     release_name: legion
     values_file: "{{ tmp_values_file }}"
-    namespace: "{{ enclave }}"
-    src_chart_name: legion
+    namespace: "{{ legion_namespace }}"
     chart_name: legion-helm/legion
     chart_version: "{{ legion_version }}"

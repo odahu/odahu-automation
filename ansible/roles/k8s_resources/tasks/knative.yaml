@@ -1,0 +1,35 @@
+---
+- name: Create knative namespace
+  shell: kubectl --context "{{ cluster_name }}" get ns "{{ knative_namespace }}" || kubectl --context "{{ cluster_name }}" create ns "{{ knative_namespace }}"
+
+- name: Remove tls secret from the knative namespace
+  shell: kubectl --context {{ cluster_name }} -n {{ knative_namespace }} delete secret {{ base_domain }}-tls --ignore-not-found
+
+- name: Copy TLS secret to the knative namespace
+  shell: "kubectl --context {{ cluster_name }} get secret {{ source_secret_name }} -o json --namespace kube-system | jq '.metadata.namespace = \"{{ knative_namespace }}\"' | jq '.metadata.name = \"{{ base_domain }}-tls\"' | kubectl apply -n {{ knative_namespace }} --context {{ cluster_name }} -f -"
+
+- name: "Label {{ knative_namespace }} namespace"
+  shell: "kubectl --context {{ cluster_name }} label ns {{ knative_namespace }} istio-injection=enabled --overwrite"
+
+# TODO: Remove after resolving of the issue https://github.com/legion-platform/legion/issues/150
+- name: Delete Knative CRDs
+  shell: "kubectl --context {{ cluster_name }} delete --ignore-not-found crd {{ item }}.knative.dev"
+  loop:
+    - "certificates.networking.internal"
+    - "clusteringresses.networking.internal"
+    - "images.caching.internal"
+    - "podautoscalers.autoscaling.internal"
+    - "revisions.serving"
+    - "routes.serving"
+    - "serverlessservices.networking.internal"
+    - "services.serving"
+    - "configurations.serving"
+
+- name: Install Knative helm chart
+  include_role:
+    name: deploy_helm_chart
+  vars:
+    release_name: knative
+    namespace: "{{ knative_namespace }}"
+    chart_name: legion-helm/knative
+    chart_version: "{{ legion_infra_version }}"

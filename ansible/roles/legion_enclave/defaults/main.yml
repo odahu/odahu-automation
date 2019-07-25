@@ -1,5 +1,5 @@
 ---
-namespace: "{{ enclave }}"
+legion_namespace: "legion"
 source_secret_name: "{{ base_domain }}-tls"
 k8s_api_retry_number_max_limit: 10
 k8s_api_retry_delay_sec: 3

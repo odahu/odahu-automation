@@ -117,6 +117,9 @@ variable "dex_static_user_name" {
 variable "dex_static_user_id" {
   description = "Dex static user user id"
 }
+variable "dex_cookie_secret" {
+  description = "Dex cookie secret"
+}
 ##################
 # Keycloak
 ##################
@@ -137,4 +140,12 @@ variable "keycloak_pg_user" {
 }
 variable "keycloak_pg_pass" {
   description = "Keycloak postgres pass"
+}
+
+########################
+# Istio
+########################
+variable "istio_namespace" {
+  default     = "istio-system"
+  description = "istio namespace"
 }

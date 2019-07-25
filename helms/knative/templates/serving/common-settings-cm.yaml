@@ -1,0 +1,41 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+        {{- include "knative.labels" (dict "root" . "name" "common") | nindent 4 }}
+  name: config-logging
+  namespace: {{ .Release.Namespace }}
+        {{- if .Values.config.logging }}
+data:
+        {{ toYaml .Values.config.logging | nindent 2 }}
+        {{ else }}
+data: {}
+        {{- end }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+        {{- include "knative.labels" (dict "root" . "name" "common") | nindent 4 }}
+  name: config-observability
+  namespace: {{ .Release.Namespace }}
+        {{- if .Values.config.observability }}
+data:
+        {{ toYaml .Values.config.observability | nindent 2 }}
+        {{ else }}
+data: {}
+        {{- end }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+        {{- include "knative.labels" (dict "root" . "name" "common") | nindent 4 }}
+  name: config-domain
+  namespace: {{ .Release.Namespace }}
+        {{- if .Values.config.domain }}
+data:
+        {{ toYaml .Values.config.domain | nindent 2 }}
+        {{ else }}
+data: {}
+        {{- end }}

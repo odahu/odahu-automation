@@ -140,14 +140,6 @@ pipeline {
                         }
                     }
                 }
-                stage('Build oauth2-proxy') {
-                    steps {
-                        script {
-                            legion.buildLegionImage('k8s-oauth2-proxy', "containers/oauth2-proxy")
-                            legion.uploadDockerImage('k8s-oauth2-proxy')
-                        }
-                    }
-                }
             }
         }
 

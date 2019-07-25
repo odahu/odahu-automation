@@ -89,7 +89,7 @@ pipeline {
                     legion.legionScope {
                         sh """
                             legionctl md delete ${env.param_model_name} --ignore-not-found
-                            legionctl md create ${env.param_model_name} --image \$(kubectl get mt ${env.param_model_name} -o=jsonpath='{.status.modelImage}')
+                            legionctl md create ${env.param_model_name} --role-name "${env.param_model_name}" --image \$(kubectl get mt ${env.param_model_name} -o=jsonpath='{.status.modelImage}')
                         """
                     }
                 }
@@ -107,9 +107,8 @@ pipeline {
                         dir("${WORKSPACE}/ml_source") {
                             sh """
                                 pip3 install nose
-                                export MODEL_SERVER_URL="https://edge-${env.param_legion_namespace}.${env.param_profile}"
-                                export MODEL_ID="\$(kubectl get mt ${env.param_model_name} -o=jsonpath='{.status.id}')"
-                                export MODEL_VERSION="\$(kubectl get mt ${env.param_model_name} -o=jsonpath='{.status.version}')"
+                                export MODEL_HOST="https://edge.${env.param_profile}"
+                                export MODEL_DEPLOYMENT_NAME="${env.param_model_name}"
                                 nosetests ${env.param_model_work_dir}/tests --with-xunit --xunit-file "nosetests.xml"
                             """
 

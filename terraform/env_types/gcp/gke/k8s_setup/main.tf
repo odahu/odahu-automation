@@ -61,6 +61,7 @@ module "dex" {
   dex_static_user_name      = "${var.dex_static_user_name}"
   dex_static_user_id        = "${var.dex_static_user_id}"
   dex_client_id             = "${var.dex_client_id}"
+  dex_cookie_secret         = "${var.dex_cookie_secret}"
 }
 
 module "monitoring" {
@@ -82,6 +83,17 @@ module "monitoring" {
   monitoring_namespace      = "${var.monitoring_namespace}"
   tls_secret_key            = "${module.base_setup.tls_secret_key}"
   tls_secret_crt            = "${module.base_setup.tls_secret_crt}"
+}
+
+module "istio" {
+  source                    = "../../../../modules/k8s/istio"
+  root_domain               = "${var.root_domain}"
+  cluster_name              = "${var.cluster_name}"
+  monitoring_namespace      = "${var.monitoring_namespace}"
+  tls_secret_key            = "${module.base_setup.tls_secret_key}"
+  tls_secret_crt            = "${module.base_setup.tls_secret_crt}"
+  legion_helm_repo          = "${var.legion_helm_repo}"
+  legion_infra_version      = "${var.legion_infra_version}"
 }
 
 module "gke-saa" {

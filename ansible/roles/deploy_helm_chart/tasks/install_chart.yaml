@@ -1,7 +1,14 @@
 ---
+- stat: path="{{ values_file }}"
+  register: vf
+
+- name: Create the empty values file if it does not exist
+  shell: "touch {{ values_file }}"
+  when: not vf.stat.exists
+
 - name: Pre run with dumping
   shell: helm --kube-context {{ cluster_name }} install {{ chart_name }} --name {{ release_name }} --version={{ chart_version }} --namespace {{ namespace }} --debug --dry-run -f  {{ values_file }}
   register: helm_legion_install_output
 
-- name: Install {{ src_chart_name }} chart
-  shell: "helm --kube-context {{ cluster_name }} install {{ chart_name }} --name {{ release_name }} --version={{ chart_version }} --namespace {{ namespace }} --wait --timeout 600 -f  {{ values_file }}"
+- name: Install {{ release_name }} chart
+  shell: "helm --kube-context {{ cluster_name }} install {{ chart_name }} --name {{ release_name }} --version={{ chart_version }} --namespace {{ namespace }} --atomic --wait --timeout 600 -f  {{ values_file }}"

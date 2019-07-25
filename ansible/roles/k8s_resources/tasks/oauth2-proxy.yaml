@@ -1,17 +1,23 @@
 ---
 
-- name: Remove dex oauth2-proxy
-  command: "helm --kube-context {{ cluster_name }} del --purge dex-oauth2-proxy"
-  ignore_errors: true
-  when: dex.enabled
+- name: Generate cookie secret
+  set_fact:
+    cookie_secret: "{{ lookup('password', '/dev/null length=16 chars=ascii_letters') | b64encode }}"
 
 - name: Create Dex oauth2-proxy configuration (values) file
   template:
     src: oauth2-proxy.yml.j2
-    dest: "{{ tmp_dir }}/oauth2-proxy.{{ cluster_name }}.yml"
+    dest: "{{ oauth_proxy_values_file }}"
     mode: 0644
   when: dex.enabled
 
-- name: Install Dex oauth2-proxy
-  command: "helm --kube-context {{ cluster_name }} install legion-helm/oauth2-proxy --name dex-oauth2-proxy --version={{ legion_infra_version }} --namespace kube-system -f {{ tmp_dir }}/oauth2-proxy.{{ cluster_name }}.yml"
+- name: Install oauth2-proxy
+  include_role:
+    name: deploy_helm_chart
+  vars:
+    release_name: dex-oauth2-proxy
+    namespace: "kube-system"
+    values_file: "{{ oauth_proxy_values_file }}"
+    chart_name: stable/oauth2-proxy
+    chart_version: "{{ oauth_proxy_chart_version }}"
   when: dex.enabled

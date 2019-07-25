@@ -159,11 +159,12 @@ def deployLegionToGCP() {
                             # Init Helm repo (workaround for https://github.com/terraform-providers/terraform-provider-helm/issues/23)
                             helm init --client-only
                             """
-                            
+
                             tfDeployVars = "-var=\"legion_infra_version=${env.param_legion_infra_version}\" \
                             -var=\"legion_version=${env.param_legion_version}\" \
                             -var=\"legion_helm_repo=${env.param_helm_repo}\" \
-                            -var=\"docker_repo=${env.param_docker_repo}\""
+                            -var=\"docker_repo=${env.param_docker_repo}\"  \
+                            -var=\"model_reference=${commitID}\""
 
                             terraformRun("apply", "legion", "${tfDeployVars}")
                         }
@@ -221,7 +222,7 @@ def legionScope(Closure body) {
                 downloadSecrets(vault)
                 sh """
                     kubectl config set-context \$(kubectl config current-context) --namespace=${env.param_legion_namespace}
-                    legionctl login --edi https://edi-${env.param_legion_namespace}.${env.param_profile} --token "${env.param_dex_token}"
+                    legionctl login --edi https://edi.${env.param_profile} --token "${env.param_dex_token}"
                 """
 
                 body()
@@ -358,15 +359,12 @@ def runRobotTests(tags="") {
                             downloadSecrets(vault)
 
                             sh """
-                                cp .secrets.yaml /opt/legion/ && cd /opt/legion
+                                cp .secrets.yaml /opt/legion/
+                                cd /opt/legion
 
                                 echo "Starting robot tests"
                                 make CLUSTER_NAME=${env.param_profile} \
                                      LEGION_VERSION=${env.param_legion_version} e2e-robot || true
-
-                                echo "Starting python tests"
-                                make CLUSTER_NAME=${env.param_profile} \
-                                     LEGION_VERSION=${env.param_legion_version} e2e-python || true
 
                                 cp -R target/ ${WORKSPACE}
                             """
@@ -387,14 +385,6 @@ def runRobotTests(tags="") {
                             }
                             else {
                                 echo "No '*.xml' files for generating robot report"
-                                currentBuild.result = 'UNSTABLE'
-                            }
-
-                            if (fileExists('target/nosetests.xml')) {
-                                junit 'target/nosetests.xml'
-                            }
-                            else {
-                                echo "No '*.xml' files for generating nosetests report"
                                 currentBuild.result = 'UNSTABLE'
                             }
 
@@ -450,14 +440,8 @@ def runRobotTestsAtGcp(tags="") {
                                          CLUSTER_NAME=${env.full_cluster_name} \
                                          CREDENTIAL_SECRETS=/opt/legion/.secrets.yaml \
                                          PATH_TO_PROFILES_DIR=/opt/legion/profiles/ \
+                                         ROBOT_THREADS=3 \
                                          LEGION_VERSION=${env.param_legion_version} e2e-robot || true
-
-                                    echo "Starting python tests"
-                                    make GOOGLE_APPLICATION_CREDENTIALS=${gcpCredential} \
-                                         CLUSTER_NAME=${env.full_cluster_name} \
-                                         CREDENTIAL_SECRETS=/opt/legion/.secrets.yaml \
-                                         PATH_TO_PROFILES_DIR=/opt/legion/profiles/ \
-                                         LEGION_VERSION=${env.param_legion_version} e2e-python || true
 
                                     cp -R target/ ${WORKSPACE}
                                 """
@@ -478,14 +462,6 @@ def runRobotTestsAtGcp(tags="") {
                                 }
                                 else {
                                     echo "No '*.xml' files for generating robot report"
-                                    currentBuild.result = 'UNSTABLE'
-                                }
-
-                                if (fileExists('target/nosetests.xml')) {
-                                    junit 'target/nosetests.xml'
-                                }
-                                else {
-                                    echo "No '*.xml' files for generating nosetests report"
                                     currentBuild.result = 'UNSTABLE'
                                 }
 

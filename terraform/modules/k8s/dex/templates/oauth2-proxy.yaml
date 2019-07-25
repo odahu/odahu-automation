@@ -1,25 +1,44 @@
+fullnameOverride: oauth2-proxy
+
 config:
-  provider: oidc
-  redirect_url: "https://auth.${cluster_name}.${root_domain}/oauth2/callback"
-  oidc_issuer_url: "https://dex.${cluster_name}.${root_domain}"
-  whitelist_domain: ".${cluster_name}.${root_domain}"
-  cookie_domain: ".${cluster_name}.${root_domain}"
-  cookie_secure: true
-  cookie_expire: "${dex_cookie_expire}"
-  email_domains: "*"
-  github-org: "${github_org_name}"
-  set_authorization_header: true
-  skip_provider_button: true
-  scope: openid profile email offline_access groups
-  http_address: 0.0.0.0:4180
-  client_secret: "${client_secret}"
-  client_id: "${client_id}"
+  clientID: "${client_id}"
+  clientSecret: "${client_secret}"
+  cookieSecret: "${cookie_secret}"
+  configFile: |
+    provider = "iodc"
+    redirect_url = "https://auth.${cluster_name}.${root_domain}/oauth2/callback"
+    oidc_issuer_url = "https://dex.${cluster_name}.${root_domain}"
+    whitelist_domains = ".${cluster_name}.${root_domain}"
+    cookie_domain = ".${cluster_name}.${root_domain}"
+    cookie_secure = true
+    email_domains = "*"
+    set_authorization_header = true
+    skip_provider_button = true
+    scope = "openid profile email offline_access groups"
+    http_address = "0.0.0.0:4180"
+    pass_authorization_header = true
+
 ingress:
   path: /oauth2
   enabled: true
   hosts:
-    - "auth.${cluster_name}.${root_domain}"
+    - auth.${cluster_name}.${root_domain}
   tls:
-  - secretName: "${cluster_name}-tls"
-    hosts:
-    - "auth.${cluster_name}.${root_domain}"
+    - secretName: ${cluster_name}-tls
+      hosts:
+        - auth.${cluster_name}.${root_domain}
+
+image:
+  repository: quay.io/pusher/oauth2_proxy
+  tag: ${oauth2_image_tag}
+
+service:
+  port: 4180
+
+resources:
+  limits:
+    cpu: 200m
+    memory: 256Mi
+  requests:
+    cpu: 200m
+    memory: 128Mi

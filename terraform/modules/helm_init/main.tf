@@ -4,7 +4,7 @@ provider "kubernetes" {
 }
 
 provider "helm" {
-  version         = "0.9.1"
+  version         = "v0.9.1"
   install_tiller  = true
   namespace       = "kube-system"
   service_account = "tiller"

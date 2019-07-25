@@ -1,5 +1,5 @@
 pipeline {
-    agent { label 'ec2orchestrator'}
+    agent { label 'ec2orchestrator' }
 
     environment {
         //Input parameters
@@ -15,12 +15,14 @@ pipeline {
         param_deploy_legion = "${params.DeployLegion}"
         param_use_regression_tests = "${params.UseRegressionTests}"
         param_tests_tags = "${params.TestsTags}"
+        param_commitID = "${params.commitID}"
+        commitID = null
         //Job parameters
         full_cluster_name = "gke_${params.GcpProject}_${params.GcpZone}_${params.ClusterName}"
         gcpCredential = "gcp-epmd-legn-legion-automation"
         sharedLibPath = "pipelines/legionPipeline.groovy"
         cleanupContainerVersion = "latest"
-        terraformHome =  "/opt/legion/terraform"
+        terraformHome = "/opt/legion/terraform"
     }
 
     stages {
@@ -32,6 +34,16 @@ pipeline {
                     legion = load "${env.sharedLibPath}"
                     legion.getWanIp()
                     legion.buildDescription()
+
+                    // Set legion release commit id
+                    commitID = env.param_commitID ?: sh(script: "echo ${env.param_legion_version} | cut -f5 -d. | tr -d '\n'", returnStdout: true)
+                    print("Legion commit ID: ${commitID}")
+
+                    if (!(commitID)) {
+                        print('Can\'t get commit id for legion package')
+                        currentBuild.result = 'FAILURE'
+                        return
+                    }
                 }
             }
         }
@@ -47,7 +59,7 @@ pipeline {
             }
         }
 
-        stage('Run regression tests'){
+        stage('Run regression tests') {
             when {
                 expression { return param_use_regression_tests == "true" }
             }
@@ -59,7 +71,7 @@ pipeline {
             }
         }
     }
-    
+
     post {
         always {
             script {
