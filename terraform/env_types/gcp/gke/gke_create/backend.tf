@@ -1,6 +1,6 @@
 terraform {
   backend "gcs" {
-    prefix  = "gke_create"
+    prefix = "gke_create"
   }
 }
 
