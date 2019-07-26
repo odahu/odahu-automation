@@ -29,6 +29,16 @@ variable "region" {
   description = "Region of resources"
 }
 
+variable "infra_vpc_name" {
+  default = "infra-vpc"
+  description = "Region of resources"
+}
+
+variable "infra_zone_name" {
+  default = "ailifecycle-org-private"
+  description = "Region of resources"
+}
+
 variable "region_aws" {
   default     = "us-east-2"
   description = "Region of AWS resources"
@@ -48,6 +58,10 @@ variable "aws_vpc_id" {
 
 variable "gcp_cidr" {
   description = "GCP network CIDR"
+}
+
+variable "infra_cidr" {
+  description = "GCP infra network CIDR"
 }
 
 variable "aws_sg" {
@@ -140,4 +154,3 @@ variable "bastion_hostname" {
   default     = "bastion"
   description = "bastion hpstname"
 }
-
