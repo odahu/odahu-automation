@@ -1,5 +1,5 @@
 provider "helm" {
-  version         = "v0.9.1"
+  version         = "v0.10.0"
   install_tiller  = false
 }
 
@@ -62,4 +62,5 @@ resource "helm_release" "monitoring" {
     values = [
       "${data.template_file.monitoring_values.rendered}"
     ]
+    depends_on    = ["data.helm_repository.legion"]
 }

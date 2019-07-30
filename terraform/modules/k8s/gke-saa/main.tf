@@ -1,5 +1,5 @@
 provider "helm" {
-  version         = "v0.9.1"
+  version         = "v0.10.0"
   install_tiller  = false
 }
 
@@ -35,4 +35,5 @@ resource "helm_release" "gke_saa" {
     values = [
       "${data.template_file.gke_saa_values.rendered}"
     ]
+    depends_on  = ["data.helm_repository.legion"]
 }

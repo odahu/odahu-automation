@@ -64,6 +64,12 @@ resource "google_container_cluster" "cluster" {
   #   }
   # }
 
+  maintenance_policy {
+    daily_maintenance_window {
+      start_time = "02:00"
+    }
+  }
+
   private_cluster_config {
     enable_private_endpoint = false
     enable_private_nodes    = true

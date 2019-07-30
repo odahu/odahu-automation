@@ -1,5 +1,5 @@
 provider "helm" {
-  version         = "v0.9.1"
+  version         = "v0.10.0"
   install_tiller  = false
 }
 
@@ -78,6 +78,7 @@ resource "helm_release" "dex" {
     #     name    = "service.loadBalancerSourceRanges"
     #     value   = "{${join(",", var.allowed_ips)}}"
     # }
+    depends_on  = ["data.helm_repository.legion"]
 }
 
 # Oauth2 proxy
@@ -105,4 +106,5 @@ resource "helm_release" "oauth2-proxy" {
     values = [
       "${data.template_file.oauth2-proxy_values.rendered}"
     ]
+    depends_on  = ["data.helm_repository.legion"]
 }

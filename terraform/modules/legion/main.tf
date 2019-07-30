@@ -136,5 +136,5 @@ resource "helm_release" "legion" {
       "${data.template_file.legion_values.rendered}"
     ]
 
-    depends_on = ["kubernetes_namespace.legion"]
+    depends_on = ["kubernetes_namespace.legion", "data.helm_repository.legion"]
 }
