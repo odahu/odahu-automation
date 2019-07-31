@@ -11,6 +11,9 @@ pipeline {
         param_helm_repo = "${params.HelmRepo}"
         param_gcp_project = "${params.GcpProject}"
         param_gcp_zone = "${params.GcpZone}"
+        legionCicdGitlabKey = "legion-profiles-gitlab-key"
+        param_legion_cicd_repo = "${params.CicdRepoGitUrl}"
+        param_legion_cicd_branch = "${params.CicdRepoGitBranch}"
         //Job parameters
         gcpCredential = "gcp-epmd-legn-legion-automation"
         sharedLibPath = "pipelines/legionPipeline.groovy"
@@ -28,7 +31,7 @@ pipeline {
                     legion.getWanIp()
                     legion.buildDescription()
                 }
-                sshagent(["${env.legionProfilesGitlabKey}"]) {
+                sshagent(["${env.legionCicdGitlabKey}"]) {
                     sh"""
                       ssh-keyscan git.epam.com >> ~/.ssh/known_hosts
                       git clone ${env.param_legion_cicd_repo} legion-cicd

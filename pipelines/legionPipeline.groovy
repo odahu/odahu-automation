@@ -76,6 +76,9 @@ def createGCPCluster() {
                             helm init --client-only
                             """
                         }
+                        stage('Add infra private DNS zone resolving') {
+                            terraformRun("apply", "dns_zone")
+                        }
                         stage('Setup K8S Legion dependencies') {
 
                             tfExtraVars = "-var=\"legion_infra_version=${env.param_legion_infra_version}\" \
@@ -563,25 +566,25 @@ def authorizeJenkinsAgent() {
     }
 }
 
-def terraformRun(command, tfModule, extraVars='') {
+def terraformRun(command, tfModule, extraVars='', workPath="${terraformHome}/env_types/${env.param_cluster_type}/${tfModule}/", backendConfigBucket="bucket=${env.param_cluster_name}-tfstate", varFile="../../../../env_profiles/${env.param_cluster_name}.tfvars") {
     sh """ #!/bin/bash -xe
-        cd ${terraformHome}/env_types/${env.param_cluster_type}/${tfModule}/
+        cd ${workPath}
 
         export TF_DATA_DIR=/tmp/.terraform-${env.param_cluster_name}-${tfModule}
         
-        terraform init -backend-config="bucket=${env.param_cluster_name}-tfstate"
+        terraform init -backend-config="${backendConfigBucket}"
 
         if [ ${command} = "apply" ]; then
             terraform plan  \
             -var-file=${secrets} \
-            -var-file=../../../../env_profiles/${env.param_cluster_name}.tfvars ${extraVars}
+            -var-file=${varFile} ${extraVars}
         fi
 
         echo "Execute ${command} on ${tfModule} state"
 
         terraform ${command} -auto-approve \
         -var-file=${secrets} \
-        -var-file=../../../../env_profiles/${env.param_cluster_name}.tfvars ${extraVars}
+        -var-file=${varFile} ${extraVars}
     """
 }
 
