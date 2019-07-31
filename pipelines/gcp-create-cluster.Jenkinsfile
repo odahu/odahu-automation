@@ -28,6 +28,13 @@ pipeline {
                     legion.getWanIp()
                     legion.buildDescription()
                 }
+                sshagent(["${env.legionProfilesGitlabKey}"]) {
+                    sh"""
+                      ssh-keyscan git.epam.com >> ~/.ssh/known_hosts
+                      git clone ${env.param_legion_cicd_repo} legion-cicd
+                      cd legion-cicd && git checkout ${env.param_legion_cicd_branch}
+                    """
+                }
             }
         }
 
