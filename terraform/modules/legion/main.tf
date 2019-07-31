@@ -80,8 +80,8 @@ resource "kubernetes_secret" "tls_legion" {
     namespace = var.legion_namespace
   }
   data = {
-    "tls.key" = "${data.aws_s3_bucket_object.tls-secret-key.body}}"
-    "tls.crt" = "${data.aws_s3_bucket_object.tls-secret-crt.body}}"
+    "tls.key" = data.aws_s3_bucket_object.tls-secret-key.body
+    "tls.crt" = data.aws_s3_bucket_object.tls-secret-crt.body
   }
   type = "kubernetes.io/tls"
 

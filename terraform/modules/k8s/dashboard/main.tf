@@ -46,7 +46,7 @@ resource "kubernetes_secret" "tls_dashboard" {
   }
   data = {
     "tls.key" = var.tls_secret_key
-    "tls.crt" = "${var.tls_secret_crt}}"
+    "tls.crt" = var.tls_secret_crt
   }
   type = "kubernetes.io/tls"
 }
