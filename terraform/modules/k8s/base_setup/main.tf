@@ -33,8 +33,8 @@ resource "kubernetes_secret" "tls_default" {
     namespace = element(var.tls_namespaces, count.index)
   }
   data = {
-    "tls.key" = "${data.aws_s3_bucket_object.tls-secret-key.body}}"
-    "tls.crt" = "${data.aws_s3_bucket_object.tls-secret-crt.body}}"
+    "tls.key" = data.aws_s3_bucket_object.tls-secret-key.body
+    "tls.crt" = data.aws_s3_bucket_object.tls-secret-crt.body
   }
   type = "kubernetes.io/tls"
 }
