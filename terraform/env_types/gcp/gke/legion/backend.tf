@@ -1,6 +1,6 @@
 terraform {
   backend "gcs" {
-    prefix  = "legion"
+    prefix = "legion"
   }
 }
 

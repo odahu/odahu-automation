@@ -160,8 +160,7 @@ def deployLegionToGCP() {
                             helm init --client-only
                             """
 
-                            tfDeployVars = "-var=\"legion_infra_version=${env.param_legion_infra_version}\" \
-                            -var=\"legion_version=${env.param_legion_version}\" \
+                            tfDeployVars = "-var=\"legion_version=${env.param_legion_version}\" \
                             -var=\"legion_helm_repo=${env.param_helm_repo}\" \
                             -var=\"docker_repo=${env.param_docker_repo}\"  \
                             -var=\"model_reference=${commitID}\""

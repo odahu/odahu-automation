@@ -1,6 +1,6 @@
 terraform {
   backend "gcs" {
-    prefix  = "k8s_setup"
+    prefix = "k8s_setup"
   }
 }
 

@@ -10,6 +10,7 @@ variable "root_domain" {
 variable "tls_secret_crt" {
   description = "Legion cluster TLS certificate"
 }
+
 variable "tls_secret_key" {
   description = "Legion cluster TLS key"
 }
@@ -36,3 +37,4 @@ variable "legion_infra_version" {
 variable "legion_helm_repo" {
   description = "Legion helm repo"
 }
+
