@@ -9,5 +9,5 @@
 #   value = "${module.gke_cluster.bastion_address}"
 # }
 output network_name {
-  value = module.gke_cluster.vpc.network_name
+  value = module.vpc.network_name
 }
