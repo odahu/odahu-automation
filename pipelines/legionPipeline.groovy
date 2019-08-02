@@ -218,7 +218,7 @@ def destroyGcpCluster() {
                                 terraformRun("destroy", "k8s_setup")
                                 terraformRun("destroy", "helm_init")
                                 script {
-                                   NETWORK_TO_REMOVE = terraformRun("output", "gke_create", "-json network_name").trim()
+                                   NETWORK_TO_REMOVE = terraformOutput("gke_create", "-json network_name").trim()
                                 }
                                 sh '''
                                    chmod 600 ~/.ssh/id_rsa
