@@ -80,7 +80,7 @@ def createGCPCluster() {
                         }
                         stage('Add infra private DNS zone resolving') {
                             script {
-                               NETWORK_TO_ADD = terraformOutput("output", "gke_create", "-json network_name").trim()
+                               NETWORK_TO_ADD = terraformOutput("gke_create", "-json network_name").trim()
                             }
                             sh '''
                                chmod 600 ~/.ssh/id_rsa
@@ -617,7 +617,7 @@ def terraformRun(command, tfModule, extraVars='', workPath="${terraformHome}/env
     """
 }
 
-def terraformOutput(command, tfModule, params = '-json', workPath="${terraformHome}/env_types/${env.param_cluster_type}/${tfModule}/", backendConfigBucket="bucket=${env.param_cluster_name}-tfstate") {
+def terraformOutput(tfModule, params = '-json', workPath="${terraformHome}/env_types/${env.param_cluster_type}/${tfModule}/", backendConfigBucket="bucket=${env.param_cluster_name}-tfstate") {
     sh """
         cd ${workPath}
         export TF_DATA_DIR=/tmp/.terraform-${env.param_cluster_name}-${tfModule}
