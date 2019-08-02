@@ -618,13 +618,14 @@ def terraformRun(command, tfModule, extraVars='', workPath="${terraformHome}/env
 }
 
 def terraformOutput(command, tfModule, params = '-json', workPath="${terraformHome}/env_types/${env.param_cluster_type}/${tfModule}/", backendConfigBucket="bucket=${env.param_cluster_name}-tfstate") {
+    sh """
+        cd ${workPath}
+        export TF_DATA_DIR=/tmp/.terraform-${env.param_cluster_name}-${tfModule}
+        terraform init -backend-config="${backendConfigBucket}"
+    """
     sh returnStdout:true, script: """ #!/bin/bash -xe
         cd ${workPath}
-
         export TF_DATA_DIR=/tmp/.terraform-${env.param_cluster_name}-${tfModule}
-        
-        terraform init -backend-config="${backendConfigBucket}"
-        
         terraform output ${params}
     """
 }
