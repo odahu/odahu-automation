@@ -80,7 +80,7 @@ def createGCPCluster() {
                         }
                         stage('Add infra private DNS zone resolving') {
                             script {
-                               NETWORK_TO_ADD = terraformRun("output", "gke_create", "-json network_name").trim()
+                               NETWORK_TO_ADD = terraformOutput("output", "gke_create", "-json network_name").trim()
                             }
                             sh '''
                                chmod 600 ~/.ssh/id_rsa
@@ -597,16 +597,11 @@ def terraformRun(command, tfModule, extraVars='', workPath="${terraformHome}/env
         export TF_DATA_DIR=/tmp/.terraform-${env.param_cluster_name}-${tfModule}
         
         terraform init -backend-config="${backendConfigBucket}"
-    """
-    sh returnStdout:true, script: """ #!/bin/bash -xe
-        cd ${workPath}
-
-        export TF_DATA_DIR=/tmp/.terraform-${env.param_cluster_name}-${tfModule}
         
-        if [ ${command} != "output" -a ${tfModule} = "dns" ]; then
+        if [ ${tfModule} = "dns" ]; then
             export TF_VAR_current_networks=\$(terraform output -json visibility_networks)
             terraform ${command} -auto-approve \
-            -var-file=${varFile} ${extraVars}
+              -var-file=${varFile} ${extraVars}
         elif [ ${command} = "apply" ]; then
             terraform plan  \
               -var-file=${secrets} \
@@ -614,13 +609,23 @@ def terraformRun(command, tfModule, extraVars='', workPath="${terraformHome}/env
             terraform ${command} -auto-approve \
               -var-file=${secrets} \
               -var-file=${varFile} ${extraVars}
-        elif [ ${command} = "output" ]; then
-            terraform ${command} ${extraVars}
         else
           terraform ${command} -auto-approve \
             -var-file=${secrets} \
             -var-file=${varFile} ${extraVars}
         fi
+    """
+}
+
+def terraformOutput(command, tfModule, params = '-json', workPath="${terraformHome}/env_types/${env.param_cluster_type}/${tfModule}/", backendConfigBucket="bucket=${env.param_cluster_name}-tfstate") {
+    sh returnStdout:true, script: """ #!/bin/bash -xe
+        cd ${workPath}
+
+        export TF_DATA_DIR=/tmp/.terraform-${env.param_cluster_name}-${tfModule}
+        
+        terraform init -backend-config="${backendConfigBucket}"
+        
+        terraform output ${params}
     """
 }
 
