@@ -198,6 +198,11 @@ def destroyGcpCluster() {
                                 # Init Helm repo (workaround for https://github.com/terraform-providers/terraform-provider-helm/issues/23)
                                 helm init --client-only
                                 """
+                                // Temp workaround for #968 issue
+                                sh"""
+                                # Remove auto-generated fw rules
+                                gcloud compute firewall-rules list --filter='name:k8s- AND network:${env.param_cluster_name}-vpc' --format='value(name)' --project='${env.param_gcp_project}'| while read i; do if (gcloud compute firewall-rules describe --project='${env.param_gcp_project}'); then gcloud compute firewall-rules delete \$i --quiet; fi; done
+                                """
                                 terraformRun("destroy", "legion")
                                 terraformRun("destroy", "k8s_setup")
                                 terraformRun("destroy", "helm_init")
