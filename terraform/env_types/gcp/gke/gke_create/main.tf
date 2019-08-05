@@ -23,14 +23,20 @@ module "firewall" {
 }
 
 module "vpc_peering" {
-  source                      = "../../../../modules/gcp/networking/vpc_peering_gce"
-  project_id                  = var.project_id
-  region                      = var.region
-  zone                        = var.zone
-  gcp_network_1_name          = module.vpc.network_name
-  gcp_network_1_range         = [var.gcp_cidr]
-  gcp_network_2_name          = var.infra_vpc_name
-  gcp_network_2_range         = [var.infra_cidr]
+  source               = "../../../../modules/gcp/networking/vpc_peering"
+  project_id           = var.project_id
+  region               = var.region
+  zone                 = var.zone
+  cluster_name         = var.cluster_name
+  region_aws           = var.region_aws
+  aws_profile          = var.aws_profile
+  aws_credentials_file = var.aws_credentials_file
+  aws_vpc_id           = var.aws_vpc_id
+  gcp_cidr             = var.gcp_cidr
+  aws_sg               = var.aws_sg
+  aws_cidr             = var.aws_cidr
+  gcp_network          = module.vpc.network_name
+  aws_route_table_id   = var.aws_route_table_id
 }
 
 ########################################################
