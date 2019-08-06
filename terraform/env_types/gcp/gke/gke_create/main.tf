@@ -45,7 +45,7 @@ module "vpc_peering_gce" {
   region                      = var.region
   zone                        = var.zone
   gcp_network_1_name          = module.vpc.network_name
-  gcp_network_1_range         = [var.gcp_cidr]
+  gcp_network_1_range         = [var.gcp_cidr, var.pods_cidr]
   gcp_network_2_name          = var.infra_vpc_name
   gcp_network_2_range         = [var.infra_cidr]
 }

@@ -65,6 +65,10 @@ variable "gcp_cidr" {
   description = "GCP network CIDR"
 }
 
+variable "pods_cidr" {
+  description = "GKE pods CIDR"
+}
+
 variable "aws_sg" {
   description = "AWS SG id for gcp access"
 }

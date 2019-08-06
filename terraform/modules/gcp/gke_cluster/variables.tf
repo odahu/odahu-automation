@@ -105,6 +105,11 @@ variable "master_ipv4_cidr_block" {
   description = "GKE master CIDR"
 }
 
+variable "cluster_ipv4_cidr" {
+  default     = "10.40.0.0/14"
+  description = "GKE pods CIDR"
+}
+
 #############
 # Node pool
 #############
