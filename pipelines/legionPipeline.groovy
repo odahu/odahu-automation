@@ -206,6 +206,7 @@ def destroyGcpCluster() {
                                 terraformRun("destroy", "legion")
                                 terraformRun("destroy", "k8s_setup")
                                 terraformRun("destroy", "helm_init")
+
                                 sh"""
                                 gcloud compute firewall-rules delete ${env.param_cluster_name}-jenkins-access --project=${env.param_gcp_project} --quiet ||true
                                 """
