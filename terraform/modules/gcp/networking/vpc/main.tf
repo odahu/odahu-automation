@@ -29,10 +29,8 @@ resource "google_compute_router" "router" {
   network = google_compute_network.vpc.self_link
 }
 
-resource "google_compute_address" "nat_gw_ip" {
-  name         = "${var.cluster_name}-nat-gw-ip"
-  region       = var.region
-  address_type = "EXTERNAL"
+data "google_compute_address" "nat_gw_ip" {
+  name = "${var.cluster_name}-nat-gw"
 }
 
 resource "google_compute_router_nat" "nat" {
@@ -40,7 +38,7 @@ resource "google_compute_router_nat" "nat" {
   router                             = google_compute_router.router.name
   region                             = var.region
   nat_ip_allocate_option             = "MANUAL_ONLY"
-  nat_ips                            = [google_compute_address.nat_gw_ip.self_link]
+  nat_ips                            = [data.google_compute_address.nat_gw_ip.self_link]
   source_subnetwork_ip_ranges_to_nat = "ALL_SUBNETWORKS_ALL_PRIMARY_IP_RANGES"
 }
 

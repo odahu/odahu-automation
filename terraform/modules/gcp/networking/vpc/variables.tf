@@ -18,4 +18,3 @@ variable "region" {
 variable "subnet_cidr" {
   description = "Subnet range"
 }
-

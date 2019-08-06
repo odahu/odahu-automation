@@ -6,7 +6,7 @@
 cluster_name                = "gke-legion-dev"
 region                      = "us-east1"
 zone                        = "us-east1-b"
-root_domain                 = "gcp.epm.kharlamov.biz"
+root_domain                 = "ailifecycle.org"
 secrets_storage             = "epm-legion-gcp-storage"
 aws_profile                 = "bdcc"
 config_context_auth_info    = "gke_or2-msq-epmd-legn-t1iylu_us-east1-b_gke-legion-dev"
@@ -20,7 +20,7 @@ gke_node_tag                = "gke-legion-dev-gke-node"
 # GKE module
 ########################################################
 location                    = "us-east1-b"
-dns_zone_name               = "legion"
+dns_zone_name               = "ailifecycle-org"
 
 ########################################################
 # Common Legion variables

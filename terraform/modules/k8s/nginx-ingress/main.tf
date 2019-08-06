@@ -29,7 +29,7 @@ resource "google_dns_record_set" "ingress_lb" {
 
 # Whitelist allowed_ips and cluster NAT ip on the cluster ingress
 data "google_compute_address" "nat_gw_ip" {
-  name = "${var.cluster_name}-nat-gw-ip"
+  name = "${var.cluster_name}-nat-gw"
 }
 
 resource "helm_release" "nginx-ingress" {
