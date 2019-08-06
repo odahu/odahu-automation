@@ -75,6 +75,7 @@ module "gke_cluster" {
   allowed_ips           = var.allowed_ips
   agent_cidr            = var.agent_cidr
   nodes_sa              = module.iam.service_account
+  cluster_ipv4_cidr     = var.pods_cidr
   gke_node_machine_type = var.gke_node_machine_type
   location              = var.location
   network               = module.vpc.network_name
