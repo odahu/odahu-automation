@@ -39,16 +39,6 @@ module "vpc_peering" {
   aws_route_table_id   = var.aws_route_table_id
 }
 
-module "vpc_peering_gce" {
-  source                      = "../../../../modules/gcp/networking/vpc_peering_gce"
-  project_id                  = var.project_id
-  region                      = var.region
-  zone                        = var.zone
-  gcp_network_1_name          = module.vpc.network_name
-  gcp_network_1_range         = [var.gcp_cidr, var.pods_cidr]
-  gcp_network_2_name          = var.infra_vpc_name
-  gcp_network_2_range         = [var.infra_cidr]
-}
 ########################################################
 # IAM
 ########################################################
@@ -75,7 +65,6 @@ module "gke_cluster" {
   allowed_ips           = var.allowed_ips
   agent_cidr            = var.agent_cidr
   nodes_sa              = module.iam.service_account
-  cluster_ipv4_cidr     = var.pods_cidr
   gke_node_machine_type = var.gke_node_machine_type
   location              = var.location
   network               = module.vpc.network_name
@@ -88,3 +77,4 @@ module "gke_cluster" {
   bastion_tag           = var.bastion_tag
   gke_node_tag          = var.gke_node_tag
 }
+
