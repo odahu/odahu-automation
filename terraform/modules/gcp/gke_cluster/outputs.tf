@@ -26,3 +26,7 @@ output "k8s_api_address" {
   value = "api.${var.cluster_name}.${var.root_domain}"
 }
 
+output "k8s_pods_cidr" {
+  value = var.cluster_ipv4_cidr
+}
+

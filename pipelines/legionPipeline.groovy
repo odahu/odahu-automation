@@ -459,7 +459,7 @@ def runRobotTestsAtGcp(tags="") {
                                          CLUSTER_NAME=${env.full_cluster_name} \
                                          CREDENTIAL_SECRETS=/opt/legion/.secrets.yaml \
                                          PATH_TO_PROFILES_DIR=/opt/legion/profiles/ \
-                                         ROBOT_THREADS=3 \
+                                         ROBOT_THREADS=6 \
                                          LEGION_VERSION=${env.param_legion_version} e2e-robot || true
 
                                     cp -R target/ ${WORKSPACE}
