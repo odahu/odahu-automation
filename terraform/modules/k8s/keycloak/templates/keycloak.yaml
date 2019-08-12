@@ -1,10 +1,14 @@
 keycloak:
+  image:
+    repository: ${keycloak_image_repository}
+    tag: ${keycloak_image_tag}
+
   username: ${keycloak_admin_user}
   password: ${keycloak_admin_pass}
 
   ingress:
     enabled: true
-    path: /    
+    path: /
     annotations: {}
     hosts:
       - "keycloak.${cluster_name}.${root_domain}"
@@ -13,7 +17,7 @@ keycloak:
           - "keycloak.${cluster_name}.${root_domain}"
         secretName: "${cluster_name}-tls"
 
-  ## Persistence configuration
+  ## Persistence configuration (postgresql in this case)
   persistence:
     dbVendor: postgres
     deployPostgres: true
@@ -21,8 +25,6 @@ keycloak:
     dbHost: mykeycloak
     dbPort: 5432
     dbUser: "${keycloak_db_user}"
-
-    # Only used if no existing secret is specified. In this case a new secret is created
     dbPassword: "${keycloak_db_pass}"
 
 postgresql:

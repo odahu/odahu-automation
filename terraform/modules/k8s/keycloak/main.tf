@@ -3,14 +3,11 @@ provider "helm" {
   install_tiller  = false
 }
 
-data "helm_repository" "legion" {
-    name = "legion_github"
-    url  = "${var.legion_helm_repo}"
-}
+########################################################
+# Auth setup
+########################################################
 
-########################################################
-# Prometheus monitoring
-########################################################
+# Keycloak
 data "helm_repository" "codecentric" {
     name = "codecentric"
     url  = "${var.codecentric_helm_repo}"
@@ -21,6 +18,8 @@ data "template_file" "keycloak_values" {
   vars = {
     cluster_name              = "${var.cluster_name}"
     root_domain               = "${var.root_domain}"
+    keycloak_image_repository = "${var.keycloak_image_repository}"
+    keycloak_image_tag        = "${var.keycloak_image_tag}"
     keycloak_admin_user       = "${var.keycloak_admin_user}"
     keycloak_admin_pass       = "${var.keycloak_admin_pass}"
     keycloak_db_user          = "${var.keycloak_db_user}"
@@ -33,37 +32,13 @@ data "template_file" "keycloak_values" {
 resource "helm_release" "keycloak" {
     name        = "keycloak"
     chart       = "codecentric/keycloak"
-    version     = "4.14.0"
+    version     = "${var.keycloak_helm_chart_version}"
     namespace   = "kube-system"
     repository  = "${data.helm_repository.codecentric.metadata.0.name}"
 
     values = [
       "${data.template_file.keycloak_values.rendered}"
     ]
-}
 
-# Keycloak gatekeeper proxy
-data "helm_repository" "gatekeeper" {
-    name = "gabibbo97"
-    url  = "${var.gatekeeper_helm_repo}"
-}
-
-data "template_file" "gatekeeper_values" {
-  template = "${file("${path.module}/templates/gatekeeper.yaml")}"
-  vars = {
-    cluster_name              = "${var.cluster_name}"
-    root_domain               = "${var.root_domain}"
-  }
-}
-
-resource "helm_release" "gatekeeper" {
-    name        = "keycloak-gatekeeper"
-    chart       = "gabibbo97/keycloak-gatekeeper"
-    version     = "1.2.1"
-    namespace   = "kube-system"
-    repository  = "${data.helm_repository.gatekeeper.metadata.0.name}"
-
-    values = [
-      "${data.template_file.gatekeeper_values.rendered}"
-    ]
+    depends_on  = ["data.helm_repository.codecentric"]
 }

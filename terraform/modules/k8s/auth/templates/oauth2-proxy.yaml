@@ -1,0 +1,52 @@
+fullnameOverride: oauth2-proxy
+
+image:
+  repository: ${oauth_image_repository}
+  tag: ${oauth_image_tag}
+
+config:
+  clientID: "${oauth_client_id}"
+  clientSecret: "${oauth_client_secret}"
+  cookieSecret: "${oauth_cookie_secret}"
+  configFile: |
+    provider = "iodc"
+    redirect_url = "${oauth_redirect_url}"
+    oidc_issuer_url = "${oauth_oidc_issuer_url}"
+    whitelist_domains = ".${cluster_name}.${root_domain}"
+    email_domains = "*"
+    skip_provider_button = true
+    scope = "${oauth_oidc_scope}"
+    http_address = "0.0.0.0:4180"
+
+    cookie_domain = ".${cluster_name}.${root_domain}"
+    cookie_expire = "${oauth_cookie_expire}"
+    cookie_secure = true
+
+    set_xauthrequest = true
+    set_authorization_header = true
+    pass_authorization_header = true
+    pass_access_token = true
+    pass_user_headers = true
+    skip_jwt_bearer_tokens = true
+    extra_jwt_issuers = "${oauth_oidc_issuer_url}=${oauth_oidc_audience}"
+
+ingress:
+  path: /oauth2
+  enabled: true
+  hosts:
+    - auth.${cluster_name}.${root_domain}
+  tls:
+    - secretName: ${cluster_name}-tls
+      hosts:
+        - auth.${cluster_name}.${root_domain}
+
+service:
+  port: 4180
+
+resources:
+  limits:
+    cpu: 200m
+    memory: 256Mi
+  requests:
+    cpu: 200m
+    memory: 128Mi

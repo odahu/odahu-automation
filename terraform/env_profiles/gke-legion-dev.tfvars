@@ -25,11 +25,18 @@ dns_zone_name               = "legion"
 ########################################################
 # Common Legion variables
 ########################################################
-legion_helm_repo            = "https://raw.githubusercontent.com/legion-platform/legion-helm-charts/master/"    
+legion_helm_repo            = "https://raw.githubusercontent.com/legion-platform/legion-helm-charts/master/"
 docker_repo                 = "registry.hub.docker.com/legionplatformtest"
 cluster_context             = "gke_or2-msq-epmd-legn-t1iylu_us-east1-b_gke-legion-dev"
 legion_infra_version        = "1.0.0-rc8"
-github_org_name             = "legion-auth-gcp"
+
+
+########################################################
+# Authorization and authentication
+########################################################
+keycloak_url                = "https://keycloak.epm.kharlamov.biz"
+keycloak_realm              = "legion-cluster"
+keycloak_realm_audience     = "legion-cluster"
 
 ########################################################
 # Legion
