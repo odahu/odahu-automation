@@ -48,6 +48,8 @@ def createCluster() {
 }
 
 def createGCPCluster() {
+  withCredentials([
+  sshUserPrivateKey(credentialsId: "${env.legionCicdGitlabKey}", keyFileVariable: 'gitKey')]) {
     withCredentials([
     file(credentialsId: "${env.gcpCredential}", variable: 'gcpCredential')]) {
         withCredentials([
@@ -97,6 +99,7 @@ def createGCPCluster() {
             }
         }
     }
+  }
 }
 
 def terminateCluster() {
@@ -183,6 +186,8 @@ def deployLegionToGCP() {
 }
 
 def destroyGcpCluster() {
+  withCredentials([
+  sshUserPrivateKey(credentialsId: "${env.legionCicdGitlabKey}", keyFileVariable: 'gitKey')]) {
     withCredentials([
     file(credentialsId: "${env.gcpCredential}", variable: 'gcpCredential')]) {
         withCredentials([
@@ -232,6 +237,7 @@ def destroyGcpCluster() {
             }
         }
     }
+  }
 }
 
 def legionScope(Closure body) {
@@ -583,14 +589,16 @@ def authorizeJenkinsAgent() {
     }
 }
 
-def terraformRun(command, tfModule, extraVars='') {
+def terraformRun(command, tfModule, extraVars='', workPath="${terraformHome}/env_types/${env.param_cluster_type}/${tfModule}/", backendConfigBucket="bucket=${env.param_cluster_name}-tfstate", varFile="../../../../env_profiles/${env.param_cluster_name}.tfvars") {
     sh """ #!/bin/bash -xe
-        cd ${terraformHome}/env_types/${env.param_cluster_type}/${tfModule}/
+        cd ${workPath}
 
         export TF_DATA_DIR=/tmp/.terraform-${env.param_cluster_name}-${tfModule}
         
         terraform init -backend-config="${backendConfigBucket}"
         
+        echo "Execute ${command} on ${tfModule} state"
+
         if [ ${tfModule} = "cluster_dns" ]; then
             terraform ${command} -auto-approve \
               -var-file=${varFile} ${extraVars}
@@ -598,15 +606,30 @@ def terraformRun(command, tfModule, extraVars='') {
             terraform plan  \
             -var-file=${secrets} \
             -var-file=../../../../env_profiles/${env.param_cluster_name}.tfvars ${extraVars}
+            terraform ${command} -auto-approve \
+            -var-file=${secrets} \
+            -var-file=../../../../env_profiles/${env.param_cluster_name}.tfvars ${extraVars}
+        else
+            terraform ${command} -auto-approve \
+            -var-file=${secrets} \
+            -var-file=../../../../env_profiles/${env.param_cluster_name}.tfvars ${extraVars}
         fi
 
-        echo "Execute ${command} on ${tfModule} state"
-
-        terraform ${command} -auto-approve \
-        -var-file=${secrets} \
-        -var-file=../../../../env_profiles/${env.param_cluster_name}.tfvars ${extraVars}
     """
 }
+
+def terraformOutput(tfModule, params = '-json', workPath="${terraformHome}/env_types/${env.param_cluster_type}/${tfModule}/", backendConfigBucket="bucket=${env.param_cluster_name}-tfstate") {
+    sh """
+        cd ${workPath}
+        export TF_DATA_DIR=/tmp/.terraform-${env.param_cluster_name}-${tfModule}
+        terraform init -backend-config="${backendConfigBucket}"
+    """
+    sh returnStdout:true, script: """ #!/bin/bash -xe
+        cd ${workPath}
+        export TF_DATA_DIR=/tmp/.terraform-${env.param_cluster_name}-${tfModule}
+        terraform output ${params}
+     """
+ }
 
 def setBuildMeta(updateVersionScript) {
 

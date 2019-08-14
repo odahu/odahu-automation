@@ -105,7 +105,7 @@ variable "master_ipv4_cidr_block" {
   description = "GKE master CIDR"
 }
 
-variable "cluster_ipv4_cidr" {
+variable "pods_cidr" {
   description = "GKE pods CIDR"
 }
 

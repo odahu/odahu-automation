@@ -27,6 +27,6 @@ output "k8s_api_address" {
 }
 
 output "k8s_pods_cidr" {
-  value = var.cluster_ipv4_cidr
+  value = var.pods_cidr
 }
 

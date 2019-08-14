@@ -34,6 +34,16 @@ variable "region_aws" {
   description = "Region of AWS resources"
 }
 
+variable "infra_vpc_name" {
+  default = "infra-vpc"
+  description = "Region of resources"
+}
+
+variable "infra_cidr" {
+  default     = ""
+  description = "GCP infra network CIDR"
+}
+
 variable "secrets_storage" {
   description = "Cluster secrets storage"
 }
@@ -48,6 +58,10 @@ variable "aws_vpc_id" {
 
 variable "gcp_cidr" {
   description = "GCP network CIDR"
+}
+
+variable "pods_cidr" {
+  description = "GKE pods CIDR"
 }
 
 variable "aws_sg" {
