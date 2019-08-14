@@ -48,13 +48,15 @@ def createCluster() {
 }
 
 def createGCPCluster() {
+  withCredentials([
+  sshUserPrivateKey(credentialsId: "${env.legionCicdGitlabKey}", keyFileVariable: 'gitKey')]) {
     withCredentials([
     file(credentialsId: "${env.gcpCredential}", variable: 'gcpCredential')]) {
         withCredentials([
         file(credentialsId: "${env.param_cluster_name}-secrets", variable: 'secrets')]) {
             withAWS(credentials: 'kops') {
                 wrap([$class: 'AnsiColorBuildWrapper', colorMapName: "xterm"]) {
-                    docker.image("${env.param_docker_repo}/k8s-terraform:${env.param_legion_infra_version}").inside("-e GOOGLE_CREDENTIALS=${gcpCredential} -e CLUSTER_NAME=${env.param_cluster_name} -u root") {
+                    docker.image("${env.param_docker_repo}/k8s-terraform:${env.param_legion_infra_version}").inside("-e GOOGLE_CREDENTIALS=${gcpCredential} -e CLUSTER_NAME=${env.param_cluster_name} -u root -v ${WORKSPACE}/legion-cicd/terraform/env_types/cluster_dns:/opt/legion/terraform/cluster_dns -v ${WORKSPACE}/legion-cicd/terraform/env_profiles/shared.tfvars:/opt/legion/terraform/env_profiles/shared.tfvars -v ${gitKey}:/root/.ssh/id_rsa ") {
                         stage('Create GCP resources') {
                             sh """
                             set -ex
@@ -76,6 +78,14 @@ def createGCPCluster() {
                             helm init --client-only
                             """
                         }
+                        stage('Create cluster specific private DNS zone') {
+                            sh '''
+                               chmod 600 ~/.ssh/id_rsa
+                               ssh-keygen -p -N "" -m pem -f ~/.ssh/id_rsa
+                               ssh-keyscan git.epam.com >> ~/.ssh/known_hosts
+                            '''
+                            terraformRun("apply", "cluster_dns", "-var=\"zone_type=FORWARDING\" -var=\"zone_name=${env.param_cluster_name}.ailifecycle.org\" -var=\"networks_to_add=[\\\"infra-vpc\\\"]\"", "${terraformHome}/cluster_dns", "bucket=${env.param_cluster_name}-tfstate", "${terraformHome}/env_profiles/shared.tfvars")
+                        }
                         stage('Setup K8S Legion dependencies') {
 
                             tfExtraVars = "-var=\"legion_infra_version=${env.param_legion_infra_version}\" \
@@ -89,6 +99,7 @@ def createGCPCluster() {
             }
         }
     }
+  }
 }
 
 def terminateCluster() {
@@ -175,13 +186,15 @@ def deployLegionToGCP() {
 }
 
 def destroyGcpCluster() {
+  withCredentials([
+  sshUserPrivateKey(credentialsId: "${env.legionCicdGitlabKey}", keyFileVariable: 'gitKey')]) {
     withCredentials([
     file(credentialsId: "${env.gcpCredential}", variable: 'gcpCredential')]) {
         withCredentials([
         file(credentialsId: "${env.param_cluster_name}-secrets", variable: 'secrets')]) {
             withAWS(credentials: 'kops') {
                 wrap([$class: 'AnsiColorBuildWrapper', colorMapName: "xterm"]) {
-                    docker.image("${env.param_docker_repo}/k8s-terraform:${env.param_legion_infra_version}").inside("-e GOOGLE_CREDENTIALS=${gcpCredential} -u root") {
+                    docker.image("${env.param_docker_repo}/k8s-terraform:${env.param_legion_infra_version}").inside("-e GOOGLE_CREDENTIALS=${gcpCredential} -e CLUSTER_NAME=${env.param_cluster_name} -u root -v ${WORKSPACE}/legion-cicd/terraform/env_types/cluster_dns:/opt/legion/terraform/cluster_dns -v ${WORKSPACE}/legion-cicd/terraform/env_profiles/shared.tfvars:/opt/legion/terraform/env_profiles/shared.tfvars -v ${gitKey}:/root/.ssh/id_rsa ") {
                         stage('Remove Legion cluster if exists') {
                             sh"""
                             # Setup GCP credentials
@@ -206,6 +219,13 @@ def destroyGcpCluster() {
                                 terraformRun("destroy", "legion")
                                 terraformRun("destroy", "k8s_setup")
                                 terraformRun("destroy", "helm_init")
+                                sh '''
+                                   chmod 600 ~/.ssh/id_rsa
+                                   ssh-keygen -p -N "" -m pem -f ~/.ssh/id_rsa
+                                   ssh-keyscan git.epam.com >> ~/.ssh/known_hosts
+                                '''
+                                terraformRun("destroy", "cluster_dns", "-var=\"zone_type=FORWARDING\" -var=\"zone_name=${env.param_cluster_name}.ailifecycle.org\"", "${terraformHome}/cluster_dns", "bucket=${env.param_cluster_name}-tfstate", "${terraformHome}/env_profiles/shared.tfvars")
+
                                 sh"""
                                 gcloud compute firewall-rules delete ${env.param_cluster_name}-jenkins-access --project=${env.param_gcp_project} --quiet ||true
                                 """
@@ -217,6 +237,7 @@ def destroyGcpCluster() {
             }
         }
     }
+  }
 }
 
 def legionScope(Closure body) {
@@ -444,7 +465,7 @@ def runRobotTestsAtGcp(tags="") {
                                          CLUSTER_NAME=${env.full_cluster_name} \
                                          CREDENTIAL_SECRETS=/opt/legion/.secrets.yaml \
                                          PATH_TO_PROFILES_DIR=/opt/legion/profiles/ \
-                                         ROBOT_THREADS=3 \
+                                         ROBOT_THREADS=6 \
                                          LEGION_VERSION=${env.param_legion_version} e2e-robot || true
 
                                     cp -R target/ ${WORKSPACE}
@@ -568,27 +589,47 @@ def authorizeJenkinsAgent() {
     }
 }
 
-def terraformRun(command, tfModule, extraVars='') {
+def terraformRun(command, tfModule, extraVars='', workPath="${terraformHome}/env_types/${env.param_cluster_type}/${tfModule}/", backendConfigBucket="bucket=${env.param_cluster_name}-tfstate", varFile="../../../../env_profiles/${env.param_cluster_name}.tfvars") {
     sh """ #!/bin/bash -xe
-        cd ${terraformHome}/env_types/${env.param_cluster_type}/${tfModule}/
+        cd ${workPath}
 
         export TF_DATA_DIR=/tmp/.terraform-${env.param_cluster_name}-${tfModule}
         
-        terraform init -backend-config="bucket=${env.param_cluster_name}-tfstate"
+        terraform init -backend-config="${backendConfigBucket}"
+        
+        echo "Execute ${command} on ${tfModule} state"
 
-        if [ ${command} = "apply" ]; then
+        if [ ${tfModule} = "cluster_dns" ]; then
+            terraform ${command} -auto-approve \
+              -var-file=${varFile} ${extraVars}
+        elif [ ${command} = "apply" ]; then
             terraform plan  \
+            -var-file=${secrets} \
+            -var-file=../../../../env_profiles/${env.param_cluster_name}.tfvars ${extraVars}
+            terraform ${command} -auto-approve \
+            -var-file=${secrets} \
+            -var-file=../../../../env_profiles/${env.param_cluster_name}.tfvars ${extraVars}
+        else
+            terraform ${command} -auto-approve \
             -var-file=${secrets} \
             -var-file=../../../../env_profiles/${env.param_cluster_name}.tfvars ${extraVars}
         fi
 
-        echo "Execute ${command} on ${tfModule} state"
-
-        terraform ${command} -auto-approve \
-        -var-file=${secrets} \
-        -var-file=../../../../env_profiles/${env.param_cluster_name}.tfvars ${extraVars}
     """
 }
+
+def terraformOutput(tfModule, params = '-json', workPath="${terraformHome}/env_types/${env.param_cluster_type}/${tfModule}/", backendConfigBucket="bucket=${env.param_cluster_name}-tfstate") {
+    sh """
+        cd ${workPath}
+        export TF_DATA_DIR=/tmp/.terraform-${env.param_cluster_name}-${tfModule}
+        terraform init -backend-config="${backendConfigBucket}"
+    """
+    sh returnStdout:true, script: """ #!/bin/bash -xe
+        cd ${workPath}
+        export TF_DATA_DIR=/tmp/.terraform-${env.param_cluster_name}-${tfModule}
+        terraform output ${params}
+     """
+ }
 
 def setBuildMeta(updateVersionScript) {
 

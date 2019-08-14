@@ -44,6 +44,7 @@ resource "google_container_cluster" "cluster" {
     ignore_changes = [
       "node_pool",
       "network",
+      "network_policy",
     ]
   }
 
@@ -92,6 +93,7 @@ resource "google_container_cluster" "cluster" {
   }
   ip_allocation_policy {
     use_ip_aliases = true
+    cluster_ipv4_cidr_block = var.pods_cidr
   }
 
   network_policy {
