@@ -132,14 +132,6 @@ pipeline {
                         }
                     }
                 }
-                stage('Build kube-elb-security') {
-                    steps {
-                        script {
-                            legion.buildLegionImage('k8s-kube-elb-security', "containers/kube-elb-security")
-                            legion.uploadDockerImage('k8s-kube-elb-security')
-                        }
-                    }
-                }
             }
         }
 
