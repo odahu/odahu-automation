@@ -99,11 +99,13 @@ variable "node_version" {
 }
 
 variable "allowed_ips" {
+  type        = list(string)
   description = "CIDR to allow access from"
 }
 
 variable "agent_cidr" {
   description = "Jenkins agent CIDR to allow access for CI jobs or your WAN address in case of locla run"
+  default     = "0.0.0.0/0"
 }
 
 variable "dns_zone_name" {

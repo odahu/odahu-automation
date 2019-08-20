@@ -11,6 +11,14 @@ provider "aws" {
   profile                 = var.aws_profile
 }
 
+data "http" "external_ip" {
+  url = "http://ipv4.icanhazip.com"
+}
+
+locals {
+  allowed_subnets = concat(list("${chomp(data.http.external_ip.body)}/32"), var.allowed_ips)
+}
+
 ########################################################
 # GKE Cluster
 ########################################################
@@ -82,15 +90,15 @@ resource "google_container_cluster" "cluster" {
 
   # workaround #2231 issue with master access
   master_authorized_networks_config {
-    cidr_blocks {
-      cidr_block   = var.allowed_ips
-      display_name = "default-access"
-    }
-    cidr_blocks {
-      cidr_block   = var.agent_cidr
-      display_name = "agent-access"
+    dynamic "cidr_blocks" {
+      iterator = cidr_block
+      for_each = local.allowed_subnets
+      content {
+        cidr_block   = cidr_block.value
+      }
     }
   }
+  
   ip_allocation_policy {
     use_ip_aliases = true
     cluster_ipv4_cidr_block = var.pods_cidr

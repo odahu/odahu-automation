@@ -14,11 +14,17 @@ pipeline {
         legionCicdGitlabKey = "legion-profiles-gitlab-key"
         param_legion_cicd_repo = "${params.CicdRepoGitUrl}"
         param_legion_cicd_branch = "${params.CicdRepoGitBranch}"
+        param_cloud_provider = "${params.cloudProvider}"
+        param_legion_profiles_repo = "${params.LegionProfilesRepo}"
+        param_legion_profiles_branch = "${params.LegionProfilesBranch}"
         //Job parameters
         gcpCredential = "gcp-epmd-legn-legion-automation"
         sharedLibPath = "pipelines/legionPipeline.groovy"
         cleanupContainerVersion = "latest"
         terraformHome =  "/opt/legion/terraform"
+        hieraPrivatePKCSKey = "hiera-pkcs-private-key"
+        hieraPublicPKCSKey = "hiera-pkcs-public-key"
+        legionProfilesGitlabKey = "legion-profiles-gitlab-key"
     }
 
     stages {

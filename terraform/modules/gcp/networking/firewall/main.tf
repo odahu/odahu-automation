@@ -26,7 +26,7 @@ resource "google_compute_firewall" "bastion_in_fw" {
 
   target_tags = [var.bastion_tag]
 
-  source_ranges = [var.allowed_ips]
+  source_ranges = var.allowed_ips
 }
 
 # Firewall rule that allows external SSH, ICMP, and HTTPS

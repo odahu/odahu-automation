@@ -17,12 +17,18 @@ pipeline {
         param_tests_tags = "${params.TestsTags}"
         param_commitID = "${params.commitID}"
         commitID = null
+        param_cloud_provider = "${params.cloudProvider}"
+        param_legion_profiles_repo = "${params.LegionProfilesRepo}"
+        param_legion_profiles_branch = "${params.LegionProfilesBranch}"
         //Job parameters
         full_cluster_name = "gke_${params.GcpProject}_${params.GcpZone}_${params.ClusterName}"
         gcpCredential = "gcp-epmd-legn-legion-automation"
         sharedLibPath = "pipelines/legionPipeline.groovy"
         cleanupContainerVersion = "latest"
         terraformHome = "/opt/legion/terraform"
+        hieraPrivatePKCSKey = "hiera-pkcs-private-key"
+        hieraPublicPKCSKey = "hiera-pkcs-public-key"
+        legionProfilesGitlabKey = "legion-profiles-gitlab-key"
     }
 
     stages {
@@ -65,7 +71,6 @@ pipeline {
             }
             steps {
                 script {
-                    legion.ansibleDebugRunCheck(env.param_debug_run)
                     legion.runRobotTestsAtGcp(env.param_tests_tags ?: "")
                 }
             }

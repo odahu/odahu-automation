@@ -19,7 +19,7 @@ module "nginx-ingress" {
   region        = var.region
   project_id    = var.project_id
   cluster_name  = var.cluster_name
-  allowed_ips   = [var.allowed_ips]
+  allowed_ips   = var.allowed_ips
   root_domain   = var.root_domain
   dns_zone_name = var.dns_zone_name
   network_name  = var.network_name
@@ -40,29 +40,29 @@ module "dashboard" {
 }
 
 module "dex" {
-  source                  = "../../../../modules/k8s/dex"
-  aws_profile             = var.aws_profile
-  aws_credentials_file    = var.aws_credentials_file
-  zone                    = var.zone
-  region                  = var.region
-  region_aws              = var.region_aws
-  project_id              = var.project_id
-  cluster_name            = var.cluster_name
-  legion_infra_version    = var.legion_infra_version
-  legion_helm_repo        = var.legion_helm_repo
-  root_domain             = var.root_domain
-  dns_zone_name           = var.dns_zone_name
-  github_org_name         = var.github_org_name
-  dex_github_clientid     = var.dex_github_clientid
-  dex_github_clientSecret = var.dex_github_clientSecret
-  dex_client_secret       = var.dex_client_secret
-  dex_static_user_email   = var.dex_static_user_email
-  dex_static_user_pass    = var.dex_static_user_pass
-  dex_static_user_hash    = var.dex_static_user_hash
-  dex_static_user_name    = var.dex_static_user_name
-  dex_static_user_id      = var.dex_static_user_id
-  dex_client_id           = var.dex_client_id
-  dex_cookie_secret       = var.dex_cookie_secret
+  source                      = "../../../../modules/k8s/dex"
+  aws_profile                 = var.aws_profile
+  aws_credentials_file        = var.aws_credentials_file
+  zone                        = var.zone
+  region                      = var.region
+  region_aws                  = var.region_aws
+  project_id                  = var.project_id
+  cluster_name                = var.cluster_name
+  legion_infra_version        = var.legion_infra_version
+  legion_helm_repo            = var.legion_helm_repo
+  root_domain                 = var.root_domain
+  dns_zone_name               = var.dns_zone_name
+  github_org_name             = var.github_org_name
+  dex_github_clientid         = var.dex_github_clientid
+  dex_github_clientSecret     = var.dex_github_clientSecret
+  dex_client_secret           = var.dex_client_secret
+  dex_static_user_email       = var.dex_static_user_email
+  dex_static_user_pass        = var.dex_static_user_pass
+  dex_static_user_hash        = var.dex_static_user_hash
+  dex_static_user_name        = var.dex_static_user_name
+  dex_static_user_id          = var.dex_static_user_id
+  dex_client_id               = var.dex_client_id
+  oauth2_github_cookieSecret  = var.oauth2_github_cookieSecret
 }
 
 module "monitoring" {

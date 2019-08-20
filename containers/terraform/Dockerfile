@@ -4,8 +4,8 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # install system utilities
 RUN apt-get update && apt-get install -y \
-    apt-transport-https bash curl tar openssh-client gnupg \
-    sshpass git ca-certificates apt-utils locales wget jq unzip && \
+    apt-transport-https bash curl tar openssh-client gnupg python3=3.6.7-1~18.04 python3-distutils\
+    sshpass git ca-certificates apt-utils locales wget jq unzip rubygems && \
     apt-get clean && apt-get autoclean
 
 # setup locale
@@ -39,6 +39,13 @@ RUN CLOUD_SDK_REPO="cloud-sdk-$(grep VERSION_CODENAME /etc/os-release | cut -d '
     echo "deb http://packages.cloud.google.com/apt $CLOUD_SDK_REPO main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list && \
     curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add - && \
     apt-get update -y && apt-get install google-cloud-sdk -y
+
+# Install Hiera
+RUN curl https://bootstrap.pypa.io/get-pip.py |python3 && \
+    pip3 install pyyaml==5.1.1 && \
+    gem install hiera hiera-eyaml
+
+COPY tools/hiera_exporter /opt/legion/tools/hiera_exporter
 
 # Deploy Legion
 COPY terraform /opt/legion/terraform

@@ -5,7 +5,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 # install system utilities
 RUN apt-get update && apt-get install -y \
     python-pip apt-transport-https bash curl tar openssh-client \
-    sshpass git ca-certificates python-pip apt-utils locales wget jq && \
+    sshpass git ca-certificates python-pip apt-utils locales wget jq rubygems && \
     apt-get clean && apt-get autoclean
 
 # setup locale
@@ -44,6 +44,12 @@ RUN curl -fsSLO https://kubernetes-helm.storage.googleapis.com/helm-${HELM_VERSI
     mkdir -p /tmp/helm && mv helm-${HELM_VERSION}-linux-amd64.tar.gz /tmp/helm && \
     tar xzf /tmp/helm/helm-${HELM_VERSION}-linux-amd64.tar.gz -C /tmp/helm && \
     mv /tmp/helm/linux-amd64/helm /usr/local/bin/helm && rm -rf /tmp/helm
+
+# Install Hiera
+RUN pip install pyyaml==5.1.1 && \
+    gem install hiera hiera-eyaml
+
+COPY tools/hiera_exporter /opt/legion/tools/hiera_exporter
 
 # Deploy Legion
 COPY ansible /opt/legion/ansible

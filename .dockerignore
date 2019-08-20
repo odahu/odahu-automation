@@ -4,6 +4,7 @@
 !ansible/**
 !helms/**
 !terraform/**
+!tools/**
 !profiles/*_template.yaml
 !version.info
 **/.terraform

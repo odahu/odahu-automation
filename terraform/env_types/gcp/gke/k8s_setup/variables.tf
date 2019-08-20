@@ -74,6 +74,7 @@ variable "network_name" {
 # Prometheus monitoring
 ########################
 variable "allowed_ips" {
+  type        = list(string)
   description = "CIDR to allow access from"
 }
 
@@ -121,14 +122,6 @@ variable "dex_client_id" {
   description = "Dex default client Secret"
 }
 
-variable "keycloak_client_secret" {
-  description = "keycloak default client Secret"
-}
-
-variable "keycloak_client_id" {
-  description = "keycloak default client Secret"
-}
-
 variable "dex_static_user_email" {
   description = "Dex static user email"
 }
@@ -149,35 +142,8 @@ variable "dex_static_user_id" {
   description = "Dex static user user id"
 }
 
-variable "dex_cookie_secret" {
-  description = "Dex cookie secret"
-}
-
-##################
-# Keycloak
-##################
-variable "keycloak_admin_user" {
-  description = "Keycloak admin user"
-}
-
-variable "keycloak_admin_pass" {
-  description = "Keycloak admin pass"
-}
-
-variable "keycloak_db_user" {
-  description = "Keycloak admin user"
-}
-
-variable "keycloak_db_pass" {
-  description = "Keycloak admin pass"
-}
-
-variable "keycloak_pg_user" {
-  description = "Keycloak postgres user"
-}
-
-variable "keycloak_pg_pass" {
-  description = "Keycloak postgres pass"
+variable "oauth2_github_cookieSecret" {
+  description = "oauth2 secret for cookies"
 }
 
 ########################

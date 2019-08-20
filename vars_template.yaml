@@ -1,0 +1,82 @@
+########################################################
+# Common variables
+########################################################
+# set GOOGLE_CREDENTIALS=/path/to/creds/.json or enable the property below
+# gcp_credentials:            # path to /gpc/credential/file.json
+cluster_name: str               # Common gcp cluster name
+region: str                     # GCP region for environment regional resources
+zone: str                       # GCP cluster zone where the cluster is deployed
+root_domain: str                # Root domain of the cluster
+aws_profile: str                # AWS boto profile
+config_context_auth_info: str   # GKE cluster auth info
+config_context_cluster: str     # GKE cluster context
+aws_vpc_id: str                 # AWS peered VPC ID
+network_name: str               # GCP VPC Network name
+bastion_tag: str                # Bastion host network tag
+gke_node_tag: str               # GKE cluster node's network tag
+infra_cidr: str                 # Core infrastructure resources CIDR
+pods_cidr: str                  # Cluster PODs CIDR
+cloud_type: str                 # Target hosting cloud
+
+########################################################
+# GKE module
+########################################################
+location: str                   # GKE cluster zone
+dns_zone_name: str              # Cloud DNS zone name for the cluster
+
+########################################################
+# Common Legion variables
+########################################################
+legion_helm_repo: str           # Helm repository url with Legion charts 
+docker_repo: str                # Docker Legion repository url
+cluster_context: str            # K8S cluster context
+legion_infra_version: str       # Legion infrastructure version to be deployed
+github_org_name: str            # GitHub Organization name for cluster access
+
+########################################################
+# Legion
+########################################################
+legion_version: str             # Legion version to be deployed
+legion_data_bucket: str         # GCP Storage bucket for Legion data
+
+########################################################
+# Common variables
+########################################################
+project_id: str                 # GCP project ID
+allowed_ips: list               # List of WAN IPs to whitelist on cluster
+secrets_storage: str            # AWS S3 bucket with sensitive data such as TLS certs and cluster SSH keys
+gcp_cidr: str                   # CIDR for cluster nodes
+aws_sg: str                     # AWS Security group ID to grant access from nodes at GCP (for Core components access)
+aws_cidr: str                   # AWS CIDR for VPC peering setup
+aws_route_table_id: str         # AWS route table ID for VPC peering setup
+
+########################################################
+# K8S base components
+########################################################
+# Prometheus monitoring
+alert_slack_url: str            # Slack URL for alerting
+grafana_admin: str              # Grafana admin login
+grafana_pass: str               # Grafana admin password
+# Dex
+dex_github_clientid: str        # Github client ID
+dex_github_clientSecret: str    # Github client secret
+oauth2_github_cookieSecret: str # Github cookie secret
+dex_client_secret: str          # Dex client secret for cluster services auth
+dex_client_id: str              # Dex client id for cluster services auth
+dex_static_user_email: str      # Static user for cluster access
+dex_static_user_pass: str       # Static password for cluster access
+dex_static_user_hash: str       # Bcrypt hash of the password string
+dex_static_user_name: str       # Static user name
+dex_static_user_id: str         # Static user id
+
+########################################################
+# Legion
+########################################################
+enclave_jwt_secret: str         # JWT secret for legion services
+api_private_key: str            # API private key for Legion services
+api_public_key: str             # API public key for Legion services
+### Nexus
+model_docker_url: str           # Docker repo URL for models
+docker_user: str                # Docker user for models repo
+docker_password: str            # Docker password for models repo
+jenkins_git_key: str            # Git key to checkout model data
