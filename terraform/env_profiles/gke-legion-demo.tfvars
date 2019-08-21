@@ -36,3 +36,10 @@ github_org_name             = "legion-auth-gcp"
 ########################################################
 legion_version            = "1.0.0-rc12"
 legion_data_bucket        = "gke-legion-demo-data-store"
+ 
+######################################################## 
+# Authorization and authentication 
+######################################################## 
+keycloak_url                = "https://keycloak.ailifecycle.org" 
+keycloak_realm              = "legion" 
+keycloak_realm_audience     = "legion" 

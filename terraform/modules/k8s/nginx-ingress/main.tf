@@ -41,6 +41,10 @@ resource "helm_release" "nginx-ingress" {
     name  = "defaultBackend.service.type"
     value = "LoadBalancer"
   }
+  set { 
+    name      = "controller.config.proxy-buffer-size" 
+    value     = "256k" 
+  } 
   set {
     name  = "controller.service.loadBalancerIP"
     value = google_compute_address.ingress_lb_address.address

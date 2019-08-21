@@ -154,30 +154,30 @@ variable "dex_cookie_secret" {
 }
 
 ##################
-# Keycloak
+# OAuth2
 ##################
-variable "keycloak_admin_user" {
-  description = "Keycloak admin user"
+variable "oauth_client_id" {
+  description = "OAuth2 Client ID"
 }
 
-variable "keycloak_admin_pass" {
-  description = "Keycloak admin pass"
+variable "oauth_client_secret" {
+  description = "OAuth2 Client Secret"
 }
 
-variable "keycloak_db_user" {
-  description = "Keycloak admin user"
+variable "oauth_cookie_secret" {
+  description = "OAuth2 Cookie Secret"
 }
 
-variable "keycloak_db_pass" {
-  description = "Keycloak admin pass"
+variable "keycloak_realm" {
+  description = "Keycloak realm"
 }
 
-variable "keycloak_pg_user" {
-  description = "Keycloak postgres user"
+variable "keycloak_url" {
+  description = "Keycloak URL"
 }
 
-variable "keycloak_pg_pass" {
-  description = "Keycloak postgres pass"
+variable "keycloak_realm_audience" {
+  description = "Keycloak real audience"
 }
 
 ########################
