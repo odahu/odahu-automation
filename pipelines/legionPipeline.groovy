@@ -710,10 +710,10 @@ def setBuildMeta(updateVersionScript) {
 
 }
 
-def setGitReleaseTag() {
+def setGitReleaseTag(git_deploy_key) {
     print('Set Release tag')
-    sshagent(["${env.param_git_deploy_key}"]) {
-        sh """
+    sshagent([git_deploy_key]) {
+        sh """#!/bin/bash -ex
         if [ `git tag |grep -x ${env.param_release_version}` ]; then
             if [ ${env.param_force_tag_push} = "true" ]; then
                 echo 'Removing existing git tag'
