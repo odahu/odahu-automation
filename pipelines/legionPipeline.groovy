@@ -93,6 +93,10 @@ def createGCPCluster() {
                                 -var=\"docker_repo=${env.param_docker_repo}\""
                                 terraformRun("apply", "k8s_setup", "${tfExtraVars}")
                             }
+                            stage('Cleanup workspace') {
+                                // Cleanup profiles directory
+                                sh"[ -d ${WORKSPACE}/legion-profiles/ ] && rm -rf ${WORKSPACE}/legion-profiles/"
+                            }
                         }
                     }
                 }
@@ -169,7 +173,6 @@ def deployLegionToGCP() {
 
                                 # Setup Kube api access
                                 gcloud container clusters get-credentials ${env.param_cluster_name} --zone ${env.param_gcp_zone} --project=${env.param_gcp_project}
-                                gcloud container clusters update ${env.param_cluster_name} --zone ${env.param_gcp_zone} --enable-master-authorized-networks --master-authorized-networks "${env.agentWanIp}/32"
 
                                 # Init Helm repo (workaround for https://github.com/terraform-providers/terraform-provider-helm/issues/23)
                                 helm init --client-only
@@ -181,6 +184,9 @@ def deployLegionToGCP() {
                                 -var=\"model_reference=${commitID}\""
 
                                 terraformRun("apply", "legion", "${tfDeployVars}")
+
+                                // Cleanup profiles directory
+                                sh" [ -d ${WORKSPACE}/legion-profiles/ ] && rm -rf ${WORKSPACE}/legion-profiles/"
                             }
                         }
                     }
@@ -230,10 +236,10 @@ def destroyGcpCluster() {
 
                                     terraformRun("destroy", "cluster_dns", "-var=\"zone_type=FORWARDING\" -var=\"zone_name=${env.param_cluster_name}.ailifecycle.org\"", "${WORKSPACE}/legion-cicd/terraform/env_types/cluster_dns", "bucket=${env.param_cluster_name}-tfstate")
 
-                                    sh"""
-                                    gcloud compute firewall-rules delete ${env.param_cluster_name}-jenkins-access --project=${env.param_gcp_project} --quiet ||true
-                                    """
-                                    terraformRun("destroy", "gke_create", "-var=\"agent_cidr=${env.agentWanIp}/32\"")
+                                    terraformRun("destroy", "gke_create")
+                                 
+                                    // Cleanup profiles directory
+                                    sh" [ -d ${WORKSPACE}/legion-profiles/ ] && rm -rf ${WORKSPACE}/legion-profiles/"
                                 }
                             }
                         }
@@ -326,39 +332,7 @@ def setupGcpAccess() {
 
         # Setup Kube api access
         gcloud container clusters get-credentials ${env.param_cluster_name} --zone ${env.param_gcp_zone} --project=${env.param_gcp_project}
-        gcloud container clusters update ${env.param_cluster_name} --zone ${env.param_gcp_zone} --enable-master-authorized-networks --master-authorized-networks "${env.agentWanIp}/32"
-
-        # Setup firewall rule
-        gcloud compute firewall-rules create ${env.param_cluster_name}-jenkins-access \
-        --project=${env.param_gcp_project} --network=${env.param_cluster_name}-vpc \
-        --description "Allow incoming traffic from Jenkins agent" \
-        --allow tcp:443 --direction INGRESS --source-ranges="${env.agentWanIp}/32"
         """
-}
-
-def revokeGcpAccess() {
-    withCredentials([
-    file(credentialsId: "${env.gcpCredential}", variable: 'gcpCredential')]) {
-        wrap([$class: 'AnsiColorBuildWrapper', colorMapName: "xterm"]) {
-            docker.image("${env.param_docker_repo}/k8s-terraform:${env.param_legion_infra_version}").inside("-e GOOGLE_CREDENTIALS=${gcpCredential} -u root") {
-                stage('Revoke jenkins access') {
-                    sh """
-                        # Authorize GCP access
-                        gcloud auth activate-service-account --key-file=${gcpCredential} --project=${env.param_gcp_project}
-
-                        # Revoke Kube api access by setting allowed cidrs as loopback host
-                        gcloud container clusters update ${env.param_cluster_name} --zone ${env.param_gcp_zone} --master-authorized-networks '127.0.0.1/32' ||true
-
-                        # Revoke agent access
-                        gcloud compute firewall-rules delete ${env.param_cluster_name}-jenkins-access --project=${env.param_gcp_project} --quiet ||true
-
-                        # Cleanup profiles directory
-                        [ -d ${WORKSPACE}/legion-profiles/ ] && rm -rf ${WORKSPACE}/legion-profiles/
-                    """
-                }
-            }
-        }
-    }
 }
 
 def runRobotTests(tags="") {
@@ -498,8 +472,11 @@ def runRobotTestsAtGcp(tags="") {
                                         currentBuild.result = 'UNSTABLE'
                                     }
 
-                                    // Cleanup
+                                    // Cleanup tests files
                                     sh "rm -rf ${WORKSPACE}/target/"
+
+                                    // Cleanup profiles directory
+                                    sh" [ -d ${WORKSPACE}/legion-profiles/ ] && rm -rf ${WORKSPACE}/legion-profiles/"
                                 }
                             }
                         }
