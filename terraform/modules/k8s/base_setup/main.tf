@@ -38,4 +38,3 @@ resource "kubernetes_secret" "tls_default" {
   }
   type = "kubernetes.io/tls"
 }
-

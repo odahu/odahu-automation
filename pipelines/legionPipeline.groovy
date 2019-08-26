@@ -76,10 +76,6 @@ def createGCPCluster() {
                             }
                             stage('Init HELM') {
                                 terraformRun("apply", "helm_init")
-                                sh """
-                                # Init Helm repo (workaround for https://github.com/terraform-providers/terraform-provider-helm/issues/23)
-                                helm init --client-only
-                                """
                             }
                             stage('Create cluster specific private DNS zone') {
                                 tfExtraVars = "-var=\"zone_type=FORWARDING\" \

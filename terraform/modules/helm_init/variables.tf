@@ -10,3 +10,10 @@ variable "tiller_image" {
   default = "gcr.io/kubernetes-helm/tiller:v2.14.0"
 }
 
+variable "legion_helm_repo" {
+  description = "Legion helm repo"
+}
+
+variable "istio_helm_repo" {
+  description = "Istio helm repo"
+}

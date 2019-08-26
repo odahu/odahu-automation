@@ -7,11 +7,6 @@ variable "istio_version" {
   default = "1.2.2"
 }
 
-data "helm_repository" "istio" {
-    name = "istio"
-    url  = "https://storage.googleapis.com/istio-release/releases/${var.istio_version}/charts"
-}
-
 resource "kubernetes_namespace" "istio" {
   metadata {
     name = var.istio_namespace
@@ -36,8 +31,7 @@ resource "helm_release" "istio-init" {
   chart       = "istio/istio-init"
   version     = var.istio_version
   namespace   = var.istio_namespace
-  repository  = data.helm_repository.istio.metadata.0.name
-  depends_on  = [data.helm_repository.istio]
+  repository  = "istio"
 }
 
 resource "null_resource" "delay" {
@@ -61,18 +55,13 @@ resource "helm_release" "istio" {
   chart       = "istio/istio"
   version     = var.istio_version
   namespace   = var.istio_namespace
-  repository  = data.helm_repository.istio.metadata.0.name
+  repository  = "istio"
 
   values = [
     data.template_file.istio_values.rendered,
   ]
 
-  depends_on = [null_resource.delay, data.helm_repository.istio]
-}
-
-data "helm_repository" "legion" {
-  name = "legion_github"
-  url  = var.legion_helm_repo
+  depends_on = [null_resource.delay]
 }
 
 resource "kubernetes_namespace" "knative" {
@@ -102,6 +91,5 @@ resource "helm_release" "knative" {
   chart         = "knative"
   version       = var.legion_infra_version
   namespace     = var.knative_namespace
-  repository    = data.helm_repository.legion.metadata.0.name
-  depends_on    = [data.helm_repository.legion]
+  repository    = "legion"
 }

@@ -48,9 +48,45 @@ resource "null_resource" "install_tiller" {
 }
 
 resource "null_resource" "wait_for_tiller" {
+  triggers = {
+    build_number = "${timestamp()}"
+  }
   provisioner "local-exec" {
     command = "timeout 60 bash -c 'until kubectl get pods -n kube-system |grep tiller; do sleep 5; done'"
   }
   depends_on = [null_resource.install_tiller]
 }
 
+#########################
+# add HELM repositories
+#########################
+
+resource "null_resource" "reinit_helm_client" {
+  triggers = {
+    build_number = "${timestamp()}"
+  }
+  provisioner "local-exec" {
+    command = "helm init --client-only"
+  }
+  depends_on = [null_resource.wait_for_tiller]
+}
+
+resource "null_resource" "add_helm_repository_legion" {
+  triggers = {
+    build_number = "${timestamp()}"
+  }
+  provisioner "local-exec" {
+    command = "helm repo add legion ${var.legion_helm_repo}"
+  }
+  depends_on = [null_resource.reinit_helm_client]
+}
+
+resource "null_resource" "add_helm_repository_istio" {
+  triggers = {
+    build_number = "${timestamp()}"
+  }
+  provisioner "local-exec" {
+    command = "helm repo add istio ${var.istio_helm_repo}"
+  }
+  depends_on = [null_resource.add_helm_repository_legion]
+}

@@ -26,6 +26,11 @@ provider "aws" {
 ########################################################
 # Install Legion dependencies
 ########################################################
+data "helm_repository" "legion" {
+  name = "legion"
+  url  = var.legion_helm_repo
+}
+
 resource "kubernetes_namespace" "legion" {
   metadata {
     annotations = {
@@ -91,11 +96,6 @@ resource "kubernetes_secret" "tls_legion" {
 ########################################################
 # Install Legion charts
 ########################################################
-data "helm_repository" "legion" {
-  name = "legion_github"
-  url  = var.legion_helm_repo
-}
-
 data "template_file" "legion_values" {
   template = file("${path.module}/templates/legion.yaml")
   vars = {

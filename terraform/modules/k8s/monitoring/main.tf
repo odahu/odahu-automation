@@ -3,11 +3,6 @@ provider "helm" {
   install_tiller  = false
 }
 
-data "helm_repository" "legion" {
-  name = "legion_github"
-  url  = var.legion_helm_repo
-}
-
 ########################################################
 # Prometheus monitoring
 ########################################################
@@ -57,11 +52,10 @@ resource "helm_release" "monitoring" {
   chart      = "monitoring"
   version    = var.legion_infra_version
   namespace  = var.monitoring_namespace
-  repository = data.helm_repository.legion.metadata[0].name
+  repository = "legion"
 
   values = [
     data.template_file.monitoring_values.rendered
   ]
-  depends_on    = [data.helm_repository.legion]
 }
 

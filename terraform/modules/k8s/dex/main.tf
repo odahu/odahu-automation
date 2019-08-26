@@ -17,11 +17,6 @@ provider "aws" {
   profile                 = var.aws_profile
 }
 
-data "helm_repository" "legion" {
-  name = "legion_github"
-  url  = var.legion_helm_repo
-}
-
 ########################################################
 # Auth setup
 ########################################################
@@ -63,18 +58,16 @@ data "template_file" "dex_values" {
 
 resource "helm_release" "dex" {
   name          = "dex"
-  chart         = "legion_github/dex"
+  chart         = "legion/dex"
   version       = var.legion_infra_version
   namespace     = "kube-system"
-  repository    = data.helm_repository.legion.metadata[0].name
+  repository    = "legion"
   recreate_pods = "true"
 
     # set {
     #     name    = "service.loadBalancerSourceRanges"
     #     value   = "{${join(",", var.allowed_ips)}}"
     # }
-  depends_on  = [data.helm_repository.legion]
-
   values = [
     data.template_file.dex_values.rendered,
   ]
@@ -109,6 +102,5 @@ resource "helm_release" "oauth2-proxy" {
   values = [
     data.template_file.oauth2-proxy_values.rendered
   ]
-  depends_on  = [data.helm_repository.legion]
 }
 

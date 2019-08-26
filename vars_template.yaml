@@ -28,6 +28,7 @@ dns_zone_name: str              # Cloud DNS zone name for the cluster
 # Common Legion variables
 ########################################################
 legion_helm_repo: str           # Helm repository url with Legion charts 
+istio_helm_repo: str            # Helm repository url with Istio charts 
 docker_repo: str                # Docker Legion repository url
 cluster_context: str            # K8S cluster context
 legion_infra_version: str       # Legion infrastructure version to be deployed

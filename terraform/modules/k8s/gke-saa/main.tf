@@ -3,11 +3,6 @@ provider "helm" {
   install_tiller  = false
 }
 
-data "helm_repository" "legion" {
-  name = "legion_github"
-  url  = var.legion_helm_repo
-}
-
 ########################################################
 # k8s GKE Service Account Assigner
 ########################################################
@@ -29,12 +24,11 @@ resource "helm_release" "gke_saa" {
   name       = "gke-saa"
   chart      = "k8s-gke-saa"
   version    = var.legion_infra_version
-  repository = data.helm_repository.legion.metadata[0].name
+  repository = "legion"
   namespace  = "kube-system"
 
   values = [
     data.template_file.gke_saa_values.rendered
   ]
-  depends_on  = [data.helm_repository.legion]
 }
 

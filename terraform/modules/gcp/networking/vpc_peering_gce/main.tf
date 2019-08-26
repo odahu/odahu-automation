@@ -18,6 +18,7 @@ resource "google_compute_network_peering" "peering2" {
   name         = "${data.google_compute_network.gcp_network_1.name}-${data.google_compute_network.gcp_network_2.name}-peering"
   network      = data.google_compute_network.gcp_network_2.self_link
   peer_network = data.google_compute_network.gcp_network_1.self_link
+  depends_on   = [google_compute_network_peering.peering1]
 }
 
 resource "google_compute_firewall" "to_network_1" {
