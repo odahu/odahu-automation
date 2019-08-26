@@ -45,6 +45,16 @@ variable "location" {
   description = "The location (region or zone) in which the cluster master will be created"
 }
 
+variable "initial_node_count" {
+  type        = string
+  description = "Initial node count, use it to warm up master"
+}
+
+variable "node_locations" {
+  type        = list(string)
+  description = "The list of zones in which nodes will be created"
+}
+
 variable "network" {
   description = "The VPC network to host the cluster in"
 }

@@ -22,6 +22,8 @@ cloud_type: str                 # Target hosting cloud
 # GKE module
 ########################################################
 location: str                   # GKE cluster zone
+node_locations: list            # GKE cluster zones to place nodes in
+initial_node_count: str         # GKE init node pool node count
 dns_zone_name: str              # Cloud DNS zone name for the cluster
 
 ########################################################

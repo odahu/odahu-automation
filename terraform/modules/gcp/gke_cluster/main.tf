@@ -31,12 +31,13 @@ resource "google_container_cluster" "cluster" {
   network            = var.network
   subnetwork         = var.subnetwork
   min_master_version = var.k8s_version
+  node_locations     = var.node_locations
 
   # We can't create a cluster with no node pool defined, but we want to only use
   # separately managed node pools. So we create the smallest possible default
   # node pool and immediately delete it.
   remove_default_node_pool = true
-  initial_node_count       = 1
+  initial_node_count       = var.initial_node_count
 
   # Setting an empty username and password explicitly disables basic auth
   master_auth {

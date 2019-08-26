@@ -78,6 +78,8 @@ module "gke_cluster" {
   pods_cidr             = var.pods_cidr
   gke_node_machine_type = var.gke_node_machine_type
   location              = var.location
+  node_locations        = var.node_locations
+  initial_node_count    = var.initial_node_count
   network               = module.vpc.network_name
   subnetwork            = module.vpc.subnet_name
   dns_zone_name         = var.dns_zone_name
