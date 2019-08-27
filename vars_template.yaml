@@ -58,17 +58,25 @@ aws_route_table_id: str         # AWS route table ID for VPC peering setup
 alert_slack_url: str            # Slack URL for alerting
 grafana_admin: str              # Grafana admin login
 grafana_pass: str               # Grafana admin password
-# Dex
-dex_github_clientid: str        # Github client ID
-dex_github_clientSecret: str    # Github client secret
-oauth2_github_cookieSecret: str # Github cookie secret
-dex_client_secret: str          # Dex client secret for cluster services auth
-dex_client_id: str              # Dex client id for cluster services auth
-dex_static_user_email: str      # Static user for cluster access
-dex_static_user_pass: str       # Static password for cluster access
-dex_static_user_hash: str       # Bcrypt hash of the password string
-dex_static_user_name: str       # Static user name
-dex_static_user_id: str         # Static user id
+
+# Integration with OAuth2 IP
+keycloak_url: str               # Keycloak's (OAuth2 IP) root URL
+keycloak_realm: str             # Keycloak's (OAuth2 IP) realm name
+keycloak_realm_audience: str    # Keycloak's (OAuth2 IP) realm audience
+
+oauth_client_id: str            # OAuth2 IP client ID
+oauth_client_secret: str        # OAuth2 IP client secret
+oauth_scope: str                # OAuth2 IP client scope
+oauth_cookie_secret: str        # Secret for encoding and decoding access/refresh/id tokens for storing in cookies
+
+# Credentials for test authorization
+test_user_email: str            # Test-user's email
+test_user_password: str         # Test-user's password
+
+test_oauth_auth_url: str        # Test-user's IP's auth URL. This IP (or realm) should support Direct Access Grant flow
+test_oauth_client_id: str       # OAuth2 client's ID for test_oauth_auth_url
+test_oauth_client_secret: str   # OAuth2 client's secret for test_oauth_auth_url
+test_oauth_scope: str           # OAuth2 client's scope
 
 ########################################################
 # Legion

@@ -94,56 +94,41 @@ variable "cluster_context" {
   description = "Kubectl cluster context"
 }
 
-variable "github_org_name" {
-  description = "Github Organization for dex authentication"
-}
-
 variable "monitoring_namespace" {
   default     = "kube-monitoring"
   description = "clusterwide monitoring namespace"
 }
 
+
 ##################
-# Dex
+# OAuth2
 ##################
-variable "dex_github_clientid" {
-  description = "Github Organization clientID"
+variable "oauth_client_id" {
+  description = "OAuth2 Client ID"
 }
 
-variable "dex_github_clientSecret" {
-  description = "Github Organization client Secret"
+variable "oauth_client_secret" {
+  description = "OAuth2 Client Secret"
 }
 
-variable "dex_client_secret" {
-  description = "Dex default client Secret"
+variable "oauth_cookie_secret" {
+  description = "OAuth2 Cookie Secret"
 }
 
-variable "dex_client_id" {
-  description = "Dex default client Secret"
+variable "keycloak_realm" {
+  description = "Keycloak realm"
 }
 
-variable "dex_static_user_email" {
-  description = "Dex static user email"
+variable "keycloak_url" {
+  description = "Keycloak URL"
 }
 
-variable "dex_static_user_pass" {
-  description = "Dex static user pass"
+variable "keycloak_realm_audience" {
+  description = "Keycloak real audience"
 }
 
-variable "dex_static_user_hash" {
-  description = "Dex static user hash"
-}
-
-variable "dex_static_user_name" {
-  description = "Dex static user name"
-}
-
-variable "dex_static_user_id" {
-  description = "Dex static user user id"
-}
-
-variable "oauth2_github_cookieSecret" {
-  description = "oauth2 secret for cookies"
+variable "oauth_scope" {
+  description = "Scope for OAuth"
 }
 
 ########################

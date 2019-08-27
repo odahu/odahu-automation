@@ -41,6 +41,10 @@ resource "helm_release" "nginx-ingress" {
     name  = "defaultBackend.service.type"
     value = "LoadBalancer"
   }
+  set { 
+    name      = "controller.config.proxy-buffer-size" 
+    value     = "256k" 
+  } 
   set {
     name  = "controller.service.loadBalancerIP"
     value = google_compute_address.ingress_lb_address.address
@@ -78,7 +82,7 @@ resource "null_resource" "ingress_fw_cleanup" {
     build_number = timestamp()
   }
   provisioner "local-exec" {
-    command = "gcloud compute firewall-rules list --filter='name:k8s-fw- AND network:${var.network_name}' --format='value(name)' --project='${var.project_id}'| while read i; do if (gcloud compute firewall-rules describe --project='${var.project_id}' $i |grep -q 'kube-system/dex\\|kube-system/nginx-ingress'); then gcloud compute firewall-rules delete $i --quiet; fi; done"
+    command = "gcloud compute firewall-rules list --filter='name:k8s-fw- AND network:${var.network_name}' --format='value(name)' --project='${var.project_id}'| while read i; do if (gcloud compute firewall-rules describe --project='${var.project_id}' $i |grep -q 'kube-system/nginx-ingress'); then gcloud compute firewall-rules delete $i --quiet; fi; done"
   }
   depends_on = [helm_release.nginx-ingress]
 }

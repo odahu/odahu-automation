@@ -366,6 +366,7 @@ def runRobotTests(tags="") {
 
                                 echo "Starting robot tests"
                                 make CLUSTER_NAME=${env.param_profile} \
+                                     LEGIONCTL_NONINTERACTIVE=1 \
                                      LEGION_VERSION=${env.param_legion_version} e2e-robot || true
 
                                 cp -R target/ ${WORKSPACE}
