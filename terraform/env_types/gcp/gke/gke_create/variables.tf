@@ -88,6 +88,16 @@ variable "location" {
   description = "The location (region or zone) in which the cluster master will be created"
 }
 
+variable "node_locations" {
+  default     = []
+  description = "The list of zones in which nodes will be created, leave blank for zone cluster"
+}
+
+variable "initial_node_count" {
+  default     = "1"
+  description = "Initial node count"
+}
+
 variable "k8s_version" {
   default     = "1.13.6"
   description = "Kubernetes master version"
