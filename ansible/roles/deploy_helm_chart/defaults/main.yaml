@@ -1,6 +1,0 @@
----
-release_name: "legion"
-values_file: "{{ tmp_dir }}/empty-values.{{ cluster_name }}.yaml"
-namespace: "default"
-chart_name: legion-helm/legion
-chart_version: "777"

@@ -1,4 +1,0 @@
----
-
-- include: kube2iam.yaml
-- include: kops-cluster.yaml

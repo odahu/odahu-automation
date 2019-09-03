@@ -125,27 +125,11 @@ pipeline {
 
         stage("Build Docker images & Upload Helm charts") {
             parallel {
-                stage("Build Ansible") {
-                    steps {
-                        script {
-                            legion.buildLegionImage('k8s-ansible', ".", "containers/ansible/Dockerfile")
-                            legion.uploadDockerImage('k8s-ansible')
-                        }
-                    }
-                }
                 stage("Build Terraform") {
                     steps {
                         script {
                             legion.buildLegionImage('k8s-terraform', ".", "containers/terraform/Dockerfile")
                             legion.uploadDockerImage('k8s-terraform')
-                        }
-                    }
-                }
-                stage('Build kube-fluentd') {
-                    steps {
-                        script {
-                            legion.buildLegionImage('k8s-kube-fluentd', "containers/kube-fluentd")
-                            legion.uploadDockerImage('k8s-kube-fluentd')
                         }
                     }
                 }

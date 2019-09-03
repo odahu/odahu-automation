@@ -1,7 +1,0 @@
-root_domain: gcp.epm.kharlamov.biz
-remote_tls_location: "{{ cluster_name}}/tls"
-secrets_bucket: "epm-legion-gcp-storage"
-tls_cert_common_name: "{{ cluster_name}}"
-tls_subject_domain: "{{ cluster_name}}.{{ root_domain }}"
-dns_hosting: "cloudDNS"
-cloud_dns_zone_id: "3920236971353089008"

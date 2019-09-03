@@ -10,7 +10,7 @@ RUN apt-get update && apt-get install -y \
 
 # setup locale
 RUN locale-gen en_US.UTF-8 && update-locale LANG=en_US.UTF-8
-COPY containers/ansible/default_locale /etc/default/locale
+COPY containers/terraform/default_locale /etc/default/locale
 RUN chmod 0755 /etc/default/locale
 ENV LC_ALL=en_US.UTF-8
 ENV LANG=en_US.UTF-8

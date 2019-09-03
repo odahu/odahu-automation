@@ -18,10 +18,10 @@
 # password:
 # connections.secret: |-
 ([Ll]ogin|[Pp]assword|[Pp]ass|[Tt]oken|[Uu]ser|[Uu]sername|[sS]ecret|[Pp]rivate)\\s*:\\s*(~|example|\\s?str,|\\s\\|\\-|$)
-#Allow ansible substitution like password: {{ .... }}
-([Ll]ogin|[Pp]assword|[Pp]ass|[Tt]oken|[Uu]ser|[Uu]sername|[sS]ecret|[Pp]rivate)\\s*:\\s*(\"|\')?\\{\\{\\s.+\\s\\}\\}(\"|\')?
 #Allow terraform substitution like password: ${...}
 ([Ll]ogin|[Pp]assword|[Pp]ass|[Tt]oken|[Uu]ser|[Uu]sername|[sS]ecret|[Pp]rivate)\\s*:\\s*(\"|\')?\\$\\{.+\\}(\"|\')?
+#Allow jinja substitution like password: {{ .... }}
+([Ll]ogin|[Pp]assword|[Pp]ass|[Tt]oken|[Uu]ser|[Uu]sername|[sS]ecret|[Pp]rivate)\\s*:\\s*(\"|\')?\\{\\{\\s.+\\s\\}\\}(\"|\')?
 # Allow localhost IPv4 address
 127.0.0.1
 # Allow demo netmask
