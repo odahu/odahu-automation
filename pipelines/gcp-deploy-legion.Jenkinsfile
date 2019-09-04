@@ -42,7 +42,8 @@ pipeline {
                     legion.buildDescription()
 
                     // Set legion release commit id
-                    commitID = env.param_commitID ?: sh(script: "echo ${env.param_legion_version} | cut -f5 -d. | tr -d '\n'", returnStdout: true)
+                    commitID = (!env.commitID) ? 'null' : env.commitID.toString()
+                    commitID =  (commitID=='null' || commitID.length()<1) ? sh(script: "echo ${env.param_legion_version} | cut -f5 -d. | tr -d '\n'", returnStdout: true): commitID
                     print("Legion commit ID: ${commitID}")
 
                     if (!(commitID)) {

@@ -48,8 +48,8 @@ pipeline {
             param_git_deploy_key = "${params.GitDeployKey}"
             param_legion_profiles_repo = "${params.LegionProfilesRepo}"
             param_legion_profiles_branch = "${params.LegionProfilesBranch}"
-            legionProfilesGitlabKey = "legion-profiles-gitlab-key"
             ///Job parameters
+            legionProfilesGitlabKey = "legion-profiles-gitlab-key"
             sharedLibPath = "pipelines/legionPipeline.groovy"
             updateVersionScript = "tools/update_version_id"
             pathToCharts= "${WORKSPACE}/helms"

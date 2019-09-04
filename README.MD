@@ -10,6 +10,7 @@ Prerequisites:
  - GCS Bucket for terraform state with name equal to "<CLUSTER_NAME>-tfstate"
  - SSL certs stored at S3 Bucket (path is configured in vars file)
  - SSH key stored at S3 Bucket (path is configured in vars file)
+ - Reserve Static IP "<CLUSTER_NAME>-nat-gw" and add this IP to Oauth provider (Keycloak for example)
  - cluster_profile.json file with terraform variables (should be specified for each terraform run as a -var-file argument)
 
 In order to setup legion cluster at GCP with provided modules you have to trigger terraform for each of the Legion infrastructure layer.
