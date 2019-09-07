@@ -28,7 +28,6 @@ pipeline {
         commitID = null
         legionInfraVersion = null
         legionVersion = null
-        mergeBranch = "ci-infra/${params.LegionInfraGitBranch}"
         gcpCredential = "gcp-epmd-legn-legion-automation"
         terraformHome =  "/opt/legion/terraform"
         gitDeployKey = "epam-legion-deployment-key"
@@ -40,19 +39,6 @@ pipeline {
                 cleanWs()
                 checkout scm
                 script {
-                    print('Set interim merge branch')
-                    sshagent(["${env.gitDeployKey}"]) {
-                        sh """
-                        echo ${env.mergeBranch}
-                        if [ `git branch | grep ${env.mergeBranch}` ]; then
-                            echo 'Removing existing git tag'
-                            git branch -D ${env.mergeBranch}
-                            git push origin --delete ${env.mergeBranch}
-                        fi
-                        git branch ${env.mergeBranch}
-                        git push origin ${env.mergeBranch}
-                        """
-                    }
                     legion = load "${env.sharedLibPath}"
                     legion.buildDescription()
                 }
@@ -63,7 +49,7 @@ pipeline {
             steps {
                 script {
                     result = build job: env.param_build_legion_infra_job_name, propagate: true, wait: true, parameters: [
-                            [$class: 'GitParameterValue', name: 'GitBranch', value: env.mergeBranch],
+                            [$class: 'GitParameterValue', name: 'GitBranch', value: env.param_legion_git_branch],
                             string(name: 'EnableDockerCache', value: env.param_enable_docker_cache)
                     ]
 
@@ -79,7 +65,6 @@ pipeline {
 
                     // Copy artifacts
                     copyArtifacts filter: '*', flatten: true, fingerprintArtifacts: true, projectName: env.param_build_legion_infra_job_name, selector: specific      (buildNumber.toString()), target: ''
-                    sh 'ls -lah'
 
                     // \ Load variables
                     def map = [:]
@@ -122,7 +107,6 @@ pipeline {
 
                     // Copy artifacts
                     copyArtifacts filter: '*', flatten: true, fingerprintArtifacts: true, projectName: env.param_build_legion_job_name, selector: specific       (buildNumber.toString()), target: ''
-                    sh 'ls -lah'
 
                     // \ Load variables
                     def map = [:]
@@ -149,7 +133,7 @@ pipeline {
             steps {
                 script {
                     result = build job: env.param_terminate_cluster_job_name, propagate: true, wait: true, parameters: [
-                        [$class: 'GitParameterValue', name: 'GitBranch', value: env.mergeBranch],
+                        [$class: 'GitParameterValue', name: 'GitBranch', value: env.param_legion_git_branch],
                         string(name: 'LegionInfraVersion', value: legionInfraVersion),
                         string(name: 'ClusterName', value: env.param_cluster_name),
                         string(name: 'LegionProfilesBranch', value: env.param_legion_profiles_branch),
@@ -163,7 +147,7 @@ pipeline {
             steps {
                 script {
                     result = build job: env.param_create_cluster_job_name, propagate: true, wait: true, parameters: [
-                        [$class: 'GitParameterValue', name: 'GitBranch', value: env.mergeBranch],
+                        [$class: 'GitParameterValue', name: 'GitBranch', value: env.param_legion_git_branch],
                         string(name: 'ClusterName', value: env.param_cluster_name),
                         string(name: 'LegionInfraVersion', value: legionInfraVersion),
                         string(name: 'LegionProfilesBranch', value: env.param_legion_profiles_branch),
@@ -177,7 +161,7 @@ pipeline {
             steps {
                 script {
                     result = build job: env.param_deploy_legion_job_name, propagate: true, wait: true, parameters: [
-                        [$class: 'GitParameterValue', name: 'GitBranch', value: env.mergeBranch],
+                        [$class: 'GitParameterValue', name: 'GitBranch', value: env.param_legion_git_branch],
                         string(name: 'ClusterName', value: env.param_cluster_name),
                         string(name: 'LegionVersion', value: legionVersion),
                         string(name: 'LegionInfraVersion', value: legionInfraVersion),
@@ -200,24 +184,15 @@ pipeline {
                 }
                 else {
                     result = build job: env.param_terminate_cluster_job_name, propagate: true, wait: true, parameters: [
-                           [$class: 'GitParameterValue', name: 'GitBranch', value: env.mergeBranch],
+                           [$class: 'GitParameterValue', name: 'GitBranch', value: env.param_legion_git_branch],
                            string(name: 'LegionInfraVersion', value: legionInfraVersion),
                            string(name: 'ClusterName', value: env.param_cluster_name),
                            string(name: 'LegionProfilesBranch', value: env.param_legion_profiles_branch),
                            string(name: 'CicdRepoGitBranch', value: env.param_legion_cicd_branch)
                     ]
                 }
-                print('Remove interim merge branch')
-                sshagent(["${env.gitDeployKey}"]) {
-                    sh """
-                        if [ `git branch | grep ${env.mergeBranch}` ]; then
-                            git branch -D ${env.mergeBranch}
-                            git push origin --delete ${env.mergeBranch}
-                        fi
-                    """
-                }
                 legion = load "${env.sharedLibPath}"
-                GitBranch = env.mergeBranch
+                GitBranch = env.param_legion_git_branch
                 legion.notifyBuild(currentBuild.currentResult)
             }
         }

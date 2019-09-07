@@ -24,19 +24,21 @@ def createGCPCluster() {
                         docker.image("${env.param_docker_repo}/k8s-terraform:${env.param_legion_infra_version}").inside("-e GOOGLE_CREDENTIALS=${gcpCredential} -e CLUSTER_NAME=${env.param_cluster_name} -u root") {
                             stage('Extract Hiera data') {
                                 extractHiera("json")
+                                gcp_zone = sh(script: "jq '.location' ${WORKSPACE}/cluster_profile.json", returnStdout: true)
+                                gcp_project_id = sh(script: "jq '.project_id' ${WORKSPACE}/cluster_profile.json", returnStdout: true)
                             }
                             stage('Create GCP resources') {
                                 sh """
                                 set -ex
                                 # Activate service account
-                                gcloud auth activate-service-account --key-file=${gcpCredential} --project=${env.param_gcp_project}
+                                gcloud auth activate-service-account --key-file=${gcpCredential} --project=${gcp_project_id}
                                 """
 
                                 terraformRun("apply", "gke_create")
 
                                 sh """
                                 # Authorize Kube api access
-                                gcloud container clusters get-credentials ${env.param_cluster_name} --zone ${env.param_gcp_zone} --project=${env.param_gcp_project}
+                                gcloud container clusters get-credentials ${env.param_cluster_name} --zone ${gcp_zone}
                                 """
                             }
                             stage('Init HELM') {
@@ -79,15 +81,17 @@ def deployLegionToGCP() {
                         docker.image("${env.param_docker_repo}/k8s-terraform:${env.param_legion_infra_version}").inside("-e GOOGLE_CREDENTIALS=${gcpCredential} -u root") {
                             stage('Extract Hiera data') {
                                     extractHiera("json")
+                                    gcp_zone = sh(script: "jq '.location' ${WORKSPACE}/cluster_profile.json", returnStdout: true)
+                                    gcp_project_id = sh(script: "jq '.project_id' ${WORKSPACE}/cluster_profile.json", returnStdout: true)
                                 }
                             stage('Deploy Legion') {
                                 sh """
                                 set -ex
                                 # Authorize GCP access
-                                gcloud auth activate-service-account --key-file=${gcpCredential} --project=${env.param_gcp_project}
+                                gcloud auth activate-service-account --key-file=${gcpCredential} --project=${gcp_project_id}
 
                                 # Setup Kube api access
-                                gcloud container clusters get-credentials ${env.param_cluster_name} --zone ${env.param_gcp_zone} --project=${env.param_gcp_project}
+                                gcloud container clusters get-credentials ${env.param_cluster_name} --zone ${gcp_zone}
 
                                 # Init Helm repo (workaround for https://github.com/terraform-providers/terraform-provider-helm/issues/23)
                                 helm init --client-only
@@ -123,13 +127,15 @@ def destroyGcpCluster() {
                         docker.image("${env.param_docker_repo}/k8s-terraform:${env.param_legion_infra_version}").inside("-e GOOGLE_CREDENTIALS=${gcpCredential} -e CLUSTER_NAME=${env.param_cluster_name} -u root") {
                             stage('Extract Hiera data') {
                                 extractHiera("json")
+                                gcp_zone = sh(script: "jq '.location' ${WORKSPACE}/cluster_profile.json", returnStdout: true)
+                                gcp_project_id = sh(script: "jq '.project_id' ${WORKSPACE}/cluster_profile.json", returnStdout: true)
                             }
                             stage('Remove Legion cluster if exists') {
                                 sh"""
                                 # Setup GCP credentials
-                                gcloud auth activate-service-account --key-file=${gcpCredential} --project=${env.param_gcp_project}
+                                gcloud auth activate-service-account --key-file=${gcpCredential} --project=${gcp_project_id}
                                 """
-                                cluster_status = sh(script: "gcloud container clusters list --zone ${env.param_gcp_zone}", returnStdout: true)
+                                cluster_status = sh(script: "gcloud container clusters list --zone ${gcp_zone}", returnStdout: true)
                                 if (!cluster_status.contains("${env.param_cluster_name}")) {
                                     currentBuild.result = 'SUCCESS'
                                     // Cleanup profiles directory
@@ -145,7 +151,7 @@ def destroyGcpCluster() {
                                     // Temp workaround for #968 issue
                                     sh"""
                                     # Remove auto-generated fw rules
-                                    gcloud compute firewall-rules list --filter='name:k8s- AND network:${env.param_cluster_name}-vpc' --format='value(name)' --project='${env.param_gcp_project}'| while read i; do if (gcloud compute firewall-rules describe --project='${env.param_gcp_project}'); then gcloud compute firewall-rules delete \$i --quiet; fi; done
+                                    gcloud compute firewall-rules list --filter='name:k8s- AND network:${env.param_cluster_name}-vpc' --format='value(name)' --project='${gcp_project_id}'| while read i; do if (gcloud compute firewall-rules describe --project='${gcp_project_id}'); then gcloud compute firewall-rules delete \$i --quiet; fi; done
                                     """
                                     terraformRun("destroy", "legion")
                                     terraformRun("destroy", "k8s_setup")
@@ -187,10 +193,10 @@ def setupGcpAccess() {
     sh """
         set -ex
         # Authorize GCP access
-        gcloud auth activate-service-account --key-file=${gcpCredential} --project=${env.param_gcp_project}
+        gcloud auth activate-service-account --key-file=${gcpCredential} --project=${gcp_project_id}
 
         # Setup Kube api access
-        gcloud container clusters get-credentials ${env.param_cluster_name} --zone ${env.param_gcp_zone} --project=${env.param_gcp_project}
+        gcloud container clusters get-credentials ${env.param_cluster_name} --zone ${gcp_zone}
         """
 }
 
@@ -206,6 +212,8 @@ def runRobotTestsAtGcp(tags="") {
                         docker.image("${env.param_docker_repo}/k8s-terraform:${env.param_legion_infra_version}").inside("-e GOOGLE_CREDENTIALS=${gcpCredential} -e CLUSTER_NAME=${env.param_cluster_name} -u root") {
                             stage('Extract Hiera data') {
                                 extractHiera("json")
+                                gcp_zone = sh(script: "jq '.location' ${WORKSPACE}/cluster_profile.json", returnStdout: true)
+                                gcp_project_id = sh(script: "jq '.project_id' ${WORKSPACE}/cluster_profile.json", returnStdout: true)
                             }
                         }
                         docker.image("${env.param_docker_repo}/legion-pipeline-agent:${env.param_legion_version}").inside("-e HOME=/opt/legion -u root") {

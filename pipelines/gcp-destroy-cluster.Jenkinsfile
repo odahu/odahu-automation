@@ -39,8 +39,11 @@ pipeline {
 
                     sshagent(["${env.legionCicdGitlabKey}"]) {
                         sh"""
-                        ssh-keyscan git.epam.com >> ~/.ssh/known_hosts
-                        git clone ${env.param_legion_cicd_repo} legion-cicd
+
+                        mkdir -p \$(getent passwd \$(whoami) | cut -d: -f6)/.ssh && ssh-keyscan git.epam.com >> \$(getent passwd \$(whoami) | cut -d: -f6)/.ssh/known_hosts
+                        if [ ! -d "legion-cicd" ]; then
+                            git clone ${env.param_legion_cicd_repo} legion-cicd
+                        fi
                         cd legion-cicd && git checkout ${env.param_legion_cicd_branch}
                         """
                     }

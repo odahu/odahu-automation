@@ -17,7 +17,7 @@ ENV LANG=en_US.UTF-8
 ENV LANGUAGE=en_US.UTF-8
 
 # Install kubectl
-ENV KUBECTL_VERSION=v1.10.6
+ENV KUBECTL_VERSION=v1.13.7
 RUN wget -qO /usr/local/bin/kubectl "https://storage.googleapis.com/kubernetes-release/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl" && \
     chmod a+x /usr/local/bin/kubectl
 

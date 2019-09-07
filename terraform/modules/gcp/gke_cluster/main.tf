@@ -105,11 +105,6 @@ resource "google_container_cluster" "cluster" {
     cluster_ipv4_cidr_block = var.pods_cidr
   }
 
-  network_policy {
-    enabled  = false
-    provider = "CALICO"
-  }
-
   addons_config {
     http_load_balancing {
       disabled = true
@@ -118,10 +113,10 @@ resource "google_container_cluster" "cluster" {
       disabled = true
     }
     horizontal_pod_autoscaling {
-      disabled = false
+      disabled = true
     }
     network_policy_config {
-      disabled = false
+      disabled = true
     }
   }
 
