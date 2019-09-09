@@ -95,14 +95,15 @@ resource "google_container_cluster" "cluster" {
       iterator = cidr_block
       for_each = local.allowed_subnets
       content {
-        cidr_block   = cidr_block.value
+        cidr_block = cidr_block.value
       }
     }
   }
-  
+
   ip_allocation_policy {
-    use_ip_aliases = true
-    cluster_ipv4_cidr_block = var.pods_cidr
+    use_ip_aliases                = true
+    cluster_ipv4_cidr_block       = var.pods_cidr
+    services_secondary_range_name = var.service_cidr
   }
 
   addons_config {

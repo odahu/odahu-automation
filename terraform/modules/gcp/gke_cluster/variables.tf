@@ -120,6 +120,10 @@ variable "pods_cidr" {
   description = "GKE pods CIDR"
 }
 
+variable "service_cidr" {
+  description = "GKE service CIDR"
+}
+
 #############
 # Node pool
 #############
