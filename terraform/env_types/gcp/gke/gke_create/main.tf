@@ -59,6 +59,7 @@ module "gke_cluster" {
   agent_cidr           = var.agent_cidr
   nodes_sa             = module.iam.service_account
   pods_cidr            = var.pods_cidr
+  service_cidr          = var.service_cidr
   location             = var.location
   node_locations       = var.node_locations
   initial_node_count   = var.initial_node_count

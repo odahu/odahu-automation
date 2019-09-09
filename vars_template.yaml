@@ -16,6 +16,7 @@ bastion_tag: str                # Bastion host network tag
 gke_node_tag: str               # GKE cluster node's network tag
 infra_cidr: str                 # Core infrastructure resources CIDR
 pods_cidr: str                  # Cluster PODs CIDR
+service_cidr: str               # Cluster Services CIDR
 cloud_type: str                 # Target hosting cloud
 k8s_version: str                # Kubernetes master version
 node_version: str               # Kubernetes node version
