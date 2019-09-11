@@ -21,6 +21,6 @@ resource "google_project_iam_member" "iam" {
   count   = length(var.service_account_iam_roles)
   member  = "serviceAccount:${google_service_account.nodes_sa.email}"
   project = var.project_id
-  role    = element(var.service_account_iam_roles, count.index)
+  role    = var.service_account_iam_roles[count.index]
 }
 

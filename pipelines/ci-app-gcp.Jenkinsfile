@@ -19,7 +19,6 @@ pipeline {
         param_terminate_cluster_job_name = "${params.TerminateClusterJobName}"
         param_create_cluster_job_name = "${params.CreateClusterJobName}"
         param_deploy_legion_job_name = "${params.DeployLegionJobName}"
-        param_commitID = "${params.commitID}"
         param_legion_cicd_branch = "${params.CicdRepoGitBranch}"
         param_legion_profiles_branch = "${params.LegionProfilesBranch}"
         //Job parameters
@@ -124,7 +123,6 @@ pipeline {
                            string(name: 'LegionVersion', value: legionVersion),
                            string(name: 'LegionInfraVersion', value: env.param_legion_infra_version),
                            string(name: 'TestsTags', value: env.param_tests_tags ?: ""),
-                           string(name: 'commitID', value: env.commitID),
                            booleanParam(name: 'DeployLegion', value: true),
                            booleanParam(name: 'UseRegressionTests', value: true),
                            string(name: 'LegionProfilesBranch', value: env.param_legion_cicd_branch)

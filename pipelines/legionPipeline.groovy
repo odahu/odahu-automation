@@ -99,8 +99,7 @@ def deployLegionToGCP() {
                                 
                                 tfDeployVars = "-var=\"legion_version=${env.param_legion_version}\" \
                                 -var=\"legion_helm_repo=${env.param_helm_repo}\" \
-                                -var=\"docker_repo=${env.param_docker_repo}\" \
-                                -var=\"model_reference=${commitID}\""
+                                -var=\"docker_repo=${env.param_docker_repo}\""
 
                                 terraformRun("apply", "legion", "${tfDeployVars}")
 

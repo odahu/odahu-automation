@@ -42,6 +42,7 @@ github_org_name: str            # GitHub Organization name for cluster access
 # Legion
 ########################################################
 legion_version: str             # Legion version to be deployed
+mlflow_toolchain_version: str   # Mlflow toolchain version to be deployed
 legion_data_bucket: str         # GCP Storage bucket for Legion data
 
 ########################################################
@@ -92,4 +93,7 @@ api_public_key: str             # API public key for Legion services
 model_docker_url: str           # Docker repo URL for models
 docker_user: str                # Docker user for models repo
 docker_password: str            # Docker password for models repo
-jenkins_git_key: str            # Git key to checkout model data
+
+git_examples_reference: str     # Git reference for model examples
+git_examples_uri: str           # Git URI for model examples
+git_examples_key: str           # Ssh git key for model examples

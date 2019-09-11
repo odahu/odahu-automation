@@ -35,7 +35,7 @@ variable "region_aws" {
 }
 
 variable "infra_vpc_name" {
-  default = "infra-vpc"
+  default     = "infra-vpc"
   description = "Region of resources"
 }
 
@@ -125,26 +125,6 @@ variable "dns_zone_name" {
 #############
 # Node pool
 #############
-variable "node_disk_size_gb" {
-  default     = "20"
-  description = "Persistent disk size for cluster worker nodes"
-}
-
-variable "gke_node_machine_type" {
-  default     = "n1-standard-2"
-  description = "Machine type of GKE nodes"
-}
-
-variable "gke_num_nodes_min" {
-  default     = "1"
-  description = "Number of nodes in each GKE cluster zone"
-}
-
-variable "gke_num_nodes_max" {
-  default     = "5"
-  description = "Number of nodes in each GKE cluster zone"
-}
-
 variable "nodes_sa" {
   default     = "default"
   description = "Service account for cluster nodes"

@@ -65,6 +65,21 @@ variable "legion_namespace" {
   description = "Legion k8s namespace"
 }
 
+variable "legion_training_namespace" {
+  default     = "legion-training"
+  description = "Legion training k8s namespace"
+}
+
+variable "legion_packaging_namespace" {
+  default     = "legion-packaging"
+  description = "Legion packaging k8s namespace"
+}
+
+variable "legion_deployment_namespace" {
+  default     = "legion-deployment"
+  description = "Legion deployment k8s namespace"
+}
+
 variable "docker_repo" {
   description = "Legion Docker repo url"
 }
@@ -109,11 +124,11 @@ variable "model_docker_url" {
   description = "Model docker url"
 }
 
-variable "model_examples_git_url" {
+variable "git_examples_uri" {
   description = "Model examples git url"
 }
 
-variable "model_reference" {
+variable "git_examples_reference" {
   description = "Model reference"
 }
 
@@ -125,8 +140,8 @@ variable "model_resources_mem" {
   description = "Model pod mem limit"
 }
 
-variable "jenkins_git_key" {
-  description = "Jenkins git key for model repo"
+variable "git_examples_key" {
+  description = "Git ssh key for git connection"
 }
 
 variable "legion_data_bucket" {
@@ -137,3 +152,6 @@ variable "collector_region" {
   description = "Collector's storage bucket region"
 }
 
+variable "mlflow_toolchain_version" {
+  description = "Version of legion-mlflow helm chart"
+}

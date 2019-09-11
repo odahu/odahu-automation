@@ -56,7 +56,6 @@ ENV/
 .mypy_cache/
 
 workspace/
-keys/
 
 log.*
 *.log
@@ -78,3 +77,5 @@ _tfstate
 /helms/legion/charts/
 /helms/legion-core/charts/
 
+/.hiera_keys/
+/.secrets/

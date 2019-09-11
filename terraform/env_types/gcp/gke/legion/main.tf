@@ -21,13 +21,14 @@ module "legion" {
   legion_version           = var.legion_version
   collector_region         = var.collector_region
   legion_data_bucket       = var.legion_data_bucket
-  jenkins_git_key          = var.jenkins_git_key
+  git_examples_key         = var.git_examples_key
   model_docker_url         = var.model_docker_url
-  model_examples_git_url   = var.model_examples_git_url
-  model_reference          = var.model_reference
+  git_examples_uri         = var.git_examples_uri
+  git_examples_reference   = var.git_examples_reference
   model_resources_cpu      = var.model_resources_cpu
   model_resources_mem      = var.model_resources_mem
   api_private_key          = var.api_private_key
   api_public_key           = var.api_public_key
+  mlflow_toolchain_version = var.mlflow_toolchain_version
 }
 

@@ -48,7 +48,6 @@ pipeline {
                     }
                     legion = load "${env.sharedLibPath}"
                     legion.buildDescription()
-                    commitID = env.mergeBranch
                 }
             }
         }

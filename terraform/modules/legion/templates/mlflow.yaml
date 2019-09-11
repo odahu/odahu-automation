@@ -1,0 +1,16 @@
+toolchainVersion: "${mlflow_toolchain_version}"
+imagesRegistry: "${docker_repo}/"
+ingress:
+  globalDomain: "${cluster_name}.${root_domain}"
+  enabled: true
+  tlsEnabled: true
+  tlsSecretName: "${cluster_name}-tls"
+
+security:
+  enabled: false
+
+tracking_server:
+  annotations:
+    sidecar.istio.io/inject: "false"
+toolchain_integration:
+  enabled: true

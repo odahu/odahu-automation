@@ -1,6 +1,6 @@
 provider "helm" {
-  version         = "v0.10.0"
-  install_tiller  = false
+  version        = "v0.10.0"
+  install_tiller = false
 }
 
 ########################################################

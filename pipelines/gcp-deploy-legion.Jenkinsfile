@@ -15,8 +15,6 @@ pipeline {
         param_deploy_legion = "${params.DeployLegion}"
         param_use_regression_tests = "${params.UseRegressionTests}"
         param_tests_tags = "${params.TestsTags}"
-        param_commitID = "${params.commitID}"
-        commitID = null
         param_cloud_provider = "${params.cloudProvider}"
         param_legion_profiles_repo = "${params.LegionProfilesRepo}"
         param_legion_profiles_branch = "${params.LegionProfilesBranch}"
@@ -40,17 +38,6 @@ pipeline {
                     legion = load "${env.sharedLibPath}"
                     legion.getWanIp()
                     legion.buildDescription()
-
-                    // Set legion release commit id
-                    commitID = (!env.commitID) ? 'null' : env.commitID.toString()
-                    commitID =  (commitID=='null' || commitID.length()<1) ? sh(script: "echo ${env.param_legion_version} | cut -f5 -d. | tr -d '\n'", returnStdout: true): commitID
-                    print("Legion commit ID: ${commitID}")
-
-                    if (!(commitID)) {
-                        print('Can\'t get commit id for legion package')
-                        currentBuild.result = 'FAILURE'
-                        return
-                    }
                 }
             }
         }

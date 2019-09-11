@@ -45,3 +45,4 @@ username : unicode
 86.57.255.92/32
 # Pipeline hiera import
 token: ":pkcs7_
+password: |

@@ -1,4 +1,3 @@
-
 legionVersion: "${legion_version}"
 imagesRegistry: "${docker_repo}/"
 logLevel: debug
@@ -12,30 +11,6 @@ ingress:
 security:
   enabled: true
 
-modelApiSecurity:
-  enabled: true
-  jwt:
-    private_key: "${api_private_key}"
-    public_key: "${api_public_key}"
-    defaultTokenTTLInMinutes: "${api_jwt_ttl_minutes}"
-    maxTokenTTLInMinutes: "${max_token_ttl_minutes}"
-    defaultTokenTTLEndDate: "${api_jwt_exp_datetime}"
-
-metrics:
-  enabled: true
-  dashboardFolder: "/tmp/dashboards/legion"
-
-modelMetrics:
-  enabled: true
-
-modelStorage:
-  buildPrefix: "${cluster_name}"
-  external:
-    protocol: "${model_docker_protocol}"
-    url: "${model_docker_url}"
-    user: "${docker_user}"
-    password: "${docker_password}"
-
 feedback:
   enabled: true
   output:
@@ -47,15 +22,59 @@ feedback:
 edi:
   replicas: 2
 
-vcs:
-- name: "legion"
-  type: "git"
-  uri: "${model_examples_git_url}"
-  defaultReference: "${model_reference}"
-  creds: "${jenkins_git_key}"
-
+connections:
+  - id: legion-examples
+    spec:
+      type: "git"
+      uri: "${git_examples_uri}"
+      reference: "${git_examples_reference}"
+      keySecret: "${git_examples_key}"
+  - id: docker-ci
+    spec:
+      type: docker
+      uri: "${model_docker_repo}"
+      password: |
+        ${model_docker_password}
+      username: "${model_docker_user}"
+  - id: models-output
+    spec:
+      type: gcs
+      uri: "${model_output_bucket}"
+      region: "${model_output_region}"
+      keySecret: |
+        ${model_output_secret}
 
 modelExecution:
   limits:
     cpu: "${model_resources_cpu}"
     mem: "${model_resources_mem}"
+
+config:
+  deployment:
+    edge:
+      host: https://edge.${cluster_name}.${root_domain}
+    namespace: "${legion_deployment_namespace}"
+    server:
+      template_folder: /opt/legion/templates
+    security:
+      role_name: legion
+      jwt:
+        enabled: true
+        private_key: "${api_private_key}"
+        public_key: "${api_public_key}"
+        ttl_minute: "${api_jwt_ttl_minutes}"
+        max_ttl_min: "${max_token_ttl_minutes}"
+        exp_date_time: "${api_jwt_exp_datetime}"
+
+  training:
+    namespace: "${legion_training_namespace}"
+    output_connection: models-output
+    model_trainer:
+      image: "${docker_repo}/k8s-model-trainer:${legion_version}"
+
+  packaging:
+    namespace: "${legion_packaging_namespace}"
+    output_connection: models-output
+    service_account: legion-model-packager
+    model_packager:
+      image: "${docker_repo}/k8s-model-packager:${legion_version}"

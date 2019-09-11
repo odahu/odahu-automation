@@ -23,14 +23,14 @@ module "firewall" {
 }
 
 module "vpc_peering_gcp" {
-  source                      = "../../../../modules/gcp/networking/vpc_peering_gcp"
-  project_id                  = var.project_id
-  region                      = var.region
-  zone                        = var.zone
-  gcp_network_1_name          = module.vpc.network_name
-  gcp_network_1_range         = [var.gcp_cidr, module.gke_cluster.k8s_pods_cidr]
-  gcp_network_2_name          = var.infra_vpc_name
-  gcp_network_2_range         = [var.infra_cidr]
+  source              = "../../../../modules/gcp/networking/vpc_peering_gcp"
+  project_id          = var.project_id
+  region              = var.region
+  zone                = var.zone
+  gcp_network_1_name  = module.vpc.network_name
+  gcp_network_1_range = [var.gcp_cidr, module.gke_cluster.k8s_pods_cidr]
+  gcp_network_2_name  = var.infra_vpc_name
+  gcp_network_2_range = [var.infra_cidr]
 }
 ########################################################
 # IAM
@@ -47,30 +47,29 @@ module "iam" {
 # GKE Cluster
 ########################################################
 module "gke_cluster" {
-  source                = "../../../../modules/gcp/gke_cluster"
-  project_id            = var.project_id
-  cluster_name          = var.cluster_name
-  region                = var.region
-  zone                  = var.zone
-  region_aws            = var.region_aws
-  aws_profile           = var.aws_profile
-  aws_credentials_file  = var.aws_credentials_file
-  allowed_ips           = var.allowed_ips
-  agent_cidr            = var.agent_cidr
-  nodes_sa              = module.iam.service_account
-  pods_cidr             = var.pods_cidr
-  gke_node_machine_type = var.gke_node_machine_type
-  location              = var.location
-  node_locations        = var.node_locations
-  initial_node_count    = var.initial_node_count
-  network               = module.vpc.network_name
-  subnetwork            = module.vpc.subnet_name
-  dns_zone_name         = var.dns_zone_name
-  root_domain           = var.root_domain
-  secrets_storage       = var.secrets_storage
-  k8s_version           = var.k8s_version
-  node_version          = var.node_version
-  bastion_tag           = var.bastion_tag
-  gke_node_tag          = var.gke_node_tag
+  source               = "../../../../modules/gcp/gke_cluster"
+  project_id           = var.project_id
+  cluster_name         = var.cluster_name
+  region               = var.region
+  zone                 = var.zone
+  region_aws           = var.region_aws
+  aws_profile          = var.aws_profile
+  aws_credentials_file = var.aws_credentials_file
+  allowed_ips          = var.allowed_ips
+  agent_cidr           = var.agent_cidr
+  nodes_sa             = module.iam.service_account
+  pods_cidr            = var.pods_cidr
+  location             = var.location
+  node_locations       = var.node_locations
+  initial_node_count   = var.initial_node_count
+  network              = module.vpc.network_name
+  subnetwork           = module.vpc.subnet_name
+  dns_zone_name        = var.dns_zone_name
+  root_domain          = var.root_domain
+  secrets_storage      = var.secrets_storage
+  k8s_version          = var.k8s_version
+  node_version         = var.node_version
+  bastion_tag          = var.bastion_tag
+  gke_node_tag         = var.gke_node_tag
 }
 

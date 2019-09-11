@@ -15,10 +15,14 @@ provider "helm" {
 # HELM Init
 ##############
 
+locals {
+  tiller_namespace = "kube-system"
+}
+
 resource "kubernetes_service_account" "tiller" {
   metadata {
     name      = "tiller"
-    namespace = "kube-system"
+    namespace = local.tiller_namespace
   }
 }
 
@@ -29,7 +33,7 @@ resource "kubernetes_cluster_role_binding" "tiller" {
   subject {
     api_group = "rbac.authorization.k8s.io"
     kind      = "User"
-    name      = "system:serviceaccount:kube-system:tiller"
+    name      = "system:serviceaccount:${local.tiller_namespace}:tiller"
   }
 
   role_ref {
@@ -49,10 +53,10 @@ resource "null_resource" "install_tiller" {
 
 resource "null_resource" "wait_for_tiller" {
   triggers = {
-    build_number = "${timestamp()}"
+    build_number = timestamp()
   }
   provisioner "local-exec" {
-    command = "timeout 60 bash -c 'until kubectl get pods -n kube-system |grep tiller; do sleep 5; done'"
+    command = "timeout 60 bash -c 'until kubectl get pods -n ${local.tiller_namespace} |grep tiller; do sleep 5; done'"
   }
   depends_on = [null_resource.install_tiller]
 }
@@ -63,7 +67,7 @@ resource "null_resource" "wait_for_tiller" {
 
 resource "null_resource" "reinit_helm_client" {
   triggers = {
-    build_number = "${timestamp()}"
+    build_number = timestamp()
   }
   provisioner "local-exec" {
     command = "helm init --client-only"
@@ -73,7 +77,7 @@ resource "null_resource" "reinit_helm_client" {
 
 resource "null_resource" "add_helm_repository_legion" {
   triggers = {
-    build_number = "${timestamp()}"
+    build_number = timestamp()
   }
   provisioner "local-exec" {
     command = "helm repo add legion ${var.legion_helm_repo}"
@@ -83,7 +87,7 @@ resource "null_resource" "add_helm_repository_legion" {
 
 resource "null_resource" "add_helm_repository_istio" {
   triggers = {
-    build_number = "${timestamp()}"
+    build_number = timestamp()
   }
   provisioner "local-exec" {
     command = "helm repo add istio ${var.istio_helm_repo}"

@@ -15,19 +15,18 @@
 #    limitations under the License.
 #
 
-import datetime
 import argparse
-import re
-import logging
-import sys
-import yaml
-import json
-import subprocess
 import ast
+import json
+import logging
+import subprocess
+import sys
 
+import yaml
 
 EXPORT_FORMATS = ['yaml', 'json']
 HIERA_BINARY = "/usr/local/bin/hiera"
+
 
 def get_variables_list(file):
     """
@@ -39,6 +38,7 @@ def get_variables_list(file):
     log.debug(data)
 
     return data
+
 
 def read_hiera_data(hiera_config, hiera_environment, hiera_cloud, all_vars):
     """
@@ -59,19 +59,20 @@ def read_hiera_data(hiera_config, hiera_environment, hiera_cloud, all_vars):
 
     for key_name in all_vars:
         variable = hiera_get(hiera_config, key_name, hiera_environment, hiera_cloud)
-        if variable != None:
+        if variable is not None:
             filtered_vars.update({key_name: variable})
     log.debug('Exported Hiera data: {}'.format(filtered_vars))
     return filtered_vars
+
 
 def hiera_get(config, key_name, env, cloud):
     """
     Read hiera data
     """
 
-    hiera_command = [HIERA_BINARY, '-a', '--config', config, key_name, "environment={}".format(env), "cloud={}".format(cloud)]
+    hiera_command = [HIERA_BINARY, '-a', '--config', config, key_name, "environment={}".format(env),
+                     "cloud={}".format(cloud)]
     log.debug(hiera_command)
-    output = None
 
     try:
         output = ast.literal_eval(subprocess.check_output(hiera_command, encoding="utf-8"))
@@ -81,6 +82,7 @@ def hiera_get(config, key_name, env, cloud):
     except Exception:
         log.warning('Key {} is missing in hieradata'.format(key_name))
         return None
+
 
 def work(args):
     """"
@@ -95,18 +97,19 @@ def work(args):
         log.debug('Reading variables list from template file {}'.format(args.vars_template))
         all_vars = get_variables_list(args.vars_template)
     except Exception as e:
-                raise ValueError('Error reading variables from template: {}'.format(e))
- 
+        raise ValueError('Error reading variables from template: {}'.format(e))
+
     # Read data from Hiera
     try:
         log.debug('Reading hiera data for environment={}, cloud={}'.format(args.hiera_environment, args.hiera_cloud))
         filtered_vars = read_hiera_data(args.hiera_config, args.hiera_environment, args.hiera_cloud, all_vars)
     except Exception as e:
-                raise ValueError('Error reading variables from hiera: {}'.format(e))
+        raise ValueError('Error reading variables from hiera: {}'.format(e))
 
     # Generate target vars file
     try:
         log.debug('Export data to {} variables file {}'.format(args.output_format, args.output_file))
+
         if args.output_format == 'yaml':
             with open(args.output_file, 'w') as output_file:
                 yaml.dump(filtered_vars, output_file, default_flow_style=False)
@@ -115,10 +118,10 @@ def work(args):
                 json.dump(filtered_vars, output_file, indent=4, sort_keys=True)
         else:
             raise ValueError('Unknown output format. Must be one of {}'.format(EXPORT_FORMATS))
-            
+
     except Exception as e:
-                log.error('Error creating target var file: {}'.format(e))
-                sys.exit(1)
+        log.error('Error creating target var file: {}'.format(e))
+        sys.exit(1)
 
 
 if __name__ == '__main__':

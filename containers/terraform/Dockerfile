@@ -41,11 +41,13 @@ RUN CLOUD_SDK_REPO="cloud-sdk-$(grep VERSION_CODENAME /etc/os-release | cut -d '
     apt-get update -y && apt-get install google-cloud-sdk -y
 
 # Install Hiera
-RUN curl https://bootstrap.pypa.io/get-pip.py |python3 && \
+RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
     pip3 install pyyaml==5.1.1 && \
     gem install hiera hiera-eyaml
 
-COPY tools/hiera_exporter /opt/legion/tools/hiera_exporter
+COPY tools/hiera_exporter /opt/legion/tools/
+COPY vars_template.yaml /opt/legion/
+COPY tools/hiera_exporter_helper.sh /usr/bin/hiera_exporter_helper
 
 # Deploy Legion
 COPY terraform /opt/legion/terraform

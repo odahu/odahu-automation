@@ -61,22 +61,6 @@ resource "google_container_cluster" "cluster" {
     enabled = true
   }
 
-  # cluster_autoscaling {
-  #   enabled = true
-
-  #   resource_limits {
-  #     resource_type = "cpu"
-  #     maximum       = "${var.cluster_autoscaling_cpu_max_limit}"
-  #     minimum       = "${var.cluster_autoscaling_cpu_min_limit}"
-  #   }
-
-  #   resource_limits {
-  #     resource_type = "memory"
-  #     maximum       = "${var.cluster_autoscaling_memory_max_limit}"
-  #     minimum       = "${var.cluster_autoscaling_memory_min_limit}"
-  #   }
-  # }
-
   maintenance_policy {
     daily_maintenance_window {
       start_time = "02:00"
@@ -95,13 +79,13 @@ resource "google_container_cluster" "cluster" {
       iterator = cidr_block
       for_each = local.allowed_subnets
       content {
-        cidr_block   = cidr_block.value
+        cidr_block = cidr_block.value
       }
     }
   }
-  
+
   ip_allocation_policy {
-    use_ip_aliases = true
+    use_ip_aliases          = true
     cluster_ipv4_cidr_block = var.pods_cidr
   }
 
@@ -127,22 +111,29 @@ resource "google_container_cluster" "cluster" {
 }
 
 ########################################################
-# Node Pool
+# Node Pools
 ########################################################
 
-resource "google_container_node_pool" "cluster_nodes" {
+resource "google_container_node_pool" "cluster_node_pools" {
+  for_each = {
+    main             = var.main_node_pool,
+    training         = var.training_node_pool,
+    training-gpu     = var.training_gpu_node_pool,
+    packaging        = var.packaging_node_pool,
+    model-deployment = var.model_deployment_node_pool
+  }
   provider           = google-beta
   project            = var.project_id
-  name               = "${var.cluster_name}-node-pool"
+  name               = lookup(each.value, "name", "${var.cluster_name}-${each.key}")
   location           = var.location
   cluster            = var.cluster_name
-  initial_node_count = 1
+  initial_node_count = lookup(each.value, "initial_node_count", 0)
   depends_on         = [google_container_cluster.cluster]
   version            = var.node_version
 
   autoscaling {
-    min_node_count = var.gke_num_nodes_min
-    max_node_count = var.gke_num_nodes_max
+    min_node_count = lookup(lookup(each.value, "autoscaling", {}), "min_node_count", "0")
+    max_node_count = lookup(lookup(each.value, "autoscaling", {}), "max_node_count", "2")
   }
 
   management {
@@ -152,8 +143,8 @@ resource "google_container_node_pool" "cluster_nodes" {
 
   node_config {
     preemptible     = false
-    machine_type    = var.gke_node_machine_type
-    disk_size_gb    = var.node_disk_size_gb
+    machine_type    = lookup(each.value.node_config, "machine_type", "n1-standard-2")
+    disk_size_gb    = lookup(each.value.node_config, "disk_size_gb", "20")
     service_account = var.nodes_sa
     image_type      = "COS"
     tags            = [var.gke_node_tag]
@@ -162,119 +153,25 @@ resource "google_container_node_pool" "cluster_nodes" {
       disable-legacy-endpoints = "true"
     }
 
-    labels = {
+    labels = merge(lookup(each.value.node_config, "labels", {}), {
       "project" = "legion"
+    })
+
+    dynamic taint {
+      for_each = lookup(each.value.node_config, "taint", [])
+      content {
+        key    = taint.value.key
+        value  = taint.value.value
+        effect = taint.value.effect
+      }
     }
 
-    oauth_scopes = [
-      "https://www.googleapis.com/auth/compute",
-      "https://www.googleapis.com/auth/devstorage.read_only",
-      "https://www.googleapis.com/auth/cloud-platform",
-      "https://www.googleapis.com/auth/logging.write",
-      "https://www.googleapis.com/auth/monitoring",
-    ]
-  }
-}
-
-########################################################
-# Node Pool High CPU
-########################################################
-
-resource "google_container_node_pool" "cluster_nodes_highcpu" {
-  provider           = google-beta
-  project            = var.project_id
-  name               = "${var.cluster_name}-highcpu-node-pool"
-  location           = var.location
-  cluster            = var.cluster_name
-  initial_node_count = 0
-  depends_on         = [google_container_cluster.cluster]
-  version            = var.node_version
-
-  autoscaling {
-    min_node_count = "0"
-    max_node_count = var.gke_highcpu_num_nodes_max
-  }
-
-  management {
-    auto_repair  = false
-    auto_upgrade = false
-  }
-
-  node_config {
-    preemptible     = false
-    machine_type    = var.gke_node_machine_type_highcpu
-    disk_size_gb    = var.node_disk_size_gb
-    service_account = var.nodes_sa
-    image_type      = "COS"
-    tags            = [var.gke_node_tag]
-
-    metadata = {
-      disable-legacy-endpoints = "true"
-    }
-
-    labels = {
-      "project" = "legion"
-    }
-
-    taint {
-      key    = "dedicated"
-      value  = "jenkins-slave"
-      effect = "NO_SCHEDULE"
-    }
-
-    oauth_scopes = [
-      "https://www.googleapis.com/auth/compute",
-      "https://www.googleapis.com/auth/devstorage.read_only",
-      "https://www.googleapis.com/auth/cloud-platform",
-      "https://www.googleapis.com/auth/logging.write",
-      "https://www.googleapis.com/auth/monitoring",
-    ]
-  }
-}
-
-########################################################
-# Node Pool GPU
-########################################################
-
-resource "google_container_node_pool" "cluster_nodes_gpu" {
-  provider           = google-beta
-  project            = var.project_id
-  name               = "${var.cluster_name}-gpu-node-pool"
-  location           = var.location
-  cluster            = var.cluster_name
-  initial_node_count = 0
-  depends_on         = [google_container_cluster.cluster]
-  version            = var.node_version
-
-  autoscaling {
-    min_node_count = "0"
-    max_node_count = var.gke_gpu_num_nodes_max
-  }
-
-  management {
-    auto_repair  = false
-    auto_upgrade = false
-  }
-
-  node_config {
-    preemptible     = false
-    machine_type    = var.gke_node_machine_type_gpu
-    disk_size_gb    = var.node_disk_size_gb
-    service_account = var.nodes_sa
-    image_type      = "COS"
-    tags            = [var.gke_node_tag]
-
-    guest_accelerator {
-      type  = var.gke_gpu_accelerator
-      count = var.gpu_accelerators_count
-    }
-
-    metadata = {
-      disable-legacy-endpoints = "true"
-    }
-
-    labels = {
-      "project" = "legion"
+    dynamic guest_accelerator {
+      for_each = toset(lookup(each.value.node_config, "guest_accelerator", []))
+      content {
+        count = guest_accelerator.value.count
+        type  = guest_accelerator.value.type
+      }
     }
 
     oauth_scopes = [
@@ -374,9 +271,6 @@ resource "null_resource" "kubectl_config" {
   provisioner "local-exec" {
     command = "timeout 1200 bash -c 'until curl -sk https://${google_container_cluster.cluster.endpoint}; do sleep 20; done'"
   }
-  depends_on = [
-    google_container_node_pool.cluster_nodes,
-    google_container_node_pool.cluster_nodes_highcpu,
-  ]
+  depends_on = [google_container_node_pool.cluster_node_pools]
 }
 
