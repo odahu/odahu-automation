@@ -35,6 +35,16 @@ CLUSTER_NAME=<CLUSTER_NAME_HERE> TF_DATA_DIR=/tmp/.terraform_${CLUSTER_NAME}_$(b
 -var-file=/PATH/TO/VARIABLES.json \
 -var="agent_cidr=<YOUR_IP_HERE>/32"'
 
+There is also a helper script which allows you to create fully configured Legion cluster with a single command.
+The easiest way to run the script is to use prebuilt docker image containing all required components.
+You should pass cluster_profile.json file with all parameters required for cluster setup (refer to vars_template.yaml for details) and appropriate credentials for cloud operations (e.g GOOGLE_CREDENTIALS, AWS_ACCESS_KEY, etc.).
+Here is the example of command which mounts all dependencies to the docker container and triggers a cluster creation:
+
+docker run -v <local_path_to_cluster_profile.json>:/tmp/cluster_profile.json -v <path_to_local_gcp_credentials_file.json>/:/tmp/gcp_credentials_file.json -v $HOME/.aws:/root/.aws -e PROFILE=/tmp/cluster_profile.json -e GOOGLE_CREDENTIALS=/tmp/gcp_credentials_file.json k8s-terraform:latest tf_runner create
+
+Mandatory parameters are PROFILE and GOOGLE_CREDENTIALS environment variables which point to the mounted files required for cluster provisioning.
+The same way tf_runner script could be executed locally if you have all dependencies available.
+
 ## Cluster profile preparation
 In order to setup Legion cluster with all components you should have cluster profile with all parameters required for platform setup.
 The file should be provided as a json file to terraform modules with -var-file argument. All required variables with their purposes 

@@ -49,7 +49,7 @@ pipeline {
             steps {
                 script {
                     result = build job: env.param_build_legion_infra_job_name, propagate: true, wait: true, parameters: [
-                            [$class: 'GitParameterValue', name: 'GitBranch', value: env.param_legion_git_branch],
+                            [$class: 'GitParameterValue', name: 'GitBranch', value: env.param_legion_infra_branch],
                             string(name: 'EnableDockerCache', value: env.param_enable_docker_cache),
                             string(name: 'DockerCacheSource', value: env.param_infra_docker_cache_source)
                     ]
@@ -135,7 +135,7 @@ pipeline {
             steps {
                 script {
                     result = build job: env.param_terminate_cluster_job_name, propagate: true, wait: true, parameters: [
-                        [$class: 'GitParameterValue', name: 'GitBranch', value: env.param_legion_git_branch],
+                        [$class: 'GitParameterValue', name: 'GitBranch', value: env.param_legion_infra_branch],
                         string(name: 'LegionInfraVersion', value: legionInfraVersion),
                         string(name: 'ClusterName', value: env.param_cluster_name),
                         string(name: 'LegionProfilesBranch', value: env.param_legion_profiles_branch),
@@ -145,32 +145,20 @@ pipeline {
             }
         }
 
-        stage('Create Cluster') {
+        stage('Create Cluster & run tests') {
             steps {
                 script {
                     result = build job: env.param_create_cluster_job_name, propagate: true, wait: true, parameters: [
-                        [$class: 'GitParameterValue', name: 'GitBranch', value: env.param_legion_git_branch],
-                        string(name: 'ClusterName', value: env.param_cluster_name),
-                        string(name: 'LegionInfraVersion', value: legionInfraVersion),
-                        string(name: 'LegionProfilesBranch', value: env.param_legion_profiles_branch),
-                        string(name: 'CicdRepoGitBranch', value: env.param_legion_cicd_branch)
-                    ]
-                }
-            }
-        }
-
-        stage('Deploy Legion & run tests') {
-            steps {
-                script {
-                    result = build job: env.param_deploy_legion_job_name, propagate: true, wait: true, parameters: [
-                        [$class: 'GitParameterValue', name: 'GitBranch', value: env.param_legion_git_branch],
+                        [$class: 'GitParameterValue', name: 'GitBranch', value: env.param_legion_infra_branch],
                         string(name: 'ClusterName', value: env.param_cluster_name),
                         string(name: 'LegionVersion', value: legionVersion),
                         string(name: 'LegionInfraVersion', value: legionInfraVersion),
                         string(name: 'TestsTags', value: env.param_tests_tags ?: ""),
                         booleanParam(name: 'DeployLegion', value: true),
                         booleanParam(name: 'UseRegressionTests', value: true),
-                        string(name: 'LegionProfilesBranch', value: env.param_legion_profiles_branch)
+                        string(name: 'TestsTags', value: env.param_tests_tags ?: ""),
+                        string(name: 'LegionProfilesBranch', value: env.param_legion_profiles_branch),
+                        string(name: 'CicdRepoGitBranch', value: env.param_legion_cicd_branch)
                     ]
                 }
             }
@@ -185,15 +173,16 @@ pipeline {
                 }
                 else {
                     result = build job: env.param_terminate_cluster_job_name, propagate: true, wait: true, parameters: [
-                           [$class: 'GitParameterValue', name: 'GitBranch', value: env.param_legion_git_branch],
+                           [$class: 'GitParameterValue', name: 'GitBranch', value: env.param_legion_infra_branch],
                            string(name: 'LegionInfraVersion', value: legionInfraVersion),
+                           string(name: 'LegionVersion', value: legionVersion),
                            string(name: 'ClusterName', value: env.param_cluster_name),
                            string(name: 'LegionProfilesBranch', value: env.param_legion_profiles_branch),
                            string(name: 'CicdRepoGitBranch', value: env.param_legion_cicd_branch)
                     ]
                 }
                 legion = load "${env.sharedLibPath}"
-                GitBranch = env.param_legion_git_branch
+                GitBranch = env.param_legion_infra_branch
                 legion.notifyBuild(currentBuild.currentResult)
             }
         }

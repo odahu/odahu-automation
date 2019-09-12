@@ -45,9 +45,13 @@ RUN curl https://bootstrap.pypa.io/get-pip.py | python3 && \
     pip3 install pyyaml==5.1.1 && \
     gem install hiera hiera-eyaml
 
-COPY tools/hiera_exporter /opt/legion/tools/
+
+
 COPY vars_template.yaml /opt/legion/
 COPY tools/hiera_exporter_helper.sh /usr/bin/hiera_exporter_helper
+COPY tools/hiera_exporter /opt/legion/tools/hiera_exporter
+COPY tools/tf_runner.sh /usr/bin/tf_runner
+
 
 # Deploy Legion
 COPY terraform /opt/legion/terraform

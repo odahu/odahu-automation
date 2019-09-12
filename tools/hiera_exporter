@@ -130,7 +130,7 @@ if __name__ == '__main__':
     parser.add_argument('--hiera-config', '-c', type=str, default='hiera.yaml', help='Path to hiera.yaml config')
     parser.add_argument('--hiera-environment', '-e', type=str, help='Hiera environment name to get data for')
     parser.add_argument('--hiera-cloud', type=str, help='Hiera cloud name to get data for')
-    parser.add_argument('--output-format', '-f', type=str, help='json or yaml output variables file')
+    parser.add_argument('--output-format', '-f', type=str, default='json', help='json or yaml output variables file')
     parser.add_argument('--output-file', '-o', type=str, help='File with exported variables')
     parser.add_argument('--verbose', '-v', action='store_true', help='verbose log output')
 

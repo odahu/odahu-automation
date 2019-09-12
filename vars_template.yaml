@@ -19,6 +19,7 @@ pods_cidr: str                  # Cluster PODs CIDR
 cloud_type: str                 # Target hosting cloud
 k8s_version: str                # Kubernetes master version
 node_version: str               # Kubernetes node version
+tfstate_bucket: str             # GCS Bucket for cluster TF state
 
 ########################################################
 # GKE module
