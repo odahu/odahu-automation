@@ -85,8 +85,9 @@ resource "google_container_cluster" "cluster" {
   }
 
   ip_allocation_policy {
-    use_ip_aliases          = true
-    cluster_ipv4_cidr_block = var.pods_cidr
+    use_ip_aliases           = true
+    cluster_ipv4_cidr_block  = var.pods_cidr
+    services_ipv4_cidr_block = var.service_cidr
   }
 
   addons_config {
