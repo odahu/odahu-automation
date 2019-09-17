@@ -161,13 +161,17 @@ locals {
   // This hack is used to transform the json key to one line
   collector_sa_key_one_line = jsonencode(jsondecode(base64decode(google_service_account_key.collector_sa_key.private_key)))
 
-  model_docker_user     = "_json_key"
-  model_docker_password = local.collector_sa_key_one_line
-  model_docker_repo     = "${data.google_container_registry_repository.legion_registry.repository_url}/${var.cluster_name}"
+  model_docker_user        = "_json_key"
+  model_docker_password    = local.collector_sa_key_one_line
+  model_docker_repo        = "${data.google_container_registry_repository.legion_registry.repository_url}/${var.cluster_name}"
+  model_docker_description = "GCP Docker repository for model packaging"
+  model_docker_web_ui_link = "https://${local.model_docker_repo}"
 
-  model_output_bucket = "${google_storage_bucket.legion_store.url}/output"
-  model_output_region = var.project_id
-  model_output_secret = local.collector_sa_key_one_line
+  model_output_bucket      = "${google_storage_bucket.legion_store.url}/output"
+  model_output_region      = var.project_id
+  model_output_secret      = local.collector_sa_key_one_line
+  model_output_description = "Storage for trainined artifacts"
+  model_output_web_ui_link = "https://console.cloud.google.com/storage/browser/${google_storage_bucket.legion_store.name}/output?project=${var.project_id}"
 }
 
 data "template_file" "legion_values" {
@@ -193,20 +197,26 @@ data "template_file" "legion_values" {
     legion_data_bucket  = var.legion_data_bucket
     legion_collector_sa = google_service_account.collector_sa.email
 
-    git_examples_uri       = var.git_examples_uri
-    git_examples_reference = var.git_examples_reference
-    git_examples_key       = var.git_examples_key
+    git_examples_uri         = var.git_examples_uri
+    git_examples_reference   = var.git_examples_reference
+    git_examples_key         = var.git_examples_key
+    git_examples_web_ui_link = var.git_examples_web_ui_link
+    git_examples_description = var.git_examples_description
 
     model_resources_cpu = var.model_resources_cpu
     model_resources_mem = var.model_resources_mem
 
-    model_output_bucket = local.model_output_bucket
-    model_output_region = local.model_output_region
-    model_output_secret = local.model_output_secret
+    model_output_bucket      = local.model_output_bucket
+    model_output_region      = local.model_output_region
+    model_output_secret      = local.model_output_secret
+    model_output_description = local.model_output_description
+    model_output_web_ui_link = local.model_output_web_ui_link
 
-    model_docker_user     = local.model_docker_user
-    model_docker_password = local.model_docker_password
-    model_docker_repo     = local.model_docker_repo
+    model_docker_user        = local.model_docker_user
+    model_docker_password    = local.model_docker_password
+    model_docker_repo        = local.model_docker_repo
+    model_docker_description = local.model_docker_description
+    model_docker_web_ui_link = local.model_docker_web_ui_link
   }
 }
 

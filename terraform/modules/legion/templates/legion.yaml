@@ -29,6 +29,9 @@ connections:
       uri: "${git_examples_uri}"
       reference: "${git_examples_reference}"
       keySecret: "${git_examples_key}"
+      description: "${git_examples_description}"
+      webUILink: "${git_examples_web_ui_link}"
+
   - id: docker-ci
     spec:
       type: docker
@@ -36,6 +39,9 @@ connections:
       password: |
         ${model_docker_password}
       username: "${model_docker_user}"
+      description: "${model_docker_description}"
+      webUILink: "${model_docker_web_ui_link}"
+
   - id: models-output
     spec:
       type: gcs
@@ -43,6 +49,8 @@ connections:
       region: "${model_output_region}"
       keySecret: |
         ${model_output_secret}
+      description: "${model_output_description}"
+      webUILink: "${model_output_web_ui_link}"
 
 modelExecution:
   limits:

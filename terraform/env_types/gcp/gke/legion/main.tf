@@ -30,5 +30,7 @@ module "legion" {
   api_private_key          = var.api_private_key
   api_public_key           = var.api_public_key
   mlflow_toolchain_version = var.mlflow_toolchain_version
+  git_examples_description = var.git_examples_description
+  git_examples_web_ui_link = var.git_examples_web_ui_link
 }
 

@@ -36,13 +36,8 @@ Common labels
 */}}
 {{- define "knative.labels" -}}
 app.kubernetes.io/name: {{ include "knative.name" . }}
-helm.sh/chart: {{ include "knative.chart" . }}
 app.kubernetes.io/instance: {{ .root.Release.Name }}
 app: {{ .name }}
 role: {{ .name }}
-{{- if .root.Chart.AppVersion }}
-app.kubernetes.io/version: {{ .root.Chart.AppVersion | quote }}
-serving.knative.dev/release: {{ .root.Chart.AppVersion | quote }}
-{{- end }}
 app.kubernetes.io/managed-by: {{ .root.Release.Service }}
 {{- end -}}

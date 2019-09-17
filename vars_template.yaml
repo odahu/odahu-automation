@@ -99,3 +99,5 @@ docker_password: str            # Docker password for models repo
 git_examples_reference: str     # Git reference for model examples
 git_examples_uri: str           # Git URI for model examples
 git_examples_key: str           # Ssh git key for model examples
+git_examples_description: str   # Git examples web UI Link for Legion connection
+git_examples_web_ui_link: str   # Git examples description for Legion connection

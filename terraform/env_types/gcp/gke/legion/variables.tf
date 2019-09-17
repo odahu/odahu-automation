@@ -95,6 +95,16 @@ variable "git_examples_reference" {
   description = "Model reference"
 }
 
+variable "git_examples_web_ui_link" {
+  description = "Git examples web UI Link for Legion connection"
+  default     = ""
+}
+
+variable "git_examples_description" {
+  description = "Git examples description for Legion connection"
+  default     = ""
+}
+
 variable "model_resources_cpu" {
   default     = "256m"
   description = "Model pod cpu limit"
