@@ -135,6 +135,7 @@ def runRobotTestsAtGcp(tags="") {
 
                                     sh """
                                         cd /opt/legion
+                                        make CLUSTER_PROFILE=${env.clusterProfile} CLUSTER_NAME=${env.param_cluster_name} prepare-e2e-robot
                                         echo "Starting robot tests"
                                         make GOOGLE_APPLICATION_CREDENTIALS=${gcpCredential} \
                                             CLUSTER_PROFILE=${env.clusterProfile} \
@@ -153,7 +154,7 @@ def runRobotTestsAtGcp(tags="") {
                                             outputFileName : "*.xml",
                                             disableArchiveOutput : false,
                                             passThreshold : 100,
-                                            unstableThreshold: 95.0,
+                                            unstableThreshold: 50.0,
                                             onlyCritical : true,
                                             otherFiles : "*.png",
                                         ])

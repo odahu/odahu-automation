@@ -129,6 +129,12 @@ resource "google_service_account" "collector_sa" {
   project      = var.project_id
 }
 
+resource "google_storage_bucket_iam_member" "legion_store_legacy_write" {
+  bucket = google_storage_bucket.legion_store.name
+  member = "serviceAccount:${google_service_account.collector_sa.email}"
+  role   = "roles/storage.legacyBucketWriter"
+}
+
 resource "google_storage_bucket_iam_member" "legion_store" {
   bucket = google_storage_bucket.legion_store.name
   member = "serviceAccount:${google_service_account.collector_sa.email}"
