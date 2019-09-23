@@ -17,6 +17,7 @@ data "http" "external_ip" {
 
 locals {
   allowed_subnets = concat(list("${chomp(data.http.external_ip.body)}/32"), var.allowed_ips)
+  initial_node_count = var.initial_node_count % length(var.node_locations)
 }
 
 ########################################################
@@ -37,7 +38,7 @@ resource "google_container_cluster" "cluster" {
   # separately managed node pools. So we create the smallest possible default
   # node pool and immediately delete it.
   remove_default_node_pool = true
-  initial_node_count       = var.initial_node_count
+  initial_node_count       = local.initial_node_count
 
   # Setting an empty username and password explicitly disables basic auth
   master_auth {
@@ -51,6 +52,7 @@ resource "google_container_cluster" "cluster" {
 
   lifecycle {
     ignore_changes = [
+      "initial_node_count",
       "node_pool",
       "network",
       "network_policy",
