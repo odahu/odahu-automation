@@ -17,6 +17,9 @@ resource "kubernetes_namespace" "monitoring" {
     }
     name = var.monitoring_namespace
   }
+  timeouts {
+    delete = "15m"
+  }
 }
 
 resource "kubernetes_secret" "tls_monitoring" {
