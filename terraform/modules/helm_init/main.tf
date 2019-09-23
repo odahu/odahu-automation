@@ -56,7 +56,7 @@ resource "null_resource" "wait_for_tiller" {
     build_number = timestamp()
   }
   provisioner "local-exec" {
-    command = "timeout 60 bash -c 'until kubectl get pods -n ${local.tiller_namespace} |grep tiller; do sleep 5; done'"
+    command = "timeout 60 bash -c 'until kubectl get pods -n ${local.tiller_namespace} | grep tiller; do sleep 5; done'"
   }
   depends_on = [null_resource.install_tiller]
 }
