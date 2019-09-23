@@ -53,6 +53,7 @@ resource "helm_release" "monitoring" {
   version    = var.legion_infra_version
   namespace  = var.monitoring_namespace
   repository = "legion"
+  timeout    = "600"
 
   values = [
     data.template_file.monitoring_values.rendered

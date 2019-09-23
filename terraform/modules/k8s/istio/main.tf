@@ -56,6 +56,7 @@ resource "helm_release" "istio" {
   version    = var.istio_version
   namespace  = var.istio_namespace
   repository = "istio"
+  timeout    = "600"
 
   values = [
     data.template_file.istio_values.rendered,

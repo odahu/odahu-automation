@@ -32,6 +32,7 @@ resource "helm_release" "oauth2-proxy" {
   version       = var.oauth_helm_chart_version
   namespace     = "kube-system"
   recreate_pods = "true"
+  timeout       = "600"
 
   values = [
     data.template_file.oauth2-proxy_values.rendered
