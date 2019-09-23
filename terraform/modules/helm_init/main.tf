@@ -75,6 +75,20 @@ resource "null_resource" "reinit_helm_client" {
   depends_on = [null_resource.wait_for_tiller]
 }
 
+resource "null_resource" "add_helm_repository_stable" {
+  triggers = {
+    build_number = timestamp()
+  }
+  provisioner "local-exec" {
+    command = "helm repo add stable https://kubernetes-charts.storage.googleapis.com"
+  }
+  provisioner "local-exec" {
+    when    = "destroy"
+    command = "helm repo rm stable || true"
+  }
+  depends_on = [null_resource.reinit_helm_client]
+}
+
 resource "null_resource" "add_helm_repository_legion" {
   triggers = {
     build_number = timestamp()
@@ -82,7 +96,7 @@ resource "null_resource" "add_helm_repository_legion" {
   provisioner "local-exec" {
     command = "helm repo add legion ${var.legion_helm_repo}"
   }
-  depends_on = [null_resource.reinit_helm_client]
+  depends_on = [null_resource.add_helm_repository_stable]
 }
 
 resource "null_resource" "add_helm_repository_istio" {
