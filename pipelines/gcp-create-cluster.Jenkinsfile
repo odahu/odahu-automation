@@ -42,7 +42,6 @@ pipeline {
                     sshagent(["${env.legionProfilesGitlabKey}"]) {
                         sh"""#!/bin/bash -ex
                         #TODO get repo url from passed parameters
-                        #mkdir -p \$(getent passwd \$(whoami) | cut -d: -f6)/.ssh && ssh-keyscan git.epam.com >> \$(getent passwd \$(whoami) | cut -d: -f6)/.ssh/known_hosts
                         if [ ! -d "legion-profiles" ]; then
                             GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no" git clone ${env.param_legion_profiles_repo} legion-profiles
                         fi
@@ -52,7 +51,6 @@ pipeline {
                     // Checkout CICD repo with private DNS zone
                     sshagent(["${env.legionCicdGitlabKey}"]) {
                         sh"""
-                        #mkdir -p \$(getent passwd \$(whoami) | cut -d: -f6)/.ssh && ssh-keyscan git.epam.com >> \$(getent passwd \$(whoami) | cut -d: -f6)/.ssh/known_hosts
                         if [ ! -d "legion-cicd" ]; then
                             GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no" git clone ${env.param_legion_cicd_repo} legion-cicd
                         fi
