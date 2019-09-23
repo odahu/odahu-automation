@@ -37,7 +37,7 @@ resource "helm_release" "istio-init" {
 
 resource "null_resource" "delay" {
   provisioner "local-exec" {
-    command = "timeout 200 bash -c \"until [ $(kubectl get customresourcedefinitions -l release=istio --no-headers | wc -l) -ge ${var.istio_crds_num} ]; do sleep 5; done\""
+    command = "timeout 200 bash -c 'until $(kubectl get --all-namespaces gateways.networking.istio.io && kubectl get --all-namespaces envoyfilters.networking.istio.io && kubectl get --all-namespaces policies.authentication.istio.io && kubectl get --all-namespaces destinationrules.networking.istio.io && kubectl get --all-namespaces virtualservices.networking.istio.io && kubectl get --all-namespaces envoyfilters.networking.istio.io && kubectl get --all-namespaces attributemanifests.config.istio.io && kubectl get --all-namespaces handlers.config.istio.io && kubectl get --all-namespaces meshpolicies.authentication.istio.io); do sleep 5; done'"
   }
   depends_on = [helm_release.istio-init]
 }
