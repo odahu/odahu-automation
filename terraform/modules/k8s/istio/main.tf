@@ -37,7 +37,7 @@ resource "helm_release" "istio-init" {
 
 resource "null_resource" "delay" {
   provisioner "local-exec" {
-    command = "timeout 200 bash -c 'until [ $(kubectl get customresourcedefinitions -l release=istio --no-headers | wc -l) -ge 23 ]; do sleep 5; done'"
+    command = "timeout 200 bash -c \"until [ $(kubectl get customresourcedefinitions -l release=istio --no-headers | wc -l) -ge ${var.istio_crds_num} ]; do sleep 5; done\""
   }
   depends_on = [helm_release.istio-init]
 }
