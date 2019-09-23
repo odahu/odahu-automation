@@ -17,7 +17,7 @@ data "http" "external_ip" {
 
 locals {
   allowed_subnets = concat(list("${chomp(data.http.external_ip.body)}/32"), var.allowed_ips)
-  initial_node_count = var.initial_node_count % length(var.node_locations)
+  initial_node_count = length(var.node_locations) == 0 ? var.initial_node_count : floor(var.initial_node_count / length(var.node_locations))
 }
 
 ########################################################
