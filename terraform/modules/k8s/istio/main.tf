@@ -32,6 +32,7 @@ resource "helm_release" "istio-init" {
   version    = var.istio_version
   namespace  = var.istio_namespace
   repository = "istio"
+  depends_on = [kubernetes_namespace.istio]
 }
 
 resource "null_resource" "delay" {
@@ -93,4 +94,5 @@ resource "helm_release" "knative" {
   version    = var.legion_infra_version
   namespace  = var.knative_namespace
   repository = "legion"
+  depends_on = [kubernetes_namespace.knative, helm_release.istio]
 }
