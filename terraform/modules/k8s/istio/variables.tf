@@ -20,6 +20,11 @@ variable "istio_namespace" {
   description = "istio namespace"
 }
 
+variable "istio_crds_num" {
+  default     = "23"
+  description = "Number of custom resource definitions created for Istio"
+}
+
 variable "monitoring_namespace" {
   default     = "kube-monitoring"
   description = "Monitoring namespace"

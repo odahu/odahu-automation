@@ -1,5 +1,5 @@
 provider "helm" {
-  version        = "v0.10.0"
+  version        = "0.10.2"
   install_tiller = false
 }
 
@@ -16,6 +16,9 @@ resource "kubernetes_namespace" "monitoring" {
       k8s-component = "monitoring"
     }
     name = var.monitoring_namespace
+  }
+  timeouts {
+    delete = "15m"
   }
 }
 
@@ -53,6 +56,7 @@ resource "helm_release" "monitoring" {
   version    = var.legion_infra_version
   namespace  = var.monitoring_namespace
   repository = "legion"
+  timeout    = "600"
 
   values = [
     data.template_file.monitoring_values.rendered

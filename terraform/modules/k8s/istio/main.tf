@@ -1,5 +1,5 @@
 provider "helm" {
-  version        = "v0.10.0"
+  version        = "0.10.2"
   install_tiller = false
 }
 
@@ -32,11 +32,12 @@ resource "helm_release" "istio-init" {
   version    = var.istio_version
   namespace  = var.istio_namespace
   repository = "istio"
+  depends_on = [kubernetes_namespace.istio]
 }
 
 resource "null_resource" "delay" {
   provisioner "local-exec" {
-    command = "timeout 200 bash -c 'until $(kubectl get --all-namespaces gateways.networking.istio.io && kubectl get --all-namespaces envoyfilters.networking.istio.io && kubectl get --all-namespaces policies.authentication.istio.io && kubectl get --all-namespaces destinationrules.networking.istio.io && kubectl get --all-namespaces virtualservices.networking.istio.io && kubectl get --all-namespaces envoyfilters.networking.istio.io && kubectl get --all-namespaces attributemanifests.config.istio.io && kubectl get --all-namespaces handlers.config.istio.io && kubectl get --all-namespaces meshpolicies.authentication.istio.io); do sleep 5; done'"
+    command = "timeout 200 bash -c \"until [ $(kubectl get customresourcedefinitions -l release=istio --no-headers | wc -l) -ge ${var.istio_crds_num} ]; do sleep 5; done\""
   }
   depends_on = [helm_release.istio-init]
 }
@@ -56,6 +57,7 @@ resource "helm_release" "istio" {
   version    = var.istio_version
   namespace  = var.istio_namespace
   repository = "istio"
+  timeout    = "600"
 
   values = [
     data.template_file.istio_values.rendered,
@@ -92,4 +94,5 @@ resource "helm_release" "knative" {
   version    = var.legion_infra_version
   namespace  = var.knative_namespace
   repository = "legion"
+  depends_on = [kubernetes_namespace.knative, helm_release.istio]
 }
