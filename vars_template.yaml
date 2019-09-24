@@ -7,7 +7,6 @@ cluster_name: str               # Common gcp cluster name
 region: str                     # GCP region for environment regional resources
 zone: str                       # GCP cluster zone where the cluster is deployed
 root_domain: str                # Root domain of the cluster
-aws_profile: str                # AWS boto profile
 config_context_auth_info: str   # GKE cluster auth info
 config_context_cluster: str     # GKE cluster context
 aws_vpc_id: str                 # AWS peered VPC ID
@@ -21,6 +20,9 @@ cloud_type: str                 # Target hosting cloud
 k8s_version: str                # Kubernetes master version
 node_version: str               # Kubernetes node version
 tfstate_bucket: str             # GCS Bucket for cluster TF state
+ssh_key: str                    # SSH public key for cluster nodes and bastion
+tls_key: str                    # TLS private key for Legion cluster
+tls_crt: str                    # TLS certificates chain for Legion cluster
 
 ########################################################
 # GKE module
@@ -52,7 +54,6 @@ legion_data_bucket: str         # GCP Storage bucket for Legion data
 ########################################################
 project_id: str                 # GCP project ID
 allowed_ips: list               # List of WAN IPs to whitelist on cluster
-secrets_storage: str            # AWS S3 bucket with sensitive data such as TLS certs and cluster SSH keys
 gcp_cidr: str                   # CIDR for cluster nodes
 aws_sg: str                     # AWS Security group ID to grant access from nodes at GCP (for Core components access)
 aws_cidr: str                   # AWS CIDR for VPC peering setup
