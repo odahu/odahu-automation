@@ -23,8 +23,8 @@ resource "kubernetes_secret" "tls_legion" {
     namespace = var.legion_namespace
   }
   data = {
-    "tls.key" = var.tls-secret-key
-    "tls.crt" = var.tls-secret-crt
+    "tls.key" = var.tls_secret_key
+    "tls.crt" = var.tls_secret_crt
   }
   type = "kubernetes.io/tls"
 
