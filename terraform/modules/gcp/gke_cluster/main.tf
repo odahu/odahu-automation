@@ -5,12 +5,6 @@ provider "google-beta" {
   project = var.project_id
 }
 
-provider "aws" {
-  region                  = var.region_aws
-  shared_credentials_file = var.aws_credentials_file
-  profile                 = var.aws_profile
-}
-
 data "http" "external_ip" {
   url = "http://ipv4.icanhazip.com"
 }
@@ -191,16 +185,11 @@ resource "google_container_node_pool" "cluster_node_pools" {
 # SSH keys
 ########################################################
 
-data "aws_s3_bucket_object" "ssh_public_key" {
-  bucket = var.secrets_storage
-  key    = "${var.cluster_name}/ssh/${var.cluster_name}.pub"
-}
-
 resource "google_compute_project_metadata_item" "ssh_public_keys" {
   provider = google-beta
   project  = var.project_id
   key      = "ssh-keys"
-  value    = "${var.ssh_user}:${data.aws_s3_bucket_object.ssh_public_key.body}"
+  value    = "${var.ssh_user}:${var.ssh_public_key}"
 }
 
 ########################################################
@@ -233,7 +222,7 @@ resource "google_compute_instance" "gke_bastion" {
   }
 
   metadata = {
-    ssh-keys = "${var.ssh_user}:${data.aws_s3_bucket_object.ssh_public_key.body}"
+    ssh-keys = "${var.ssh_user}:${var.ssh_public_key}"
   }
 
   metadata_startup_script = "sed -i '/AllowAgentForwarding/s/^#//g' /etc/ssh/sshd_config && service sshd restart"

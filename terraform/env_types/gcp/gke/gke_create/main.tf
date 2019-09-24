@@ -53,9 +53,6 @@ module "gke_cluster" {
   cluster_name         = var.cluster_name
   region               = var.region
   zone                 = var.zone
-  region_aws           = var.region_aws
-  aws_profile          = var.aws_profile
-  aws_credentials_file = var.aws_credentials_file
   allowed_ips          = var.allowed_ips
   agent_cidr           = var.agent_cidr
   nodes_sa             = module.iam.service_account
@@ -73,5 +70,6 @@ module "gke_cluster" {
   node_version         = var.node_version
   bastion_tag          = var.bastion_tag
   gke_node_tag         = var.gke_node_tag
+  ssh_public_key       = var.ssh_key
 }
 

@@ -10,15 +10,6 @@ variable "cluster_name" {
   description = "Legion cluster name"
 }
 
-variable "aws_profile" {
-  description = "AWS profile name"
-}
-
-variable "aws_credentials_file" {
-  default     = "~/.aws/config"
-  description = "AWS credentials file location"
-}
-
 variable "zone" {
   default     = "us-east1-b"
   description = "Default zone"
@@ -27,11 +18,6 @@ variable "zone" {
 variable "region" {
   default     = "us-east1"
   description = "Region of resources"
-}
-
-variable "region_aws" {
-  default     = "us-east-2"
-  description = "Region of AWS resources"
 }
 
 variable "infra_vpc_name" {
@@ -124,6 +110,10 @@ variable "agent_cidr" {
 
 variable "dns_zone_name" {
   description = "Cluster root DNS zone name"
+}
+
+variable "ssh_key" {
+  description = "SSH public key for Legion cluster nodes and bastion host"
 }
 
 #############

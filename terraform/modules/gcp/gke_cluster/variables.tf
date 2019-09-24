@@ -91,6 +91,10 @@ variable "ssh_user" {
   description = "default ssh user"
 }
 
+variable "ssh_public_key" {
+  description = "SSH public key for Legion cluster nodes and bastion host"
+}
+
 variable "cluster_autoscaling_cpu_max_limit" {
   default     = 20
   description = "Maximum CPU limit for autoscaling if it is enabled."

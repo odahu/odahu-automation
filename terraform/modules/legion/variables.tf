@@ -18,14 +18,6 @@ variable "config_context_cluster" {
   description = "Legion cluster context name"
 }
 
-variable "aws_profile" {
-  description = "AWS profile name"
-}
-
-variable "aws_credentials_file" {
-  description = "AWS credentials file location"
-}
-
 variable "zone" {
   default     = "us-east1-b"
   description = "Default zone"
@@ -36,21 +28,20 @@ variable "region" {
   description = "Region of resources"
 }
 
-variable "region_aws" {
-  default     = "us-east-2"
-  description = "Region of AWS resources"
-}
-
-variable "secrets_storage" {
-  description = "Cluster secrets storage"
-}
-
 variable "legion_helm_repo" {
   description = "Legion helm repo"
 }
 
 variable "root_domain" {
   description = "Legion cluster root domain"
+}
+
+variable "tls_secret_crt" {
+  description = "Legion cluster TLS certificate"
+}
+
+variable "tls_secret_key" {
+  description = "Legion cluster TLS key"
 }
 
 ##################
