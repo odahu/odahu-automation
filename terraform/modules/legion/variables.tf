@@ -92,29 +92,6 @@ variable "docker_password" {
   description = "Legion Docker repo password"
 }
 
-variable "api_private_key" {
-  description = "RSA model private key. It is used for generation of JWT tokens."
-}
-
-variable "api_public_key" {
-  description = "RSA model public key. It is used for verification of JWT tokens."
-}
-
-variable "api_jwt_ttl_minutes" {
-  default     = "120"
-  description = "API JWT secret ttl"
-}
-
-variable "api_jwt_exp_datetime" {
-  default     = ""
-  description = "API JWT secret expiration"
-}
-
-variable "max_token_ttl_minutes" {
-  default     = "259200"
-  description = "Max token ttl"
-}
-
 variable "model_docker_protocol" {
   default     = "https"
   description = "Model docker protocol"
@@ -164,4 +141,19 @@ variable "collector_region" {
 
 variable "mlflow_toolchain_version" {
   description = "Version of legion-mlflow helm chart"
+}
+
+variable "model_authorization_enabled" {
+  description = "Is model authorization enabled"
+  default     = "false"
+}
+
+variable "model_oidc_jwks_url" {
+  description = "Jwks url for mode authorization"
+  default     = ""
+}
+
+variable "model_oidc_issuer" {
+  description = "The Issuer Identifier"
+  default     = ""
 }

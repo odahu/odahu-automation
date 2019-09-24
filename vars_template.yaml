@@ -89,8 +89,6 @@ test_oauth_scope: str           # OAuth2 client's scope
 # Legion
 ########################################################
 enclave_jwt_secret: str         # JWT secret for legion services
-api_private_key: str            # API private key for Legion services
-api_public_key: str             # API public key for Legion services
 ### Nexus
 model_docker_url: str           # Docker repo URL for models
 docker_user: str                # Docker user for models repo

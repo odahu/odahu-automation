@@ -73,14 +73,6 @@ variable "docker_password" {
   description = "Legion Docker repo password"
 }
 
-variable "api_private_key" {
-  description = "RSA model private key. It is used for generation of JWT tokens."
-}
-
-variable "api_public_key" {
-  description = "RSA model public key. It is used for verification of JWT tokens."
-}
-
 variable "model_docker_url" {
   description = "Model docker url"
 }
@@ -130,4 +122,17 @@ variable "collector_region" {
 
 variable "mlflow_toolchain_version" {
   description = "Version of legion-mlflow helm chart"
+}
+
+variable "keycloak_realm" {
+  description = "Keycloak realm"
+}
+
+variable "keycloak_url" {
+  description = "Keycloak URL"
+}
+
+variable "model_authorization_enabled" {
+  description = "Is model authorization enabled"
+  default     = "false"
 }

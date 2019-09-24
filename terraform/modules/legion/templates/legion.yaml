@@ -58,6 +58,18 @@ modelExecution:
     mem: "${model_resources_mem}"
 
 config:
+  common:
+    external_urls:
+      - name: "API's Gateway"
+        url: "https://edi.${cluster_name}.${root_domain}/swagger/index.html"
+      - name: "ML Metrics"
+        url: "https://mlflow.${cluster_name}.${root_domain}"
+      - name: "Service Catalog"
+        url: "https://edge.${cluster_name}.${root_domain}/swagger/index.html"
+      - name: "Cluster Monitoring"
+        url: "https://grafana.${cluster_name}.${root_domain}"
+      - name: "Feedback storage"
+        url: "${feedback_storage_link}"
   deployment:
     edge:
       host: https://edge.${cluster_name}.${root_domain}
@@ -65,18 +77,15 @@ config:
     server:
       template_folder: /opt/legion/templates
     security:
-      role_name: legion
-      jwt:
-        enabled: true
-        private_key: "${api_private_key}"
-        public_key: "${api_public_key}"
-        ttl_minute: "${api_jwt_ttl_minutes}"
-        max_ttl_min: "${max_token_ttl_minutes}"
-        exp_date_time: "${api_jwt_exp_datetime}"
+      jwks:
+        enabled: ${model_authorization_enabled}
+        url: "${model_oidc_jwks_url}"
+        issuer: "${model_oidc_issuer}"
 
   training:
     namespace: "${legion_training_namespace}"
     output_connection: models-output
+    metric_url: "https://mlflow.${cluster_name}.${root_domain}"
     model_trainer:
       image: "${docker_repo}/k8s-model-trainer:${legion_version}"
 

@@ -178,6 +178,8 @@ locals {
   model_output_secret      = local.collector_sa_key_one_line
   model_output_description = "Storage for trainined artifacts"
   model_output_web_ui_link = "https://console.cloud.google.com/storage/browser/${google_storage_bucket.legion_store.name}/output?project=${var.project_id}"
+
+  feedback_storage_link = "https://console.cloud.google.com/storage/browser/${google_storage_bucket.legion_store.name}/model_log?project=${var.project_id}"
 }
 
 data "template_file" "legion_values" {
@@ -194,14 +196,12 @@ data "template_file" "legion_values" {
     docker_repo    = var.docker_repo
     legion_version = var.legion_version
 
-    api_private_key       = var.api_private_key
-    api_public_key        = var.api_public_key
-    api_jwt_ttl_minutes   = var.api_jwt_ttl_minutes
-    max_token_ttl_minutes = var.max_token_ttl_minutes
-    api_jwt_exp_datetime  = var.api_jwt_exp_datetime
-
     legion_data_bucket  = var.legion_data_bucket
     legion_collector_sa = google_service_account.collector_sa.email
+
+    model_authorization_enabled = var.model_authorization_enabled
+    model_oidc_jwks_url         = var.model_oidc_jwks_url
+    model_oidc_issuer           = var.model_oidc_issuer
 
     git_examples_uri         = var.git_examples_uri
     git_examples_reference   = var.git_examples_reference
@@ -223,6 +223,8 @@ data "template_file" "legion_values" {
     model_docker_repo        = local.model_docker_repo
     model_docker_description = local.model_docker_description
     model_docker_web_ui_link = local.model_docker_web_ui_link
+
+    feedback_storage_link = local.feedback_storage_link
   }
 }
 
