@@ -60,7 +60,7 @@ modelExecution:
 config:
   common:
     external_urls:
-      - name: "API's Gateway"
+      - name: "API Gateway"
         url: "https://edi.${cluster_name}.${root_domain}/swagger/index.html"
       - name: "ML Metrics"
         url: "https://mlflow.${cluster_name}.${root_domain}"
