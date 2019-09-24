@@ -30,10 +30,6 @@ variable "infra_cidr" {
   description = "GCP infra network CIDR"
 }
 
-variable "secrets_storage" {
-  description = "Cluster secrets storage"
-}
-
 variable "root_domain" {
   description = "Legion cluster root domain"
 }

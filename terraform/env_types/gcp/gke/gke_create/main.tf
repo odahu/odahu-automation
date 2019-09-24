@@ -65,7 +65,6 @@ module "gke_cluster" {
   subnetwork           = module.vpc.subnet_name
   dns_zone_name        = var.dns_zone_name
   root_domain          = var.root_domain
-  secrets_storage      = var.secrets_storage
   k8s_version          = var.k8s_version
   node_version         = var.node_version
   bastion_tag          = var.bastion_tag
