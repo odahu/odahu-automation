@@ -22,6 +22,10 @@ feedback:
 edi:
   replicas: 2
 
+metrics:
+  enabled: true
+  dashboardFolder: /tmp/dashboards/legion
+
 connections:
   - id: legion-examples
     spec:
