@@ -21,8 +21,6 @@ module "firewall" {
 module "vpc_peering_gcp" {
   source              = "../../../../modules/gcp/networking/vpc_peering_gcp"
   project_id          = var.project_id
-  region              = var.region
-  zone                = var.zone
   gcp_network_1_name  = module.vpc.network_name
   gcp_network_1_range = [var.gcp_cidr, module.gke_cluster.k8s_pods_cidr]
   gcp_network_2_name  = var.infra_vpc_name
