@@ -1,8 +1,3 @@
-provider "helm" {
-  version        = "0.10.2"
-  install_tiller = false
-}
-
 variable "istio_version" {
   default = "1.2.2"
 }

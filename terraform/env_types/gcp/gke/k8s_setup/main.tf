@@ -3,9 +3,6 @@
 ########################################################
 module "base_setup" {
   source               = "../../../../modules/k8s/base_setup"
-  zone                 = var.zone
-  region               = var.region
-  project_id           = var.project_id
   cluster_name         = var.cluster_name
   tls_secret_key       = var.tls_key
   tls_secret_crt       = var.tls_crt
@@ -25,9 +22,6 @@ module "nginx-ingress" {
 
 module "dashboard" {
   source               = "../../../../modules/k8s/dashboard"
-  zone                 = var.zone
-  region               = var.region
-  project_id           = var.project_id
   cluster_name         = var.cluster_name
   root_domain          = var.root_domain
   tls_secret_key       = var.tls_key
@@ -50,9 +44,6 @@ module "auth" {
 
 module "monitoring" {
   source               = "../../../../modules/k8s/monitoring"
-  zone                 = var.zone
-  region               = var.region
-  project_id           = var.project_id
   cluster_name         = var.cluster_name
   legion_helm_repo     = var.legion_helm_repo
   legion_infra_version = var.legion_infra_version

@@ -1,15 +1,3 @@
-provider "helm" {
-  version        = "0.10.2"
-  install_tiller = false
-}
-
-provider "google" {
-  version = "~> 2.2"
-  region  = var.region
-  zone    = var.zone
-  project = var.project_id
-}
-
 ########################################################
 # Kubernetes Dashboard
 ########################################################
