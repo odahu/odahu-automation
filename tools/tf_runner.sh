@@ -99,6 +99,7 @@ function TerraformRun() {
 				-backend-config="container_name=$(GetParam 'tfstate_bucket')" \
 				-backend-config="resource_group_name=$(GetParam 'azure_resource_group')" \
 				-backend-config="storage_account_name=$(GetParam 'azure_storage_account')" \
+				-backend-config="key=$TF_MODULE/default.tfstate"
 			;;
 	esac
 

@@ -1,11 +1,3 @@
 terraform {
-  backend "gcs" {
-    prefix = "helm_init"
-  }
+  backend "gcs" {}
 }
-
-# terraform {
-#   backend "local" {
-#     path = "../../../../_tfstate/state.tfstate"
-#   }
-# }
