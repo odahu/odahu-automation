@@ -5,7 +5,6 @@ module "vpc" {
   source       = "../../../../modules/gcp/networking/vpc"
   project_id   = var.project_id
   region       = var.region
-  zone         = var.zone
   cluster_name = var.cluster_name
   subnet_cidr  = var.gcp_cidr
 }
