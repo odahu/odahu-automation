@@ -7,16 +7,6 @@ variable "cluster_name" {
   description = "Legion cluster name"
 }
 
-variable "region" {
-  default     = "us-east1"
-  description = "Region of resources"
-}
-
-variable "zone" {
-  default     = "us-east1-b"
-  description = "Default zone"
-}
-
 variable "service_account_iam_roles" {
   default = [
     "roles/logging.logWriter",

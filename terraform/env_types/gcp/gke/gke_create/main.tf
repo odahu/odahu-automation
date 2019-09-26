@@ -34,8 +34,6 @@ module "iam" {
   source       = "../../../../modules/gcp/iam"
   project_id   = var.project_id
   cluster_name = var.cluster_name
-  region       = var.region
-  zone         = var.zone
 }
 
 ########################################################

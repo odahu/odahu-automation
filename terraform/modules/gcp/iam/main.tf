@@ -1,10 +1,3 @@
-provider "google" {
-  version = "~> 2.2"
-  region  = var.region
-  zone    = var.zone
-  project = var.project_id
-}
-
 resource "google_service_account" "nodes_sa" {
   account_id   = "${var.cluster_name}-nodes-sa"
   display_name = "${var.cluster_name}-nodes-sa"
