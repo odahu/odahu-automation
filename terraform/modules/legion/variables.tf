@@ -10,19 +10,6 @@ variable "cluster_name" {
   description = "Legion cluster name"
 }
 
-variable "config_context_auth_info" {
-  description = "Legion cluster context auth"
-}
-
-variable "config_context_cluster" {
-  description = "Legion cluster context name"
-}
-
-variable "zone" {
-  default     = "us-east1-b"
-  description = "Default zone"
-}
-
 variable "region" {
   default     = "us-east1"
   description = "Region of resources"
