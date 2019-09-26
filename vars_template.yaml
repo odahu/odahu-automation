@@ -4,15 +4,10 @@
 # set GOOGLE_CREDENTIALS=/path/to/creds/.json or enable the property below
 # gcp_credentials:            # path to /gpc/credential/file.json
 cluster_name: str               # Common gcp cluster name
-region: str                     # GCP region for environment regional resources
-zone: str                       # GCP cluster zone where the cluster is deployed
 root_domain: str                # Root domain of the cluster
 config_context_auth_info: str   # GKE cluster auth info
 config_context_cluster: str     # GKE cluster context
-aws_vpc_id: str                 # AWS peered VPC ID
 network_name: str               # GCP VPC Network name
-bastion_tag: str                # Bastion host network tag
-gke_node_tag: str               # GKE cluster node's network tag
 infra_cidr: str                 # Core infrastructure resources CIDR
 pods_cidr: str                  # Cluster PODs CIDR
 service_cidr: str               # Cluster Services CIDR
@@ -23,14 +18,26 @@ tfstate_bucket: str             # GCS Bucket for cluster TF state
 ssh_key: str                    # SSH public key for cluster nodes and bastion
 tls_key: str                    # TLS private key for Legion cluster
 tls_crt: str                    # TLS certificates chain for Legion cluster
+allowed_ips: list               # List of WAN IPs to whitelist on cluster
 
 ########################################################
 # GKE module
 ########################################################
+dns_zone_name: str              # Cloud DNS zone name for the cluster
+aws_profile: str                # AWS profile
+aws_vpc_id: str                 # AWS peered VPC ID
+aws_sg: str                     # AWS Security group ID to grant access from nodes at GCP (for Core components access)
+aws_cidr: str                   # AWS CIDR for VPC peering setup
+aws_route_table_id: str         # AWS route table ID for VPC peering setup
+region: str                     # GCP region for environment regional resources
+zone: str                       # GCP cluster zone where the cluster is deployed
+project_id: str                 # GCP project ID
+bastion_tag: str                # Bastion host network tag
+gke_node_tag: str               # GKE cluster node's network tag
+gcp_cidr: str                   # CIDR for GKE cluster nodes
 location: str                   # GKE cluster zone
 node_locations: list            # GKE cluster zones to place nodes in
 initial_node_count: str         # GKE init node pool node count
-dns_zone_name: str              # Cloud DNS zone name for the cluster
 
 ########################################################
 # Common Legion variables
@@ -48,16 +55,6 @@ github_org_name: str            # GitHub Organization name for cluster access
 legion_version: str             # Legion version to be deployed
 mlflow_toolchain_version: str   # Mlflow toolchain version to be deployed
 legion_data_bucket: str         # GCP Storage bucket for Legion data
-
-########################################################
-# Common variables
-########################################################
-project_id: str                 # GCP project ID
-allowed_ips: list               # List of WAN IPs to whitelist on cluster
-gcp_cidr: str                   # CIDR for cluster nodes
-aws_sg: str                     # AWS Security group ID to grant access from nodes at GCP (for Core components access)
-aws_cidr: str                   # AWS CIDR for VPC peering setup
-aws_route_table_id: str         # AWS route table ID for VPC peering setup
 
 ########################################################
 # K8S base components
