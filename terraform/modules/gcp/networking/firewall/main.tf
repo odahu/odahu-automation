@@ -1,14 +1,11 @@
-provider "google" {
-  version = "~> 2.2"
-  region  = var.region
-  zone    = var.zone
-  project = var.project_id
+locals {
+  network_name = var.network_name == "" ? "${var.cluster_name}-vpc" : var.network_name
 }
 
 # Firewall rule that allows internal communication across all protocols
 resource "google_compute_firewall" "bastion_in_fw" {
   name      = "${var.cluster_name}-bastion-in-fw"
-  network   = var.network_name
+  network   = local.network_name
   direction = "INGRESS"
 
   allow {
@@ -32,7 +29,7 @@ resource "google_compute_firewall" "bastion_in_fw" {
 # Firewall rule that allows external SSH, ICMP, and HTTPS
 resource "google_compute_firewall" "bastion_out_fw" {
   name      = "${var.cluster_name}-bastion-out-fw"
-  network   = var.network_name
+  network   = local.network_name
   direction = "EGRESS"
 
   allow {
@@ -52,7 +49,7 @@ resource "google_compute_firewall" "bastion_out_fw" {
 # Firewall rule that allows kube API access to the pods
 resource "google_compute_firewall" "master_to_pods_fw" {
   name      = "${var.cluster_name}-nodes-access-from-master"
-  network   = var.network_name
+  network   = local.network_name
   direction = "INGRESS"
 
   allow {

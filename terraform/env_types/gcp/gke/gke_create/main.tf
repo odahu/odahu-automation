@@ -11,9 +11,6 @@ module "vpc" {
 
 module "firewall" {
   source       = "../../../../modules/gcp/networking/firewall"
-  project_id   = var.project_id
-  region       = var.region
-  zone         = var.zone
   allowed_ips  = var.allowed_ips
   cluster_name = var.cluster_name
   network_name = module.vpc.network_name
