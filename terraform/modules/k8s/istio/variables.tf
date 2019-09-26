@@ -15,6 +15,10 @@ variable "tls_secret_key" {
   description = "Legion cluster TLS key"
 }
 
+variable "istio_version" {
+  default = "1.2.2"
+}
+
 variable "istio_namespace" {
   default     = "istio-system"
   description = "istio namespace"
