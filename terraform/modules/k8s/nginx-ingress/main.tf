@@ -1,89 +1,92 @@
-provider "helm" {
-  version        = "0.10.2"
-  install_tiller = false
-}
-
-provider "google" {
-  version = "~> 2.2"
-  region  = var.region
-  zone    = var.zone
-  project = var.project_id
-}
-
-########################################################
-# Nginx Ingress
-########################################################
-resource "google_compute_address" "ingress_lb_address" {
-  name         = "${var.cluster_name}-ingress-main"
-  region       = var.region
-  address_type = "EXTERNAL"
-}
-
-resource "google_dns_record_set" "ingress_lb" {
-  name         = "*.${var.cluster_name}.${var.root_domain}."
-  type         = "A"
-  ttl          = 300
-  managed_zone = var.dns_zone_name
-  rrdatas      = [google_compute_address.ingress_lb_address.address]
-}
-
-# Whitelist allowed_ips and cluster NAT ip on the cluster ingress
-data "google_compute_address" "nat_gw_ip" {
-  name = "${var.cluster_name}-nat-gw"
+locals {
+  nginx_service_types = {
+    "gcp/gke"   : "LoadBalancer",
+    "azure/aks" : "LoadBalancer",
+    "aws/eks"   : "NodePort"
+  }
 }
 
 resource "helm_release" "nginx-ingress" {
-  name      = "nginx-ingress"
-  chart     = "stable/nginx-ingress"
-  namespace = "kube-system"
-  version   = "0.20.1"
-  set {
-    name  = "defaultBackend.service.type"
-    value = "LoadBalancer"
-  }
+  name       = "nginx-ingress"
+  chart      = "stable/nginx-ingress"
+  namespace  = "kube-system"
+  version    = "0.20.1"
+  wait       = false
+  
   set {
     name  = "controller.config.proxy-buffer-size"
     value = "256k"
   }
+
+  # Controller service configuration
   set {
-    name  = "controller.service.loadBalancerIP"
-    value = google_compute_address.ingress_lb_address.address
+    name  = "controller.service.type"
+    value = lookup(local.nginx_service_types, var.cluster_type)
   }
-  depends_on = [google_compute_address.ingress_lb_address]
+
+  # GCP GKE only configuration
+  dynamic "set" {
+    iterator = i
+    for_each = local.gcp_resouce_count == 0 ? [] : [0]
+    content {
+      name  = "defaultBackend.service.type"
+      value = lookup(local.nginx_service_types, var.cluster_type)
+    }
+  }
+
+  dynamic "set" {
+    iterator = i
+    for_each = local.gcp_resouce_count == 0 ? [] : [0]
+    content {
+      name  = "controller.service.loadBalancerIP"
+      value = google_compute_address.ingress_lb_address[0].address
+    }
+  }
+
+  # AWS EKS only configuration
+  dynamic "set" {
+    iterator = port
+    for_each = local.aws_resouce_count == 0 ? [] : [30000]
+    content {
+      name  = "controller.service.nodePorts.http"
+      value = port.value
+    }
+  }
+
+  dynamic "set" {
+    iterator = port
+    for_each = local.aws_resouce_count == 0 ? [] : [30001]
+    content {
+      name  = "controller.service.nodePorts.https"
+      value = port.value
+    }
+  }
+
+  # Azure AKS only configuration
+  dynamic "set" {
+    iterator = i
+    for_each = local.azure_resource_count == 0 ? [] : [0]
+    content {
+      name  = "controller.service.loadBalancerIP"
+      value = var.aks_ingress_ip
+    }
+  }
+
+  dynamic "set" {
+    iterator = i
+    for_each = local.azure_resource_count == 0 ? [] : [0]
+    content {
+      name  = "controller.service.externalTrafficPolicy"
+      value = "Local"
+    }
+  }
+
+  dynamic "set_string" {
+    iterator = i
+    for_each = local.azure_resource_count == 0 ? [] : [0]
+    content {
+      name  = "controller.service.annotations.service\\.beta\\.kubernetes\\.io/azure-load-balancer-resource-group"
+      value = var.aks_ip_resource_group
+    }
+  }
 }
-
-resource "google_compute_firewall" "ingress_access" {
-  name          = "${var.cluster_name}-ingress-access"
-  network       = var.network_name
-  source_ranges = var.allowed_ips
-  target_tags   = ["${var.cluster_name}-gke-node"]
-
-  allow {
-    protocol = "tcp"
-    ports    = ["80", "443"]
-  }
-}
-
-resource "google_compute_firewall" "auth_loop_access" {
-  name          = "${var.cluster_name}-auth-access"
-  network       = var.network_name
-  source_ranges = ["${data.google_compute_address.nat_gw_ip.address}/32"]
-  target_tags   = ["${var.cluster_name}-gke-node"]
-
-  allow {
-    protocol = "tcp"
-    ports    = ["80", "443"]
-  }
-}
-
-# Remove default nginx-ingress fw rules created by controller
-resource "null_resource" "ingress_fw_cleanup" {
-  triggers = {
-    build_number = timestamp()
-  }
-  provisioner "local-exec" {
-    command = "gcloud compute firewall-rules list --filter='name:k8s-fw- AND network:${var.network_name}' --format='value(name)' --project='${var.project_id}'| while read i; do if (gcloud compute firewall-rules describe --project='${var.project_id}' $i |grep -q 'kube-system/nginx-ingress'); then gcloud compute firewall-rules delete $i --quiet; fi; done"
-  }
-  depends_on = [helm_release.nginx-ingress]
-}
-
