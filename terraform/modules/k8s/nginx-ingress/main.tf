@@ -27,7 +27,7 @@ resource "helm_release" "nginx-ingress" {
   # GCP GKE only configuration
   dynamic "set" {
     iterator = i
-    for_each = local.gcp_resouce_count == 0 ? [] : [0]
+    for_each = local.gcp_resource_count == 0 ? [] : [0]
     content {
       name  = "defaultBackend.service.type"
       value = lookup(local.nginx_service_types, var.cluster_type)
@@ -36,7 +36,7 @@ resource "helm_release" "nginx-ingress" {
 
   dynamic "set" {
     iterator = i
-    for_each = local.gcp_resouce_count == 0 ? [] : [0]
+    for_each = local.gcp_resource_count == 0 ? [] : [0]
     content {
       name  = "controller.service.loadBalancerIP"
       value = google_compute_address.ingress_lb_address[0].address
@@ -46,7 +46,7 @@ resource "helm_release" "nginx-ingress" {
   # AWS EKS only configuration
   dynamic "set" {
     iterator = port
-    for_each = local.aws_resouce_count == 0 ? [] : [30000]
+    for_each = local.aws_resource_count == 0 ? [] : [30000]
     content {
       name  = "controller.service.nodePorts.http"
       value = port.value
@@ -55,7 +55,7 @@ resource "helm_release" "nginx-ingress" {
 
   dynamic "set" {
     iterator = port
-    for_each = local.aws_resouce_count == 0 ? [] : [30001]
+    for_each = local.aws_resource_count == 0 ? [] : [30001]
     content {
       name  = "controller.service.nodePorts.https"
       value = port.value

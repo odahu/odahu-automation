@@ -134,5 +134,5 @@ variable "bastion_tag" {
 
 variable "bastion_hostname" {
   default     = "bastion"
-  description = "bastion hpstname"
+  description = "Bastion hostname"
 }

@@ -1,10 +1,10 @@
 locals {
-  aws_resouce_count = var.cluster_type == "aws/eks" ? 1 : 0
+  aws_resource_count = var.cluster_type == "aws/eks" ? 1 : 0
 }
 
 # Data
 data "aws_vpc" "default" {
-  count  = local.aws_resouce_count
+  count  = local.aws_resource_count
   filter {
     name   = "tag:Name"
     values = [var.cluster_name]
@@ -12,14 +12,14 @@ data "aws_vpc" "default" {
 }
 
 data "aws_subnet_ids" "public" {
-  count  = local.aws_resouce_count
+  count  = local.aws_resource_count
   vpc_id = data.aws_vpc.default[0].id
   tags = {
     Tier = "Public"
   }
 }
 data "aws_security_group" "lb" {
-  count  = local.aws_resouce_count
+  count  = local.aws_resource_count
   vpc_id = data.aws_vpc.default[0].id
   name   = "tf-${var.cluster_name}-lb"
 }
@@ -29,7 +29,7 @@ data "aws_autoscaling_groups" "default" {
 
 # ELB
 resource "aws_elb" "default" {
-  count           = local.aws_resouce_count
+  count           = local.aws_resource_count
   name            = var.cluster_name
   internal        = false
   subnets         = data.aws_subnet_ids.public[0].ids
@@ -55,14 +55,14 @@ resource "aws_elb" "default" {
 }
 
 resource "aws_autoscaling_attachment" "default" {
-  count                  = local.aws_resouce_count == 0 ? 0 : length(data.aws_autoscaling_groups.default.names)
+  count                  = local.aws_resource_count == 0 ? 0 : length(data.aws_autoscaling_groups.default.names)
   autoscaling_group_name = element(data.aws_autoscaling_groups.default.names, count.index)
   elb                    = aws_elb.default[0].id
 }
 
 # ToDo: remove Google Cloud DNS resources from AWS EKS cluster setup
 resource "google_dns_record_set" "aws_ingress_lb" {
-  count        = local.aws_resouce_count
+  count        = local.aws_resource_count
   name         = "*.${var.cluster_name}.${var.root_domain}."
   managed_zone = var.dns_zone_name
   project      = var.project_id

@@ -1,9 +1,9 @@
 locals {
-  gcp_resouce_count = var.cluster_type == "gcp/gke" ? 1 : 0
+  gcp_resource_count = var.cluster_type == "gcp/gke" ? 1 : 0
 }
 
 resource "google_compute_address" "ingress_lb_address" {
-  count        = local.gcp_resouce_count
+  count        = local.gcp_resource_count
   name         = "${var.cluster_name}-ingress-main"
   region       = var.region
   project      = var.project_id
@@ -11,7 +11,7 @@ resource "google_compute_address" "ingress_lb_address" {
 }
 
 resource "google_dns_record_set" "ingress_lb" {
-  count        = local.gcp_resouce_count
+  count        = local.gcp_resource_count
   project      = var.project_id
   name         = "*.${var.cluster_name}.${var.root_domain}."
   type         = "A"
@@ -22,14 +22,14 @@ resource "google_dns_record_set" "ingress_lb" {
 
 # Whitelist allowed_ips and cluster NAT ip on the cluster ingress
 data "google_compute_address" "nat_gw_ip" {
-  count   = local.gcp_resouce_count
+  count   = local.gcp_resource_count
   project = var.project_id
   region  = var.region
   name    = "${var.cluster_name}-nat-gw"
 }
 
 resource "google_compute_firewall" "ingress_access" {
-  count         = local.gcp_resouce_count
+  count         = local.gcp_resource_count
   project       = var.project_id
   name          = "${var.cluster_name}-ingress-access"
   network       = var.network_name
@@ -43,7 +43,7 @@ resource "google_compute_firewall" "ingress_access" {
 }
 
 resource "google_compute_firewall" "auth_loop_access" {
-  count         = local.gcp_resouce_count
+  count         = local.gcp_resource_count
   project       = var.project_id
   name          = "${var.cluster_name}-auth-access"
   network       = var.network_name
@@ -59,7 +59,7 @@ resource "google_compute_firewall" "auth_loop_access" {
 
 # Remove default nginx-ingress fw rules created by controller
 resource "null_resource" "ingress_fw_cleanup" {
-  count = local.gcp_resouce_count
+  count = local.gcp_resource_count
   triggers = {
     build_number = timestamp()
   }

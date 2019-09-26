@@ -24,7 +24,7 @@ variable "config_context_cluster" {
 }
 
 variable "cluster_type" {
-  default     = "azure/aks"
+  default     = "gcp/gke"
   description = "Legion cluster cloud provider type"
 }
 
