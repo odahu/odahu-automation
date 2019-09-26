@@ -45,18 +45,8 @@ function ReadArguments() {
 		echo "Error! --command argument must be specified. Use -h for help!"
 		exit 1
 	fi
-	# Read GCP credentials path from env
-	if [ ! $GOOGLE_CREDENTIALS ]; then
-		echo "Error: No GCP credentials found. Pass path to the credentials json file as GOOGLE_CREDENTIALS env var!"
-		exit 1
-	fi
 	if [ ! $PROFILE ]; then
 		echo "Error: No PROFILE found. Pass path to the Cluster profile json file as PROFILE env var!"
-		exit 1
-	fi
-	# Validate profile path
-	if [ ! -f $GOOGLE_CREDENTIALS ]; then
-		echo "Error: no Cluster profile found at $GOOGLE_CREDENTIALS path!"
 		exit 1
 	fi
 	# Validate Command parameter
@@ -69,7 +59,7 @@ function ReadArguments() {
 # Get parameter from cluster profile
 function GetParam() {
 	result=$(jq ".$1" $PROFILE | tr -d '"')
-	if [ ! $result ]; then
+	if [[ $result == null ]]; then
 		echo "Error: $1 parameter missed in $PROFILE cluster profile"
 		exit 1
 	else
@@ -78,7 +68,7 @@ function GetParam() {
 }
 
 function TerraformRun() {
-	MODULES_ROOT=/opt/legion/terraform/env_types/gcp/gke/
+	MODULES_ROOT=/opt/legion/terraform/env_types/gcp/gke
 	TF_MODULE=$1
 	TF_COMMAND=$2
 	WORK_DIR=$MODULES_ROOT/$TF_MODULE
@@ -91,7 +81,14 @@ function TerraformRun() {
 	terraform $TF_COMMAND -no-color -auto-approve -var-file=$PROFILE
 }
 
-function SetupGCPAccess() {
+function SetupCloudAccess() {
+	# Read GCP credentials path from env
+	if [[ -z $GOOGLE_CREDENTIALS || ! -f $GOOGLE_CREDENTIALS ]]; then
+		echo -e "ERROR:\tNo GCP credentials file found!"
+		echo -e "\tPass path to the credentials json file as GOOGLE_CREDENTIALS env var!"
+		exit 1
+	fi
+
 	echo "Activate service account"
     gcloud auth activate-service-account --key-file=$GOOGLE_CREDENTIALS --project=$(GetParam "project_id")
 }
@@ -147,13 +144,13 @@ function TerraformDestroy() {
 ##################
 
 ReadArguments "$@"
-SetupGCPAccess
+SetupCloudAccess
+
+export TF_IN_AUTOMATION=true
+export TF_PLUGIN_CACHE_DIR=/tmp/.terraform/cache && mkdir -p $TF_PLUGIN_CACHE_DIR
 
 if [ $COMMAND == 'create' ]; then
 	TerraformCreate
 elif [ $COMMAND == 'destroy' ]; then
 	TerraformDestroy
-else
-	echo "Error: invalid command!"
-	exit 1
 fi

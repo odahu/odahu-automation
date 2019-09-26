@@ -70,7 +70,7 @@ def hiera_get(config, key_name, env, cloud):
     Read hiera data
     """
 
-    hiera_command = [HIERA_BINARY, '-a', '--config', config, key_name, "environment={}".format(env),
+    hiera_command = [HIERA_BINARY, '-a', '-f', 'json', '--config', config, key_name, "environment={}".format(env),
                      "cloud={}".format(cloud)]
     log.debug(hiera_command)
 

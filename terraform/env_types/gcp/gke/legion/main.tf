@@ -5,13 +5,9 @@ module "legion" {
   source                      = "../../../../modules/legion"
   config_context_auth_info    = var.config_context_auth_info
   config_context_cluster      = var.config_context_cluster
-  aws_profile                 = var.aws_profile
-  aws_credentials_file        = var.aws_credentials_file
   zone                        = var.zone
   region                      = var.region
-  region_aws                  = var.region_aws
   project_id                  = var.project_id
-  secrets_storage             = var.secrets_storage
   legion_helm_repo            = var.legion_helm_repo
   root_domain                 = var.root_domain
   cluster_name                = var.cluster_name
@@ -33,4 +29,6 @@ module "legion" {
   model_authorization_enabled = true
   model_oidc_jwks_url         = "${var.keycloak_url}/auth/realms/${var.keycloak_realm}/protocol/openid-connect/certs"
   model_oidc_issuer           = "${var.keycloak_url}/auth/realms/${var.keycloak_realm}"
+  tls_secret_key              = var.tls_key
+  tls_secret_crt              = var.tls_crt
 }

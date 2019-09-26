@@ -23,24 +23,6 @@ variable "config_context_cluster" {
   description = "Legion cluster context name"
 }
 
-variable "region_aws" {
-  default     = "us-east-2"
-  description = "Region of AWS resources"
-}
-
-variable "aws_profile" {
-  description = "AWS profile name"
-}
-
-variable "aws_credentials_file" {
-  default     = "~/.aws/config"
-  description = "AWS credentials file location"
-}
-
-variable "secrets_storage" {
-  description = "Cluster secrets storage"
-}
-
 variable "cluster_name" {
   default     = "legion"
   description = "Legion cluster name"
@@ -68,6 +50,14 @@ variable "dns_zone_name" {
 
 variable "network_name" {
   description = "The VPC network to host the cluster in"
+}
+
+variable "tls_key" {
+  description = "TLS key for Legion cluster"
+}
+
+variable "tls_crt" {
+  description = "TLS certificate file for Legion cluster"
 }
 
 ########################

@@ -10,28 +10,12 @@ variable "cluster_name" {
   description = "Legion cluster name"
 }
 
-variable "aws_profile" {
-  description = "AWS profile name"
-}
-
-variable "aws_credentials_file" {
-  description = "AWS credentials file location"
-}
-
 variable "zone" {
   description = "Default zone"
 }
 
 variable "region" {
   description = "Region of resources"
-}
-
-variable "region_aws" {
-  description = "Region of AWS resources"
-}
-
-variable "secrets_storage" {
-  description = "Cluster secrets storage"
 }
 
 variable "root_domain" {
@@ -89,6 +73,10 @@ variable "dns_zone_name" {
 variable "ssh_user" {
   default     = "ubuntu"
   description = "default ssh user"
+}
+
+variable "ssh_public_key" {
+  description = "SSH public key for Legion cluster nodes and bastion host"
 }
 
 variable "cluster_autoscaling_cpu_max_limit" {
