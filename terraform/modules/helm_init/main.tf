@@ -1,16 +1,3 @@
-provider "kubernetes" {
-  config_context_auth_info = var.config_context_auth_info
-  config_context_cluster   = var.config_context_cluster
-}
-
-provider "helm" {
-  version         = "0.10.2"
-  install_tiller  = true
-  namespace       = "kube-system"
-  service_account = "tiller"
-  tiller_image    = ""
-}
-
 ##############
 # HELM Init
 ##############
