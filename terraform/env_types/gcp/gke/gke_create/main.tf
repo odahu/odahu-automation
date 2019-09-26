@@ -43,7 +43,6 @@ module "gke_cluster" {
   source               = "../../../../modules/gcp/gke_cluster"
   project_id           = var.project_id
   cluster_name         = var.cluster_name
-  region               = var.region
   zone                 = var.zone
   allowed_ips          = var.allowed_ips
   agent_cidr           = var.agent_cidr

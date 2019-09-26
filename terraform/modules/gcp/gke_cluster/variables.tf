@@ -14,10 +14,6 @@ variable "zone" {
   description = "Default zone"
 }
 
-variable "region" {
-  description = "Region of resources"
-}
-
 variable "root_domain" {
   description = "Legion cluster root domain"
 }
