@@ -128,4 +128,3 @@ variable "istio_namespace" {
   default     = "istio-system"
   description = "istio namespace"
 }
-
