@@ -63,4 +63,3 @@ resource "google_compute_firewall" "master_to_pods_fw" {
 
   source_ranges = [var.master_ipv4_cidr_block]
 }
-

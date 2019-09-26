@@ -43,4 +43,3 @@ resource "kubernetes_secret" "tls_dashboard" {
   }
   type = "kubernetes.io/tls"
 }
-

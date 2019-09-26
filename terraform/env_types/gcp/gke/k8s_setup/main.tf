@@ -71,10 +71,10 @@ module "istio" {
   root_domain          = var.root_domain
   cluster_name         = var.cluster_name
   monitoring_namespace = var.monitoring_namespace
-  tls_secret_key       = var.tls_key
-  tls_secret_crt       = var.tls_crt
   legion_helm_repo     = var.legion_helm_repo
   legion_infra_version = var.legion_infra_version
+  tls_secret_key       = var.tls_key
+  tls_secret_crt       = var.tls_crt
 }
 
 module "gke-saa" {
@@ -82,4 +82,3 @@ module "gke-saa" {
   legion_helm_repo     = var.legion_helm_repo
   legion_infra_version = var.legion_infra_version
 }
-

@@ -71,4 +71,3 @@ module "gke_cluster" {
   gke_node_tag         = var.gke_node_tag
   ssh_public_key       = var.ssh_key
 }
-

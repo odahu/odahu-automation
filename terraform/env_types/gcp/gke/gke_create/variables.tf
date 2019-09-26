@@ -136,4 +136,3 @@ variable "bastion_hostname" {
   default     = "bastion"
   description = "bastion hpstname"
 }
-

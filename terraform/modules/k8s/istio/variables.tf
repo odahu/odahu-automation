@@ -37,4 +37,3 @@ variable "legion_infra_version" {
 variable "legion_helm_repo" {
   description = "Legion helm repo"
 }
-

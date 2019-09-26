@@ -37,4 +37,3 @@ variable "dashboard_tls_secret_name" {
   default     = "kubernetes-dashboard-certs"
   description = "Cluster root DNS zone name"
 }
-

@@ -62,4 +62,3 @@ resource "helm_release" "monitoring" {
     data.template_file.monitoring_values.rendered
   ]
 }
-

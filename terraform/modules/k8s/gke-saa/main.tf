@@ -31,4 +31,3 @@ resource "helm_release" "gke_saa" {
     data.template_file.gke_saa_values.rendered
   ]
 }
-
