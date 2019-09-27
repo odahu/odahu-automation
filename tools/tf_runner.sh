@@ -74,8 +74,18 @@ function GetParam() {
 	fi
 }
 
+function IngressTFCrutch() {
+	for file in $(find $1 -type f -name "*.tf" ! \( \
+	-name "main.tf" -o \
+	-name "versions.tf" -o \
+	-name "variables.tf" -o \
+	-name "$(echo $(GetParam 'cluster_type') | awk -F\/ '{print $1}').tf" \)); do
+		# Rename extra provider tf files :/
+		mv "$file" "$file.bak"
+	done
+}
+
 function TerraformRun() {
-	MODULES_ROOT="/opt/legion/terraform/env_types/$(GetParam 'cluster_type')/"
 	TF_MODULE=$1
 	TF_COMMAND=$2
 	WORK_DIR=$MODULES_ROOT/$TF_MODULE
@@ -254,6 +264,9 @@ SetupCloudAccess
 
 export TF_IN_AUTOMATION=true
 export TF_PLUGIN_CACHE_DIR=/tmp/.terraform/cache && mkdir -p $TF_PLUGIN_CACHE_DIR
+export MODULES_ROOT="/opt/legion/terraform/env_types/$(GetParam 'cluster_type')"
+
+IngressTFCrutch "$MODULES_ROOT/../../../modules/k8s/nginx-ingress/"
 
 if [[ $COMMAND == 'create' ]]; then
 	TerraformCreate
