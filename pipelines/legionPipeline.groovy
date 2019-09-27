@@ -26,7 +26,7 @@ def createGCPCluster() {
                             updateProfileKey("docker_repo", env.param_docker_repo)
                             updateProfileKey("model_reference", commitID)
 
-                            sh'tf_runner create'
+                            sh'tf_runner -v create'
                         }
                         stage('Create cluster specific private DNS zone') {
                             // Run terraform DNS state to establish DNS peering between Jenkins agent and target cluster
@@ -61,7 +61,7 @@ def destroyGcpCluster() {
                             updateProfileKey("legion_helm_repo", env.param_helm_repo)
                             updateProfileKey("docker_repo", env.param_docker_repo)
 
-                            sh'tf_runner destroy'
+                            sh'tf_runner -v destroy'
                         }
                         stage('Destroy cluster specific private DNS zone') {
                             terraformRun("destroy", "cluster_dns", "-var=\"zone_type=FORWARDING\" -var=\"zone_name=${env.param_cluster_name}.ailifecycle.org\"", "${WORKSPACE}/legion-cicd/terraform/env_types/cluster_dns", "bucket=${env.param_cluster_name}-tfstate")
