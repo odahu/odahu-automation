@@ -1,13 +1,5 @@
-provider "azurerm" {
-  version = "1.33.1"
-}
-
 provider "google" {
   version = "2.16.0"
-}
-
-provider "aws" {
-  version = "2.28.1"
 }
 
 provider "helm" {
