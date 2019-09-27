@@ -28,7 +28,7 @@ RUN wget -qO /tmp/terraform.zip "https://releases.hashicorp.com/terraform/${TERR
     mv /tmp/terraform /usr/local/bin/terraform && rm -rf /tmp/terraform*
 
 # Install Helm
-ENV HELM_VERSION=v2.14.0
+ENV HELM_VERSION=v2.14.3
 RUN curl -fsSLO https://kubernetes-helm.storage.googleapis.com/helm-${HELM_VERSION}-linux-amd64.tar.gz && \
     mkdir -p /tmp/helm && mv helm-${HELM_VERSION}-linux-amd64.tar.gz /tmp/helm && \
     tar xzf /tmp/helm/helm-${HELM_VERSION}-linux-amd64.tar.gz -C /tmp/helm && \
