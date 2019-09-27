@@ -34,11 +34,6 @@ variable "project_id" {
   description = "Target project id"
 }
 
-variable "zone" {
-  default     = ""
-  description = "Default zone"
-}
-
 variable "region" {
   default     = ""
   description = "Region of resources"

@@ -10,7 +10,6 @@ module "base_setup" {
 
 module "nginx-ingress" {
   source        = "../../../../modules/k8s/nginx-ingress"
-  zone          = var.zone
   region        = var.region
   project_id    = var.project_id
   cluster_name  = var.cluster_name
