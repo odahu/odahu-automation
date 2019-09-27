@@ -1,7 +1,3 @@
-locals {
-  gcp_resource_count = var.cluster_type == "gcp/gke" ? 1 : 0
-}
-
 resource "google_compute_address" "ingress_lb_address" {
   count        = local.gcp_resource_count
   name         = "${var.cluster_name}-ingress-main"
@@ -68,4 +64,3 @@ resource "null_resource" "ingress_fw_cleanup" {
   }
   #  depends_on = [helm_release.nginx-ingress]
 }
-

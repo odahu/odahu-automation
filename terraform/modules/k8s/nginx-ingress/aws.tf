@@ -1,7 +1,3 @@
-locals {
-  aws_resource_count = var.cluster_type == "aws/eks" ? 1 : 0
-}
-
 # Data
 data "aws_vpc" "default" {
   count  = local.aws_resource_count

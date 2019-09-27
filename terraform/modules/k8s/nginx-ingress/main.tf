@@ -6,6 +6,12 @@ locals {
   }
 }
 
+locals {
+  gcp_resource_count = var.cluster_type == "gcp/gke" ? 1 : 0
+  azure_resource_count = var.cluster_type == "azure/aks" ? 1 : 0
+  aws_resource_count = var.cluster_type == "aws/eks" ? 1 : 0
+}
+
 resource "helm_release" "nginx-ingress" {
   name       = "nginx-ingress"
   chart      = "stable/nginx-ingress"
