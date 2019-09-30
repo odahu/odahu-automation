@@ -33,7 +33,7 @@ def createCluster(cloudCredsSecret, dockerArgPrefix) {
                             sh'tf_runner -v create'
                         }
                         stage('Create cluster specific private DNS zone') {
-                            if (return env.param_cloud_provider == 'gcp') {
+                            if (env.param_cloud_provider == 'gcp') {
                                 // Run terraform DNS state to establish DNS peering between Jenkins agent and target cluster
                                 root_domain = sh(script: "jq -r '.root_domain' ${env.clusterProfile}", returnStdout: true).trim()
                                 tfExtraVars = "-var=\"zone_type=FORWARDING\" \
@@ -75,7 +75,7 @@ def destroyCluster(cloudCredsSecret, dockerArgPrefix) {
                             sh'tf_runner -v destroy'
                         }
                         stage('Destroy cluster specific private DNS zone') {
-                            if (return env.param_cloud_provider == 'gcp') {
+                            if (env.param_cloud_provider == 'gcp') {
                                 root_domain = sh(script: "jq -r '.root_domain' ${env.clusterProfile}", returnStdout: true).trim()
                                 tfExtraVars = "-var=\"zone_type=FORWARDING\" \
                                     -var=\"zone_name=${env.param_cluster_name}.${root_domain}\""
