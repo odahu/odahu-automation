@@ -79,7 +79,7 @@ function IngressTFCrutch() {
 	-name "main.tf" -o \
 	-name "versions.tf" -o \
 	-name "variables.tf" -o \
-	-name "$(echo $(GetParam 'cluster_type') | awk -F\/ '{print $1}').tf" \)); do
+	-name "$(GetParam 'cluster_type' | awk -F\/ '{print $1}').tf" \)); do
 		# Rename extra provider tf files :/
 		mv "$file" "$file.bak"
 	done
