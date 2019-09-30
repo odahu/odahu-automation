@@ -33,16 +33,14 @@ def createCluster(cloudCredsSecret, dockerArgPrefix) {
                             sh'tf_runner -v create'
                         }
                         stage('Create cluster specific private DNS zone') {
-                            when {
-                                expression {
-                                    return env.param_cloud_provider == 'gcp';
-                                }
+                            if (return env.param_cloud_provider == 'gcp') {
+                                // Run terraform DNS state to establish DNS peering between Jenkins agent and target cluster
+                                root_domain = sh(script: "jq -r '.root_domain' ${env.clusterProfile}", returnStdout: true).trim()
+                                tfExtraVars = "-var=\"zone_type=FORWARDING\" \
+                                    -var=\"zone_name=${env.param_cluster_name}.${root_domain}\" \
+                                    -var=\"networks_to_add=[\\\"infra-vpc\\\"]\""
+                                terraformRun("apply", "cluster_dns", "${tfExtraVars}", "${WORKSPACE}/legion-cicd/terraform/env_types/cluster_dns", "bucket=${env.param_cluster_name}-tfstate")
                             }
-                            // Run terraform DNS state to establish DNS peering between Jenkins agent and target cluster
-                            tfExtraVars = "-var=\"zone_type=FORWARDING\" \
-                                -var=\"zone_name=${env.param_cluster_name}.ailifecycle.org\" \
-                                -var=\"networks_to_add=[\\\"infra-vpc\\\"]\""
-                            terraformRun("apply", "cluster_dns", "${tfExtraVars}", "${WORKSPACE}/legion-cicd/terraform/env_types/cluster_dns", "bucket=${env.param_cluster_name}-tfstate")
                         }
                     }
                 }
@@ -77,14 +75,13 @@ def destroyCluster(cloudCredsSecret, dockerArgPrefix) {
                             sh'tf_runner -v destroy'
                         }
                         stage('Destroy cluster specific private DNS zone') {
-                            when {
-                                expression {
-                                    return env.param_cloud_provider == 'gcp';
-                                }
+                            if (return env.param_cloud_provider == 'gcp') {
+                                root_domain = sh(script: "jq -r '.root_domain' ${env.clusterProfile}", returnStdout: true).trim()
+                                tfExtraVars = "-var=\"zone_type=FORWARDING\" \
+                                    -var=\"zone_name=${env.param_cluster_name}.${root_domain}\""
+                                terraformRun("destroy", "cluster_dns", "${tfExtraVars}", "${WORKSPACE}/legion-cicd/terraform/env_types/cluster_dns", "bucket=${env.param_cluster_name}-tfstate")
                             }
-                            terraformRun("destroy", "cluster_dns", "-var=\"zone_type=FORWARDING\" -var=\"zone_name=${env.param_cluster_name}.ailifecycle.org\"", "${WORKSPACE}/legion-cicd/terraform/env_types/cluster_dns", "bucket=${env.param_cluster_name}-tfstate")
-                        }
-                        stage('Cleanup workspace') {
+                            stage('Cleanup workspace') {
                             // Cleanup profiles directory
                             sh"rm -rf ${WORKSPACE}/legion-profiles/ ||true"
                         }
