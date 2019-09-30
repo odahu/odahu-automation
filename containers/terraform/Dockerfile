@@ -5,16 +5,13 @@ ENV DEBIAN_FRONTEND=noninteractive
 # install system utilities
 RUN apt-get update && apt-get install -y \
     apt-transport-https bash curl tar openssh-client gnupg python3=3.6.7-1~18.04 python3-distutils\
-    sshpass git ca-certificates apt-utils locales wget jq unzip rubygems && \
-    apt-get clean && apt-get autoclean
+    sshpass git ca-certificates apt-utils locales wget jq unzip rubygems
 
 # setup locale
 RUN locale-gen en_US.UTF-8 && update-locale LANG=en_US.UTF-8
 COPY containers/terraform/default_locale /etc/default/locale
 RUN chmod 0755 /etc/default/locale
-ENV LC_ALL=en_US.UTF-8
-ENV LANG=en_US.UTF-8
-ENV LANGUAGE=en_US.UTF-8
+ENV LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 LANGUAGE=en_US.UTF-8
 
 # Install kubectl
 ENV KUBECTL_VERSION=v1.13.7
@@ -43,21 +40,17 @@ RUN CLOUD_SDK_REPO="cloud-sdk-$(grep VERSION_CODENAME /etc/os-release | cut -d '
 # Install Azure CLI
 RUN curl -sL https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && \
     echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ $(grep VERSION_CODENAME /etc/os-release | cut -d '=' -f 2) main" | tee /etc/apt/sources.list.d/azure-cli.list && \
-    apt-get update -y && apt-get install azure-cli -y && rm -rf /var/lib/apt/lists/*
+    apt-get update -y && apt-get install azure-cli -y && apt-get clean && apt-get autoclean && rm -rf /var/lib/apt/lists/*
 
-# Install Hiera
+# Install AWS CLI and Hiera
 RUN curl -sL https://bootstrap.pypa.io/get-pip.py | python3 && \
-    pip3 install pyyaml==5.1.1 && \
+    pip3 install pyyaml==5.1.1 awscli && \
     gem install hiera hiera-eyaml
-
-# Install awscli
-RUN pip3 install awscli
 
 COPY vars_template.yaml /opt/legion/
 COPY tools/hiera_exporter_helper.sh /usr/bin/hiera_exporter_helper
 COPY tools/hiera_exporter /opt/legion/tools/hiera_exporter
 COPY tools/tf_runner.sh /usr/bin/tf_runner
-
 
 # Deploy Legion
 COPY terraform /opt/legion/terraform
