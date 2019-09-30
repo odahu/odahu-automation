@@ -6,15 +6,19 @@ def buildDescription(){
     }
 }
 
-def createGCPCluster() {
+def createCluster(cloudCredsSecret, dockerArgPrefix) {
     withCredentials([
-    file(credentialsId: "${env.gcpCredential}", variable: 'gcpCredential')]) {
+    file(credentialsId: "${cloudCredsSecret}", variable: 'cloudCredentials')]) {
         withCredentials([
         file(credentialsId: "${env.hieraPrivatePKCSKey}", variable: 'PrivatePkcsKey')]) {
             withCredentials([
             file(credentialsId: "${env.hieraPublicPKCSKey}", variable: 'PublicPkcsKey')]) {
                 wrap([$class: 'AnsiColorBuildWrapper', colorMapName: "xterm"]) {
-                    docker.image("${env.param_docker_repo}/k8s-terraform:${env.param_legion_infra_version}").inside("-e GOOGLE_CREDENTIALS=${gcpCredential} -e PROFILE=${env.clusterProfile} -u root") {
+                    def dockerArgs = """-e PROFILE=${env.clusterProfile}
+                                        -u root
+                                        ${dockerArgPrefix}${cloudCredentials}
+                                     """
+                    docker.image("${env.param_docker_repo}/k8s-terraform:${env.param_legion_infra_version}").inside(dockerArgs) {
                         stage('Extract Hiera data') {
                             extractHiera()
                         }
@@ -29,6 +33,11 @@ def createGCPCluster() {
                             sh'tf_runner -v create'
                         }
                         stage('Create cluster specific private DNS zone') {
+                            when {
+                                expression {
+                                    return env.param_cloud_provider == 'gcp';
+                                }
+                            }
                             // Run terraform DNS state to establish DNS peering between Jenkins agent and target cluster
                             tfExtraVars = "-var=\"zone_type=FORWARDING\" \
                                 -var=\"zone_name=${env.param_cluster_name}.ailifecycle.org\" \
@@ -42,15 +51,19 @@ def createGCPCluster() {
     }
 }
 
-def destroyGcpCluster() {
+def destroyCluster(cloudCredsSecret, dockerArgPrefix) {
     withCredentials([
-    file(credentialsId: "${env.gcpCredential}", variable: 'gcpCredential')]) {
+    file(credentialsId: "${cloudCredsSecret}", variable: 'cloudCredentials')]) {
         withCredentials([
         file(credentialsId: "${env.hieraPrivatePKCSKey}", variable: 'PrivatePkcsKey')]) {
             withCredentials([
             file(credentialsId: "${env.hieraPublicPKCSKey}", variable: 'PublicPkcsKey')]) {
                 wrap([$class: 'AnsiColorBuildWrapper', colorMapName: "xterm"]) {
-                    docker.image("${env.param_docker_repo}/k8s-terraform:${env.param_legion_infra_version}").inside("-e GOOGLE_CREDENTIALS=${gcpCredential} -e PROFILE=${env.clusterProfile} -u root") {
+                    def dockerArgs = """-e PROFILE=${env.clusterProfile}
+                                        -u root
+                                        ${dockerArgPrefix}${cloudCredentials}
+                                     """
+                    docker.image("${env.param_docker_repo}/k8s-terraform:${env.param_legion_infra_version}").inside(dockerArgs) {
                         stage('Extract Hiera data') {
                             extractHiera()
                         }
@@ -64,6 +77,11 @@ def destroyGcpCluster() {
                             sh'tf_runner -v destroy'
                         }
                         stage('Destroy cluster specific private DNS zone') {
+                            when {
+                                expression {
+                                    return env.param_cloud_provider == 'gcp';
+                                }
+                            }
                             terraformRun("destroy", "cluster_dns", "-var=\"zone_type=FORWARDING\" -var=\"zone_name=${env.param_cluster_name}.ailifecycle.org\"", "${WORKSPACE}/legion-cicd/terraform/env_types/cluster_dns", "bucket=${env.param_cluster_name}-tfstate")
                         }
                         stage('Cleanup workspace') {
@@ -141,7 +159,7 @@ def runRobotTestsAtGcp(tags="") {
                                              CLUSTER_PROFILE=${env.clusterProfile} \
                                              ROBOT_THREADS=6 \
                                              LEGION_VERSION=${env.param_legion_version} e2e-robot || true
-                                        
+
                                         make CLUSTER_PROFILE=${env.clusterProfile} \
                                              CLUSTER_NAME=${env.param_cluster_name} cleanup-e2e-robot
 

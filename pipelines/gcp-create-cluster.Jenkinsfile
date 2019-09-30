@@ -67,7 +67,7 @@ pipeline {
             }
             steps {
                 script {
-                    legion.createGCPCluster()
+                    legion.createCluster("${env.gcpCredential}", "-e GOOGLE_CREDENTIALS=")
                 }
             }
         }

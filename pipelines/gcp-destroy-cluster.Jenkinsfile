@@ -60,7 +60,7 @@ pipeline {
         stage('Delete all Legion States') {
             steps {
                 script {
-                    legion.destroyGcpCluster()
+                    legion.destroyCluster("${env.gcpCredential}", "-e GOOGLE_CREDENTIALS=")
                 }
             }
         }
