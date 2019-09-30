@@ -17,7 +17,6 @@ variable "root_domain" {
 
 variable "allowed_ips" {
   type        = list(string)
-  default     = ["0.0.0.0/0"]
   description = "CIDR to allow access from"
 }
 
