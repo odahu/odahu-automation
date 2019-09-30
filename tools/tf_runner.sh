@@ -12,7 +12,7 @@ function ReadArguments() {
 		exit 1
 	fi
 
-	while [[ $# > 0 ]];	do
+	while [[ $# -gt 0 ]]; do
 		case "$1" in
 			-h|--help)
 				echo "tf_runner.sh - Run Terraform modules for Legion clusters orchestration."
