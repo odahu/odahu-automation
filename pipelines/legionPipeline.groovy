@@ -81,7 +81,8 @@ def destroyCluster(cloudCredsSecret, dockerArgPrefix) {
                                     -var=\"zone_name=${env.param_cluster_name}.${root_domain}\""
                                 terraformRun("destroy", "cluster_dns", "${tfExtraVars}", "${WORKSPACE}/legion-cicd/terraform/env_types/cluster_dns", "bucket=${env.param_cluster_name}-tfstate")
                             }
-                            stage('Cleanup workspace') {
+                        }
+                        stage('Cleanup workspace') {
                             // Cleanup profiles directory
                             sh"rm -rf ${WORKSPACE}/legion-profiles/ ||true"
                         }
