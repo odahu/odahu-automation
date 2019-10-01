@@ -2,14 +2,6 @@ variable "project_id" {
   description = "Target project id"
 }
 
-variable "zone" {
-  description = "Default zone"
-}
-
-variable "region" {
-  description = "Region of resources"
-}
-
 variable "gcp_network_1_name" {
   description = "VPC Network 1 name to peer with"
 }

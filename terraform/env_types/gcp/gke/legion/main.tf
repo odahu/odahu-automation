@@ -3,9 +3,6 @@
 ########################################################
 module "legion" {
   source                      = "../../../../modules/legion"
-  config_context_auth_info    = var.config_context_auth_info
-  config_context_cluster      = var.config_context_cluster
-  zone                        = var.zone
   region                      = var.region
   project_id                  = var.project_id
   legion_helm_repo            = var.legion_helm_repo

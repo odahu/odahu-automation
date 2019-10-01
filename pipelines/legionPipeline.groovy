@@ -6,72 +6,88 @@ def buildDescription(){
     }
 }
 
-def createGCPCluster() {
+def createCluster(cloudCredsSecret, dockerArgPrefix) {
     withCredentials([
-    file(credentialsId: "${env.gcpCredential}", variable: 'gcpCredential')]) {
+    file(credentialsId: "${cloudCredsSecret}", variable: 'cloudCredentials')]) {
         withCredentials([
         file(credentialsId: "${env.hieraPrivatePKCSKey}", variable: 'PrivatePkcsKey')]) {
             withCredentials([
             file(credentialsId: "${env.hieraPublicPKCSKey}", variable: 'PublicPkcsKey')]) {
-                    wrap([$class: 'AnsiColorBuildWrapper', colorMapName: "xterm"]) {
-                        docker.image("${env.param_docker_repo}/k8s-terraform:${env.param_legion_infra_version}").inside("-e GOOGLE_CREDENTIALS=${gcpCredential} -e PROFILE=${env.clusterProfile} -u root") {
-                            stage('Extract Hiera data') {
-                                extractHiera()
-                            }
-                            stage('Create Legion Cluster') {
-                                 // Update default cluster parameters
-                                updateProfileKey("legion_infra_version", env.param_legion_infra_version)
-                                updateProfileKey("legion_version", env.param_legion_version)
-                                updateProfileKey("legion_helm_repo", env.param_helm_repo)
-                                updateProfileKey("docker_repo", env.param_docker_repo)
-                                updateProfileKey("model_reference", commitID)
+                wrap([$class: 'AnsiColorBuildWrapper', colorMapName: "xterm"]) {
+                    def dockerArgs = """-e PROFILE=${env.clusterProfile}
+                                        -u root
+                                        ${dockerArgPrefix}${cloudCredentials}
+                                     """
+                    docker.image("${env.param_docker_repo}/k8s-terraform:${env.param_legion_infra_version}").inside(dockerArgs) {
+                        stage('Extract Hiera data') {
+                            extractHiera()
+                        }
+                        stage('Create Legion Cluster') {
+                            // Update default cluster parameters
+                            updateProfileKey("legion_infra_version", env.param_legion_infra_version)
+                            updateProfileKey("legion_version", env.param_legion_version)
+                            updateProfileKey("legion_helm_repo", env.param_helm_repo)
+                            updateProfileKey("docker_repo", env.param_docker_repo)
+                            updateProfileKey("model_reference", commitID)
 
-                                sh'tf_runner create'
-                            }
-                            stage('Create cluster specific private DNS zone') {
+                            sh'tf_runner -v create'
+                        }
+                        stage('Create cluster specific private DNS zone') {
+                            if (env.param_cloud_provider == 'gcp') {
                                 // Run terraform DNS state to establish DNS peering between Jenkins agent and target cluster
+                                root_domain = sh(script: "jq -r '.root_domain' ${env.clusterProfile}", returnStdout: true).trim()
                                 tfExtraVars = "-var=\"zone_type=FORWARDING\" \
-                                -var=\"zone_name=${env.param_cluster_name}.ailifecycle.org\" \
-                                -var=\"networks_to_add=[\\\"infra-vpc\\\"]\""
+                                    -var=\"zone_name=${env.param_cluster_name}.${root_domain}\" \
+                                    -var=\"networks_to_add=[\\\"infra-vpc\\\"]\""
                                 terraformRun("apply", "cluster_dns", "${tfExtraVars}", "${WORKSPACE}/legion-cicd/terraform/env_types/cluster_dns", "bucket=${env.param_cluster_name}-tfstate")
                             }
                         }
                     }
+                }
             }
         }
     }
 }
 
-def destroyGcpCluster() {
+def destroyCluster(cloudCredsSecret, dockerArgPrefix) {
     withCredentials([
-    file(credentialsId: "${env.gcpCredential}", variable: 'gcpCredential')]) {
+    file(credentialsId: "${cloudCredsSecret}", variable: 'cloudCredentials')]) {
         withCredentials([
         file(credentialsId: "${env.hieraPrivatePKCSKey}", variable: 'PrivatePkcsKey')]) {
             withCredentials([
             file(credentialsId: "${env.hieraPublicPKCSKey}", variable: 'PublicPkcsKey')]) {
-                    wrap([$class: 'AnsiColorBuildWrapper', colorMapName: "xterm"]) {
-                        docker.image("${env.param_docker_repo}/k8s-terraform:${env.param_legion_infra_version}").inside("-e GOOGLE_CREDENTIALS=${gcpCredential} -e PROFILE=${env.clusterProfile} -u root") {
-                            stage('Extract Hiera data') {
-                                extractHiera()
-                            }
-                            stage('Destroy Legion Cluster') {
-                                // Update default cluster parameters
-                                updateProfileKey("legion_infra_version", env.param_legion_infra_version)
-                                updateProfileKey("legion_version", env.param_legion_version)
-                                updateProfileKey("legion_helm_repo", env.param_helm_repo)
-                                updateProfileKey("docker_repo", env.param_docker_repo)
+                wrap([$class: 'AnsiColorBuildWrapper', colorMapName: "xterm"]) {
+                    def dockerArgs = """-e PROFILE=${env.clusterProfile}
+                                        -u root
+                                        ${dockerArgPrefix}${cloudCredentials}
+                                     """
+                    docker.image("${env.param_docker_repo}/k8s-terraform:${env.param_legion_infra_version}").inside(dockerArgs) {
+                        stage('Extract Hiera data') {
+                            extractHiera()
+                        }
+                        stage('Destroy Legion Cluster') {
+                            // Update default cluster parameters
+                            updateProfileKey("legion_infra_version", env.param_legion_infra_version)
+                            updateProfileKey("legion_version", env.param_legion_version)
+                            updateProfileKey("legion_helm_repo", env.param_helm_repo)
+                            updateProfileKey("docker_repo", env.param_docker_repo)
 
-                                sh'tf_runner destroy'
-                            }
-                            stage('Destroy cluster specific private DNS zone') {
-                                terraformRun("destroy", "cluster_dns", "-var=\"zone_type=FORWARDING\" -var=\"zone_name=${env.param_cluster_name}.ailifecycle.org\"", "${WORKSPACE}/legion-cicd/terraform/env_types/cluster_dns", "bucket=${env.param_cluster_name}-tfstate")
-                            }
-                            stage('Cleanup workspace') {
-                                // Cleanup profiles directory
-                                sh"rm -rf ${WORKSPACE}/legion-profiles/ ||true"
+                            sh'tf_runner -v destroy'
+                        }
+                        stage('Destroy cluster specific private DNS zone') {
+                            if (env.param_cloud_provider == 'gcp') {
+                                root_domain = sh(script: "jq -r '.root_domain' ${env.clusterProfile}", returnStdout: true).trim()
+                                tfExtraVars = "-var=\"zone_type=FORWARDING\" \
+                                    -var=\"zone_name=${env.param_cluster_name}.${root_domain}\""
+                                terraformRun("destroy", "cluster_dns", "${tfExtraVars}", "${WORKSPACE}/legion-cicd/terraform/env_types/cluster_dns", "bucket=${env.param_cluster_name}-tfstate")
                             }
                         }
+                        stage('Cleanup workspace') {
+                            // Cleanup profiles directory
+                            sh"rm -rf ${WORKSPACE}/legion-profiles/ ||true"
+                        }
                     }
+                }
             }
         }
     }
@@ -138,10 +154,10 @@ def runRobotTestsAtGcp(tags="") {
 
                                         echo "Starting robot tests"
                                         make GOOGLE_APPLICATION_CREDENTIALS=${gcpCredential} \
-                                            CLUSTER_PROFILE=${env.clusterProfile} \
-                                            ROBOT_THREADS=6 \
-                                            LEGION_VERSION=${env.param_legion_version} e2e-robot || true
-                                        
+                                             CLUSTER_PROFILE=${env.clusterProfile} \
+                                             ROBOT_THREADS=6 \
+                                             LEGION_VERSION=${env.param_legion_version} e2e-robot || true
+
                                         make CLUSTER_PROFILE=${env.clusterProfile} \
                                              CLUSTER_NAME=${env.param_cluster_name} cleanup-e2e-robot
 

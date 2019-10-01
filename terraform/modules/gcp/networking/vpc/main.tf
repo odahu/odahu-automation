@@ -1,10 +1,3 @@
-provider "google" {
-  version = "~> 2.2"
-  region  = var.region
-  zone    = var.zone
-  project = var.project_id
-}
-
 # Create VPC
 resource "google_compute_network" "vpc" {
   project                 = var.project_id

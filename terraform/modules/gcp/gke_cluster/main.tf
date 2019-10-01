@@ -1,10 +1,3 @@
-provider "google-beta" {
-  version = "2.9"
-  region  = var.region
-  zone    = var.zone
-  project = var.project_id
-}
-
 data "http" "external_ip" {
   url = "http://ipv4.icanhazip.com"
 }

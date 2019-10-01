@@ -1,8 +1,3 @@
-provider "helm" {
-  version        = "0.10.2"
-  install_tiller = false
-}
-
 ########################################################
 # Prometheus monitoring
 ########################################################
@@ -62,4 +57,3 @@ resource "helm_release" "monitoring" {
     data.template_file.monitoring_values.rendered
   ]
 }
-

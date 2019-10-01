@@ -51,4 +51,3 @@ variable "gke_saa_name" {
   default     = "gke-sa-assigner"
   description = "GKE Service Account Assigner name"
 }
-

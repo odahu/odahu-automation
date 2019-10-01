@@ -1,11 +1,3 @@
 terraform {
-  backend "gcs" {
-    prefix = "gke_create"
-  }
+  backend "gcs" {}
 }
-
-# terraform {
-#   backend "local" {
-#     path = "../../../../_tfstate/state.tfstate"
-#   }
-# }

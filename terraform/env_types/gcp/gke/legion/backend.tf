@@ -1,11 +1,3 @@
 terraform {
-  backend "gcs" {
-    prefix = "legion"
-  }
+  backend "gcs" {}
 }
-
-# terraform {
-#   backend "local" {
-#     path = "../../../../_tfstate/legion-dev-legion.tfstate"
-#   }
-# }

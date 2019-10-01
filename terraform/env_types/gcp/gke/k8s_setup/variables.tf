@@ -23,6 +23,11 @@ variable "config_context_cluster" {
   description = "Legion cluster context name"
 }
 
+variable "cluster_type" {
+  default     = "gcp/gke"
+  description = "Legion cluster cloud provider type"
+}
+
 variable "cluster_name" {
   default     = "legion"
   description = "Legion cluster name"
@@ -128,4 +133,3 @@ variable "istio_namespace" {
   default     = "istio-system"
   description = "istio namespace"
 }
-

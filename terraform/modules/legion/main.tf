@@ -1,22 +1,3 @@
-provider "kubernetes" {
-  config_context_auth_info = var.config_context_auth_info
-  config_context_cluster   = var.config_context_cluster
-}
-
-provider "helm" {
-  install_tiller  = true
-  namespace       = "kube-system"
-  service_account = "tiller"
-  tiller_image    = "gcr.io/kubernetes-helm/tiller:v2.11.0"
-}
-
-provider "google" {
-  version = "~> 2.2"
-  region  = var.region
-  zone    = var.zone
-  project = var.project_id
-}
-
 resource "kubernetes_secret" "tls_legion" {
   metadata {
     name      = "${var.cluster_name}-tls"

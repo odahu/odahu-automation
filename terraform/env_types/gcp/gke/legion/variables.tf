@@ -32,6 +32,10 @@ variable "legion_helm_repo" {
   description = "Legion helm repo"
 }
 
+variable "tiller_image" {
+  default     = "gcr.io/kubernetes-helm/tiller:v2.14.3"
+}
+
 variable "root_domain" {
   description = "Legion cluster root domain"
 }

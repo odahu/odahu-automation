@@ -7,10 +7,6 @@ variable "cluster_name" {
   description = "Legion cluster name"
 }
 
-variable "zone" {
-  description = "Default zone"
-}
-
 variable "region" {
   description = "Region of resources"
 }
