@@ -16,11 +16,11 @@
 #
 
 import argparse
-import ast
 import json
 import logging
 import subprocess
 import sys
+from typing import Dict, Any, Optional
 
 import yaml
 
@@ -28,9 +28,11 @@ EXPORT_FORMATS = ['yaml', 'json']
 HIERA_BINARY = "/usr/local/bin/hiera"
 
 
-def get_variables_list(file):
+def get_variables_list(file: str) -> Dict[str, str]:
     """
     Get all variables from template file
+    :param file: path to a vars_template.yaml file
+    :return: content of a vars_template.yaml file
     """
 
     stream = open(file, 'r')
@@ -40,51 +42,54 @@ def get_variables_list(file):
     return data
 
 
-def read_hiera_data(hiera_config, hiera_environment, hiera_cloud, all_vars):
+def read_hiera_data(hiera_config: str, hiera_environment: str,
+                    hiera_cloud: str, all_vars: Dict[str, str]) -> Dict[str, Any]:
     """
     Read data from Hiera
 
     :param hiera_config: Hiera config location
-    :type hiera_config: str
     :param hiera_environment: Hiera environment name to get data for
-    :type hiera_environment: string
     :param hiera_cloud: Hiera cloud name to get data for
-    :type hiera_cloud: string
     :param all_vars: list of variables to get from hiera
-    :type all_vars: :dict
-    :return: list[dict] List of Nexus components
+    :return: result variables
     """
 
-    filtered_vars = {}
+    filtered_vars: Dict[str, Any] = {}
 
     for key_name in all_vars:
         variable = hiera_get(hiera_config, key_name, hiera_environment, hiera_cloud)
         if variable is not None:
             filtered_vars.update({key_name: variable})
+
     log.debug('Exported Hiera data: {}'.format(filtered_vars))
     return filtered_vars
 
 
-def hiera_get(config, key_name, env, cloud):
+def hiera_get(config: str, key_name: str, env: str, cloud: str) -> Optional[Any]:
     """
-    Read hiera data
+    Read hiera variable
+
+    :param key_name: variable name
+    :param config: Hiera config location
+    :param env: Hiera environment name to get data for
+    :param cloud: Hiera cloud name to get data for
     """
 
-    hiera_command = [HIERA_BINARY, '-a', '-f', 'json', '--config', config, key_name, "environment={}".format(env),
+    hiera_command = [HIERA_BINARY, '-f', 'json', '--config', config, key_name, "environment={}".format(env),
                      "cloud={}".format(cloud)]
     log.debug(hiera_command)
 
     try:
-        output = ast.literal_eval(subprocess.check_output(hiera_command, encoding="utf-8"))
+        output = subprocess.check_output(hiera_command, encoding="utf-8")
         log.debug(output)
-        result = output[0].strip('[]') if len(output) < 2 else output
-        return result
+
+        return json.loads(output)
     except Exception:
         log.warning('Key {} is missing in hieradata'.format(key_name))
         return None
 
 
-def work(args):
+def work(args: argparse.Namespace):
     """"
     Export Legion variables
 
