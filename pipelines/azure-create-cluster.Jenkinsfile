@@ -78,7 +78,7 @@ pipeline {
             }
             steps {
                 script {
-                    legion.runRobotTestsAtGcp(env.param_tests_tags ?: "")
+                    legion.runRobotTests(env.param_tests_tags ?: "")
                 }
             }
         }

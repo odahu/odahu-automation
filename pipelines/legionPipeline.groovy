@@ -93,19 +93,25 @@ def destroyCluster(cloudCredsSecret, dockerArgPrefix) {
     }
 }
 
-def setupGcpAccess() {
-    sh """
-        set -ex
-
-        # Authorize GCP access
-        gcloud auth activate-service-account --key-file=${gcpCredential} --project=${gcp_project_id}
-
-        # Setup Kube api access
-        gcloud container clusters get-credentials ${env.param_cluster_name} --zone ${gcp_zone}
-        """
+def setupAccess() {
+    switch (env.param_cloud_provider) {
+        case 'gcp':
+            sh """
+                set -ex
+        
+                # Authorize GCP access
+                gcloud auth activate-service-account --key-file=${gcpCredential} --project=${gcp_project_id}
+        
+                # Setup Kube api access
+                gcloud container clusters get-credentials ${env.param_cluster_name} --zone ${gcp_zone}
+            """
+            break
+        default:
+            throw new Exception("Unexpected cloud provider: ${env.param_cloud_provider}")
+    }
 }
 
-def runRobotTestsAtGcp(tags="") {
+def runRobotTests(tags="") {
     withCredentials([
     file(credentialsId: "${env.gcpCredential}", variable: 'gcpCredential')]) {
         withCredentials([
@@ -125,25 +131,19 @@ def runRobotTestsAtGcp(tags="") {
                             stage('Run Robot tests') {
                                 dir("${WORKSPACE}"){
                                     def tags_list = tags.toString().trim().split(',')
-                                    def robot_tags = []
-                                    def nose_tags = []
+                                    def robot_tags = ["-e disable"]
 
                                     for (item in tags_list) {
                                         if (item.startsWith('-')) {
                                             item = item.replace("-","")
                                             robot_tags.add(" -e ${item}")
-                                            nose_tags.add(" -a !${item}")
                                             }
                                         else if (item?.trim()) {
                                             robot_tags.add(" -i ${item}")
-                                            nose_tags.add(" -a ${item}")
                                         }
                                     }
 
-                                    env.robot_tags= robot_tags.join(" ")
-                                    env.nose_tags = nose_tags.join(" ")
-
-                                    setupGcpAccess()
+                                    setupAccess()
 
                                     sh """
                                         cd /opt/legion
@@ -156,6 +156,7 @@ def runRobotTestsAtGcp(tags="") {
                                         make GOOGLE_APPLICATION_CREDENTIALS=${gcpCredential} \
                                              CLUSTER_PROFILE=${env.clusterProfile} \
                                              ROBOT_THREADS=6 \
+                                             ROBOT_OPTIONS="${robot_tags.join(' ')}" \
                                              LEGION_VERSION=${env.param_legion_version} e2e-robot || true
 
                                         make CLUSTER_PROFILE=${env.clusterProfile} \
@@ -345,7 +346,7 @@ def notifyBuild(String buildStatus = 'STARTED') {
             arguments = arguments + "\nversion *${env.param_legion_infra_version}*"
         }
     }
-    
+
     def mailSubject = "${buildStatus}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'"
     def summary = """\
     @here Job *${env.JOB_NAME}* #${env.BUILD_NUMBER} - *${buildStatus}* (previous: ${previousBuildResult}) \n
@@ -393,7 +394,7 @@ def notifyBuild(String buildStatus = 'STARTED') {
 
 def buildLegionImage(legion_image, build_context=".", dockerfile='Dockerfile', additional_parameters='') {
     dir (build_context) {
-        
+
         def cache_from_params = ''
 
         if (env.param_enable_docker_cache.toBoolean()) {

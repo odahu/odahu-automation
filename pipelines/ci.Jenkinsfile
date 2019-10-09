@@ -29,7 +29,7 @@ pipeline {
         legionInfraVersion = null
         legionVersion = null
         gcpCredential = "gcp-epmd-legn-legion-automation"
-        terraformHome =  "/opt/legion/terraform"
+        terraformHome = "/opt/legion/terraform"
         gitDeployKey = "epam-legion-deployment-key"
     }
 
@@ -45,89 +45,94 @@ pipeline {
             }
         }
 
-        stage('Build Legion Infrastructure artifacts') {
-            steps {
-                script {
-                    result = build job: env.param_build_legion_infra_job_name, propagate: true, wait: true, parameters: [
-                            [$class: 'GitParameterValue', name: 'GitBranch', value: env.param_legion_infra_branch],
-                            string(name: 'EnableDockerCache', value: env.param_enable_docker_cache),
-                            string(name: 'DockerCacheSource', value: env.param_infra_docker_cache_source)
-                    ]
+        stage('Build artifacts') {
+            parallel {
+                stage('Build Legion Infrastructure artifacts') {
+                    steps {
+                        script {
+                            result = build job: env.param_build_legion_infra_job_name, propagate: true, wait: true, parameters: [
+                                    [$class: 'GitParameterValue', name: 'GitBranch', value: env.param_legion_infra_branch],
+                                    string(name: 'EnableDockerCache', value: env.param_enable_docker_cache),
+                                    string(name: 'DockerCacheSource', value: env.param_infra_docker_cache_source)
+                            ]
 
-                    buildNumber = result.getNumber()
-                    print 'Finished build id ' + buildNumber.toString()
+                            buildNumber = result.getNumber()
+                            print 'Finished build id ' + buildNumber.toString()
 
-                    // Save logs
-                    logFile = result.getRawBuild().getLogFile()
-                    sh """
-                    cat "${logFile.getPath()}" | perl -pe 's/\\x1b\\[8m.*?\\x1b\\[0m//g;' > build-log.txt 2>&1
-                    """
-                    archiveArtifacts 'build-log.txt'
+                            // Save logs
+                            logFile = result.getRawBuild().getLogFile()
+                            sh """
+                            cat "${logFile.getPath()}" | perl -pe 's/\\x1b\\[8m.*?\\x1b\\[0m//g;' > build-log.txt 2>&1
+                            """
+                            archiveArtifacts 'build-log.txt'
 
-                    // Copy artifacts
-                    copyArtifacts filter: '*', flatten: true, fingerprintArtifacts: true, projectName: env.param_build_legion_infra_job_name, selector: specific      (buildNumber.toString()), target: ''
+                            // Copy artifacts
+                            copyArtifacts filter: '*', flatten: true, fingerprintArtifacts: true, projectName: env.param_build_legion_infra_job_name, selector: specific(buildNumber.toString()), target: ''
 
-                    // \ Load variables
-                    def map = [:]
-                    def envs = sh returnStdout: true, script: "cat file.env"
+                            // \ Load variables
+                            def map = [:]
+                            def envs = sh returnStdout: true, script: "cat file.env"
 
-                    envs.split("\n").each {
-                        kv = it.split('=', 2)
-                        print "Loaded ${kv[0]} = ${kv[1]}"
-                        map[kv[0]] = kv[1]
-                    }
+                            envs.split("\n").each {
+                                kv = it.split('=', 2)
+                                print "Loaded ${kv[0]} = ${kv[1]}"
+                                map[kv[0]] = kv[1]
+                            }
 
-                    legionInfraVersion = map["LEGION_VERSION"]
+                            legionInfraVersion = map["LEGION_VERSION"]
 
-                    print "Loaded version ${legionInfraVersion}"
+                            print "Loaded version ${legionInfraVersion}"
 
-                    if (!legionInfraVersion) {
-                        error 'Cannot get legion release version number'
-                    }
-                }
-            }
-        }
-
-        stage('Build Legion artifacts') {
-            steps {
-                script {
-                    result = build job: env.param_build_legion_job_name, propagate: true, wait: true, parameters: [
-                            [$class: 'GitParameterValue', name: 'GitBranch', value: env.param_legion_git_branch],
-                            string(name: 'EnableDockerCache', value: env.param_enable_docker_cache),
-                            string(name: 'DockerCacheSource', value: env.param_legion_docker_cache_source)
-                    ]
-
-                    buildNumber = result.getNumber()
-                    print 'Finished build id ' + buildNumber.toString()
-
-                    // Save logs
-                    logFile = result.getRawBuild().getLogFile()
-                    sh """
-                    cat "${logFile.getPath()}" | perl -pe 's/\\x1b\\[8m.*?\\x1b\\[0m//g;' > build-log.txt 2>&1
-                    """
-                    archiveArtifacts 'build-log.txt'
-
-                    // Copy artifacts
-                    copyArtifacts filter: '*', flatten: true, fingerprintArtifacts: true, projectName: env.param_build_legion_job_name, selector: specific       (buildNumber.toString()), target: ''
-
-                    // \ Load variables
-                    def map = [:]
-                    def envs = sh returnStdout: true, script: "cat file.env"
-
-                    envs.split("\n").each {
-                        kv = it.split('=', 2)
-                        print "Loaded ${kv[0]} = ${kv[1]}"
-                        map[kv[0]] = kv[1]
-                    }
-
-                    legionVersion = map["LEGION_VERSION"]
-
-                    print "Loaded version ${legionVersion}"
-
-                    if (!legionVersion) {
-                        error 'Cannot get legion release version number'
+                            if (!legionInfraVersion) {
+                                error 'Cannot get legion release version number'
+                            }
+                        }
                     }
                 }
+
+                stage('Build Legion artifacts') {
+                    steps {
+                        script {
+                            result = build job: env.param_build_legion_job_name, propagate: true, wait: true, parameters: [
+                                    [$class: 'GitParameterValue', name: 'GitBranch', value: env.param_legion_git_branch],
+                                    string(name: 'EnableDockerCache', value: env.param_enable_docker_cache),
+                                    string(name: 'DockerCacheSource', value: env.param_legion_docker_cache_source)
+                            ]
+
+                            buildNumber = result.getNumber()
+                            print 'Finished build id ' + buildNumber.toString()
+
+                            // Save logs
+                            logFile = result.getRawBuild().getLogFile()
+                            sh """
+                            cat "${logFile.getPath()}" | perl -pe 's/\\x1b\\[8m.*?\\x1b\\[0m//g;' > build-log.txt 2>&1
+                            """
+                            archiveArtifacts 'build-log.txt'
+
+                            // Copy artifacts
+                            copyArtifacts filter: '*', flatten: true, fingerprintArtifacts: true, projectName: env.param_build_legion_job_name, selector: specific(buildNumber.toString()), target: ''
+
+                            // \ Load variables
+                            def map = [:]
+                            def envs = sh returnStdout: true, script: "cat file.env"
+
+                            envs.split("\n").each {
+                                kv = it.split('=', 2)
+                                print "Loaded ${kv[0]} = ${kv[1]}"
+                                map[kv[0]] = kv[1]
+                            }
+
+                            legionVersion = map["LEGION_VERSION"]
+
+                            print "Loaded version ${legionVersion}"
+
+                            if (!legionVersion) {
+                                error 'Cannot get legion release version number'
+                            }
+                        }
+                    }
+                }
+
             }
         }
 
@@ -190,7 +195,7 @@ pipeline {
             script {
                 legion = load "${env.sharedLibPath}"
             }
-            deleteDir()        
+            deleteDir()
         }
     }
 }
