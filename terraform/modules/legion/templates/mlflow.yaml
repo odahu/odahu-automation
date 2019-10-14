@@ -7,7 +7,7 @@ ingress:
   tlsSecretName: "${cluster_name}-tls"
 
 security:
-  enabled: false
+  enabled: true
 
 tracking_server:
   annotations:
