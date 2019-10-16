@@ -1,0 +1,67 @@
+---
+apiVersion: v1
+data: null
+kind: ConfigMap
+metadata:
+  name: config-artifact-bucket
+---
+apiVersion: v1
+data: null
+kind: ConfigMap
+metadata:
+  name: config-artifact-pvc
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config-defaults
+{{- if .Values.config.defaults }}
+data:
+  {{ toYaml .Values.config.defaults | nindent 2 }}
+  {{ else }}
+data: {}
+{{- end }}
+---
+apiVersion: v1
+data:
+  loglevel.controller: info
+  loglevel.webhook: info
+  zap-logger-config: |
+    {
+      "level": "info",
+      "development": false,
+      "sampling": {
+        "initial": 100,
+        "thereafter": 100
+      },
+      "outputPaths": ["stdout"],
+      "errorOutputPaths": ["stderr"],
+      "encoding": "json",
+      "encoderConfig": {
+        "timeKey": "",
+        "levelKey": "level",
+        "nameKey": "logger",
+        "callerKey": "caller",
+        "messageKey": "msg",
+        "stacktraceKey": "stacktrace",
+        "lineEnding": "",
+        "levelEncoder": "",
+        "timeEncoder": "",
+        "durationEncoder": "",
+        "callerEncoder": ""
+      }
+    }
+kind: ConfigMap
+metadata:
+  name: config-logging
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config-observability
+{{- if .Values.config.observability }}
+data:
+  {{ toYaml .Values.config.observability | nindent 2 }}
+{{ else }}
+data: {}
+{{- end }}

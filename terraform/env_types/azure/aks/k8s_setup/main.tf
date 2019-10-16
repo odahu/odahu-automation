@@ -79,3 +79,9 @@ module "istio" {
   tls_secret_key       = var.tls_key
   tls_secret_crt       = var.tls_crt
 }
+
+module "tekton" {
+  source = "../../../../modules/k8s/tekton"
+  legion_helm_repo     = var.legion_helm_repo
+  legion_infra_version = var.legion_infra_version
+}

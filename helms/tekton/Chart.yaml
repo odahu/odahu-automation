@@ -1,0 +1,7 @@
+name: tekton
+version: 0.1.0
+appVersion: v0.6.1
+description: Tekton chart
+keywords:
+  - cicd
+  - tekton

@@ -168,6 +168,7 @@ cleanup-infra-crds:
 	$(call delete_crds,knative)
 	$(call delete_crds,istio)
 	$(call delete_crds,coreos)
+	$(call delete_crds,tekton)
 
 ## cleanup-legion-crds: Delete all legion CRDs from k8s cluster
 cleanup-legion-crds:

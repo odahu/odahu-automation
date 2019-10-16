@@ -73,3 +73,9 @@ module "gke-saa" {
   legion_helm_repo     = var.legion_helm_repo
   legion_infra_version = var.legion_infra_version
 }
+
+module "tekton" {
+  source = "../../../../modules/k8s/tekton"
+  legion_helm_repo     = var.legion_helm_repo
+  legion_infra_version = var.legion_infra_version
+}
