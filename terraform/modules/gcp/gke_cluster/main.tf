@@ -205,6 +205,11 @@ resource "google_compute_instance" "gke_bastion" {
 
   tags = [var.bastion_tag]
 
+  labels = {
+    "project"      = "legion"
+    "cluster_name" = var.cluster_name
+  }
+
   // Define a network interface in the correct subnet.
   network_interface {
     subnetwork         = var.subnetwork
