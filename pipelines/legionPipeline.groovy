@@ -27,10 +27,12 @@ def createCluster(cloudCredsSecret, dockerArgPrefix) {
                             updateProfileKey("legion_infra_version", env.param_legion_infra_version)
                             updateProfileKey("legion_version", env.param_legion_version)
                             updateProfileKey("legion_helm_repo", env.param_helm_repo)
-                            updateProfileKey("docker_repo", env.param_docker_repo)
+                            if (env.param_cloud_provider == 'gcp') {
+                                updateProfileKey("docker_repo", env.param_docker_repo)
+                            }
                             updateProfileKey("model_reference", commitID)
 
-                            sh'tf_runner -v create'
+                            sh'tf_runner create'
                         }
                         stage('Create cluster specific private DNS zone') {
                             if (env.param_cloud_provider == 'gcp') {
@@ -70,9 +72,11 @@ def destroyCluster(cloudCredsSecret, dockerArgPrefix) {
                             updateProfileKey("legion_infra_version", env.param_legion_infra_version)
                             updateProfileKey("legion_version", env.param_legion_version)
                             updateProfileKey("legion_helm_repo", env.param_helm_repo)
-                            updateProfileKey("docker_repo", env.param_docker_repo)
+                            if (env.param_cloud_provider == 'gcp') {
+                                updateProfileKey("docker_repo", env.param_docker_repo)
+                            }
 
-                            sh'tf_runner -v destroy'
+                            sh'tf_runner destroy'
                         }
                         stage('Destroy cluster specific private DNS zone') {
                             if (env.param_cloud_provider == 'gcp') {
@@ -84,7 +88,7 @@ def destroyCluster(cloudCredsSecret, dockerArgPrefix) {
                         }
                         stage('Cleanup workspace') {
                             // Cleanup profiles directory
-                            sh"rm -rf ${WORKSPACE}/legion-profiles/ ||true"
+                            sh"rm -rf ${WORKSPACE}/legion-profiles/ || true"
                         }
                     }
                 }
@@ -96,14 +100,29 @@ def destroyCluster(cloudCredsSecret, dockerArgPrefix) {
 def setupAccess() {
     switch (env.param_cloud_provider) {
         case 'gcp':
+            def gcp_zone = sh(script: "jq -r '.location' ${env.clusterProfile}", returnStdout: true).trim()
+            def gcp_project_id = sh(script: "jq -r '.project_id' ${env.clusterProfile}", returnStdout: true).trim()
             sh """
                 set -ex
         
                 # Authorize GCP access
-                gcloud auth activate-service-account --key-file=${gcpCredential} --project=${gcp_project_id}
+                gcloud auth activate-service-account --key-file=${cloudCredentials} --project=${gcp_project_id}
         
                 # Setup Kube api access
                 gcloud container clusters get-credentials ${env.param_cluster_name} --zone ${gcp_zone}
+            """
+            break
+        case 'azure':
+            def resource_group = sh(script: "jq -r '.azure_resource_group' ${env.clusterProfile}", returnStdout: true).trim()
+            sh """#!/bin/bash -ex
+
+                # Authorize Azure access
+                set +x
+                az login --service-principal -u \$ARM_CLIENT_ID -p \$ARM_CLIENT_SECRET --tenant \$ARM_TENANT_ID
+                set -x
+
+                # Setup Kubernetes API access
+                az aks get-credentials --name ${env.param_cluster_name} --resource-group ${resource_group}
             """
             break
         default:
@@ -111,85 +130,97 @@ def setupAccess() {
     }
 }
 
-def runRobotTests(tags="") {
+def runRobotTests(tags="", cloudCredsSecret, dockerArgPrefix) {
     withCredentials([
-    file(credentialsId: "${env.gcpCredential}", variable: 'gcpCredential')]) {
+    file(credentialsId: "${cloudCredsSecret}", variable: 'cloudCredentials')]) {
         withCredentials([
         file(credentialsId: "${env.hieraPrivatePKCSKey}", variable: 'PrivatePkcsKey')]) {
             withCredentials([
             file(credentialsId: "${env.hieraPublicPKCSKey}", variable: 'PublicPkcsKey')]) {
-                withAWS(credentials: 'kops') {
-                    wrap([$class: 'AnsiColorBuildWrapper', colorMapName: "xterm"]) {
-                        docker.image("${env.param_docker_repo}/k8s-terraform:${env.param_legion_infra_version}").inside("-e GOOGLE_CREDENTIALS=${gcpCredential} -e CLUSTER_NAME=${env.param_cluster_name} -u root") {
-                            stage('Extract Hiera data') {
-                                extractHiera()
-                                gcp_zone = sh(script: "jq '.location' ${env.clusterProfile}", returnStdout: true)
-                                gcp_project_id = sh(script: "jq '.project_id' ${env.clusterProfile}", returnStdout: true)
-                            }
+                wrap([$class: 'AnsiColorBuildWrapper', colorMapName: "xterm"]) {
+                    def dockerArgs = """-e PROFILE=${env.clusterProfile}
+                                        -u root
+                                        ${dockerArgPrefix}${cloudCredentials}
+                                     """
+                    docker.image("${env.param_docker_repo}/k8s-terraform:${env.param_legion_infra_version}").inside(dockerArgs) {
+                        stage('Extract Hiera data') {
+                            extractHiera()
                         }
-                        docker.image("${env.param_docker_repo}/legion-pipeline-agent:${env.param_legion_version}").inside("-e HOME=/opt/legion -u root") {
-                            stage('Run Robot tests') {
-                                dir("${WORKSPACE}"){
-                                    def tags_list = tags.toString().trim().split(',')
-                                    def robot_tags = ["-e disable"]
+                    }
 
-                                    for (item in tags_list) {
-                                        if (item.startsWith('-')) {
-                                            item = item.replace("-","")
-                                            robot_tags.add(" -e ${item}")
-                                            }
-                                        else if (item?.trim()) {
-                                            robot_tags.add(" -i ${item}")
-                                        }
+                    dockerArgs = """-e HOME=/opt/legion
+                                    -u root
+                                    ${dockerArgPrefix}${cloudCredentials}
+                                 """
+                    docker.image("${env.param_docker_repo}/legion-pipeline-agent:${env.param_legion_version}").inside(dockerArgs) {
+                        stage('Run Robot tests') {
+                            dir("${WORKSPACE}"){
+                                def tags_list = tags.toString().trim().split(',')
+                                def robot_tags = ["-e disable"]
+
+                                for (item in tags_list) {
+                                    if (item.startsWith('-')) {
+                                        item = item.replace("-","")
+                                        robot_tags.add(" -e ${item}")
                                     }
-
-                                    setupAccess()
-
-                                    sh """
-                                        cd /opt/legion
-                                        make CLUSTER_PROFILE=${env.clusterProfile} \
-                                             CLUSTER_NAME=${env.param_cluster_name} \
-                                             DOCKER_REGISTRY=${env.param_docker_repo} \
-                                             LEGION_VERSION=${env.param_legion_version} setup-e2e-robot
-
-                                        echo "Starting robot tests"
-                                        make GOOGLE_APPLICATION_CREDENTIALS=${gcpCredential} \
-                                             CLUSTER_PROFILE=${env.clusterProfile} \
-                                             ROBOT_THREADS=6 \
-                                             ROBOT_OPTIONS="${robot_tags.join(' ')}" \
-                                             LEGION_VERSION=${env.param_legion_version} e2e-robot || true
-
-                                        make CLUSTER_PROFILE=${env.clusterProfile} \
-                                             CLUSTER_NAME=${env.param_cluster_name} cleanup-e2e-robot
-
-                                        cp -R target/ ${WORKSPACE}
-                                    """
-
-                                    robot_report = sh(script: 'find target/ -name "*.xml" | wc -l', returnStdout: true)
-
-                                    if (robot_report.toInteger() > 0) {
-                                        step([
-                                            $class : 'RobotPublisher',
-                                            outputPath : 'target/',
-                                            outputFileName : "*.xml",
-                                            disableArchiveOutput : false,
-                                            passThreshold : 100,
-                                            unstableThreshold: 50.0,
-                                            onlyCritical : true,
-                                            otherFiles : "*.png",
-                                        ])
+                                    else if (item?.trim()) {
+                                        robot_tags.add(" -i ${item}")
                                     }
-                                    else {
-                                        echo "No '*.xml' files for generating robot report"
-                                        currentBuild.result = 'UNSTABLE'
-                                    }
-
-                                    // Cleanup tests files
-                                    sh "rm -rf ${WORKSPACE}/target/"
-
-                                    // Cleanup profiles directory
-                                    sh"rm -rf ${env.clusterProfile} ||true"
                                 }
+
+                                setupAccess()
+
+                                sh """#!/bin/bash
+
+                                    cd /opt/legion
+                                    make CLUSTER_PROFILE=${env.clusterProfile} \
+                                         CLUSTER_NAME=${env.param_cluster_name} \
+                                         CLOUD_PROVIDER=${env.param_cloud_provider} \
+                                         DOCKER_REGISTRY=${env.param_docker_repo} \
+                                         LEGION_VERSION=${env.param_legion_version} setup-e2e-robot
+
+                                    ROBOT_PARAMS=(CLUSTER_PROFILE=${env.clusterProfile} \
+                                                  ROBOT_THREADS=6 \
+                                                  ROBOT_OPTIONS="${robot_tags.join(' ')}" \
+                                                  LEGION_VERSION=${env.param_legion_version})
+
+                                    if [[ ${env.param_cloud_provider} == gcp ]]; then
+                                        ROBOT_PARAMS+=(GOOGLE_APPLICATION_CREDENTIALS=${cloudCredentials})
+                                    fi
+
+                                    echo "Starting robot tests"
+                                    make "\${ROBOT_PARAMS[@]}" e2e-robot || true
+
+                                    make CLUSTER_PROFILE=${env.clusterProfile} \
+                                         CLUSTER_NAME=${env.param_cluster_name} cleanup-e2e-robot
+
+                                    cp -R target/ ${WORKSPACE}
+                                """
+
+                                robot_report = sh(script: 'find target/ -name "*.xml" | wc -l', returnStdout: true)
+
+                                if (robot_report.toInteger() > 0) {
+                                    step([
+                                        $class : 'RobotPublisher',
+                                        outputPath : 'target/',
+                                        outputFileName : "*.xml",
+                                        disableArchiveOutput : false,
+                                        passThreshold : 100,
+                                        unstableThreshold: 50.0,
+                                        onlyCritical : true,
+                                        otherFiles : "*.png",
+                                    ])
+                                }
+                                else {
+                                    echo "No '*.xml' files for generating robot report"
+                                    currentBuild.result = 'UNSTABLE'
+                                }
+
+                                // Cleanup tests files
+                                sh "rm -rf ${WORKSPACE}/target/"
+
+                                // Cleanup profiles directory
+                                sh"rm -rf ${env.clusterProfile} ||true"
                             }
                         }
                     }

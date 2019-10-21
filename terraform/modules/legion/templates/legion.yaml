@@ -14,10 +14,27 @@ security:
 feedback:
   enabled: true
   output:
-    target: gcs
+%{ if cloud_type == "aws" ~}
+    target: "s3"
+    s3:
+      bucket: "${legion_data_bucket}"
+      region: "${legion_data_bucket_region}"
+      customIAMRole: "${legion_collector_iam_role}"
+%{ endif ~}
+%{ if cloud_type == "gcp" ~}
+    target: "gcs"
     gcs:
       bucket: "${legion_data_bucket}"
       customSA: "${legion_collector_sa}"
+%{ endif ~}
+%{ if cloud_type == "azure" ~}
+    target: "azureblob"
+    azureblob:
+      authorization: "accesskey"
+      bucket: "${legion_data_bucket}"
+      AzureStorageAccount: "${azure_storage_account}"
+      AzureStorageAccessKey: "${azure_storage_access_key}"
+%{ endif ~}
 
 edi:
   replicas: 2
@@ -40,19 +57,34 @@ connections:
     spec:
       type: docker
       uri: "${model_docker_repo}"
+%{ if cloud_type != "azure" ~}
       password: |
         ${model_docker_password}
+%{ else ~}
+      password: "${model_docker_password}"
+%{ endif ~}
       username: "${model_docker_user}"
       description: "${model_docker_description}"
       webUILink: "${model_docker_web_ui_link}"
 
   - id: models-output
     spec:
+%{ if cloud_type == "gcp" ~}
       type: gcs
-      uri: "${model_output_bucket}"
       region: "${model_output_region}"
       keySecret: |
         ${model_output_secret}
+%{ endif ~}
+%{ if cloud_type == "aws" ~}
+      type: s3
+      region: "${model_output_region}"
+      keySecret: "${model_output_secret}"
+%{ endif ~}
+%{ if cloud_type == "azure" ~}
+      type: azureblob
+      keySecret: "${model_output_secret}"
+%{ endif ~}
+      uri: "${model_output_bucket}"
       description: "${model_output_description}"
       webUILink: "${model_output_web_ui_link}"
 
@@ -75,6 +107,10 @@ config:
       - name: "Feedback storage"
         url: "${feedback_storage_link}"
   deployment:
+%{ if cloud_type == "azure" ~}
+    toleration: {}
+    node_selector: {}
+%{ endif ~}
     edge:
       host: https://edge.${cluster_name}.${root_domain}
     namespace: "${legion_deployment_namespace}"
@@ -87,6 +123,10 @@ config:
         issuer: "${model_oidc_issuer}"
 
   training:
+%{ if cloud_type == "azure" ~}
+    toleration: {}
+    node_selector: {}
+%{ endif ~}
     namespace: "${legion_training_namespace}"
     output_connection: models-output
     metric_url: "https://mlflow.${cluster_name}.${root_domain}"
@@ -94,6 +134,10 @@ config:
       image: "${docker_repo}/k8s-model-trainer:${legion_version}"
 
   packaging:
+%{ if cloud_type == "azure" ~}
+    toleration: {}
+    node_selector: {}
+%{ endif ~}
     namespace: "${legion_packaging_namespace}"
     output_connection: models-output
     service_account: legion-model-packager

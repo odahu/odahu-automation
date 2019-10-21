@@ -1,5 +1,5 @@
 provider "azurerm" {
-  version = "1.34.0"
+  version = "1.35.0"
 }
 
 provider "random" {
@@ -20,4 +20,8 @@ provider "http" {
 
 provider "tls" {
   version = "~> 2.1.0"
+}
+
+provider "external" {
+  version = "~> 1.2"
 }

@@ -12,5 +12,13 @@ security:
 tracking_server:
   annotations:
     sidecar.istio.io/inject: "false"
+  resources:
+    requests:
+      cpu: "200m"
+      memory: "256Mi"
+    limits:
+      cpu: "250m"
+      memory: "512Mi"
+
 toolchain_integration:
   enabled: true

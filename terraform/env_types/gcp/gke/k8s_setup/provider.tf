@@ -6,6 +6,7 @@ provider "helm" {
   version         = "0.10.2"
   namespace       = "kube-system"
   service_account = "tiller"
+  insecure        = "true"
 }
 
 provider "kubernetes" {

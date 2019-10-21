@@ -5,6 +5,10 @@ variable "project_id" {
   description = "Target project id"
 }
 
+variable "cloud_type" {}
+
+variable "cluster_type" {}
+
 variable "cluster_name" {
   default     = "legion"
   description = "Legion cluster name"
@@ -107,11 +111,6 @@ variable "git_examples_key" {
 
 variable "legion_data_bucket" {
   description = "Legion data storage bucket"
-}
-
-variable "collector_region" {
-  default     = "us-east1"
-  description = "Collector's storage bucket region"
 }
 
 variable "mlflow_toolchain_version" {

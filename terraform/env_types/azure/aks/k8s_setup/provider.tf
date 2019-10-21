@@ -1,11 +1,12 @@
 provider "azurerm" {
-  version = "1.34.0"
+  version = "1.35.0"
 }
 
 provider "helm" {
   version         = "0.10.2"
   namespace       = "kube-system"
   service_account = "tiller"
+  insecure        = "true"
 }
 
 provider "kubernetes" {

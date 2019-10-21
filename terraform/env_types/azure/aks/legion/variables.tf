@@ -1,7 +1,21 @@
+variable "azure_location" {
+  description = "Azure base resource group location"
+}
 
 variable "azure_resource_group" {
   description = "Azure base resource group name"
-  default     = "legion-rg"
+}
+
+variable "azure_storage_account" {
+  description = "Azure storage account name"
+}
+
+variable "aks_common_tags" {
+  description = "Set of common tags assigned to all cluster resources"
+  type        = "map"
+  default     = {
+    environment = "Development"
+  }
 }
 
 ##################
@@ -10,6 +24,14 @@ variable "azure_resource_group" {
 variable "cluster_name" {
   default     = "legion"
   description = "Legion cluster name"
+}
+
+variable "cloud_type" {
+  default = "azure"
+}
+
+variable "cluster_type" {
+  default = "azure/aks"
 }
 
 variable "legion_helm_repo" {

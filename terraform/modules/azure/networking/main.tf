@@ -7,9 +7,16 @@ data "http" "external_ip" {
   url = "http://ifconfig.co"
 }
 
-# TODO: make check for CIDR block interceptions
+data "external" "check_ip_in_cidrs" {
+  program = ["python3", "${path.module}/scripts/check_ip_in_cidrs.py"]
+  query = {
+    ip = chomp(data.http.external_ip.body)
+    cidrlist = join(", ", var.allowed_ips)
+  }
+}
+
 locals {
-  allowed_subnets = concat(list("${chomp(data.http.external_ip.body)}/32"), var.allowed_ips)
+  allowed_subnets = split(", ", data.external.check_ip_in_cidrs.result.cidrlist)
 }
 
 resource "azurerm_public_ip" "bastion" {
@@ -58,7 +65,7 @@ resource "azurerm_network_security_group" "aks_nsg" {
     protocol                     = "Tcp"
     source_port_range            = "*"
     destination_port_ranges      = [ "22" ]
-    source_address_prefixes      = var.allowed_ips
+    source_address_prefixes      = local.allowed_subnets
     destination_address_prefixes = [ azurerm_public_ip.bastion.ip_address, var.subnet_cidr ]
   }
   security_rule {
@@ -70,7 +77,7 @@ resource "azurerm_network_security_group" "aks_nsg" {
     protocol                     = "Tcp"
     source_port_range            = "*"
     destination_port_ranges      = [ "80", "443" ]
-    source_address_prefixes      = concat(list(azurerm_public_ip.bastion.ip_address), var.allowed_ips)
+    source_address_prefixes      = concat(list(azurerm_public_ip.bastion.ip_address), local.allowed_subnets)
     destination_address_prefixes = [ data.azurerm_public_ip.aks_ext.ip_address, var.subnet_cidr ]
   }
   security_rule {
