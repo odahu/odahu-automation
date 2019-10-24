@@ -24,11 +24,6 @@ variable "aws_region" {
   description = "Region of AWS resources"
 }
 
-variable "aws_profile" {
-  default     = ""
-  description = "AWS profile name"
-}
-
 variable "legion_collector_iam_role" { default = "" }
 
 variable "legion_collector_sa" { default = "" }
@@ -40,6 +35,7 @@ variable "azure_storage_access_key" { default = "" }
 ##################
 # Common
 ##################
+
 variable "cluster_name" {
   default     = "legion"
   description = "Legion cluster name"
@@ -148,6 +144,11 @@ variable "legion_data_bucket_region" {
   description = "Legion data storage bucket region"
 }
 
+variable "collector_region" {
+  default     = ""
+  description = "Collector's storage bucket region"
+}
+
 variable "mlflow_toolchain_version" {
   description = "Version of legion-mlflow helm chart"
 }
@@ -184,5 +185,13 @@ variable "model_output_region" { default = "" }
 variable "model_output_secret" {}
 
 variable "model_output_web_ui_link" {}
+
+variable "model_output_secret_key" {
+  default = ""
+}
+
+variable "bucket_registry_name" {
+  default = ""
+}
 
 variable "feedback_storage_link" {}

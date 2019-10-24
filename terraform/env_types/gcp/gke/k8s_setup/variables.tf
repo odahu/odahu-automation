@@ -1,6 +1,10 @@
 ##################
 # Common
 ##################
+variable "cluster_type" {
+  description = "Cluster type"
+}
+
 variable "project_id" {
   description = "Target project id"
 }
@@ -15,17 +19,17 @@ variable "region" {
   description = "Region of resources"
 }
 
+variable "aws_region" {
+  default     = "us-east-1"
+  description = "Region of resources"
+}
+
 variable "config_context_auth_info" {
   description = "Legion cluster context auth"
 }
 
 variable "config_context_cluster" {
   description = "Legion cluster context name"
-}
-
-variable "cluster_type" {
-  default     = "gcp/gke"
-  description = "Legion cluster cloud provider type"
 }
 
 variable "cluster_name" {

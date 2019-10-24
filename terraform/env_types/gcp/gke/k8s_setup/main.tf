@@ -70,6 +70,7 @@ module "istio" {
 
 module "gke-saa" {
   source               = "../../../../modules/k8s/gke-saa"
+  cluster_type         = var.cluster_type
   legion_helm_repo     = var.legion_helm_repo
   legion_infra_version = var.legion_infra_version
 }

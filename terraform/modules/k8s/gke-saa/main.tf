@@ -1,3 +1,7 @@
+locals {
+  gcp_resource_count = var.cluster_type == "gcp/gke" ? 1 : 0
+}
+
 ########################################################
 # k8s GKE Service Account Assigner
 ########################################################
@@ -16,6 +20,7 @@ data "template_file" "gke_saa_values" {
 }
 
 resource "helm_release" "gke_saa" {
+  count      = local.gcp_resource_count
   name       = "gke-saa"
   chart      = "k8s-gke-saa"
   version    = var.legion_infra_version

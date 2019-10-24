@@ -9,12 +9,16 @@ def buildDescription(){
 def createCluster(cloudCredsSecret, dockerArgPrefix) {
     withCredentials([
     file(credentialsId: "${cloudCredsSecret}", variable: 'cloudCredentials')]) {
+      if (env.param_cloud_provider != "gcp") {
+        withCredentials([
+        file(credentialsId: "gcp-epmd-legn-legion-automation", variable: 'gcpCredentials')]) {
         withCredentials([
         file(credentialsId: "${env.hieraPrivatePKCSKey}", variable: 'PrivatePkcsKey')]) {
             withCredentials([
             file(credentialsId: "${env.hieraPublicPKCSKey}", variable: 'PublicPkcsKey')]) {
                 wrap([$class: 'AnsiColorBuildWrapper', colorMapName: "xterm"]) {
                     def dockerArgs = """-e PROFILE=${env.clusterProfile}
+                                        -e GOOGLE_CREDENTIALS=${gcpCredentials}
                                         -u root
                                         ${dockerArgPrefix}${cloudCredentials}
                                      """
@@ -35,25 +39,132 @@ def createCluster(cloudCredsSecret, dockerArgPrefix) {
                             sh'tf_runner create'
                         }
                         stage('Create cluster specific private DNS zone') {
-                            if (env.param_cloud_provider == 'gcp') {
-                                // Run terraform DNS state to establish DNS peering between Jenkins agent and target cluster
-                                root_domain = sh(script: "jq -r '.root_domain' ${env.clusterProfile}", returnStdout: true).trim()
-                                tfExtraVars = "-var=\"zone_type=FORWARDING\" \
-                                    -var=\"zone_name=${env.param_cluster_name}.${root_domain}\" \
-                                    -var=\"networks_to_add=[\\\"infra-vpc\\\"]\""
-                                terraformRun("apply", "cluster_dns", "${tfExtraVars}", "${WORKSPACE}/legion-cicd/terraform/env_types/cluster_dns", "bucket=${env.param_cluster_name}-tfstate")
+                            if (env.param_cloud_provider == 'aws') {
+                              root_domain = sh(script: "jq -r '.root_domain' ${env.clusterProfile}", returnStdout: true).trim()
+                              tfExtraVars = "-var=\"zone_type=FORWARDING\" \
+                                  -var=\"zone_name=${env.param_cluster_name}.${root_domain}\" \
+                                  -var=\"networks_to_add=[\\\"infra-vpc\\\"]\""
+                              terraformRun("apply", "cluster_dns", "${tfExtraVars}", "${WORKSPACE}/legion-cicd/terraform/env_types/cluster_dns", "bucket=legion-infra-tfstate")
+                            }
+                        }
+                        stage('Create cluster specific public DNS record') {
+                            if (env.param_cloud_provider == 'aws') {
+                              region = sh(script: "jq -r '.aws_region' ${env.clusterProfile}", returnStdout: true).trim()
+                              tfstate_bucket = sh(script: "jq -r '.tfstate_bucket' ${env.clusterProfile}", returnStdout: true).trim()
+                              RRDATA = sh(script: "aws elb describe-load-balancers --load-balancer-names ${env.param_cluster_name} --region ${region} | jq .[][].DNSName", returnStdout: true).trim()
+
+                              root_domain = sh(script: "jq -r '.root_domain' ${env.clusterProfile}", returnStdout: true).trim()
+                              tfExtraVars = "-var=\"rrdatas=[\\\"${RRDATA}.\\\"]\" \
+                                             -var=\"record_name=*.${env.clusterName}.${root_domain}.\" \
+                                             -var=\"record_type=CNAME\" \
+                                             -var=\"zone_name=ailifecycle-org\" "
+                              terraformRun("apply", "dns_record", "${tfExtraVars}", "${WORKSPACE}/legion-cicd/terraform/env_types/dns_record", "bucket=legion-infra-tfstate")
                             }
                         }
                     }
                 }
+                }
             }
-        }
+         } 
+
+      } else {
+        withCredentials([
+        file(credentialsId: "${env.hieraPrivatePKCSKey}", variable: 'PrivatePkcsKey')]) {
+            withCredentials([
+            file(credentialsId: "${env.hieraPublicPKCSKey}", variable: 'PublicPkcsKey')]) {
+                wrap([$class: 'AnsiColorBuildWrapper', colorMapName: "xterm"]) {
+                    def dockerArgs = """-e PROFILE=${env.clusterProfile}
+                                        -u root
+                                        ${dockerArgPrefix}${cloudCredentials}
+                                     """
+                    docker.image("${env.param_docker_repo}/k8s-terraform:${env.param_legion_infra_version}").inside(dockerArgs) {
+                        stage('Extract Hiera data') {
+                            extractHiera()
+                        }
+                        stage('Create Legion Cluster') {
+                            // Update default cluster parameters
+                            updateProfileKey("legion_infra_version", env.param_legion_infra_version)
+                            updateProfileKey("legion_version", env.param_legion_version)
+                            updateProfileKey("legion_helm_repo", env.param_helm_repo)
+                            // updateProfileKey("docker_repo", env.param_docker_repo)
+                            updateProfileKey("model_reference", commitID)
+
+                            sh'tf_runner -v create'
+                        }
+                        stage('Create cluster specific private DNS zone') {
+                            root_domain = sh(script: "jq -r '.root_domain' ${env.clusterProfile}", returnStdout: true).trim()
+                            tfExtraVars = "-var=\"zone_type=FORWARDING\" \
+                                -var=\"zone_name=${env.param_cluster_name}.${root_domain}\" \
+                                -var=\"networks_to_add=[\\\"infra-vpc\\\"]\""
+                            terraformRun("apply", "cluster_dns", "${tfExtraVars}", "${WORKSPACE}/legion-cicd/terraform/env_types/cluster_dns", "bucket=${env.param_cluster_name}-tfstate")
+                        }
+                    }
+                }
+            }
+         } 
+      }
     }
 }
 
 def destroyCluster(cloudCredsSecret, dockerArgPrefix) {
     withCredentials([
     file(credentialsId: "${cloudCredsSecret}", variable: 'cloudCredentials')]) {
+      if (env.param_cloud_provider != "gcp") {
+        withCredentials([
+        file(credentialsId: "gcp-epmd-legn-legion-automation", variable: 'gcpCredentials')]) {
+          withCredentials([
+          file(credentialsId: "${env.hieraPrivatePKCSKey}", variable: 'PrivatePkcsKey')]) {
+            withCredentials([
+            file(credentialsId: "${env.hieraPublicPKCSKey}", variable: 'PublicPkcsKey')]) {
+                wrap([$class: 'AnsiColorBuildWrapper', colorMapName: "xterm"]) {
+                    def dockerArgs = """-e PROFILE=${env.clusterProfile}
+                                        -u root
+                                        -e GOOGLE_CREDENTIALS=${gcpCredentials}
+                                        ${dockerArgPrefix}${cloudCredentials}
+                                     """
+                    docker.image("${env.param_docker_repo}/k8s-terraform:${env.param_legion_infra_version}").inside(dockerArgs) {
+                        stage('Extract Hiera data') {
+                            extractHiera()
+                        }
+                        stage('Destroy cluster specific public DNS record') {
+                            if (env.param_cloud_provider == 'aws') {
+                                root_domain = sh(script: "jq -r '.root_domain' ${env.clusterProfile}", returnStdout: true).trim()
+                                region = sh(script: "jq -r '.aws_region' ${env.clusterProfile}", returnStdout: true).trim()
+                                tfstate_bucket = sh(script: "jq -r '.tfstate_bucket' ${env.clusterProfile}", returnStdout: true).trim()
+                                tfExtraVars = "-var=\"rrdatas=[\\\"${env.clusterName}.${root_domain}.\\\"]\" \
+                                               -var=\"record_name=*.${env.clusterName}.${root_domain}.\" \
+                                               -var=\"record_type=CNAME\" \
+                                               -var=\"zone_name=ailifecycle-org\" "
+                                terraformRun("destroy", "dns_record", "${tfExtraVars}", "${WORKSPACE}/legion-cicd/terraform/env_types/dns_record", "bucket=legion-infra-tfstate")
+                            }
+                        }
+                        stage('Destroy Legion Cluster') {
+                            // Update default cluster parameters
+                            updateProfileKey("legion_infra_version", env.param_legion_infra_version)
+                            updateProfileKey("legion_version", env.param_legion_version)
+                            updateProfileKey("legion_helm_repo", env.param_helm_repo)
+                            updateProfileKey("docker_repo", env.param_docker_repo)
+
+                            sh'tf_runner -v destroy'
+                        }
+                        stage('Destroy cluster specific private DNS zone') {
+                            if (env.param_cloud_provider == 'aws') {
+                                root_domain = sh(script: "jq -r '.root_domain' ${env.clusterProfile}", returnStdout: true).trim()
+                                tfExtraVars = "-var=\"zone_type=FORWARDING\" \
+                                               -var=\"zone_name=${env.param_cluster_name}.${root_domain}\""
+                                terraformRun("destroy", "cluster_dns", "${tfExtraVars}", "${WORKSPACE}/legion-cicd/terraform/env_types/cluster_dns", "bucket=legion-infra-tfstate")
+                            }
+                        }
+                        stage('Cleanup workspace') {
+                            // Cleanup profiles directory
+                            sh"rm -rf ${WORKSPACE}/legion-profiles/ ||true"
+                        }
+                    }
+                }
+              }
+            }
+        }
+      } else {
         withCredentials([
         file(credentialsId: "${env.hieraPrivatePKCSKey}", variable: 'PrivatePkcsKey')]) {
             withCredentials([
@@ -79,12 +190,10 @@ def destroyCluster(cloudCredsSecret, dockerArgPrefix) {
                             sh'tf_runner destroy'
                         }
                         stage('Destroy cluster specific private DNS zone') {
-                            if (env.param_cloud_provider == 'gcp') {
-                                root_domain = sh(script: "jq -r '.root_domain' ${env.clusterProfile}", returnStdout: true).trim()
-                                tfExtraVars = "-var=\"zone_type=FORWARDING\" \
-                                    -var=\"zone_name=${env.param_cluster_name}.${root_domain}\""
-                                terraformRun("destroy", "cluster_dns", "${tfExtraVars}", "${WORKSPACE}/legion-cicd/terraform/env_types/cluster_dns", "bucket=${env.param_cluster_name}-tfstate")
-                            }
+                            root_domain = sh(script: "jq -r '.root_domain' ${env.clusterProfile}", returnStdout: true).trim()
+                            tfExtraVars = "-var=\"zone_type=FORWARDING\" \
+                                -var=\"zone_name=${env.param_cluster_name}.${root_domain}\""
+                            terraformRun("destroy", "cluster_dns", "${tfExtraVars}", "${WORKSPACE}/legion-cicd/terraform/env_types/cluster_dns", "bucket=${env.param_cluster_name}-tfstate")
                         }
                         stage('Cleanup workspace') {
                             // Cleanup profiles directory
@@ -94,6 +203,7 @@ def destroyCluster(cloudCredsSecret, dockerArgPrefix) {
                 }
             }
         }
+      }
     }
 }
 
@@ -125,6 +235,14 @@ def setupAccess() {
                 az aks get-credentials --name ${env.param_cluster_name} --resource-group ${resource_group}
             """
             break
+        case 'aws':
+            sh """
+                set -ex
+
+                # Setup Kube api access
+                aws eks --region ${aws_region} update-kubeconfig --name ${env.param_cluster_name}
+            """
+            break
         default:
             throw new Exception("Unexpected cloud provider: ${env.param_cloud_provider}")
     }
@@ -145,6 +263,12 @@ def runRobotTests(tags="", cloudCredsSecret, dockerArgPrefix) {
                     docker.image("${env.param_docker_repo}/k8s-terraform:${env.param_legion_infra_version}").inside(dockerArgs) {
                         stage('Extract Hiera data') {
                             extractHiera()
+                            if (env.param_cloud_provider == "gcp") {
+                                gcp_zone = sh(script: "jq '.location' ${env.clusterProfile}", returnStdout: true)
+                                gcp_project_id = sh(script: "jq '.project_id' ${env.clusterProfile}", returnStdout: true)
+                            } else if (env.param_cloud_provider == "aws") {
+                                aws_region = sh(script: "jq '.aws_region' ${env.clusterProfile}", returnStdout: true).trim()
+                            }
                         }
                     }
 
@@ -236,19 +360,36 @@ def terraformRun(command, tfModule, extraVars='', workPath="${terraformHome}/env
 
         export TF_DATA_DIR=/tmp/.terraform-${env.param_cluster_name}-${tfModule}
         
-        terraform init -no-color -backend-config="${backendConfigBucket}"
-        
         echo "Execute ${command} on ${tfModule} state"
 
         if [ ${tfModule} = "cluster_dns" ]; then
+            terraform init -no-color -backend-config="${backendConfigBucket}" -backend-config="prefix=${env.param_cluster_name}/dns" 
+            terraform ${command} -no-color -auto-approve -var-file=${varFile} ${extraVars}
+        elif [ ${tfModule} = "dns_record" ]; then
+            terraform init -no-color -backend-config="${backendConfigBucket}" -backend-config="prefix=${env.param_cluster_name}/wildcard" 
             terraform ${command} -no-color -auto-approve -var-file=${varFile} ${extraVars}
         elif [ ${command} = "apply" ]; then
+            terraform init -no-color -backend-config="${backendConfigBucket}"
             terraform plan -no-color -var-file=${varFile} ${extraVars}
             terraform ${command} -no-color -auto-approve -var-file=${varFile} ${extraVars}
         else
+            terraform init -no-color -backend-config="${backendConfigBucket}"
             terraform ${command} -no-color -auto-approve -var-file=${varFile} ${extraVars}
         fi
     """
+}
+
+def terraformOutput(tfModule, params = '-json', backendConfigBucket="bucket=${env.param_cluster_name}-tfstate", backendConfigRegion="", workPath="${terraformHome}/env_types/${env.param_cluster_type}/${tfModule}/") {
+    sh """
+        cd ${workPath}
+        export TF_DATA_DIR=/tmp/.terraform-${env.param_cluster_name}-${tfModule}
+        terraform init -backend-config="${backendConfigBucket}" -backend-config="${backendConfigRegion}"
+    """
+    sh returnStdout:true, script: """ #!/bin/bash -xe
+        cd ${workPath}
+        export TF_DATA_DIR=/tmp/.terraform-${env.param_cluster_name}-${tfModule}
+        terraform output ${params}
+     """
 }
 
 def updateProfileKey(profilePath=env.clusterProfile, key, value) {

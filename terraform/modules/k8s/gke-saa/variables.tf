@@ -9,6 +9,10 @@ variable "legion_helm_repo" {
   description = "Legion helm repo"
 }
 
+variable "cluster_type" {
+  description = "Cluster type"
+}
+
 ########################
 # GKE Service Account Assigner
 ########################

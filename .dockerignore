@@ -5,5 +5,5 @@
 !terraform/**
 !tools/**
 !version.info
-!vars_template.yaml
+!*vars_template.yaml
 **/.terraform

@@ -1,16 +1,3 @@
-provider "google" {
-  version = "~> 2.2"
-  region  = var.region
-  zone    = var.zone
-  project = var.project_id
-}
-
-provider "aws" {
-  region                  = var.region_aws
-  shared_credentials_file = var.aws_credentials_file
-  profile                 = var.aws_profile
-}
-
 # Allocate GCP Static IP for VPN
 resource "google_compute_address" "vpn_gateway_ip_address" {
   name         = "${var.cluster_name}-gateway-ip"
@@ -34,23 +21,23 @@ resource "aws_customer_gateway" "to_gcp" {
 }
 
 # Virtual Private gateway at AWS
-# resource "aws_vpn_gateway" "vpn_gateway" {
-#   vpc_id    = "${var.aws_vpc_id}"
-#   tags = {
-#     Name    = "${var.cluster_name}-gcp"
-#     Project = "legion"
-#   }
-# }
-data "aws_vpn_gateway" "vpn_gateway" {
-  filter {
-    name   = "tag:Name"
-    values = [var.aws_private_gw_name]
+resource "aws_vpn_gateway" "vpn_gateway" {
+  vpc_id    = "${var.aws_vpc_id}"
+  tags = {
+    Name    = "${var.cluster_name}-gcp"
+    Project = "legion"
   }
 }
+#data "aws_vpn_gateway" "vpn_gateway" {
+#  filter {
+#    name   = "tag:Name"
+#    values = [var.aws_private_gw_name]
+#  }
+#}
 
 # VPN Connection at AWS
 resource "aws_vpn_connection" "to_gcp" {
-  vpn_gateway_id      = data.aws_vpn_gateway.vpn_gateway.id
+  vpn_gateway_id      = aws_vpn_gateway.vpn_gateway.id
   customer_gateway_id = aws_customer_gateway.to_gcp.id
   type                = "ipsec.1"
   static_routes_only  = true
@@ -68,7 +55,7 @@ resource "aws_vpn_connection_route" "gcp" {
 
 resource "aws_route" "gcp" {
   route_table_id         = var.aws_route_table_id
-  gateway_id             = data.aws_vpn_gateway.vpn_gateway.id
+  gateway_id             = aws_vpn_gateway.vpn_gateway.id
   destination_cidr_block = var.gcp_cidr
 }
 
@@ -145,9 +132,10 @@ resource "google_compute_vpn_tunnel" "tunnel1" {
 }
 
 resource "google_compute_route" "gcp_route1" {
-  name       = "${var.cluster_name}-gcp-route1"
+  count      = length(var.aws_cidrs)
+  name       = "${var.cluster_name}-gcp-route1-${count.index}"
   network    = var.gcp_network
-  dest_range = var.aws_cidr
+  dest_range = element(var.aws_cidrs, count.index)
   priority   = 1000
 
   next_hop_vpn_tunnel = google_compute_vpn_tunnel.tunnel1.self_link
@@ -170,9 +158,10 @@ resource "google_compute_vpn_tunnel" "tunnel2" {
 }
 
 resource "google_compute_route" "gcp_route2" {
-  name       = "${var.cluster_name}-gcp-route2"
+  count      = length(var.aws_cidrs)
+  name       = "${var.cluster_name}-gcp-route2-${count.index}"
   network    = var.gcp_network
-  dest_range = var.aws_cidr
+  dest_range = element(var.aws_cidrs, count.index)
   priority   = 1000
 
   next_hop_vpn_tunnel = google_compute_vpn_tunnel.tunnel2.self_link
@@ -181,7 +170,7 @@ resource "google_compute_route" "gcp_route2" {
 resource "google_compute_firewall" "aws_vpn" {
   name          = "${var.cluster_name}-to-aws"
   network       = var.gcp_network
-  source_ranges = [var.aws_cidr]
+  source_ranges = var.aws_cidrs
 
   allow {
     protocol = "icmp"

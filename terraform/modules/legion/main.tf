@@ -117,7 +117,8 @@ data "template_file" "legion_values" {
     model_output_bucket      = var.model_output_bucket
     model_output_region      = var.model_output_region
     model_output_secret      = var.model_output_secret
-    model_output_description = "Storage for trained artifacts"
+    model_output_secret_key  = var.model_output_secret_key
+    model_output_description = "Storage for trainined artifacts"
     model_output_web_ui_link = var.model_output_web_ui_link
 
     model_docker_user        = var.model_docker_user
@@ -175,40 +176,8 @@ resource "helm_release" "mlflow" {
     data.template_file.mlflow_values.rendered,
   ]
 
-  depends_on = [
+   depends_on = [
     helm_release.legion,
     kubernetes_namespace.legion
   ]
-}
-
-########################################################
-# Create a docker pull secret for knative
-# TODO: move this logic to legion deployment operator later
-########################################################
-
-resource "kubernetes_secret" "regsecret" {
-  metadata {
-    name      = "regsecret"
-    namespace = var.legion_deployment_namespace
-  }
-
-  data = {
-    ".dockercfg" = jsonencode(var.dockercfg)
-  }
-
-  type = "kubernetes.io/dockercfg"
-
-  depends_on = [kubernetes_namespace.legion_deployment]
-}
-
-resource "kubernetes_service_account" "regsecret" {
-  metadata {
-    name      = "regsecret"
-    namespace = var.legion_deployment_namespace
-  }
-  image_pull_secret {
-    name = "regsecret"
-  }
-
-  depends_on = [kubernetes_namespace.legion_deployment]
 }

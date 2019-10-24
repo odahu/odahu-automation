@@ -54,4 +54,3 @@ variable "tls_secret_crt" {
 variable "tls_secret_key" {
   description = "Legion cluster TLS key"
 }
-

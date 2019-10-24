@@ -23,11 +23,11 @@ module "legion" {
 
   legion_version     = var.legion_version
   legion_helm_repo   = var.legion_helm_repo
-  legion_data_bucket = var.legion_data_bucket
 
   region               = var.region
   project_id           = var.project_id
-  legion_collector_sa  = module.legion_prereqs.legion_collector_sa
+
+  bucket_registry_name  = module.legion_prereqs.bucket_registry_name
 
   model_docker_user        = module.legion_prereqs.model_docker_user
   model_docker_repo        = module.legion_prereqs.model_docker_repo
@@ -39,6 +39,10 @@ module "legion" {
   model_output_secret      = module.legion_prereqs.model_output_secret
   model_output_web_ui_link = module.legion_prereqs.model_output_web_ui_link
   model_output_region      = module.legion_prereqs.model_output_region
+
+  collector_region         = ""
+  legion_collector_sa      = module.legion_prereqs.legion_collector_sa
+  legion_data_bucket       = var.legion_data_bucket
 
   dockercfg       = module.legion_prereqs.dockercfg
   docker_repo     = var.docker_repo

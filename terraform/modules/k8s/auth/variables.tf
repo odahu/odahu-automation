@@ -36,7 +36,7 @@ variable "oauth_oidc_scope" {
 
 # OAuth2_proxy configuration
 variable "oauth_helm_chart_version" {
-  default     = "0.14.0"
+  default     = "0.14.1"
   description = "version of oauth2 proxy helm chart"
 }
 variable "oauth_image_repository" {

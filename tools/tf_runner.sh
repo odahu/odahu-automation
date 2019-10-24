@@ -75,17 +75,18 @@ function GetParam() {
 }
 
 function IngressTFCrutch() {
-	for file in $(find $1 -type f -name "*.tf" ! \( \
-	-name "main.tf" -o \
-	-name "versions.tf" -o \
-	-name "variables.tf" -o \
-	-name "$(GetParam 'cluster_type' | awk -F\/ '{print $1}').tf" \)); do
-		# Rename extra provider tf files :/
-		mv "$file" "$file.bak"
-	done
+       for file in $(find $1 -type f -name "*.tf" ! \( \
+       -name "main.tf" -o \
+       -name "versions.tf" -o \
+       -name "variables.tf" -o \
+       -name "$(GetParam 'cluster_type' | awk -F\/ '{print $1}').tf" \)); do
+               # Rename extra provider tf files :/
+               mv "$file" "$file.bak"
+       done
 }
 
 function TerraformRun() {
+	MODULES_ROOT="/opt/legion/terraform/env_types/$(GetParam 'cluster_type')/"
 	TF_MODULE=$1
 	TF_COMMAND=$2
 	WORK_DIR=$MODULES_ROOT/$TF_MODULE
@@ -96,8 +97,7 @@ function TerraformRun() {
 		"aws/eks")
 			terraform init -no-color \
 				-backend-config="bucket=$(GetParam 'tfstate_bucket')" \
-				-backend-config="region=$(GetParam 'aws_region')" \
-				-backend-config="profile=$(GetParam 'aws_profile')"
+				-backend-config="region=$(GetParam 'aws_region')"
 			;;
 		"gcp/gke")
 			terraform init -no-color \
@@ -215,7 +215,7 @@ function TerraformDestroy() {
 function CheckCluster() {
 	case $(GetParam 'cluster_type') in
 		"aws/eks")
-			if aws eks list-clusters --region $(GetParam 'aws_region') --profile $(GetParam 'aws_profile') | grep $(GetParam 'cluster_name'); then
+			if aws eks list-clusters --region $(GetParam 'aws_region') | grep $(GetParam 'cluster_name'); then
 				true
 			else
 				false
@@ -243,7 +243,7 @@ function FetchKubeConfig() {
 	echo 'INFO : Authorize Kubernetes API access'
 	case $(GetParam "cluster_type") in
 		"aws/eks")
-			aws eks --region $(GetParam 'aws_region') update-kubeconfig --name $(GetParam 'cluster_name') --profile $(GetParam 'aws_profile')
+			aws eks --region $(GetParam 'aws_region') update-kubeconfig --name $(GetParam 'cluster_name')
 			;;
 		"gcp/gke")
 			gcloud container clusters get-credentials $(GetParam 'cluster_name') --zone $(GetParam 'location') --project=$(GetParam 'project_id')

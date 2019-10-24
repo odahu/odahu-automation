@@ -43,10 +43,20 @@ bastion_tag: str                # Bastion host network tag
 gke_node_tag: str               # GKE cluster node's network tag
 
 aws_profile: str                # AWS profile
+aws_region: str                 # AWS region
 aws_vpc_id: str                 # AWS peered VPC ID
 aws_sg: str                     # AWS Security group ID to grant access from nodes at GCP (for Core components access)
 aws_cidr: str                   # AWS CIDR for VPC peering setup
 aws_route_table_id: str         # AWS route table ID for VPC peering setup
+
+########################################################
+# EKS module
+########################################################
+cidr: str                       # EKS cluster zone
+az_list: list                   # EKS Availability zones listshould contains same number of elements as public_subnet_cidrs and private_subnet_cidrs
+private_subnet_cidrs: list      # EKS private subnet CIDRS, should contains same number of elements as az_list and public_subnet_cidrs
+public_subnet_cidrs: list       # EKS public subnet CIDRS, should contains same number of elements as az_list and private_subnet_cidrs
+nat_subnet_cidr: str            # AWS NAT network
 
 ########################################################
 # Common Legion variables

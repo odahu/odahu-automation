@@ -1,0 +1,58 @@
+extraArgs:
+  auto-discover-base-arn: true
+  auto-discover-default-role: true
+extraEnv: {}
+host:
+  iptables: true
+  interface: eni+
+
+prometheus:
+  service:
+    enabled: false
+  serviceMonitor:
+    enabled: false
+    interval: 10s
+    namespace: ""
+
+image:
+  repository: "${image_repo}"
+  tag: "${image_tag}"
+  pullPolicy: IfNotPresent
+
+# AWS Access keys to inject as environment variables
+aws:
+  secret_key: ""
+  access_key: ""
+  region: ""
+
+## Node labels for pod assignment
+## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
+##
+nodeSelector: {}
+
+## Affinity configuration for pod assignment
+## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
+##
+affinity: {}
+
+## Annotations to be added to pods
+##
+podAnnotations: {}
+
+priorityClassName: ""
+
+podLabels: {}
+
+probe: true
+
+rbac:
+  create: true
+
+resources: {}
+
+updateStrategy: OnDelete
+
+verbose: true
+
+tolerations: []
+

@@ -55,15 +55,22 @@ connections:
 
   - id: docker-ci
     spec:
-      type: docker
-      uri: "${model_docker_repo}"
-%{ if cloud_type != "azure" ~}
-      password: |
-        ${model_docker_password}
+%{ if cloud_type == "aws" ~}
+      type: ecr
+      keyID: "${model_docker_user}"
+      keySecret: "${model_docker_password}"
 %{ else ~}
+      type: docker
+      username: "${model_docker_user}"
+%{ endif ~}
+%{ if cloud_type == "azure" ~}
       password: "${model_docker_password}"
 %{ endif ~}
-      username: "${model_docker_user}"
+%{ if cloud_type == "gcp" ~}
+      password: |
+        ${model_docker_password}
+%{ endif ~}
+      uri: "${model_docker_repo}"
       description: "${model_docker_description}"
       webUILink: "${model_docker_web_ui_link}"
 
@@ -71,20 +78,20 @@ connections:
     spec:
 %{ if cloud_type == "gcp" ~}
       type: gcs
-      region: "${model_output_region}"
       keySecret: |
         ${model_output_secret}
 %{ endif ~}
 %{ if cloud_type == "aws" ~}
       type: s3
-      region: "${model_output_region}"
-      keySecret: "${model_output_secret}"
+      keyID: "${model_output_secret}"
+      keySecret: "${model_output_secret_key}"
 %{ endif ~}
 %{ if cloud_type == "azure" ~}
       type: azureblob
       keySecret: "${model_output_secret}"
 %{ endif ~}
       uri: "${model_output_bucket}"
+      region: "${model_output_region}"
       description: "${model_output_description}"
       webUILink: "${model_output_web_ui_link}"
 
@@ -111,6 +118,7 @@ config:
     toleration: {}
     node_selector: {}
 %{ endif ~}
+    default_docker_pull_conn_name: docker-ci
     edge:
       host: https://edge.${cluster_name}.${root_domain}
     namespace: "${legion_deployment_namespace}"

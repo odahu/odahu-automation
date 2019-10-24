@@ -19,14 +19,6 @@ variable "gcp_network" {
   description = "VPC Netwrok name at GCP"
 }
 
-variable "aws_profile" {
-  description = "AWS profile name"
-}
-
-variable "aws_credentials_file" {
-  description = "AWS credentials file location"
-}
-
 variable "region_aws" {
   description = "Region of AWS resources"
 }
@@ -48,7 +40,8 @@ variable "aws_private_gw_name" {
   description = "AWS SG id for gcp access"
 }
 
-variable "aws_cidr" {
+variable "aws_cidrs" {
+  type        = list(string)
   description = "AWS network CIDR"
 }
 
