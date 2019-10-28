@@ -9,11 +9,9 @@ variable "location" {
 
 variable "resource_group" {
   description = "The name of the resource group, unique within Azure subscription"
-  default     = "testResourceGroup1"
 }
 
 variable "k8s_version" {
-  default     = "1.14.6"
   description = "Version of Kubernetes engine"
 }
 
@@ -52,10 +50,6 @@ variable "sp_client_id" {
 
 variable "sp_secret" {
   description = "Service Principal account secret"
-}
-
-variable "allowed_ips" {
-  description = "CIDRs to allow access from"
 }
 
 variable "node_pools" {

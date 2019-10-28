@@ -22,6 +22,9 @@ module "legion_prereqs" {
   resource_group     = var.azure_resource_group
   cluster_name       = var.cluster_name
   legion_data_bucket = var.legion_data_bucket
+  aks_subnet_cidr    = var.aks_cidr
+  public_ip_name     = var.aks_public_ip_name
+  allowed_ips        = var.allowed_ips
 }
 
 module "legion" {

@@ -65,7 +65,7 @@ function ReadArguments() {
 
 # Get parameter from cluster profile
 function GetParam() {
-	result=$(jq ".$1" $PROFILE | tr -d '"')
+	result=$(jq -r ".$1" $PROFILE)
 	if [[ $result == null ]]; then
 		echo "ERROR: $1 parameter is missing in $PROFILE cluster profile"
 		exit 1

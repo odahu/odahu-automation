@@ -3,22 +3,6 @@ data "azurerm_public_ip" "aks_ext" {
   resource_group_name = var.resource_group
 }
 
-data "http" "external_ip" {
-  url = "http://ifconfig.co"
-}
-
-data "external" "check_ip_in_cidrs" {
-  program = ["python3", "${path.module}/scripts/check_ip_in_cidrs.py"]
-  query = {
-    ip = chomp(data.http.external_ip.body)
-    cidrlist = join(", ", var.allowed_ips)
-  }
-}
-
-locals {
-  allowed_subnets = split(", ", data.external.check_ip_in_cidrs.result.cidrlist)
-}
-
 resource "azurerm_public_ip" "bastion" {
   name                = "${var.cluster_name}-bastion"
   location            = var.location
@@ -49,6 +33,10 @@ resource "azurerm_subnet" "subnet" {
   virtual_network_name      = azurerm_virtual_network.vpc.name
   address_prefix            = var.subnet_cidr
   network_security_group_id = azurerm_network_security_group.aks_nsg.id
+  service_endpoints         = [
+    "Microsoft.ContainerRegistry",
+    "Microsoft.Storage"
+  ]
 }
 
 resource "azurerm_network_security_group" "aks_nsg" {
@@ -65,7 +53,7 @@ resource "azurerm_network_security_group" "aks_nsg" {
     protocol                     = "Tcp"
     source_port_range            = "*"
     destination_port_ranges      = [ "22" ]
-    source_address_prefixes      = local.allowed_subnets
+    source_address_prefixes      = var.allowed_ips
     destination_address_prefixes = [ azurerm_public_ip.bastion.ip_address, var.subnet_cidr ]
   }
   security_rule {
@@ -77,7 +65,7 @@ resource "azurerm_network_security_group" "aks_nsg" {
     protocol                     = "Tcp"
     source_port_range            = "*"
     destination_port_ranges      = [ "80", "443" ]
-    source_address_prefixes      = concat(list(azurerm_public_ip.bastion.ip_address), local.allowed_subnets)
+    source_address_prefixes      = concat(list(azurerm_public_ip.bastion.ip_address), var.allowed_ips)
     destination_address_prefixes = [ data.azurerm_public_ip.aks_ext.ip_address, var.subnet_cidr ]
   }
   security_rule {

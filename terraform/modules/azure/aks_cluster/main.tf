@@ -72,13 +72,17 @@ resource "azurerm_kubernetes_cluster" "aks" {
     enabled = true
   }
 
-  # The IP ranges to whitelist for incoming traffic to the k8s master
-  api_server_authorized_ip_ranges = []
-
   network_profile {
     network_plugin = "azure"
     network_policy = "calico"
   }
 
   tags = var.aks_tags
+
+  lifecycle {
+    ignore_changes = [
+      api_server_authorized_ip_ranges,
+      agent_pool_profile,
+    ]
+  }
 }

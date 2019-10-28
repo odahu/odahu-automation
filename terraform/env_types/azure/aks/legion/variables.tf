@@ -18,6 +18,14 @@ variable "aks_common_tags" {
   }
 }
 
+variable "aks_public_ip_name" {
+  description = "Name of public IP-address used for AKS cluster"
+}
+
+variable "aks_cidr" {
+  description = "CIDR of AKS subnet used for nodes/pods networking"
+}
+
 ##################
 # Common
 ##################
@@ -52,6 +60,10 @@ variable "tls_key" {
 
 variable "tls_crt" {
   description = "TLS certificate for Legion cluster"
+}
+
+variable "allowed_ips" {
+  description = "CIDRs to allow access from"
 }
 
 ##################
