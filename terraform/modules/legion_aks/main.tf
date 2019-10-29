@@ -86,7 +86,7 @@ resource "null_resource" "secure_kube_api" {
   }
   provisioner "local-exec" {
     when    = "destroy"
-    command = "az aks update --resource-group ${var.resource_group} --name ${var.cluster_name} --api-server-authorized-ip-ranges \"\""
+    command = "az extension add --name aks-preview && az aks update --resource-group ${var.resource_group} --name ${var.cluster_name} --api-server-authorized-ip-ranges \"\""
     interpreter = ["timeout", "300", "bash", "-c"]
   }
 
@@ -129,7 +129,7 @@ data "azurerm_storage_account_sas" "legion" {
   }
 
   resource_types {
-    service   = false
+    service   = true
     container = true
     object    = true
   }

@@ -30,10 +30,10 @@ feedback:
 %{ if cloud_type == "azure" ~}
     target: "azureblob"
     azureblob:
-      authorization: "accesskey"
+      authorization: "sastoken"
       bucket: "${legion_data_bucket}"
       AzureStorageAccount: "${azure_storage_account}"
-      AzureStorageAccessKey: "${azure_storage_access_key}"
+      AzureStorageSasToken: "${azure_storage_sas_token}"
 %{ endif ~}
 
 edi:

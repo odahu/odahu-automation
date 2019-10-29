@@ -41,7 +41,6 @@ module "legion" {
   legion_data_bucket = var.legion_data_bucket
 
   azure_storage_account    = module.legion_prereqs.storage_account
-  azure_storage_access_key = module.legion_prereqs.storage_access_key
 
   model_docker_user        = module.legion_prereqs.model_docker_user
   model_docker_repo        = module.legion_prereqs.model_docker_repo

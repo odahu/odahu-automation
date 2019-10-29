@@ -98,8 +98,8 @@ data "template_file" "legion_values" {
     legion_collector_sa       = var.legion_collector_sa
     legion_collector_iam_role = var.legion_collector_iam_role
 
-    azure_storage_account    = var.azure_storage_account
-    azure_storage_access_key = var.azure_storage_access_key
+    azure_storage_account   = var.azure_storage_account
+    azure_storage_sas_token = "?${replace(var.model_output_secret, "/.+?\\?/", "")}"
 
     model_authorization_enabled = var.model_authorization_enabled
     model_oidc_jwks_url         = var.model_oidc_jwks_url
@@ -118,7 +118,7 @@ data "template_file" "legion_values" {
     model_output_region      = var.model_output_region
     model_output_secret      = var.model_output_secret
     model_output_secret_key  = var.model_output_secret_key
-    model_output_description = "Storage for trainined artifacts"
+    model_output_description = "Storage for trained artifacts"
     model_output_web_ui_link = var.model_output_web_ui_link
 
     model_docker_user        = var.model_docker_user

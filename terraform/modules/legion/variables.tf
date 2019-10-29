@@ -30,8 +30,6 @@ variable "legion_collector_sa" { default = "" }
 
 variable "azure_storage_account" { default = "" }
 
-variable "azure_storage_access_key" { default = "" }
-
 ##################
 # Common
 ##################

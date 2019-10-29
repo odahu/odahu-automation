@@ -23,7 +23,6 @@ output "model_output_bucket" {
 }
 
 output "model_output_secret" {
-  #value    = data.azurerm_storage_account.legion_storage.primary_access_key
   value     = "${azurerm_storage_account.legion_data.primary_blob_endpoint}${data.azurerm_storage_account_sas.legion.sas}"
   sensitive = true
 }
@@ -38,9 +37,4 @@ output "feedback_storage_link" {
 
 output "storage_account" {
   value = azurerm_storage_account.legion_data.name
-}
-
-output "storage_access_key" {
-  value     = azurerm_storage_account.legion_data.primary_access_key
-  sensitive = true
 }
