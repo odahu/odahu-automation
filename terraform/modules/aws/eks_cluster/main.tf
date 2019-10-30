@@ -107,6 +107,7 @@ resource "aws_launch_template" "main" {
   network_interfaces {
     associate_public_ip_address = false
     security_groups             = ["${var.node_sg_id}"]
+    delete_on_termination       = true
   }
 
   instance_initiated_shutdown_behavior = "terminate"
@@ -193,6 +194,7 @@ resource "aws_launch_template" "training" {
   network_interfaces {
     associate_public_ip_address = false
     security_groups             = ["${var.node_sg_id}"]
+    delete_on_termination       = true
   }
 
   instance_initiated_shutdown_behavior = "terminate"
@@ -286,6 +288,7 @@ resource "aws_launch_template" "packaging" {
   network_interfaces {
     associate_public_ip_address = false
     security_groups             = ["${var.node_sg_id}"]
+    delete_on_termination       = true
   }
 
   instance_initiated_shutdown_behavior = "terminate"
@@ -369,6 +372,7 @@ resource "aws_launch_template" "deployment" {
   network_interfaces {
     associate_public_ip_address = false
     security_groups             = ["${var.node_sg_id}"]
+    delete_on_termination       = true
   }
 
   instance_initiated_shutdown_behavior = "terminate"
