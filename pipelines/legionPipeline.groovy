@@ -279,6 +279,14 @@ def runRobotTests(tags="", cloudCredsSecret, dockerArgPrefix) {
                     docker.image("${env.param_docker_repo}/legion-pipeline-agent:${env.param_legion_version}").inside(dockerArgs) {
                         stage('Run Robot tests') {
                             dir("${WORKSPACE}"){
+                                def docker_repo = ""
+
+                                if (env.param_cloud_provider == "gcp") {
+                                    docker_repo = env.param_docker_repo
+                                } else {
+                                    docker_repo = sh(script: "jq '.docker_repo' ${env.clusterProfile}", returnStdout: true).trim()
+                                }
+
                                 def tags_list = tags.toString().trim().split(',')
                                 def robot_tags = ["-e disable"]
 
@@ -300,7 +308,7 @@ def runRobotTests(tags="", cloudCredsSecret, dockerArgPrefix) {
                                     make CLUSTER_PROFILE=${env.clusterProfile} \
                                          CLUSTER_NAME=${env.param_cluster_name} \
                                          CLOUD_PROVIDER=${env.param_cloud_provider} \
-                                         DOCKER_REGISTRY=${env.param_docker_repo} \
+                                         DOCKER_REGISTRY=${docker_repo} \
                                          LEGION_VERSION=${env.param_legion_version} setup-e2e-robot
 
                                     ROBOT_PARAMS=(CLUSTER_PROFILE=${env.clusterProfile} \

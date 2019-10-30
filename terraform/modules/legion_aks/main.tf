@@ -89,7 +89,6 @@ resource "null_resource" "secure_kube_api" {
     command = "az extension add --name aks-preview && az aks update --resource-group ${var.resource_group} --name ${var.cluster_name} --api-server-authorized-ip-ranges \"\""
     interpreter = ["timeout", "300", "bash", "-c"]
   }
-
 }
 
 ########################################################
@@ -114,7 +113,8 @@ resource "azurerm_storage_account" "legion_data" {
     )
   }
 
-  tags = local.storage_tags
+  tags       = local.storage_tags
+  depends_on = [null_resource.secure_kube_api]
 }
 
 data "azurerm_storage_account_sas" "legion" {
