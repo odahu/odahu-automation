@@ -4,6 +4,7 @@ resource "random_id" "workspace" {
 }
 
 resource "azurerm_log_analytics_workspace" "k8s" {
+  count               = var.enabled ? 1 : 0
   name                = "${var.cluster_name}-${random_id.workspace.dec}"
   location            = var.location
   resource_group_name = var.resource_group
@@ -13,14 +14,17 @@ resource "azurerm_log_analytics_workspace" "k8s" {
 }
 
 resource "azurerm_log_analytics_solution" "k8s" {
+  count                 = var.enabled ? 1 : 0
   solution_name         = "ContainerInsights"
   location              = var.location
   resource_group_name   = var.resource_group
-  workspace_resource_id = azurerm_log_analytics_workspace.k8s.id
-  workspace_name        = azurerm_log_analytics_workspace.k8s.name
+  workspace_resource_id = azurerm_log_analytics_workspace.k8s[0].id
+  workspace_name        = azurerm_log_analytics_workspace.k8s[0].name
 
   plan {
     publisher = "Microsoft"
     product   = "OMSGallery/ContainerInsights"
   }
+
+  depends_on = [azurerm_log_analytics_workspace.k8s[0]]
 }

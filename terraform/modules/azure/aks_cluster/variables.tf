@@ -40,8 +40,8 @@ variable "aks_tags" {
 }
 
 variable "aks_analytics_workspace_id" {
+  default     = ""
   description = "Azure Log Analytics workspace ID"
-  default     = "my-test-default-variable-eica0Chi"
 }
 
 variable "sp_client_id" {

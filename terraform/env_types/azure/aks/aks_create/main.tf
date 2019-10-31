@@ -13,6 +13,7 @@ data "azurerm_public_ip" "aks_ext" {
 
 module "azure_monitoring" {
   source   = "../../../../modules/azure/monitoring"
+  enabled        = var.aks_analytics_deploy
   cluster_name   = var.cluster_name
   tags           = local.common_tags
   location       = var.azure_location
@@ -55,7 +56,7 @@ module "aks_cluster" {
   ssh_user                   = "ubuntu"
   ssh_public_key             = var.ssh_key
   node_pools                 = var.node_pools
-  aks_analytics_workspace_id = module.azure_monitoring.workspace_id
+  aks_analytics_workspace_id = var.aks_analytics_deploy ? module.azure_monitoring.workspace_id : ""
 }
 
 resource "null_resource" "bastion_kubeconfig" {

@@ -51,7 +51,7 @@ resource "azurerm_kubernetes_cluster" "aks" {
   }
 
   # We have to provide Service Principal account credentials in order to create node resource group
-  # and appropriate dynamic resources, related to AKS (node resource groups, network security groups,
+  # and appropriate dynamic resources related to AKS (node resource groups, network security groups,
   # virtual machine scale sets, loadbalancers)
   service_principal {
     client_id     = var.sp_client_id
@@ -59,12 +59,12 @@ resource "azurerm_kubernetes_cluster" "aks" {
   }
 
   addon_profile {
-    oms_agent {
-      enabled                    = true
-      log_analytics_workspace_id = var.aks_analytics_workspace_id
-    }
     kube_dashboard {
       enabled = false
+    }
+    oms_agent {
+      enabled = var.aks_analytics_workspace_id == "" ? false : true
+      log_analytics_workspace_id = var.aks_analytics_workspace_id == "" ? null : var.aks_analytics_workspace_id
     }
   }
 
@@ -82,7 +82,6 @@ resource "azurerm_kubernetes_cluster" "aks" {
   lifecycle {
     ignore_changes = [
       api_server_authorized_ip_ranges,
-      agent_pool_profile,
     ]
   }
 }
