@@ -89,20 +89,29 @@ resource "null_resource" "setup_cluster_autoscaler" {
   depends_on = [null_resource.setup_calico]
 }
 
-resource "aws_launch_configuration" "main" {
-  associate_public_ip_address = false
-  iam_instance_profile        = var.node_instance_profile_name
-  image_id                    = var.node_ami
-  instance_type               = var.node_machine_type
-  name                        = "tf-${var.cluster_name}-node"
-  security_groups             = [var.node_sg_id]
-  key_name                    = var.cluster_name
-  user_data_base64            = base64encode(templatefile("${path.module}/templates/node.tpl", {
-                                             endpoint              = aws_eks_cluster.default.endpoint,
-                                             certificate_authority = aws_eks_cluster.default.certificate_authority.0.data,
-                                             name                  = var.cluster_name,
-                                             taints                = "",
-                                             labels                = "" }))
+resource "aws_launch_template" "main" {
+  name           = "tf-${var.cluster_name}-node"
+  image_id       = var.node_ami
+  instance_type  = var.node_machine_type
+  key_name       = var.cluster_name
+  user_data      = base64encode(templatefile("${path.module}/templates/node.tpl", {
+                                    endpoint              = aws_eks_cluster.default.endpoint,
+                                    certificate_authority = aws_eks_cluster.default.certificate_authority.0.data,
+                                    name                  = var.cluster_name,
+                                    taints                = "",
+                                    labels                = "" }))
+  iam_instance_profile {
+    name = var.node_instance_profile_name
+  }
+
+  network_interfaces {
+    associate_public_ip_address = false
+    security_groups             = ["${var.node_sg_id}"]
+    delete_on_termination       = true
+  }
+
+  instance_initiated_shutdown_behavior = "terminate"
+
   lifecycle {
     create_before_destroy = true
   }
@@ -110,10 +119,15 @@ resource "aws_launch_configuration" "main" {
 
 resource "aws_autoscaling_group" "main" {
   desired_capacity     = 1
-  launch_configuration = aws_launch_configuration.main.id
   max_size             = var.num_nodes_max
   min_size             = var.num_nodes_min
   name                 = "tf-${var.cluster_name}-node"
+
+  launch_template {
+    id      = "${aws_launch_template.main.id}"
+    version = "$Latest"
+  }
+
   vpc_zone_identifier  = var.subnet_ids
 
   tag {
@@ -149,27 +163,41 @@ resource "aws_autoscaling_group" "main" {
 }
 
 # Training node pool
-resource "aws_launch_configuration" "training" {
-  associate_public_ip_address = false
-  iam_instance_profile        = var.node_instance_profile_name
-  image_id                    = var.node_ami
-  instance_type               = var.node_machine_type_highcpu
-  name                        = "tf-${var.cluster_name}-training"
-  security_groups             = [var.node_sg_id]
-  user_data_base64            = base64encode(templatefile("${path.module}/templates/node.tpl", {
-                                             endpoint              = aws_eks_cluster.default.endpoint,
-                                             certificate_authority = aws_eks_cluster.default.certificate_authority.0.data,
-                                             name                  = var.cluster_name,
-                                             taints                = "dedicated=training:NoSchedule",
-                                             labels                = "mode=legion-training" }))
+resource "aws_launch_template" "training" {
+  name           = "tf-${var.cluster_name}-training"
+  image_id       = var.node_ami
+  instance_type  = var.node_machine_type_highcpu
+  key_name       = var.cluster_name
 
-  key_name                    = var.cluster_name
+  user_data = base64encode(templatefile("${path.module}/templates/node.tpl", {
+                               endpoint              = aws_eks_cluster.default.endpoint,
+                               certificate_authority = aws_eks_cluster.default.certificate_authority.0.data,
+                               name                  = var.cluster_name,
+                               taints                = "dedicated=training:NoSchedule",
+                               labels                = "mode=legion-training" }))
 
-  root_block_device {
-    volume_type           = "standard"
-    volume_size           = "50"
-    delete_on_termination = true
+
+  block_device_mappings {
+    device_name = "/dev/xvda"
+
+    ebs {
+      volume_type           = "standard"
+      volume_size           = "50"
+      delete_on_termination = true
+    }
   }
+
+  iam_instance_profile {
+    name = var.node_instance_profile_name
+  }
+
+  network_interfaces {
+    associate_public_ip_address = false
+    security_groups             = ["${var.node_sg_id}"]
+    delete_on_termination       = true
+  }
+
+  instance_initiated_shutdown_behavior = "terminate"
 
   lifecycle {
     create_before_destroy = true
@@ -178,11 +206,15 @@ resource "aws_launch_configuration" "training" {
 
 resource "aws_autoscaling_group" "training" {
   desired_capacity     = 0
-  launch_configuration = aws_launch_configuration.training.id
   max_size             = var.num_nodes_highcpu_max
   min_size             = 0
   name                 = "tf-${var.cluster_name}-training"
   vpc_zone_identifier  = var.subnet_ids
+
+  launch_template {
+    id      = "${aws_launch_template.training.id}"
+    version = "$Latest"
+  }
 
   tag {
     key                 = "Name"
@@ -227,27 +259,39 @@ resource "aws_autoscaling_group" "training" {
 }
 
 # Packaging node pool
-resource "aws_launch_configuration" "packaging" {
-  associate_public_ip_address = false
-  iam_instance_profile        = var.node_instance_profile_name
-  image_id                    = var.node_ami
-  instance_type               = var.node_machine_type_highcpu
-  name                        = "tf-${var.cluster_name}-packaging"
-  security_groups             = [var.node_sg_id]
-  user_data_base64            = base64encode(templatefile("${path.module}/templates/node.tpl", {
-                                             endpoint              = aws_eks_cluster.default.endpoint,
-                                             certificate_authority = aws_eks_cluster.default.certificate_authority.0.data,
-                                             name                  = var.cluster_name,
-                                             taints                = "dedicated=packaging:NoSchedule",
-                                             labels                = "mode=legion-packaging" }))
+resource "aws_launch_template" "packaging" {
+  name          = "tf-${var.cluster_name}-packaging"
+  image_id      = var.node_ami
+  instance_type = var.node_machine_type_highcpu
+  key_name      = var.cluster_name
+  user_data     = base64encode(templatefile("${path.module}/templates/node.tpl", {
+                                   endpoint              = aws_eks_cluster.default.endpoint,
+                                   certificate_authority = aws_eks_cluster.default.certificate_authority.0.data,
+                                   name                  = var.cluster_name,
+                                   taints                = "dedicated=packaging:NoSchedule",
+                                   labels                = "mode=legion-packaging" }))
 
-  key_name                    = var.cluster_name
-
-  root_block_device {
-    volume_type           = "standard"
-    volume_size           = "100"
-    delete_on_termination = true
+  iam_instance_profile {
+    name = var.node_instance_profile_name
   }
+
+  block_device_mappings {
+    device_name = "/dev/xvda"
+
+    ebs {
+      volume_type           = "standard"
+      volume_size           = "100"
+      delete_on_termination = true
+    }
+  }
+
+  network_interfaces {
+    associate_public_ip_address = false
+    security_groups             = ["${var.node_sg_id}"]
+    delete_on_termination       = true
+  }
+
+  instance_initiated_shutdown_behavior = "terminate"
 
   lifecycle {
     create_before_destroy = true
@@ -256,11 +300,15 @@ resource "aws_launch_configuration" "packaging" {
 
 resource "aws_autoscaling_group" "packaging" {
   desired_capacity     = 0
-  launch_configuration = aws_launch_configuration.packaging.id
   max_size             = var.num_nodes_highcpu_max
   min_size             = 0
   name                 = "tf-${var.cluster_name}-packaging"
   vpc_zone_identifier  = var.subnet_ids
+
+  launch_template {
+    id      = "${aws_launch_template.packaging.id}"
+    version = "$Latest"
+  }
 
   tag {
     key                 = "Name"
@@ -305,21 +353,29 @@ resource "aws_autoscaling_group" "packaging" {
 }
 
 #  Deployment node pool
-resource "aws_launch_configuration" "deployment" {
-  associate_public_ip_address = false
-  iam_instance_profile        = var.node_instance_profile_name
-  image_id                    = var.node_ami
-  instance_type               = var.node_machine_type_highcpu
-  name                        = "tf-${var.cluster_name}-deployment"
-  security_groups             = [var.node_sg_id]
-  user_data_base64            = base64encode(templatefile("${path.module}/templates/node.tpl", {
-                                             endpoint              = aws_eks_cluster.default.endpoint,
-                                             certificate_authority = aws_eks_cluster.default.certificate_authority.0.data,
-                                             name                  = var.cluster_name,
-                                             taints                = "dedicated=deployment:NoSchedule",
-                                             labels                = "mode=legion-deployment" }))
+resource "aws_launch_template" "deployment" {
+  name          = "tf-${var.cluster_name}-deployment"
+  image_id      = var.node_ami
+  instance_type = var.node_machine_type_highcpu
+  key_name      = var.cluster_name
+  user_data     = base64encode(templatefile("${path.module}/templates/node.tpl", {
+                                   endpoint              = aws_eks_cluster.default.endpoint,
+                                   certificate_authority = aws_eks_cluster.default.certificate_authority.0.data,
+                                   name                  = var.cluster_name,
+                                   taints                = "dedicated=deployment:NoSchedule",
+                                   labels                = "mode=legion-deployment" }))
 
-  key_name                    = var.cluster_name
+  iam_instance_profile {
+    name = var.node_instance_profile_name
+  }
+
+  network_interfaces {
+    associate_public_ip_address = false
+    security_groups             = ["${var.node_sg_id}"]
+    delete_on_termination       = true
+  }
+
+  instance_initiated_shutdown_behavior = "terminate"
 
   lifecycle {
     create_before_destroy = true
@@ -328,11 +384,15 @@ resource "aws_launch_configuration" "deployment" {
 
 resource "aws_autoscaling_group" "deployment" {
   desired_capacity     = 0
-  launch_configuration = aws_launch_configuration.deployment.id
   max_size             = var.num_nodes_highcpu_max
   min_size             = 0
   name                 = "tf-${var.cluster_name}-deployment"
   vpc_zone_identifier  = var.subnet_ids
+
+  launch_template {
+    id      = "${aws_launch_template.deployment.id}"
+    version = "$Latest"
+  }
 
   tag {
     key                 = "Name"
