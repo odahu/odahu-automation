@@ -166,7 +166,7 @@ resource "aws_autoscaling_group" "main" {
 resource "aws_launch_template" "training" {
   name           = "tf-${var.cluster_name}-training"
   image_id       = var.node_ami
-  instance_type  = var.node_machine_type
+  instance_type  = var.node_machine_type_highcpu
   key_name       = var.cluster_name
 
   user_data = base64encode(templatefile("${path.module}/templates/node.tpl", {
