@@ -48,9 +48,12 @@ pipeline {
             param_git_deploy_key = "${params.GitDeployKey}"
             param_legion_profiles_repo = "${params.LegionProfilesRepo}"
             param_legion_profiles_branch = "${params.LegionProfilesBranch}"
+            param_legion_сicd_repo = "${params.LegionCicdRepo}"
+            param_legion_cicd_branch = "${params.LegionCicdBranch}"
             ///Job parameters
             legionProfilesGitlabKey = "legion-profiles-gitlab-key"
-            sharedLibPath = "pipelines/legionPipeline.groovy"
+            legionCicdGitlabKey = "legion-profiles-gitlab-key"
+            sharedLibPath = "cicd/pipelines/legionPipeline.groovy"
             updateVersionScript = "tools/update_version_id"
             pathToCharts= "${WORKSPACE}/helms"
     }
@@ -62,6 +65,17 @@ pipeline {
                 checkout scm
                 script {
                     sh 'echo RunningOn: $(curl http://checkip.amazonaws.com/)'
+
+                    sshagent(["${env.legionCicdGitlabKey}"]) {
+                        sh"""#!/bin/bash -ex
+                        #TODO get repo url from passed parameters
+                        mkdir -p \$(getent passwd \$(whoami) | cut -d: -f6)/.ssh && ssh-keyscan git.epam.com >> \$(getent passwd \$(whoami) | cut -d: -f6)/.ssh/known_hosts
+                        if [ ! -d "legion-cicd" ]; then
+                            git clone ${env.param_legion_cicd_repo} legion-cicd
+                        fi
+                        cd legion-cicd && git checkout ${env.param_legion_cicd_branch}
+                        """
+                    }
                     legion = load "${env.sharedLibPath}"
                     
                     print("Check code for security issues")
