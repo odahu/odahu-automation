@@ -48,7 +48,7 @@ pipeline {
             param_git_deploy_key = "${params.GitDeployKey}"
             param_legion_profiles_repo = "${params.LegionProfilesRepo}"
             param_legion_profiles_branch = "${params.LegionProfilesBranch}"
-            param_legion_сicd_repo = "${params.LegionCicdRepo}"
+            param_legion_cicd_repo = "${params.LegionCicdRepo}"
             param_legion_cicd_branch = "${params.LegionCicdBranch}"
             ///Job parameters
             legionProfilesGitlabKey = "legion-profiles-gitlab-key"
