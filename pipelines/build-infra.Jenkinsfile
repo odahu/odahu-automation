@@ -53,7 +53,7 @@ pipeline {
             ///Job parameters
             legionProfilesGitlabKey = "legion-profiles-gitlab-key"
             legionCicdGitlabKey = "legion-profiles-gitlab-key"
-            sharedLibPath = "cicd/pipelines/legionPipeline.groovy"
+            sharedLibPath = "legion-cicd/pipelines/legionPipeline.groovy"
             updateVersionScript = "tools/update_version_id"
             pathToCharts= "${WORKSPACE}/helms"
     }
