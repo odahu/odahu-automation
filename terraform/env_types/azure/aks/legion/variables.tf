@@ -135,3 +135,8 @@ variable "collector_region" {
 variable "mlflow_toolchain_version" {
   description = "Version of legion-mlflow helm chart"
 }
+
+# TODO: Remove after implementation of the issue https://github.com/legion-platform/legion/issues/1008
+variable "legion_connection_decrypt_token" {
+  default = "Token for getting a decrypted connection"
+}

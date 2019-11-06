@@ -10,7 +10,7 @@ variable "cloud_type" {
 }
 
 variable "project_id" {
-  default = ""
+  default     = ""
   description = "Target GCP project id"
 }
 
@@ -80,6 +80,11 @@ variable "legion_packaging_namespace" {
 variable "legion_deployment_namespace" {
   default     = "legion-deployment"
   description = "Legion deployment k8s namespace"
+}
+
+variable "vault_namespace" {
+  default     = "vault"
+  description = "Vault namespace"
 }
 
 variable "docker_repo" {
@@ -193,3 +198,8 @@ variable "bucket_registry_name" {
 }
 
 variable "feedback_storage_link" {}
+
+# TODO: Remove after implementation of the issue https://github.com/legion-platform/legion/issues/1008
+variable "legion_connection_decrypt_token" {
+  default = "Token for getting a decrypted connection"
+}

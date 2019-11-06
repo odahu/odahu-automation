@@ -91,7 +91,7 @@ variable "grafana_pass" {
   description = "Grafana admin password"
 }
 
-variable "grafana_storage_class" {
+variable "storage_class" {
   default     = "gp2"
   description = "Grafana storage class"
 }

@@ -91,3 +91,8 @@ variable "collector_region" {
   default     = "us-east1"
   description = "Collector's storage bucket region"
 }
+
+# TODO: Remove after implementation of the issue https://github.com/legion-platform/legion/issues/1008
+variable "legion_connection_decrypt_token" {
+  default = "Token for getting a decrypted connection"
+}

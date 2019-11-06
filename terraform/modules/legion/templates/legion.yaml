@@ -38,6 +38,17 @@ feedback:
 
 edi:
   replicas: 2
+  env:
+    VAULT_CACERT: /vault/tls/ca.crt
+
+  volumeMounts:
+    - name: vault-tls
+      mountPath: /vault/tls
+
+  volumes:
+    - name: vault-tls
+      secret:
+        secretName: vault-tls
 
 metrics:
   enabled: true
@@ -113,6 +124,14 @@ config:
         url: "https://grafana.${cluster_name}.${root_domain}"
       - name: "Feedback storage"
         url: "${feedback_storage_link}"
+  connection:
+    repository_type: vault
+    # TODO: Remove after implementation of the issue https://github.com/legion-platform/legion/issues/1008
+    decrypt_token: "${legion_connection_decrypt_token}"
+    vault:
+      secret_engine_path: "legion/connections"
+      role: "legion"
+      url: "https://vault.vault:8200"
   deployment:
 %{ if cloud_type == "azure" ~}
     toleration: {}

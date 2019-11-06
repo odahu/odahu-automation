@@ -80,3 +80,7 @@ module "tekton" {
   legion_helm_repo     = var.legion_helm_repo
   legion_infra_version = var.legion_infra_version
 }
+
+module "vault" {
+  source = "../../../../modules/k8s/vault"
+}

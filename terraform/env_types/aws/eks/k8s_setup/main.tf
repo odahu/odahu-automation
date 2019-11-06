@@ -52,7 +52,7 @@ module "monitoring" {
   root_domain           = var.root_domain
   grafana_admin         = var.grafana_admin
   grafana_pass          = var.grafana_pass
-  grafana_storage_class = var.grafana_storage_class
+  grafana_storage_class = var.storage_class
   docker_repo           = var.docker_repo
   monitoring_namespace  = var.monitoring_namespace
   tls_secret_key        = var.tls_key
@@ -86,5 +86,10 @@ module "tekton" {
   source               = "../../../../modules/k8s/tekton"
   legion_helm_repo     = var.legion_helm_repo
   legion_infra_version = var.legion_infra_version
+}
+
+module "vault" {
+  source                  = "../../../../modules/k8s/vault"
+  vault_pvc_storage_class = var.storage_class
 }
 

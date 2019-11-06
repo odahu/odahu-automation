@@ -95,3 +95,13 @@ resource "null_resource" "add_helm_repository_istio" {
   }
   depends_on = [null_resource.add_helm_repository_legion]
 }
+
+resource "null_resource" "add_helm_vault_repository" {
+  triggers = {
+    build_number = timestamp()
+  }
+  provisioner "local-exec" {
+    command = "helm repo add banzaicloud-stable http://kubernetes-charts.banzaicloud.com/branch/master"
+  }
+  depends_on = [null_resource.add_helm_repository_istio]
+}

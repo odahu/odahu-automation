@@ -69,6 +69,26 @@ resource "kubernetes_namespace" "legion_deployment" {
   }
 }
 
+locals {
+  vault_tls_secret_name = "vault-tls"
+}
+
+data "kubernetes_secret" "vault_tls" {
+  metadata {
+    name      = local.vault_tls_secret_name
+    namespace = var.vault_namespace
+  }
+}
+
+resource "kubernetes_secret" "legion_vault_tls" {
+  metadata {
+    name      = local.vault_tls_secret_name
+    namespace = var.legion_namespace
+  }
+  data       = data.kubernetes_secret.vault_tls.data
+  depends_on = [kubernetes_namespace.legion]
+}
+
 ########################################################
 # Install Legion chart
 ########################################################
@@ -128,6 +148,8 @@ data "template_file" "legion_values" {
     model_docker_web_ui_link = var.model_docker_web_ui_link
 
     feedback_storage_link = var.feedback_storage_link
+
+    legion_connection_decrypt_token = var.legion_connection_decrypt_token
   }
 }
 
@@ -147,6 +169,7 @@ resource "helm_release" "legion" {
     kubernetes_namespace.legion_training,
     kubernetes_namespace.legion_deployment,
     kubernetes_namespace.legion_packaging,
+    kubernetes_secret.legion_vault_tls,
     data.helm_repository.legion,
   ]
 }
@@ -176,7 +199,7 @@ resource "helm_release" "mlflow" {
     data.template_file.mlflow_values.rendered,
   ]
 
-   depends_on = [
+  depends_on = [
     helm_release.legion,
     kubernetes_namespace.legion
   ]

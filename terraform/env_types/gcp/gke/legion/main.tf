@@ -58,4 +58,6 @@ module "legion" {
   model_resources_cpu      = var.model_resources_cpu
   model_resources_mem      = var.model_resources_mem
   mlflow_toolchain_version = var.mlflow_toolchain_version
+
+  legion_connection_decrypt_token = var.legion_connection_decrypt_token
 }

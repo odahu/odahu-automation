@@ -54,6 +54,11 @@ variable "tls_crt" {
   description = "TLS certificate for Legion cluster"
 }
 
+variable "storage_class" {
+  default     = "default"
+  description = "Grafana storage class"
+}
+
 ########################
 # Prometheus monitoring
 ########################
@@ -72,11 +77,6 @@ variable "grafana_admin" {
 
 variable "grafana_pass" {
   description = "Grafana admin password"
-}
-
-variable "grafana_storage_class" {
-  default     = "default"
-  description = "Grafana storage class"
 }
 
 variable "monitoring_namespace" {

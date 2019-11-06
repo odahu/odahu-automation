@@ -115,3 +115,6 @@ git_examples_uri: str           # Git URI for model examples
 git_examples_key: str           # Ssh git key for model examples
 git_examples_description: str   # Git examples web UI Link for Legion connection
 git_examples_web_ui_link: str   # Git examples description for Legion connection
+
+# TODO: Remove after implementation of the issue https://github.com/legion-platform/legion/issues/1008
+legion_connection_decrypt_token: str # Token for getting a decrypted connection
