@@ -15,20 +15,20 @@ locals {
 
 # We going to create bastion host in AKS subnet
 resource "azurerm_network_interface" "aks_bastion_nic" {
-  name                = "${var.bastion_hostname}-${var.cluster_name}-nic"
+  name                = "${var.cluster_name}-${var.bastion_hostname}-nic"
   location            = var.location
   resource_group_name = var.resource_group
 
   ip_configuration {
-    name                          = "bastion-public-ip"
+    name                          = "${var.cluster_name}-bastion-ip"
     subnet_id                     = var.aks_subnet_id
     private_ip_address_allocation = "Dynamic"
-    public_ip_address_id          = var.public_ip_id
+    public_ip_address_id          = var.bastion_ip_id
   }
 }
 
 resource "azurerm_virtual_machine" "aks_bastion" {
-  name                  = "${var.bastion_hostname}-${var.cluster_name}"
+  name                  = "${var.cluster_name}-${var.bastion_hostname}"
   location              = var.location
   resource_group_name   = var.resource_group
   network_interface_ids = [ azurerm_network_interface.aks_bastion_nic.id ]
@@ -45,14 +45,14 @@ resource "azurerm_virtual_machine" "aks_bastion" {
   }
   
   storage_os_disk {
-    name              = "${var.bastion_hostname}-os"
+    name              = "${var.cluster_name}-${var.bastion_hostname}-disk"
     caching           = "ReadWrite"
     create_option     = "FromImage"
     managed_disk_type = "Standard_LRS"
   }
   
   os_profile {
-    computer_name  = "${var.bastion_hostname}-${var.cluster_name}"
+    computer_name  = "${var.cluster_name}-${var.bastion_hostname}"
     admin_username = var.bastion_ssh_user
   }
   

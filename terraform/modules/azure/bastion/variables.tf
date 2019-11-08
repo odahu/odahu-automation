@@ -16,7 +16,7 @@ variable "aks_subnet_id" {
   description = "ID of subnet for the cluster nodes to run"
 }
 
-variable "public_ip_id" {
+variable "bastion_ip_id" {
   description = "ID of Public IP address that will be used for bastion SSH access"
 }
 

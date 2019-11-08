@@ -78,6 +78,7 @@ data "kubernetes_secret" "vault_tls" {
     name      = local.vault_tls_secret_name
     namespace = var.vault_namespace
   }
+  depends_on = [kubernetes_namespace.legion]
 }
 
 resource "kubernetes_secret" "legion_vault_tls" {

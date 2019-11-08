@@ -2,6 +2,21 @@ resource "random_id" "pool_name" {
   byte_length = 8
 }
 
+data "azurerm_public_ip" "egress" {
+  name                = var.egress_ip_name
+  resource_group_name = var.resource_group
+}
+
+locals {
+  allowed_nets = concat(
+    list(var.aks_subnet_cidr),
+    list(var.service_cidr),
+    list("${data.azurerm_public_ip.egress.ip_address}/32"),
+    list("${var.bastion_ip}/32"),
+    var.allowed_ips
+  )
+}
+
 ########################################################
 # Deploy AKS cluster
 ########################################################
@@ -68,20 +83,35 @@ resource "azurerm_kubernetes_cluster" "aks" {
     }
   }
 
+  api_server_authorized_ip_ranges = local.allowed_nets
+
   role_based_access_control {
     enabled = true
   }
 
   network_profile {
-    network_plugin = "azure"
-    network_policy = "calico"
+    load_balancer_sku = "standard"
+    network_plugin    = "azure"
+    network_policy    = "calico"
   }
 
   tags = var.aks_tags
 
-  lifecycle {
-    ignore_changes = [
-      api_server_authorized_ip_ranges,
-    ]
+  # Temporary hack until https://github.com/terraform-providers/terraform-provider-azurerm/issues/4322 is fixed
+  provisioner "local-exec" {
+    interpreter = ["bash", "-c"]
+    command = <<EOF
+      if [ -z "$(az extension list | jq -r '.[] | select(.name == "aks-preview")')" ]; then
+        az extension add -n aks-preview -y
+      else
+        az extension update -n aks-preview || true
+      fi
+
+      az aks update \
+        --resource-group ${self.resource_group_name} \
+        --name ${self.name} \
+        --load-balancer-outbound-ips \
+        "$(az network public-ip show --resource-group ${self.resource_group_name} --name ${var.egress_ip_name} --query id -o tsv)"
+    EOF
   }
 }

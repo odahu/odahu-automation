@@ -74,18 +74,18 @@ resource "helm_release" "nginx-ingress" {
     for_each = local.azure_resource_count == 0 ? [] : [0]
     content {
       name  = "controller.service.loadBalancerIP"
-      value = var.aks_ingress_ip
+      value = data.azurerm_public_ip.ingress[0].ip_address
     }
   }
 
-  dynamic "set" {
-    iterator = i
-    for_each = local.azure_resource_count == 0 ? [] : [0]
-    content {
-      name  = "controller.service.externalTrafficPolicy"
-      value = "Local"
-    }
-  }
+  # dynamic "set" {
+  #   iterator = i
+  #   for_each = local.azure_resource_count == 0 ? [] : [0]
+  #   content {
+  #     name  = "controller.service.externalTrafficPolicy"
+  #     value = "Local"
+  #   }
+  # }
 
   dynamic "set_string" {
     iterator = i

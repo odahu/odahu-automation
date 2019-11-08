@@ -59,11 +59,6 @@ variable "aws_lb_subnets" {
 ##################
 # Azure
 ##################
-variable "aks_ingress_ip" {
-  default     = ""
-  description = "Cloud Load Balancer IP address used for k8s ingress"
-}
-
 variable "aks_ip_resource_group" {
   default     = ""
   description = "Azure resource group name"

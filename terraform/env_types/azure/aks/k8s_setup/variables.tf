@@ -6,10 +6,6 @@ variable "azure_resource_group" {
   default     = ""
 }
 
-variable "aks_public_ip_name" {
-  description = "Name of public IP-address used for AKS cluster"
-}
-
 variable "cluster_type" {
   default     = "azure/aks"
   description = "Legion cluster cloud provider type"
@@ -56,7 +52,7 @@ variable "tls_crt" {
 
 variable "storage_class" {
   default     = "default"
-  description = "Grafana storage class"
+  description = "Kubernetes PVC storage class"
 }
 
 ########################
@@ -68,11 +64,11 @@ variable "allowed_ips" {
 }
 
 variable "alert_slack_url" {
-  description = "Alert slack usrl"
+  description = "Slack alerts url"
 }
 
 variable "grafana_admin" {
-  description = "Grafana admion username"
+  description = "Grafana admin username"
 }
 
 variable "grafana_pass" {

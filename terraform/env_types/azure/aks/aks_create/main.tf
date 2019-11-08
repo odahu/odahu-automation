@@ -6,11 +6,6 @@ locals {
   aks_dns_prefix = var.aks_dns_prefix == "" ? var.cluster_name : var.aks_dns_prefix
 }
 
-data "azurerm_public_ip" "aks_ext" {
-  name                = var.aks_public_ip_name
-  resource_group_name = var.azure_resource_group
-}
-
 module "azure_monitoring" {
   source   = "../../../../modules/azure/monitoring"
   enabled        = var.aks_analytics_deploy
@@ -27,7 +22,6 @@ module "aks_networking" {
   location       = var.azure_location
   resource_group = var.azure_resource_group
   subnet_cidr    = var.aks_cidr
-  public_ip_name = var.aks_public_ip_name
   allowed_ips    = var.allowed_ips
 }
 
@@ -37,7 +31,7 @@ module "aks_bastion" {
   location         = var.azure_location
   resource_group   = var.azure_resource_group
   aks_subnet_id    = module.aks_networking.subnet_id
-  public_ip_id     = module.aks_networking.bastion_ip_id
+  bastion_ip_id    = module.aks_networking.bastion_ip_id
   bastion_ssh_user = "ubuntu"
   bastion_tags     = local.common_tags
 }
@@ -50,6 +44,10 @@ module "aks_cluster" {
   resource_group             = var.azure_resource_group
   aks_dns_prefix             = local.aks_dns_prefix
   aks_subnet_id              = module.aks_networking.subnet_id
+  aks_subnet_cidr            = var.aks_cidr
+  egress_ip_name             = var.aks_egress_ip_name
+  bastion_ip                 = module.aks_networking.bastion_ip
+  allowed_ips                = var.allowed_ips
   sp_client_id               = var.sp_client_id
   sp_secret                  = var.sp_secret
   k8s_version                = var.k8s_version

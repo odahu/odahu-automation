@@ -33,6 +33,19 @@ variable "aks_subnet_id" {
   description = "ID of subnet for the cluster nodes to run"
 }
 
+variable "aks_subnet_cidr" {
+  description = "CIDR of AKS subnet used for nodes/pods networking"
+}
+
+variable "service_cidr" {
+  default     = "10.0.0.0/16"
+  description = "AKS service CIDR"
+}
+
+variable "allowed_ips" {
+  description = "CIDRs to allow access from"
+}
+
 variable "aks_tags" {
   description = "Tags used for Azure Kubernetes cluster definition"
   default     = {}
@@ -55,4 +68,12 @@ variable "sp_secret" {
 variable "node_pools" {
   description = "List of k8s node pools map definitions"
   default     = []
+}
+
+variable "egress_ip_name" {
+  description = "Name of public IP-address used for AKS cluster egress"
+}
+
+variable "bastion_ip" {
+  description = "Bastion host IP-address"
 }

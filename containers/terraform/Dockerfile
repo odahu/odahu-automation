@@ -1,6 +1,9 @@
 FROM ubuntu:18.04
 
-ENV DEBIAN_FRONTEND=noninteractive
+ENV DEBIAN_FRONTEND=noninteractive \
+    KUBECTL_VERSION=v1.13.12 \
+    TERRAFORM_VERSION=0.12.9 \
+    HELM_VERSION=v2.14.3
 
 # install system utilities
 RUN apt-get update && apt-get install -y \
@@ -14,18 +17,15 @@ RUN chmod 0755 /etc/default/locale
 ENV LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 LANGUAGE=en_US.UTF-8
 
 # Install kubectl
-ENV KUBECTL_VERSION=v1.13.8
 RUN wget -qO /usr/local/bin/kubectl "https://storage.googleapis.com/kubernetes-release/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl" && \
     chmod a+x /usr/local/bin/kubectl
 
 # Install Terraform
-ENV TERRAFORM_VERSION=0.12.9
 RUN wget -qO /tmp/terraform.zip "https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip" && \
     cd /tmp && unzip /tmp/terraform.zip && \
     mv /tmp/terraform /usr/local/bin/terraform && rm -rf /tmp/terraform*
 
 # Install Helm
-ENV HELM_VERSION=v2.14.3
 RUN curl -fsSLO https://kubernetes-helm.storage.googleapis.com/helm-${HELM_VERSION}-linux-amd64.tar.gz && \
     mkdir -p /tmp/helm && mv helm-${HELM_VERSION}-linux-amd64.tar.gz /tmp/helm && \
     tar xzf /tmp/helm/helm-${HELM_VERSION}-linux-amd64.tar.gz -C /tmp/helm && \
@@ -47,7 +47,6 @@ RUN curl -sL https://bootstrap.pypa.io/get-pip.py | python3 && \
     pip3 install pyyaml==5.1.1 awscli && \
     gem install hiera hiera-eyaml
 
-COPY vars_template.yaml /opt/legion/
 COPY tools/hiera_exporter_helper.sh /usr/bin/hiera_exporter_helper
 COPY tools/hiera_exporter /opt/legion/tools/hiera_exporter
 COPY tools/tf_runner.sh /usr/bin/tf_runner
