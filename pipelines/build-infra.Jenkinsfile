@@ -54,7 +54,6 @@ pipeline {
             legionProfilesGitlabKey = "legion-profiles-gitlab-key"
             legionCicdGitlabKey = "legion-profiles-gitlab-key"
             sharedLibPath = "legion-cicd/pipelines/legionPipeline.groovy"
-            updateVersionScript = "tools/update_version_id"
             pathToCharts= "${WORKSPACE}/helms"
     }
 
@@ -66,22 +65,28 @@ pipeline {
                 script {
                     sh 'echo RunningOn: $(curl http://checkip.amazonaws.com/)'
 
+                    // import Legion components
                     sshagent(["${env.legionCicdGitlabKey}"]) {
+                        print ("Checkout Legion-cicd repo")
                         sh"""#!/bin/bash -ex
-                        #TODO get repo url from passed parameters
                         mkdir -p \$(getent passwd \$(whoami) | cut -d: -f6)/.ssh && ssh-keyscan git.epam.com >> \$(getent passwd \$(whoami) | cut -d: -f6)/.ssh/known_hosts
                         if [ ! -d "legion-cicd" ]; then
                             git clone ${env.param_legion_cicd_repo} legion-cicd
                         fi
                         cd legion-cicd && git checkout ${env.param_legion_cicd_branch}
                         """
+
+                        print ("Load legion pipeline common library")
+                        legion = load "${env.sharedLibPath}"
                     }
-                    legion = load "${env.sharedLibPath}"
-                    
+
                     print("Check code for security issues")
                     sh "bash install-git-secrets-hook.sh install_hooks && git secrets --scan -r"
 
-                    legion.setBuildMeta(env.updateVersionScript)
+                    verFiles = [
+                            'version.info'
+                    ]
+                    legion.setBuildMeta(verFiles)
                 }
             }
         }
