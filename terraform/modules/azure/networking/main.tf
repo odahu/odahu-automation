@@ -30,7 +30,7 @@ resource "azurerm_public_ip" "ingress" {
 
 resource "azurerm_virtual_network" "vpc" {
   name                = "${var.cluster_name}-vpc"
-  address_space       = [ var.subnet_cidr ]
+  address_space       = [var.subnet_cidr]
   location            = var.location
   resource_group_name = var.resource_group
   tags                = var.tags
@@ -46,7 +46,7 @@ resource "azurerm_subnet" "subnet" {
   virtual_network_name      = azurerm_virtual_network.vpc.name
   address_prefix            = var.subnet_cidr
   network_security_group_id = azurerm_network_security_group.aks_nsg.id
-  service_endpoints         = [
+  service_endpoints = [
     "Microsoft.ContainerRegistry",
     "Microsoft.Storage"
   ]
@@ -65,9 +65,9 @@ resource "azurerm_network_security_group" "aks_nsg" {
     access                       = "Allow"
     protocol                     = "Tcp"
     source_port_range            = "*"
-    destination_port_ranges      = [ "22" ]
+    destination_port_ranges      = ["22"]
     source_address_prefixes      = var.allowed_ips
-    destination_address_prefixes = [ azurerm_public_ip.bastion.ip_address, var.subnet_cidr ]
+    destination_address_prefixes = [azurerm_public_ip.bastion.ip_address, var.subnet_cidr]
   }
   security_rule {
     name                         = "allow-ingress"
@@ -77,9 +77,9 @@ resource "azurerm_network_security_group" "aks_nsg" {
     access                       = "Allow"
     protocol                     = "Tcp"
     source_port_range            = "*"
-    destination_port_ranges      = [ "80", "443" ]
+    destination_port_ranges      = ["80", "443"]
     source_address_prefixes      = concat(list(azurerm_public_ip.bastion.ip_address), var.allowed_ips)
-    destination_address_prefixes = [ azurerm_public_ip.ingress.ip_address, var.subnet_cidr ]
+    destination_address_prefixes = [azurerm_public_ip.ingress.ip_address, var.subnet_cidr]
   }
   security_rule {
     name                       = "deny-ingress"
@@ -89,7 +89,7 @@ resource "azurerm_network_security_group" "aks_nsg" {
     access                     = "Deny"
     protocol                   = "Tcp"
     source_port_range          = "*"
-    destination_port_ranges    = [ "80", "443" ]
+    destination_port_ranges    = ["80", "443"]
     source_address_prefix      = "Internet"
     destination_address_prefix = azurerm_public_ip.ingress.ip_address
   }

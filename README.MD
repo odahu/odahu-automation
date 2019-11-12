@@ -52,7 +52,7 @@ You should pass cluster_profile.json file with all parameters required for clust
 Here is the example of command which mounts all dependencies to the docker container and triggers a cluster creation:
 
 ```bash
-docker run -v <local_path_to_cluster_profile.json>:/tmp/cluster_profile.json -v <path_to_local_gcp_credentials_file.json>/:/tmp/gcp_credentials_file.json -e PROFILE=/tmp/cluster_profile.json -e GOOGLE_CREDENTIALS=/tmp/gcp_credentials_file.json k8s-terraform:latest tf_runner create
+docker run -v <local_path_to_cluster_profile.json>:/tmp/cluster_profile.json -v <path_to_local_gcp_credentials_file.json>/:/tmp/gcp_credentials_file.json -e PROFILE=/tmp/cluster_profile.json -e GOOGLE_CREDENTIALS=/tmp/gcp_credentials_file.json terraform:latest tf_runner create
 ```
 
 Mandatory parameters are `PROFILE` and `GOOGLE_CREDENTIALS` environment variables which point to the mounted files required for cluster provisioning.

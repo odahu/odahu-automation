@@ -3,8 +3,8 @@ variable "project_id" {
 }
 
 variable "cluster_name" {
-  default     = "legion"
-  description = "Legion cluster name"
+  default     = "odahuflow"
+  description = "Odahuflow cluster name"
 }
 
 variable "service_account_iam_roles" {

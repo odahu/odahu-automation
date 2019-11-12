@@ -13,12 +13,12 @@ variable "tags" {
 }
 
 variable "cluster_name" {
-  default     = "legion"
-  description = "Legion cluster name"
+  default     = "odahuflow"
+  description = "Odahuflow cluster name"
 }
 
-variable "legion_data_bucket" {
-  description = "Legion data storage bucket"
+variable "data_bucket" {
+  description = "Odahuflow data storage bucket"
 }
 
 variable "allowed_ips" {

@@ -1,16 +1,13 @@
-variable "project_id" {
-  description = "Target project id"
-}
-
 variable "cluster_name" {
   default     = "odahuflow"
   description = "Odahuflow cluster name"
 }
 
 variable "region" {
+  default     = "eu-central-1"
   description = "Region of resources"
 }
 
-variable "subnet_cidr" {
-  description = "Subnet range"
+variable "data_bucket" {
+  description = "Odahuflow data storage bucket"
 }

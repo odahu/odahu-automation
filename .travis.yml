@@ -1,0 +1,31 @@
+language: bash
+dist: bionic
+python: 3.6
+sudo: true
+env:
+  global:
+      # https://github.com/hashicorp/terraform/issues/21408#issuecomment-495746582
+    - AWS_DEFAULT_REGION=test
+    - TERRAFORM_VERSION=0.12.9
+before_script:
+  - wget -qO /tmp/terraform.zip "https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip"
+  - unzip /tmp/terraform.zip -d /tmp
+  - ls -al /tmp
+  - sudo mv /tmp/terraform /usr/local/bin/terraform
+jobs:
+  include:
+    - stage: security
+      before_script:
+        - sudo make install-vulnerabilities-checker
+      script:
+        - make check-vulnerabilities
+    - stage: unit tests and lint
+      script:
+        - make terraform-validate
+    - script:
+        - make terraform-fmt-check
+    - stage: Docker builds
+      before_script: skip
+      script:
+        - make docker-build-terraform
+

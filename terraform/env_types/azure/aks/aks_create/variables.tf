@@ -20,14 +20,14 @@ variable "aks_analytics_workspace_id" {
 }
 
 variable "cluster_name" {
-  default     = "legion"
-  description = "Legion k8s cluster name"
+  default     = "odahuflow"
+  description = "Odahuflow k8s cluster name"
 }
 
 variable "aks_common_tags" {
   description = "Set of common tags assigned to all cluster resources"
   type        = "map"
-  default     = {
+  default = {
     env     = "Development"
     purpose = "Kubernetes Cluster"
   }
@@ -67,7 +67,7 @@ variable "sp_secret" {
 }
 
 variable "ssh_key" {
-  description = "SSH public key for Legion cluster nodes and bastion host"
+  description = "SSH public key for Odahuflow cluster nodes and bastion host"
 }
 
 ################

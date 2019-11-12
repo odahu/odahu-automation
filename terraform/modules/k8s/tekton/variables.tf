@@ -1,12 +1,12 @@
-variable "legion_helm_repo" {
-  description = "Legion helm repo"
+variable "helm_repo" {
+  description = "Odahuflow helm repo"
 }
 
-variable "legion_infra_version" {
-  description = "Legion infra release version"
+variable "odahu_infra_version" {
+  description = "Odahuflow infra release version"
 }
 
 variable "namespace" {
   description = "Tekton namespace"
-  default = "tekton-pipelines"
+  default     = "tekton-pipelines"
 }

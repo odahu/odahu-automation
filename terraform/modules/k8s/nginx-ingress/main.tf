@@ -1,24 +1,24 @@
 locals {
   nginx_service_types = {
-    "gcp/gke"   : "LoadBalancer",
+    "gcp/gke" : "LoadBalancer",
     "azure/aks" : "LoadBalancer",
-    "aws/eks"   : "NodePort"
+    "aws/eks" : "NodePort"
   }
 }
 
 locals {
-  gcp_resource_count = var.cluster_type == "gcp/gke" ? 1 : 0
+  gcp_resource_count   = var.cluster_type == "gcp/gke" ? 1 : 0
   azure_resource_count = var.cluster_type == "azure/aks" ? 1 : 0
-  aws_resource_count = var.cluster_type == "aws/eks" ? 1 : 0
+  aws_resource_count   = var.cluster_type == "aws/eks" ? 1 : 0
 }
 
 resource "helm_release" "nginx-ingress" {
-  name       = "nginx-ingress"
-  chart      = "stable/nginx-ingress"
-  namespace  = "kube-system"
-  version    = "0.25.1"
-  wait       = false
-  
+  name      = "nginx-ingress"
+  chart     = "stable/nginx-ingress"
+  namespace = "kube-system"
+  version   = "0.25.1"
+  wait      = false
+
   set {
     name  = "controller.config.proxy-buffer-size"
     value = "256k"

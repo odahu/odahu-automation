@@ -31,7 +31,7 @@ resource "azurerm_virtual_machine" "aks_bastion" {
   name                  = "${var.cluster_name}-${var.bastion_hostname}"
   location              = var.location
   resource_group_name   = var.resource_group
-  network_interface_ids = [ azurerm_network_interface.aks_bastion_nic.id ]
+  network_interface_ids = [azurerm_network_interface.aks_bastion_nic.id]
   vm_size               = var.bastion_machine_type
 
   delete_os_disk_on_termination    = true
@@ -43,19 +43,19 @@ resource "azurerm_virtual_machine" "aks_bastion" {
     sku       = "18.04-LTS"
     version   = "latest"
   }
-  
+
   storage_os_disk {
     name              = "${var.cluster_name}-${var.bastion_hostname}-disk"
     caching           = "ReadWrite"
     create_option     = "FromImage"
     managed_disk_type = "Standard_LRS"
   }
-  
+
   os_profile {
     computer_name  = "${var.cluster_name}-${var.bastion_hostname}"
     admin_username = var.bastion_ssh_user
   }
-  
+
   os_profile_linux_config {
     disable_password_authentication = true
     ssh_keys {
@@ -63,6 +63,6 @@ resource "azurerm_virtual_machine" "aks_bastion" {
       key_data = local.deploy_pubkey
     }
   }
-  
+
   tags = var.bastion_tags
 }

@@ -46,8 +46,8 @@ module "auth" {
 module "monitoring" {
   source                = "../../../../modules/k8s/monitoring"
   cluster_name          = var.cluster_name
-  legion_helm_repo      = var.legion_helm_repo
-  legion_infra_version  = var.legion_infra_version
+  helm_repo      = var.helm_repo
+  odahu_infra_version  = var.odahu_infra_version
   alert_slack_url       = var.alert_slack_url
   root_domain           = var.root_domain
   grafana_admin         = var.grafana_admin
@@ -66,15 +66,15 @@ module "istio" {
   monitoring_namespace = var.monitoring_namespace
   tls_secret_key       = var.tls_key
   tls_secret_crt       = var.tls_crt
-  legion_helm_repo     = var.legion_helm_repo
-  legion_infra_version = var.legion_infra_version
+  helm_repo     = var.helm_repo
+  odahu_infra_version = var.odahu_infra_version
 }
 
 module "gke-saa" {
   source               = "../../../../modules/k8s/gke-saa"
   cluster_type         = var.cluster_type
-  legion_helm_repo     = var.legion_helm_repo
-  legion_infra_version = var.legion_infra_version
+  helm_repo     = var.helm_repo
+  odahu_infra_version = var.odahu_infra_version
 }
 
 module "kube2iam" {
@@ -84,8 +84,8 @@ module "kube2iam" {
 
 module "tekton" {
   source               = "../../../../modules/k8s/tekton"
-  legion_helm_repo     = var.legion_helm_repo
-  legion_infra_version = var.legion_infra_version
+  helm_repo     = var.helm_repo
+  odahu_infra_version = var.odahu_infra_version
 }
 
 module "vault" {

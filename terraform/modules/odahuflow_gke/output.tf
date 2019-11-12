@@ -7,7 +7,7 @@ output "model_docker_password" {
 }
 
 output "model_docker_repo" {
-  value = "${data.google_container_registry_repository.legion_registry.repository_url}/${var.cluster_name}"
+  value = "${data.google_container_registry_repository.odahuflow_registry.repository_url}/${var.cluster_name}"
 }
 
 output "model_docker_web_ui_link" {
@@ -18,11 +18,11 @@ output "dockercfg" {
   value = local.dockercfg
 }
 
-output "legion_data_bucket" {
+output "data_bucket" {
   value = google_storage_bucket.this.name
 }
 
-output "legion_collector_sa" {
+output "odahuflow_collector_sa" {
   value = google_service_account.collector_sa.email
 }
 

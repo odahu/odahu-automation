@@ -7,7 +7,7 @@ locals {
 }
 
 module "azure_monitoring" {
-  source   = "../../../../modules/azure/monitoring"
+  source         = "../../../../modules/azure/monitoring"
   enabled        = var.aks_analytics_deploy
   cluster_name   = var.cluster_name
   tags           = local.common_tags
@@ -75,5 +75,5 @@ resource "null_resource" "bastion_kubeconfig" {
       "mkdir -p ~/.kube && printf \"${module.aks_cluster.kube_config}\" > ~/.kube/config"
     ]
   }
-  depends_on = [ module.aks_bastion, module.aks_cluster ]
+  depends_on = [module.aks_bastion, module.aks_cluster]
 }

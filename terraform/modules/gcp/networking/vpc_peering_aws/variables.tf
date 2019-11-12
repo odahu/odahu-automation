@@ -11,8 +11,8 @@ variable "region" {
 }
 
 variable "cluster_name" {
-  default     = "legion"
-  description = "Legion cluster name"
+  default     = "odahuflow"
+  description = "Odahuflow cluster name"
 }
 
 variable "gcp_network" {
@@ -36,7 +36,7 @@ variable "aws_sg" {
 }
 
 variable "aws_private_gw_name" {
-  default     = "legion-gcp-gw"
+  default     = "odahuflow-gcp-gw"
   description = "AWS SG id for gcp access"
 }
 

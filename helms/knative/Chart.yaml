@@ -5,11 +5,15 @@ description: Knative chart
 keywords:
   - ML
 maintainers:
-  - name: Alexey Kharlamov
-    email: alexey@kharlamov.biz
   - name: Dmitrii Suslov
     email: suslov.dimitriy@gmail.com
-  - name: Alexander Semenets
-    email: am.semenets@gmail.com
+  - name: Vlad Tokarev
+    email: vlad.tokarev.94@gmail.com
+  - name: Dmitriy Karbyshev
+    email: karbyshevds@gmail.com
+  - name: Max Kochubey
+    email: maxkochubey@gmail.com
   - name: Kirill Makhonin
     email: kirill@makhonin.biz
+  - name: Vitalik Solodilov
+    email: mcdkr@yandex.ru

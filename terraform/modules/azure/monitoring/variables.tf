@@ -5,8 +5,8 @@ variable "enabled" {
 }
 
 variable "cluster_name" {
-  description = "Legion k8s cluster name"
-  default     = "legion"
+  description = "Odahuflow k8s cluster name"
+  default     = "odahuflow"
 }
 
 variable "location" {

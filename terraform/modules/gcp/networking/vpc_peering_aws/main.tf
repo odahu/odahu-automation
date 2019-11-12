@@ -16,7 +16,7 @@ resource "aws_customer_gateway" "to_gcp" {
   type       = "ipsec.1"
   tags = {
     Name    = "${var.cluster_name}-gcp"
-    Project = "legion"
+    Project = "odahuflow"
   }
 }
 
@@ -25,7 +25,7 @@ resource "aws_vpn_gateway" "vpn_gateway" {
   vpc_id    = "${var.aws_vpc_id}"
   tags = {
     Name    = "${var.cluster_name}-gcp"
-    Project = "legion"
+    Project = "odahuflow"
   }
 }
 #data "aws_vpn_gateway" "vpn_gateway" {
@@ -43,7 +43,7 @@ resource "aws_vpn_connection" "to_gcp" {
   static_routes_only  = true
   tags = {
     Name    = "${var.cluster_name}-gcp"
-    Project = "legion"
+    Project = "odahuflow"
   }
 }
 

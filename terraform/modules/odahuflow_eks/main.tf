@@ -8,13 +8,13 @@ data "aws_iam_role" "node" {
 ########################################################
 
 resource "aws_s3_bucket" "this" {
-  bucket        = var.legion_data_bucket
+  bucket        = var.data_bucket
   acl           = "private"
   region        = var.region
   force_destroy = true
 
   tags = {
-    Name = var.legion_data_bucket
+    Name = var.data_bucket
     Env  = var.cluster_name
   }
 }
@@ -75,14 +75,14 @@ resource "aws_iam_policy" "collector" {
 
 resource "aws_iam_policy_attachment" "collector" {
   name       = "${var.cluster_name}-collector"
-  roles      = ["${aws_iam_role.collector.name}"]
-  policy_arn = "${aws_iam_policy.collector.arn}"
+  roles      = [aws_iam_role.collector.name]
+  policy_arn = aws_iam_policy.collector.arn
 }
 
 
 resource "aws_iam_user" "collector" {
   name = "${var.cluster_name}-collector"
-  path = "/legion/"
+  path = "/odahuflow/"
 
   tags = {
     Name        = "${var.cluster_name}-collector"
@@ -97,5 +97,5 @@ resource "aws_iam_user_policy" "collector" {
 }
 
 resource "aws_iam_access_key" "collector" {
-  user = "${aws_iam_user.collector.name}"
+  user = aws_iam_user.collector.name
 }

@@ -1,13 +1,13 @@
 variable "config_context_auth_info" {
-  description = "Legion cluster context auth"
+  description = "Odahuflow cluster context auth"
 }
 
 variable "config_context_cluster" {
-  description = "Legion cluster context name"
+  description = "Odahuflow cluster context name"
 }
 
-variable "legion_helm_repo" {
-  description = "Legion helm repo"
+variable "helm_repo" {
+  description = "Odahuflow helm repo"
 }
 
 variable "istio_helm_repo" {

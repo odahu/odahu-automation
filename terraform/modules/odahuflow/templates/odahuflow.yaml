@@ -1,4 +1,4 @@
-legionVersion: "${legion_version}"
+odahuFlowVersion: "${odahuflow_version}"
 imagesRegistry: "${docker_repo}/"
 logLevel: debug
 
@@ -17,21 +17,21 @@ feedback:
 %{ if cloud_type == "aws" ~}
     target: "s3"
     s3:
-      bucket: "${legion_data_bucket}"
-      region: "${legion_data_bucket_region}"
-      customIAMRole: "${legion_collector_iam_role}"
+      bucket: "${data_bucket}"
+      region: "${data_bucket_region}"
+      customIAMRole: "${odahuflow_collector_iam_role}"
 %{ endif ~}
 %{ if cloud_type == "gcp" ~}
     target: "gcs"
     gcs:
-      bucket: "${legion_data_bucket}"
-      customSA: "${legion_collector_sa}"
+      bucket: "${data_bucket}"
+      customSA: "${odahuflow_collector_sa}"
 %{ endif ~}
 %{ if cloud_type == "azure" ~}
     target: "azureblob"
     azureblob:
       authorization: "sastoken"
-      bucket: "${legion_data_bucket}"
+      bucket: "${data_bucket}"
       AzureStorageAccount: "${azure_storage_account}"
       AzureStorageSasToken: "${azure_storage_sas_token}"
 %{ endif ~}
@@ -52,10 +52,10 @@ edi:
 
 metrics:
   enabled: true
-  dashboardFolder: /tmp/dashboards/legion
+  dashboardFolder: /tmp/dashboards/odahuflow
 
 connections:
-  - id: legion-examples
+  - id: odahuflow-examples
     spec:
       type: "git"
       uri: "${git_examples_uri}"
@@ -126,11 +126,11 @@ config:
         url: "${feedback_storage_link}"
   connection:
     repository_type: vault
-    # TODO: Remove after implementation of the issue https://github.com/legion-platform/legion/issues/1008
-    decrypt_token: "${legion_connection_decrypt_token}"
+    # TODO: Remove after implementation of the issue https://github.com/legion-platform/odahuflow/issues/1008
+    decrypt_token: "${odahuflow_connection_decrypt_token}"
     vault:
-      secret_engine_path: "legion/connections"
-      role: "legion"
+      secret_engine_path: "odahuflow/connections"
+      role: "odahuflow"
       url: "https://vault.vault:8200"
   deployment:
 %{ if cloud_type == "azure" ~}
@@ -140,9 +140,9 @@ config:
     default_docker_pull_conn_name: docker-ci
     edge:
       host: https://edge.${cluster_name}.${root_domain}
-    namespace: "${legion_deployment_namespace}"
+    namespace: "${odahuflow_deployment_namespace}"
     server:
-      template_folder: /opt/legion/templates
+      template_folder: /opt/odahuFlow/templates
     security:
       jwks:
         enabled: ${model_authorization_enabled}
@@ -154,19 +154,19 @@ config:
     toleration: {}
     node_selector: {}
 %{ endif ~}
-    namespace: "${legion_training_namespace}"
+    namespace: "${odahuflow_training_namespace}"
     output_connection: models-output
     metric_url: "https://mlflow.${cluster_name}.${root_domain}"
     model_trainer:
-      image: "${docker_repo}/k8s-model-trainer:${legion_version}"
+      image: "${docker_repo}/odahuflow-model-trainer:${odahuflow_version}"
 
   packaging:
 %{ if cloud_type == "azure" ~}
     toleration: {}
     node_selector: {}
 %{ endif ~}
-    namespace: "${legion_packaging_namespace}"
+    namespace: "${odahuflow_packaging_namespace}"
     output_connection: models-output
-    service_account: legion-model-packager
+    service_account: odahuflow-model-packager
     model_packager:
-      image: "${docker_repo}/k8s-model-packager:${legion_version}"
+      image: "${docker_repo}/odahuflow-model-packager:${odahuflow_version}"

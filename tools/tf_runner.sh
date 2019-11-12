@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#Script for Legion clusters orchestration
+#Script for Odahuflow clusters orchestration
 
 set -e
 
@@ -15,7 +15,7 @@ function ReadArguments() {
 	while [[ $# -gt 0 ]]; do
 		case "$1" in
 			-h|--help)
-				echo "tf_runner.sh - Run Terraform modules for Legion clusters orchestration."
+				echo "tf_runner.sh - Run Terraform modules for Odahuflow clusters orchestration."
 				echo "Usage: ./tf_runner.sh [OPTIONS]"
 				echo " "
 				echo "options:"
@@ -86,7 +86,7 @@ function IngressTFCrutch() {
 }
 
 function TerraformRun() {
-	MODULES_ROOT="/opt/legion/terraform/env_types/$(GetParam 'cluster_type')/"
+	MODULES_ROOT="/opt/odahuflow/terraform/env_types/$(GetParam 'cluster_type')/"
 	TF_MODULE=$1
 	TF_COMMAND=$2
 	WORK_DIR=$MODULES_ROOT/$TF_MODULE
@@ -150,7 +150,7 @@ function SetupCloudAccess() {
 	esac
 }
 
-# Create Legion cluster
+# Create Odahuflow cluster
 function TerraformCreate() {
 	echo 'INFO : Applying k8s create TF module'
 	case $(GetParam "cluster_type") in
@@ -167,22 +167,22 @@ function TerraformCreate() {
 	FetchKubeConfig
 	echo 'INFO : Init HELM'
 	TerraformRun helm_init apply
-	echo 'INFO : Setup K8S Legion dependencies'
+	echo 'INFO : Setup K8S Odahuflow dependencies'
 	TerraformRun k8s_setup apply
-	echo 'INFO : Deploy Legion components'
-	TerraformRun legion apply
+	echo 'INFO : Deploy Odahuflow components'
+	TerraformRun odahuflow apply
 }
 
-# Destroy Legion cluster
+# Destroy Odahuflow cluster
 function TerraformDestroy() {
 	if CheckCluster; then
 		FetchKubeConfig
 		echo 'INFO : Init HELM'
 		helm init --client-only
 
-		echo 'INFO : Destroy Legion components'
-		TerraformRun legion destroy
-		echo 'INFO : Destroy K8S Legion dependencies'
+		echo 'INFO : Destroy Odahuflow components'
+		TerraformRun odahuflow destroy
+		echo 'INFO : Destroy K8S Odahuflow dependencies'
 		TerraformRun k8s_setup destroy
 		echo 'INFO : Destroy Helm'
 		TerraformRun helm_init destroy
@@ -264,7 +264,7 @@ SetupCloudAccess
 
 export TF_IN_AUTOMATION=true
 export TF_PLUGIN_CACHE_DIR=/tmp/.terraform/cache && mkdir -p $TF_PLUGIN_CACHE_DIR
-export MODULES_ROOT="/opt/legion/terraform/env_types/$(GetParam 'cluster_type')"
+export MODULES_ROOT="/opt/odahuflow/terraform/env_types/$(GetParam 'cluster_type')"
 
 IngressTFCrutch "$MODULES_ROOT/../../../modules/k8s/nginx-ingress/"
 

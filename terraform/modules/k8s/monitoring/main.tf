@@ -7,7 +7,7 @@ resource "kubernetes_namespace" "monitoring" {
       name = var.monitoring_namespace
     }
     labels = {
-      project       = "legion"
+      project       = "odahuflow"
       k8s-component = "monitoring"
     }
     name = var.monitoring_namespace
@@ -34,7 +34,7 @@ data "template_file" "monitoring_values" {
   template = file("${path.module}/templates/monitoring.yaml")
   vars = {
     monitoring_namespace  = var.monitoring_namespace
-    legion_infra_version  = var.legion_infra_version
+    odahu_infra_version   = var.odahu_infra_version
     cluster_name          = var.cluster_name
     root_domain           = var.root_domain
     docker_repo           = var.docker_repo
@@ -48,9 +48,9 @@ data "template_file" "monitoring_values" {
 resource "helm_release" "monitoring" {
   name       = "monitoring"
   chart      = "monitoring"
-  version    = var.legion_infra_version
+  version    = var.odahu_infra_version
   namespace  = var.monitoring_namespace
-  repository = "legion"
+  repository = "odahuflow"
   timeout    = "600"
 
   values = [

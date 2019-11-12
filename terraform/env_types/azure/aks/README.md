@@ -27,7 +27,7 @@ $ az provider register -n Microsoft.ContainerService
 
 - Create resource group for Terraform remote backend and all base resources of AKS cluster:
 ```bash
-$ export CLUSTER_NAME="legion-test"
+$ export CLUSTER_NAME="odahuflow-test"
 $ export RG=${CLUSTER_NAME}
 $ az group create --name $RG --location eastus --tags env=Testing cluster=$CLUSTER_NAME
 ```

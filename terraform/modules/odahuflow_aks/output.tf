@@ -19,22 +19,22 @@ output "dockercfg" {
 }
 
 output "model_output_bucket" {
-  value = "${var.legion_data_bucket}/output"
+  value = "${var.data_bucket}/output"
 }
 
 output "model_output_secret" {
-  value     = "${azurerm_storage_account.legion_data.primary_blob_endpoint}${data.azurerm_storage_account_sas.legion.sas}"
+  value     = "${azurerm_storage_account.odahuflow_data.primary_blob_endpoint}${data.azurerm_storage_account_sas.odahuflow.sas}"
   sensitive = true
 }
 
 output "model_output_web_ui_link" {
-  value = "${azurerm_storage_container.legion_bucket.id}/output"
+  value = "${azurerm_storage_container.odahuflow_bucket.id}/output"
 }
 
 output "feedback_storage_link" {
-  value = "${azurerm_storage_container.legion_bucket.id}/model_log"
+  value = "${azurerm_storage_container.odahuflow_bucket.id}/model_log"
 }
 
 output "storage_account" {
-  value = azurerm_storage_account.legion_data.name
+  value = azurerm_storage_account.odahuflow_data.name
 }

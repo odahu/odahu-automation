@@ -1,6 +1,6 @@
 variable "cluster_name" {
-  description = "Legion cluster name"
-  default     = "legion"
+  description = "Odahuflow cluster name"
+  default     = "odahuflow"
 }
 
 variable "location" {

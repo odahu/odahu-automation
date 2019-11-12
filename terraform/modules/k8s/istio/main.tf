@@ -82,8 +82,8 @@ resource "kubernetes_secret" "tls_knative" {
 resource "helm_release" "knative" {
   name       = "knative"
   chart      = "knative"
-  version    = var.legion_infra_version
+  version    = var.odahu_infra_version
   namespace  = var.knative_namespace
-  repository = "legion"
+  repository = "odahuflow"
   depends_on = [kubernetes_namespace.knative, helm_release.istio]
 }

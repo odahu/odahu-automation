@@ -23,8 +23,8 @@ resource "helm_release" "gke_saa" {
   count      = local.gcp_resource_count
   name       = "gke-saa"
   chart      = "k8s-gke-saa"
-  version    = var.legion_infra_version
-  repository = "legion"
+  version    = var.odahu_infra_version
+  repository = "odahuflow"
   namespace  = "kube-system"
 
   values = [

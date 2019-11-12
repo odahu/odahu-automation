@@ -6,8 +6,8 @@ variable "project_id" {
 }
 
 variable "cluster_name" {
-  default     = "legion"
-  description = "Legion cluster name"
+  default     = "odahuflow"
+  description = "Odahuflow cluster name"
 }
 
 variable "zone" {
@@ -15,7 +15,7 @@ variable "zone" {
 }
 
 variable "root_domain" {
-  description = "Legion cluster root domain"
+  description = "Odahuflow cluster root domain"
 }
 
 ################
@@ -72,7 +72,7 @@ variable "ssh_user" {
 }
 
 variable "ssh_public_key" {
-  description = "SSH public key for Legion cluster nodes and bastion host"
+  description = "SSH public key for Odahuflow cluster nodes and bastion host"
 }
 
 variable "cluster_autoscaling_cpu_max_limit" {
@@ -142,7 +142,7 @@ variable "training_node_pool" {
       machine_type = "n1-highcpu-8"
       disk_size_gb = "100"
       labels = {
-        "mode" = "legion-training"
+        "mode" = "odahuflow-training"
       }
       taint = [{
         key    = "dedicated"
@@ -160,7 +160,7 @@ variable "training_gpu_node_pool" {
       machine_type = "n1-highcpu-8"
       disk_size_gb = "100"
       labels = {
-        "mode" = "legion-training-gpu"
+        "mode" = "odahuflow-training-gpu"
       }
       guest_accelerator = [{
         type  = "nvidia-tesla-p100"
@@ -180,7 +180,7 @@ variable "packaging_node_pool" {
     node_config = {
       disk_size_gb = "100"
       labels = {
-        "mode" = "legion-packaging"
+        "mode" = "odahuflow-packaging"
       }
       taint = [{
         key    = "dedicated"
@@ -200,7 +200,7 @@ variable "model_deployment_node_pool" {
 
     node_config = {
       labels = {
-        "mode" = "legion-deployment"
+        "mode" = "odahuflow-deployment"
       }
       taint = [{
         key    = "dedicated"
