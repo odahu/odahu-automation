@@ -1,6 +1,6 @@
 variable "cluster_type" {
-  default     = "legion"
-  description = "Legion cluster type"
+  default     = "odahuflow"
+  description = "Odahuflow cluster type"
 }
 
 variable "image_repo" {

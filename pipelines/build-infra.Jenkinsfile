@@ -55,6 +55,8 @@ pipeline {
             legionCicdGitlabKey = "legion-profiles-gitlab-key"
             sharedLibPath = "legion-cicd/pipelines/legionPipeline.groovy"
             pathToCharts= "${WORKSPACE}/helms"
+
+            param_dockerhub_publishing_enabled = "${params.DockerHubPublishingEnabled}"
     }
 
     stages {
@@ -77,16 +79,13 @@ pipeline {
                         """
 
                         print ("Load legion pipeline common library")
-                        legion = load "${env.sharedLibPath}"
+                        cicdLibrary = load "${env.sharedLibPath}"
                     }
-
-                    print("Check code for security issues")
-                    sh "bash install-git-secrets-hook.sh install_hooks && git secrets --scan -r"
 
                     verFiles = [
                             'version.info'
                     ]
-                    legion.setBuildMeta(verFiles)
+                    cicdLibrary.setBuildMeta(verFiles)
                 }
             }
         }
@@ -96,7 +95,7 @@ pipeline {
             steps {
                 script {
                     if (env.param_stable_release.toBoolean() && env.param_push_git_tag.toBoolean()){
-                        legion.setGitReleaseTag("${env.param_git_deploy_key}")
+                        cicdLibrary.setGitReleaseTag("${env.param_git_deploy_key}")
 
                         print("Set tag to profiles repo")
                         sshagent(["${env.legionProfilesGitlabKey}"]) {
@@ -109,34 +108,11 @@ pipeline {
                             """
                         }
                         dir("${WORKSPACE}/legion-profiles"){
-                            legion.setGitReleaseTag("${env.legionProfilesGitlabKey}")
+                            cicdLibrary.setGitReleaseTag("${env.legionProfilesGitlabKey}")
                         }
                     }
                     else {
                         print("Skipping release git tag push")
-                    }
-                }
-            }
-        }
-
-        stage("Docker login") {
-            steps {
-                withCredentials([[
-                 $class: 'UsernamePasswordMultiBinding',
-                 credentialsId: 'nexus-local-repository',
-                 usernameVariable: 'USERNAME',
-                 passwordVariable: 'PASSWORD']]) {
-                    sh "docker login -u ${USERNAME} -p ${PASSWORD} ${env.param_docker_registry}"
-                }
-                script {
-                    if (env.param_stable_release.toBoolean()) {
-                        withCredentials([[
-                        $class: 'UsernamePasswordMultiBinding',
-                        credentialsId: 'dockerhub',
-                        usernameVariable: 'USERNAME',
-                        passwordVariable: 'PASSWORD']]) {
-                            sh "docker login -u ${USERNAME} -p ${PASSWORD}"
-                        }
                     }
                 }
             }
@@ -147,8 +123,8 @@ pipeline {
                 stage("Build Terraform") {
                     steps {
                         script {
-                            legion.buildLegionImage('k8s-terraform', ".", "containers/terraform/Dockerfile")
-                            legion.uploadDockerImage('k8s-terraform')
+                            cicdLibrary.buildLegionImage('odahuflow-automation', ".", "containers/terraform/Dockerfile")
+                            cicdLibrary.uploadDockerImage('odahuflow-automation', env.param_stable_release.toBoolean() && env.param_dockerhub_publishing_enabled.toBoolean())
                         }
                     }
                 }
@@ -158,7 +134,7 @@ pipeline {
         stage('Package and upload helm charts'){
             steps {
                 script {
-                    legion.uploadHelmCharts(env.pathToCharts)
+                    cicdLibrary.uploadHelmCharts(env.pathToCharts)
                 }
             }
         }
@@ -167,7 +143,7 @@ pipeline {
             steps {
                 script {
                     if (env.param_stable_release.toBoolean() && env.param_update_version_string.toBoolean()) {
-                        legion.updateVersionString(env.versionFile)
+                        cicdLibrary.updateVersionString(env.versionFile)
                     }
                     else {
                         print("Skipping version string update")
@@ -180,7 +156,7 @@ pipeline {
             steps {
                 script {
                     if (env.param_update_master.toBoolean()){
-                        legion.updateMasterBranch()
+                        cicdLibrary.updateMasterBranch()
                         }
                     else {
                         print("Skipping Master branch update")
@@ -193,9 +169,10 @@ pipeline {
     post {
         always {
             script {
+                sh "sudo chmod -R 777 ${WORKSPACE}"
                 dir ("${WORKSPACE}") {
-                    legion = load "${env.sharedLibPath}"
-                    legion.notifyBuild(currentBuild.currentResult)
+                    cicdLibrary = load "${env.sharedLibPath}"
+                    cicdLibrary.notifyBuild(currentBuild.currentResult)
                 }
             }
             deleteDir()

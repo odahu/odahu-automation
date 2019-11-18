@@ -76,12 +76,12 @@ resource "null_resource" "add_helm_repository_stable" {
   depends_on = [null_resource.reinit_helm_client]
 }
 
-resource "null_resource" "add_helm_repository_legion" {
+resource "null_resource" "add_helm_repository_odahuflow" {
   triggers = {
     build_number = timestamp()
   }
   provisioner "local-exec" {
-    command = "helm repo add legion ${var.legion_helm_repo}"
+    command = "helm repo add odahuflow ${var.helm_repo}"
   }
   depends_on = [null_resource.add_helm_repository_stable]
 }
@@ -93,7 +93,7 @@ resource "null_resource" "add_helm_repository_istio" {
   provisioner "local-exec" {
     command = "helm repo add istio ${var.istio_helm_repo}"
   }
-  depends_on = [null_resource.add_helm_repository_legion]
+  depends_on = [null_resource.add_helm_repository_odahuflow]
 }
 
 resource "null_resource" "add_helm_vault_repository" {

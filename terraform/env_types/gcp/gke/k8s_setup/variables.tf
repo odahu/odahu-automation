@@ -25,32 +25,32 @@ variable "aws_region" {
 }
 
 variable "config_context_auth_info" {
-  description = "Legion cluster context auth"
+  description = "Odahuflow cluster context auth"
 }
 
 variable "config_context_cluster" {
-  description = "Legion cluster context name"
+  description = "Odahuflow cluster context name"
 }
 
 variable "cluster_name" {
-  default     = "legion"
-  description = "Legion cluster name"
+  default     = "odahuflow"
+  description = "Odahuflow cluster name"
 }
 
-variable "legion_helm_repo" {
-  description = "Legion helm repo"
+variable "helm_repo" {
+  description = "Odahuflow helm repo"
 }
 
-variable "legion_infra_version" {
-  description = "Legion infra release version"
+variable "odahu_infra_version" {
+  description = "Odahuflow infra release version"
 }
 
 variable "root_domain" {
-  description = "Legion cluster root domain"
+  description = "Odahuflow cluster root domain"
 }
 
 variable "docker_repo" {
-  description = "Legion Docker repo url"
+  description = "Odahuflow Docker repo url"
 }
 
 variable "dns_zone_name" {
@@ -62,11 +62,11 @@ variable "network_name" {
 }
 
 variable "tls_key" {
-  description = "TLS key for Legion cluster"
+  description = "TLS key for Odahuflow cluster"
 }
 
 variable "tls_crt" {
-  description = "TLS certificate file for Legion cluster"
+  description = "TLS certificate file for Odahuflow cluster"
 }
 
 ########################

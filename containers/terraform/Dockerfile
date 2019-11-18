@@ -8,7 +8,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
 # install system utilities
 RUN apt-get update && apt-get install -y \
     apt-transport-https bash curl tar openssh-client gnupg python3=3.6.7-1~18.04 python3-distutils\
-    sshpass git ca-certificates apt-utils locales wget jq unzip rubygems
+    sshpass git ca-certificates apt-utils locales wget jq unzip
 
 # setup locale
 RUN locale-gen en_US.UTF-8 && update-locale LANG=en_US.UTF-8
@@ -42,17 +42,15 @@ RUN curl -sL https://packages.microsoft.com/keys/microsoft.asc | apt-key add - &
     echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ $(grep VERSION_CODENAME /etc/os-release | cut -d '=' -f 2) main" | tee /etc/apt/sources.list.d/azure-cli.list && \
     apt-get update -y && apt-get install azure-cli -y && apt-get clean && apt-get autoclean && rm -rf /var/lib/apt/lists/*
 
-# Install AWS CLI and Hiera
-RUN curl -sL https://bootstrap.pypa.io/get-pip.py | python3 && \
-    pip3 install pyyaml==5.1.1 awscli && \
-    gem install hiera hiera-eyaml
 
-COPY tools/hiera_exporter_helper.sh /usr/bin/hiera_exporter_helper
-COPY tools/hiera_exporter /opt/legion/tools/hiera_exporter
+# Install AWS CLI
+RUN curl -sL https://bootstrap.pypa.io/get-pip.py | python3 && \
+    pip3 install awscli
+
 COPY tools/tf_runner.sh /usr/bin/tf_runner
 
-# Deploy Legion
-COPY terraform /opt/legion/terraform
-COPY version.info /opt/legion/version.info
+# Deploy odahuflow
+COPY terraform /opt/odahuflow/terraform
+COPY version.info /opt/odahuflow/version.info
 
-WORKDIR /opt/legion
+WORKDIR /opt/odahuflow

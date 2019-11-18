@@ -23,13 +23,13 @@ prometheus-operator:
     ingress:
       enabled: true
       hosts:
-        - "alertmanager.legion-test.org"
-        - "alertmanager.local.grafana.legion-test.org"
+        - "alertmanager.odahuflow-test.org"
+        - "alertmanager.local.grafana.odahuflow-test.org"
       tls:
-        - secretName: "legion-test.org-tls"
-          hosts: ["alertmanager.legion-test.org"]
+        - secretName: "odahuflow-test.org-tls"
+          hosts: ["alertmanager.odahuflow-test.org"]
       annotations:
-        nginx.ingress.kubernetes.io/auth-signin: "https://auth.legion.epm.org/oauth2/start?rd=https://$host$request_uri$is_args$args"
+        nginx.ingress.kubernetes.io/auth-signin: "https://auth.odahuflow.epm.org/oauth2/start?rd=https://$host$request_uri$is_args$args"
         nginx.ingress.kubernetes.io/auth-url: "http://oauth2-proxy.kube-system.svc.cluster.local:4180/oauth2/auth"
     alertmanagerSpec:
       resources:
@@ -52,13 +52,13 @@ prometheus-operator:
     ingress:
       enabled: true
       hosts:
-        - "prometheus.legion-test.org"
-        - "prometheus.local.grafana.legion-test.org"
+        - "prometheus.odahuflow-test.org"
+        - "prometheus.local.grafana.odahuflow-test.org"
       tls:
-        - secretName: "legion-test.org-tls"
-          hosts: ["prometheus.legion-test.org"]
+        - secretName: "odahuflow-test.org-tls"
+          hosts: ["prometheus.odahuflow-test.org"]
       annotations:
-        nginx.ingress.kubernetes.io/auth-signin: "https://auth.legion.epm.org/oauth2/start?rd=https://$host$request_uri$is_args$args"
+        nginx.ingress.kubernetes.io/auth-signin: "https://auth.odahuflow.epm.org/oauth2/start?rd=https://$host$request_uri$is_args$args"
         nginx.ingress.kubernetes.io/auth-url: "http://oauth2-proxy.kube-system.svc.cluster.local:4180/oauth2/auth"
     prometheusSpec:
       resources:
@@ -405,7 +405,7 @@ grafana:
 coreDns:
   enabled: false
 
-legion-grafana:
+odahuflow-grafana:
   enabled: true
   defaultDashboardsEnabled: true
   fullnameOverride: grafana
@@ -443,13 +443,13 @@ legion-grafana:
   ingress:
     enabled: true
     hosts:
-      - "grafana.legion-test.org"
-      - "grafana.local.grafana.legion-test.org"
+      - "grafana.odahuflow-test.org"
+      - "grafana.local.grafana.odahuflow-test.org"
     tls:
-      - secretName: "legion-test.org-tls"
-        hosts: ["grafana.legion-test.org"]
+      - secretName: "odahuflow-test.org-tls"
+        hosts: ["grafana.odahuflow-test.org"]
     annotations:
-      nginx.ingress.kubernetes.io/auth-signin: "https://auth.legion.epm.org/oauth2/start?rd=https://$host$request_uri$is_args$args"
+      nginx.ingress.kubernetes.io/auth-signin: "https://auth.odahuflow.epm.org/oauth2/start?rd=https://$host$request_uri$is_args$args"
       nginx.ingress.kubernetes.io/auth-url: "http://oauth2-proxy.kube-system.svc.cluster.local:4180/oauth2/auth"
   env:
     GF_AUTH_ANONYMOUS_ENABLED: "true"
@@ -490,14 +490,14 @@ legion-grafana:
         editable: true
         options:
           path: /tmp/dashboards/monitoring
-      - name: 'Legion'
+      - name: 'odahuflow'
         orgId: 1
-        folder: 'Legion'
+        folder: 'odahuflow'
         type: file
         disableDeletion: false
         editable: true
         options:
-          path: /tmp/dashboards/legion
+          path: /tmp/dashboards/odahuflow
       - name: 'Kubernetes'
         orgId: 1
         folder: 'Kubernetes'

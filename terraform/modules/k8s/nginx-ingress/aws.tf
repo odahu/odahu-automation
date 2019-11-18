@@ -1,10 +1,6 @@
-locals {
-  aws_resouce_count = var.cluster_type == "aws/eks" ? 1 : 0
-}
-
 # Data
 data "aws_vpc" "default" {
-  count  = local.aws_resouce_count
+  count = local.aws_resource_count
   filter {
     name   = "tag:Name"
     values = [var.cluster_name]
@@ -25,7 +21,7 @@ data "aws_security_group" "lb" {
 }
 
 data "aws_autoscaling_groups" "default" {
-  count  = local.aws_resource_count
+  count = local.aws_resource_count
   filter {
     name   = "auto-scaling-group"
     values = ["tf-${var.cluster_name}-node"]

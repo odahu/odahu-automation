@@ -2,10 +2,10 @@
 # K8S setup
 ########################################################
 module "base_setup" {
-  source               = "../../../../modules/k8s/base_setup"
-  cluster_name         = var.cluster_name
-  tls_secret_key       = var.tls_key
-  tls_secret_crt       = var.tls_crt
+  source         = "../../../../modules/k8s/base_setup"
+  cluster_name   = var.cluster_name
+  tls_secret_key = var.tls_key
+  tls_secret_crt = var.tls_crt
 }
 
 module "nginx-ingress" {
@@ -21,11 +21,11 @@ module "nginx-ingress" {
 }
 
 module "dashboard" {
-  source               = "../../../../modules/k8s/dashboard"
-  cluster_name         = var.cluster_name
-  root_domain          = var.root_domain
-  tls_secret_key       = var.tls_key
-  tls_secret_crt       = var.tls_crt
+  source         = "../../../../modules/k8s/dashboard"
+  cluster_name   = var.cluster_name
+  root_domain    = var.root_domain
+  tls_secret_key = var.tls_key
+  tls_secret_crt = var.tls_crt
 }
 
 module "auth" {
@@ -45,8 +45,8 @@ module "auth" {
 module "monitoring" {
   source               = "../../../../modules/k8s/monitoring"
   cluster_name         = var.cluster_name
-  legion_helm_repo     = var.legion_helm_repo
-  legion_infra_version = var.legion_infra_version
+  helm_repo            = var.helm_repo
+  odahu_infra_version  = var.odahu_infra_version
   alert_slack_url      = var.alert_slack_url
   root_domain          = var.root_domain
   grafana_admin        = var.grafana_admin
@@ -62,23 +62,23 @@ module "istio" {
   root_domain          = var.root_domain
   cluster_name         = var.cluster_name
   monitoring_namespace = var.monitoring_namespace
-  legion_helm_repo     = var.legion_helm_repo
-  legion_infra_version = var.legion_infra_version
+  helm_repo            = var.helm_repo
+  odahu_infra_version  = var.odahu_infra_version
   tls_secret_key       = var.tls_key
   tls_secret_crt       = var.tls_crt
 }
 
 module "gke-saa" {
-  source               = "../../../../modules/k8s/gke-saa"
-  cluster_type         = var.cluster_type
-  legion_helm_repo     = var.legion_helm_repo
-  legion_infra_version = var.legion_infra_version
+  source              = "../../../../modules/k8s/gke-saa"
+  cluster_type        = var.cluster_type
+  helm_repo           = var.helm_repo
+  odahu_infra_version = var.odahu_infra_version
 }
 
 module "tekton" {
-  source = "../../../../modules/k8s/tekton"
-  legion_helm_repo     = var.legion_helm_repo
-  legion_infra_version = var.legion_infra_version
+  source              = "../../../../modules/k8s/tekton"
+  helm_repo           = var.helm_repo
+  odahu_infra_version = var.odahu_infra_version
 }
 
 module "vault" {

@@ -6,8 +6,8 @@ variable "project_id" {
 }
 
 variable "cluster_name" {
-  default     = "legion"
-  description = "Legion cluster name"
+  default     = "odahuflow"
+  description = "Odahuflow cluster name"
 }
 
 variable "zone" {
@@ -31,7 +31,7 @@ variable "infra_cidr" {
 }
 
 variable "root_domain" {
-  description = "Legion cluster root domain"
+  description = "Odahuflow cluster root domain"
 }
 
 variable "aws_vpc_id" {
@@ -109,7 +109,7 @@ variable "dns_zone_name" {
 }
 
 variable "ssh_key" {
-  description = "SSH public key for Legion cluster nodes and bastion host"
+  description = "SSH public key for Odahuflow cluster nodes and bastion host"
 }
 
 #############

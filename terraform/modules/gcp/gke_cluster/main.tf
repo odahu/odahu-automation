@@ -3,7 +3,7 @@ data "http" "external_ip" {
 }
 
 locals {
-  allowed_subnets = concat(list("${chomp(data.http.external_ip.body)}/32"), var.allowed_ips)
+  allowed_subnets    = concat(list("${chomp(data.http.external_ip.body)}/32"), var.allowed_ips)
   initial_node_count = length(var.node_locations) == 0 ? var.initial_node_count : floor(var.initial_node_count / length(var.node_locations))
 }
 
@@ -95,7 +95,7 @@ resource "google_container_cluster" "cluster" {
   }
 
   resource_labels = {
-    "project"      = "legion"
+    "project"      = "odahuflow"
     "cluster_name" = var.cluster_name
   }
 }
@@ -144,7 +144,7 @@ resource "google_container_node_pool" "cluster_node_pools" {
     }
 
     labels = merge(lookup(each.value.node_config, "labels", {}), {
-      "project" = "legion"
+      "project" = "odahuflow"
     })
 
     dynamic taint {
@@ -206,7 +206,7 @@ resource "google_compute_instance" "gke_bastion" {
   tags = [var.bastion_tag]
 
   labels = {
-    "project"      = "legion"
+    "project"      = "odahuflow"
     "cluster_name" = var.cluster_name
   }
 

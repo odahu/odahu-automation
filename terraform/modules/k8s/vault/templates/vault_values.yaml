@@ -18,24 +18,24 @@ persistence:
 vault:
   externalConfig:
     policies:
-      - name: legion
-        rules: path "legion/connections/*" {
+      - name: odahuflow
+        rules: path "odahuflow/connections/*" {
           capabilities = ["create", "read", "update", "delete", "list"]
           }
     auth:
       - type: kubernetes
         roles:
-          - name: legion
+          - name: odahuflow
             bound_service_account_names:
-              - "legion-edi"
-              - "legion-operator"
-            bound_service_account_namespaces: ["legion"]
-            policies: legion
+              - "odahuflow-edi"
+              - "odahuflow-operator"
+            bound_service_account_namespaces: ["odahuflow"]
+            policies: odahuflow
             ttl: 720h
     secrets:
-      - path: legion/connections
+      - path: odahuflow/connections
         type: kv
-        description: Legion connection storage.
+        description: Odahuflow connection storage.
   config:
     listener:
       tcp:

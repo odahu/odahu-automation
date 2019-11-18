@@ -26,7 +26,7 @@ LEGION_PROFILES_DIR :=
 MODEL_REFERENCE :=
 TF_APPLY_CLI_ARGS :=
 
-EXPORT_HIERA_DOCKER_IMAGE := legion/k8s-terraform:${BUILD_TAG}
+EXPORT_HIERA_DOCKER_IMAGE := odahu/odahuflow-automation:${BUILD_TAG}
 
 -include .env
 
@@ -76,9 +76,15 @@ terraform-fmt:
         terraform fmt $$module_path ; \
     done
 
+## terraform-fmt-check: Check that terraform modules are formatted
+terraform-fmt-check:
+	set -e; for module_path in $$(${FIND_ALL_TER_MODULES_COMMAND}) ; do \
+        terraform fmt -check $$module_path ; \
+    done
+
 ## terraform-validate: Validate all legion terraform modules
 terraform-validate:
-	for module_path in $$(${FIND_ALL_TER_MODULES_COMMAND}) ; do \
+	set -e; for module_path in $$(${FIND_ALL_TER_MODULES_COMMAND}) ; do \
 	    cd $$module_path ; \
 	    echo Current module: $$module_path ; \
 	    terraform init -backend=false &> /dev/null && \
@@ -88,35 +94,11 @@ terraform-validate:
 
 ## docker-build-terraform: Build terraform docker image
 docker-build-terraform:
-	docker build -t legion/k8s-terraform:${BUILD_TAG} -f containers/terraform/Dockerfile .
+	docker build -t legion/odahuflow-automation:${BUILD_TAG} -f containers/terraform/Dockerfile .
 
-## export-hiera: Export hiera data
-export-hiera:
-	set -e
-	$(call verify_existence,CLUSTER_NAME)
-	$(call verify_existence,HIERA_KEYS_DIR)
-	$(call verify_existence,SECRET_DIR)
-	$(call verify_existence,CLOUD_PROVIDER)
-	$(call verify_existence,EXPORT_HIERA_DOCKER_IMAGE)
-	$(call verify_existence,LEGION_PROFILES_DIR)
-
-	mkdir -p ${SECRET_DIR}
-	docker run \
-	           --net host \
-	           -v ${HIERA_KEYS_DIR}:/opt/legion/.hiera_keys \
-	           -v ${LEGION_PROFILES_DIR}:/opt/legion/legion-profiles \
-	           -v ${SECRET_DIR}:/opt/legion/.secrets \
-	           -e CLUSTER_NAME=${CLUSTER_NAME} \
-	           -e CLOUD_PROVIDER=${CLOUD_PROVIDER} \
-	           ${EXPORT_HIERA_DOCKER_IMAGE} hiera_exporter_helper
-
-## encrypt-value: Enctypt the value using hiera
-encrypt-value:
-	echo ${VALUE} | docker run -i \
-	                       -v ${HIERA_KEYS_DIR}:/opt/legion/keys \
-	                       --workdir /opt/legion \
-	                       ${EXPORT_HIERA_DOCKER_IMAGE} \
-	                       eyaml encrypt --stdin -o string
+## install-vulnerabilities-checker: Install the vulnerabilities-checker
+install-vulnerabilities-checker:
+	./install-git-secrets-hook.sh install_binaries
 
 ## check-vulnerabilities: Сheck vulnerabilities in the source code
 check-vulnerabilities:
@@ -126,5 +108,5 @@ check-vulnerabilities:
 ## help: Show the help message
 help: Makefile
 	@echo "Choose a command run in "$(PROJECTNAME)":"
-	@sed -n 's/^##//p' $< | column -t -s ':' |  sed -e 's/^/ /'
+	@fgrep -h "##" $(MAKEFILE_LIST) | fgrep -v fgrep | sort | sed -e 's/\\$$//' | sed -e 's/##//'
 	@echo

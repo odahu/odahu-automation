@@ -2,20 +2,20 @@
 # Common
 ##################
 variable "cluster_name" {
-  default     = "legion"
-  description = "Legion cluster name"
+  default     = "odahuflow"
+  description = "Odahuflow cluster name"
 }
 
 variable "root_domain" {
-  description = "Legion cluster root domain"
+  description = "Odahuflow cluster root domain"
 }
 
 variable "tls_secret_crt" {
-  description = "Legion cluster TLS certificate"
+  description = "Odahuflow cluster TLS certificate"
 }
 
 variable "tls_secret_key" {
-  description = "Legion cluster TLS key"
+  description = "Odahuflow cluster TLS key"
 }
 
 ########################

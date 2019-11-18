@@ -129,7 +129,7 @@ prometheus-operator:
             spec:
               storageClassName: "${grafana_storage_class}"
 
-legion-grafana:
+odahuflow-grafana:
   adminUser: "${grafana_admin}"
   adminPassword:  "${grafana_pass}"
   persistence:

@@ -1,11 +1,11 @@
 variable "project_id" {
-  default = ""
+  default     = ""
   description = "Target project id"
 }
 
 variable "cluster_name" {
-  default     = "legion"
-  description = "Legion cluster name"
+  default     = "odahuflow"
+  description = "Odahuflow cluster name"
 }
 
 variable "region" {
@@ -13,6 +13,6 @@ variable "region" {
   description = "Region of resources"
 }
 
-variable "legion_data_bucket" {
-  description = "Legion data storage bucket"
+variable "data_bucket" {
+  description = "Odahuflow data storage bucket"
 }

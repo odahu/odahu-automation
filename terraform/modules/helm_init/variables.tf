@@ -1,5 +1,5 @@
-variable "legion_helm_repo" {
-  description = "Legion helm repo"
+variable "helm_repo" {
+  description = "Odahuflow helm repo"
 }
 
 variable "istio_helm_repo" {

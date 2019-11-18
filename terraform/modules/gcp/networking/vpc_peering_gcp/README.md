@@ -2,7 +2,7 @@
 
 | Name | Description | Type | Default | Required |
 |------|-------------|:----:|:-----:|:-----:|
-| cluster\_name | Legion cluster name | string | `"legion"` | no |
+| cluster\_name | Odahuflow cluster name | string | `"odahuflow"` | no |
 | gcp\_network\_1\_name | VPC Network name to peer with at GCP | string | n/a | yes |
 | gcp\_network\_1\_range | VPC Network name to peer with at GCP | list | n/a | yes |
 | gcp\_network\_2\_name | VPC Network name to peer with at GCP | string | n/a | yes |

@@ -1,6 +1,6 @@
 dependencies:
   - name: grafana
-    alias: legion-grafana
+    alias: odahuflow-grafana
     version: "3.5.3"
     repository: "@stable"
   - name: prometheus-operator

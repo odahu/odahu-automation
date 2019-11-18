@@ -2,22 +2,22 @@
 
 variable "azure_resource_group" {
   description = "Azure base resource group name"
-  default     = "legion-rg"
+  default     = "odahuflow-rg"
 }
 
 ############################################################################################################
 
 variable "cluster_name" {
-  description = "Legion k8s cluster name"
-  default     = "legion"
+  description = "Odahuflow k8s cluster name"
+  default     = "odahuflow"
 }
 
 variable "tiller_image" {
   default = "gcr.io/kubernetes-helm/tiller:v2.14.3"
 }
 
-variable "legion_helm_repo" {
-  description = "Legion helm repo"
+variable "helm_repo" {
+  description = "Odahuflow helm repo"
 }
 
 variable "istio_helm_repo" {

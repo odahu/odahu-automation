@@ -32,7 +32,7 @@ resource "azurerm_kubernetes_cluster" "aks" {
   node_resource_group = "${var.resource_group}-k8s"
   dns_prefix          = var.aks_dns_prefix
   kubernetes_version  = var.k8s_version
-  
+
   linux_profile {
     admin_username = var.ssh_user
     ssh_key {
@@ -59,8 +59,8 @@ resource "azurerm_kubernetes_cluster" "aks" {
       max_pods  = lookup(agent_pool_profile.value, "max_pods", "32")
 
       node_taints = [
-        for taint in lookup(agent_pool_profile.value.node_config, "taint", []):
-          "${taint.key}=${taint.value}:${taint.effect}"
+        for taint in lookup(agent_pool_profile.value.node_config, "taint", []) :
+        "${taint.key}=${taint.value}:${taint.effect}"
       ]
     }
   }
@@ -78,7 +78,7 @@ resource "azurerm_kubernetes_cluster" "aks" {
       enabled = false
     }
     oms_agent {
-      enabled = var.aks_analytics_workspace_id == "" ? false : true
+      enabled                    = var.aks_analytics_workspace_id == "" ? false : true
       log_analytics_workspace_id = var.aks_analytics_workspace_id == "" ? null : var.aks_analytics_workspace_id
     }
   }
@@ -100,7 +100,7 @@ resource "azurerm_kubernetes_cluster" "aks" {
   # Temporary hack until https://github.com/terraform-providers/terraform-provider-azurerm/issues/4322 is fixed
   provisioner "local-exec" {
     interpreter = ["bash", "-c"]
-    command = <<EOF
+    command     = <<EOF
       if [ -z "$(az extension list | jq -r '.[] | select(.name == "aks-preview")')" ]; then
         az extension add -n aks-preview -y
       else

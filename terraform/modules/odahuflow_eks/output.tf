@@ -24,15 +24,15 @@ output "dockercfg" {
   }
 }
 
-output "legion_data_bucket" {
+output "data_bucket" {
   value = aws_s3_bucket.this.id
 }
 
-output "legion_data_bucket_region" {
+output "data_bucket_region" {
   value = aws_s3_bucket.this.region
 }
 
-output "legion_collector_iam_role" {
+output "odahuflow_collector_iam_role" {
   value = aws_iam_role.collector.name
 }
 
@@ -61,5 +61,5 @@ output "bucket_registry_name" {
 }
 
 output "feedback_storage_link" {
-  value = "https://s3.console.aws.amazon.com/s3/buckets/${var.legion_data_bucket}/?region=${var.region}"
+  value = "https://s3.console.aws.amazon.com/s3/buckets/${var.data_bucket}/?region=${var.region}"
 }

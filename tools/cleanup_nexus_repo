@@ -45,7 +45,7 @@ ALLOWED_RESPONSE_CODES = [200, 201, 202, 204]
 
 def get_builds(repository: str, options: Options):
     """
-    Get list of Legion artifacts at Nexus repo matching search filters
+    Get list of Odahuflow artifacts at Nexus repo matching search filters
 
     :param repository: Nexus repository name
     :type repository: str
@@ -191,7 +191,7 @@ def delete_builds(builds: List[dict], options: Options):
 
 def work(options: Options):
     """
-    Get Legion artifacts matching build_name (if specified) from Nexus repository
+    Get Odahuflow artifacts matching build_name (if specified) from Nexus repository
     and delete those who older than remaining_days
 
     :param options: configuration options
@@ -226,7 +226,7 @@ def work(options: Options):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Script for Legion artifacts cleanup at Nexus repository')
+    parser = argparse.ArgumentParser(description='Script for Odahuflow artifacts cleanup at Nexus repository')
     parser.add_argument('nexus_url', type=str, help='Nexus repo url')
     parser.add_argument('--user', '-u', type=str, default='admin', help='Nexus admin user')
     parser.add_argument('--password', '-p', type=str, default='admin123', help='Nexus admin password')

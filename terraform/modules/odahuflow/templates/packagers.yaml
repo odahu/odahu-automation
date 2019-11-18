@@ -1,0 +1,2 @@
+packagerVersion: "${packager_version}"
+imagesRegistry: "${docker_repo}/"

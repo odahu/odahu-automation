@@ -174,7 +174,7 @@ resource "aws_launch_template" "training" {
                                certificate_authority = aws_eks_cluster.default.certificate_authority.0.data,
                                name                  = var.cluster_name,
                                taints                = "dedicated=training:NoSchedule",
-                               labels                = "mode=legion-training" }))
+                               labels                = "mode=odahuflow-training" }))
 
 
   block_device_mappings {
@@ -242,7 +242,7 @@ resource "aws_autoscaling_group" "training" {
 
   tag {
     key                 = "k8s.io/cluster-autoscaler/node-template/label/mode"
-    value               = "legion-training"
+    value               = "odahuflow-training"
     propagate_at_launch = true
   }
 
@@ -269,7 +269,7 @@ resource "aws_launch_template" "packaging" {
                                    certificate_authority = aws_eks_cluster.default.certificate_authority.0.data,
                                    name                  = var.cluster_name,
                                    taints                = "dedicated=packaging:NoSchedule",
-                                   labels                = "mode=legion-packaging" }))
+                                   labels                = "mode=odahuflow-packaging" }))
 
   iam_instance_profile {
     name = var.node_instance_profile_name
@@ -336,7 +336,7 @@ resource "aws_autoscaling_group" "packaging" {
 
   tag {
     key                 = "k8s.io/cluster-autoscaler/node-template/label/mode"
-    value               = "legion-packaging"
+    value               = "odahuflow-packaging"
     propagate_at_launch = true
   }
 
@@ -363,7 +363,7 @@ resource "aws_launch_template" "deployment" {
                                    certificate_authority = aws_eks_cluster.default.certificate_authority.0.data,
                                    name                  = var.cluster_name,
                                    taints                = "dedicated=deployment:NoSchedule",
-                                   labels                = "mode=legion-deployment" }))
+                                   labels                = "mode=odahuflow-deployment" }))
 
   iam_instance_profile {
     name = var.node_instance_profile_name
@@ -420,7 +420,7 @@ resource "aws_autoscaling_group" "deployment" {
 
   tag {
     key                 = "k8s.io/cluster-autoscaler/node-template/label/mode"
-    value               = "legion-deployment"
+    value               = "odahuflow-deployment"
     propagate_at_launch = true
   }
 

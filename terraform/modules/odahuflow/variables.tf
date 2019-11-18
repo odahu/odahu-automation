@@ -24,9 +24,9 @@ variable "aws_region" {
   description = "Region of AWS resources"
 }
 
-variable "legion_collector_iam_role" { default = "" }
+variable "odahuflow_collector_iam_role" { default = "" }
 
-variable "legion_collector_sa" { default = "" }
+variable "odahuflow_collector_sa" { default = "" }
 
 variable "azure_storage_account" { default = "" }
 
@@ -35,51 +35,51 @@ variable "azure_storage_account" { default = "" }
 ##################
 
 variable "cluster_name" {
-  default     = "legion"
-  description = "Legion cluster name"
+  default     = "odahuflow"
+  description = "Odahuflow cluster name"
 }
 
-variable "legion_helm_repo" {
-  description = "Legion helm repo"
+variable "helm_repo" {
+  description = "Odahuflow helm repo"
 }
 
 variable "root_domain" {
-  description = "Legion cluster root domain"
+  description = "Odahuflow cluster root domain"
 }
 
 variable "tls_secret_crt" {
-  description = "Legion cluster TLS certificate"
+  description = "Odahuflow cluster TLS certificate"
 }
 
 variable "tls_secret_key" {
-  description = "Legion cluster TLS key"
+  description = "Odahuflow cluster TLS key"
 }
 
 ##################
-# Legion app
+# Odahuflow app
 ##################
-variable "legion_version" {
-  description = "Legion release version"
+variable "odahuflow_version" {
+  description = "Odahuflow release version"
 }
 
-variable "legion_namespace" {
-  default     = "legion"
-  description = "Legion k8s namespace"
+variable "odahuflow_namespace" {
+  default     = "odahuflow"
+  description = "Odahuflow k8s namespace"
 }
 
-variable "legion_training_namespace" {
-  default     = "legion-training"
-  description = "Legion training k8s namespace"
+variable "odahuflow_training_namespace" {
+  default     = "odahuflow-training"
+  description = "Odahuflow training k8s namespace"
 }
 
-variable "legion_packaging_namespace" {
-  default     = "legion-packaging"
-  description = "Legion packaging k8s namespace"
+variable "odahuflow_packaging_namespace" {
+  default     = "odahuflow-packaging"
+  description = "Odahuflow packaging k8s namespace"
 }
 
-variable "legion_deployment_namespace" {
-  default     = "legion-deployment"
-  description = "Legion deployment k8s namespace"
+variable "odahuflow_deployment_namespace" {
+  default     = "odahuflow-deployment"
+  description = "Odahuflow deployment k8s namespace"
 }
 
 variable "vault_namespace" {
@@ -88,15 +88,15 @@ variable "vault_namespace" {
 }
 
 variable "docker_repo" {
-  description = "Legion Docker repo url"
+  description = "Odahuflow Docker repo url"
 }
 
 variable "docker_user" {
-  description = "Legion Docker repo user"
+  description = "Odahuflow Docker repo user"
 }
 
 variable "docker_password" {
-  description = "Legion Docker repo password"
+  description = "Odahuflow Docker repo password"
 }
 
 variable "model_docker_protocol" {
@@ -117,12 +117,12 @@ variable "git_examples_reference" {
 }
 
 variable "git_examples_web_ui_link" {
-  description = "Git examples web UI Link for Legion connection"
+  description = "Git examples web UI Link for Odahuflow connection"
   default     = ""
 }
 
 variable "git_examples_description" {
-  description = "Git examples description for Legion connection"
+  description = "Git examples description for Odahuflow connection"
   default     = ""
 }
 
@@ -138,13 +138,13 @@ variable "git_examples_key" {
   description = "Git ssh key for git connection"
 }
 
-variable "legion_data_bucket" {
-  description = "Legion data storage bucket"
+variable "data_bucket" {
+  description = "Odahuflow data storage bucket"
 }
 
-variable "legion_data_bucket_region" {
+variable "data_bucket_region" {
   default     = ""
-  description = "Legion data storage bucket region"
+  description = "Odahuflow data storage bucket region"
 }
 
 variable "collector_region" {
@@ -153,7 +153,7 @@ variable "collector_region" {
 }
 
 variable "mlflow_toolchain_version" {
-  description = "Version of legion-mlflow helm chart"
+  description = "Version of odahuflow-mlflow helm chart"
 }
 
 variable "model_authorization_enabled" {
@@ -200,6 +200,9 @@ variable "bucket_registry_name" {
 variable "feedback_storage_link" {}
 
 # TODO: Remove after implementation of the issue https://github.com/legion-platform/legion/issues/1008
-variable "legion_connection_decrypt_token" {
+variable "odahuflow_connection_decrypt_token" {
   description = "Token for getting a decrypted connection"
 }
+
+variable "jupyterlab_version" {}
+variable "packager_version" {}

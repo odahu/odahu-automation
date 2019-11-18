@@ -1,12 +1,12 @@
 ##################
 # Common
 ##################
-variable "legion_infra_version" {
-  description = "Legion infra release version"
+variable "odahu_infra_version" {
+  description = "Odahuflow infra release version"
 }
 
-variable "legion_helm_repo" {
-  description = "Legion helm repo"
+variable "helm_repo" {
+  description = "Odahuflow helm repo"
 }
 
 variable "cluster_type" {

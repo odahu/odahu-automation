@@ -10,16 +10,16 @@ variable "cloud_type" {}
 variable "cluster_type" {}
 
 variable "cluster_name" {
-  default     = "legion"
-  description = "Legion cluster name"
+  default     = "odahuflow"
+  description = "Odahuflow cluster name"
 }
 
 variable "config_context_auth_info" {
-  description = "Legion cluster context auth"
+  description = "Odahuflow cluster context auth"
 }
 
 variable "config_context_cluster" {
-  description = "Legion cluster context name"
+  description = "Odahuflow cluster context name"
 }
 
 variable "zone" {
@@ -32,43 +32,43 @@ variable "region" {
   description = "Region of resources"
 }
 
-variable "legion_helm_repo" {
-  description = "Legion helm repo"
+variable "helm_repo" {
+  description = "Odahuflow helm repo"
 }
 
 variable "tiller_image" {
-  default     = "gcr.io/kubernetes-helm/tiller:v2.14.3"
+  default = "gcr.io/kubernetes-helm/tiller:v2.14.3"
 }
 
 variable "root_domain" {
-  description = "Legion cluster root domain"
+  description = "Odahuflow cluster root domain"
 }
 
 variable "tls_key" {
-  description = "TLS key for Legion cluster"
+  description = "TLS key for Odahuflow cluster"
 }
 
 variable "tls_crt" {
-  description = "TLS certificate file for Legion cluster"
+  description = "TLS certificate file for Odahuflow cluster"
 }
 
 ##################
-# Legion app
+# Odahuflow app
 ##################
-variable "legion_version" {
-  description = "Legion release version"
+variable "odahuflow_version" {
+  description = "Odahuflow release version"
 }
 
 variable "docker_repo" {
-  description = "Legion Docker repo url"
+  description = "Odahuflow Docker repo url"
 }
 
 variable "docker_user" {
-  description = "Legion Docker repo user"
+  description = "Odahuflow Docker repo user"
 }
 
 variable "docker_password" {
-  description = "Legion Docker repo password"
+  description = "Odahuflow Docker repo password"
 }
 
 variable "model_docker_url" {
@@ -76,7 +76,7 @@ variable "model_docker_url" {
 }
 
 variable "git_examples_uri" {
-  default     = "git@github.com:legion-platform/legion.git"
+  default     = "git@github.com:odahuflow-platform/odahuflow.git"
   description = "Model examples git url"
 }
 
@@ -86,12 +86,12 @@ variable "git_examples_reference" {
 }
 
 variable "git_examples_web_ui_link" {
-  description = "Git examples web UI Link for Legion connection"
+  description = "Git examples web UI Link for Odahuflow connection"
   default     = ""
 }
 
 variable "git_examples_description" {
-  description = "Git examples description for Legion connection"
+  description = "Git examples description for Odahuflow connection"
   default     = ""
 }
 
@@ -109,12 +109,12 @@ variable "git_examples_key" {
   description = "Git ssh key for git connection"
 }
 
-variable "legion_data_bucket" {
-  description = "Legion data storage bucket"
+variable "data_bucket" {
+  description = "Odahuflow data storage bucket"
 }
 
 variable "mlflow_toolchain_version" {
-  description = "Version of legion-mlflow helm chart"
+  description = "Version of odahuflow-mlflow helm chart"
 }
 
 variable "keycloak_realm" {
@@ -131,6 +131,9 @@ variable "model_authorization_enabled" {
 }
 
 # TODO: Remove after implementation of the issue https://github.com/legion-platform/legion/issues/1008
-variable "legion_connection_decrypt_token" {
+variable "odahuflow_connection_decrypt_token" {
   default = "Token for getting a decrypted connection"
 }
+
+variable "jupyterlab_version" {}
+variable "packager_version" {}

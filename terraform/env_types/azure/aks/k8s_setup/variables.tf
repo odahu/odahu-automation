@@ -8,46 +8,46 @@ variable "azure_resource_group" {
 
 variable "cluster_type" {
   default     = "azure/aks"
-  description = "Legion cluster cloud provider type"
+  description = "Odahuflow cluster cloud provider type"
 }
 
 variable "config_context_auth_info" {
   default     = ""
-  description = "Legion cluster context auth"
+  description = "Odahuflow cluster context auth"
 }
 
 variable "config_context_cluster" {
   default     = ""
-  description = "Legion cluster context name"
+  description = "Odahuflow cluster context name"
 }
 
 variable "cluster_name" {
-  default     = "legion"
-  description = "Legion cluster name"
+  default     = "odahuflow"
+  description = "Odahuflow cluster name"
 }
 
-variable "legion_helm_repo" {
-  description = "Legion helm repo"
+variable "helm_repo" {
+  description = "Odahuflow helm repo"
 }
 
-variable "legion_infra_version" {
-  description = "Legion infra release version"
+variable "odahu_infra_version" {
+  description = "Odahuflow infra release version"
 }
 
 variable "root_domain" {
-  description = "Legion cluster root domain"
+  description = "Odahuflow cluster root domain"
 }
 
 variable "docker_repo" {
-  description = "Legion Docker repo url"
+  description = "Odahuflow Docker repo url"
 }
 
 variable "tls_key" {
-  description = "TLS key for Legion cluster"
+  description = "TLS key for Odahuflow cluster"
 }
 
 variable "tls_crt" {
-  description = "TLS certificate for Legion cluster"
+  description = "TLS certificate for Odahuflow cluster"
 }
 
 variable "storage_class" {

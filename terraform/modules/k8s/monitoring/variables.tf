@@ -2,16 +2,16 @@
 # Common
 ##################
 variable "cluster_name" {
-  default     = "legion"
-  description = "Legion cluster name"
+  default     = "odahuflow"
+  description = "Odahuflow cluster name"
 }
 
-variable "legion_helm_repo" {
-  description = "Legion helm repo"
+variable "helm_repo" {
+  description = "Odahuflow helm repo"
 }
 
 variable "root_domain" {
-  description = "Legion cluster root domain"
+  description = "Odahuflow cluster root domain"
 }
 
 ########################
@@ -22,8 +22,8 @@ variable "monitoring_namespace" {
   description = "clusterwide monitoring namespace"
 }
 
-variable "legion_infra_version" {
-  description = "Legion infra release version"
+variable "odahu_infra_version" {
+  description = "Odahuflow infra release version"
 }
 
 variable "alert_slack_url" {
@@ -39,7 +39,7 @@ variable "grafana_pass" {
 }
 
 variable "docker_repo" {
-  description = "Legion Docker repo url"
+  description = "Odahuflow Docker repo url"
 }
 
 variable "grafana_storage_class" {
@@ -48,9 +48,9 @@ variable "grafana_storage_class" {
 }
 
 variable "tls_secret_crt" {
-  description = "Legion cluster TLS certificate"
+  description = "Odahuflow cluster TLS certificate"
 }
 
 variable "tls_secret_key" {
-  description = "Legion cluster TLS key"
+  description = "Odahuflow cluster TLS key"
 }
