@@ -1,0 +1,12 @@
+odahuflowJupyterlabVersion: "${jupyterlab_version}"
+imagesRegistry: "${docker_repo}/"
+
+ingress:
+  globalDomain: "${cluster_domain}"
+  enabled: true
+  tlsEnabled: ${ingress_tls_enabled}
+  tlsSecretName: "${ingress_tls_secret_name}"
+
+security:
+  enabled: true
+  integration: oauth2_proxy

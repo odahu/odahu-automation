@@ -87,15 +87,6 @@ resource "helm_release" "nginx-ingress" {
     }
   }
 
-  # dynamic "set" {
-  #   iterator = i
-  #   for_each = local.azure_resource_count == 0 ? [] : [0]
-  #   content {
-  #     name  = "controller.service.externalTrafficPolicy"
-  #     value = "Local"
-  #   }
-  # }
-
   dynamic "set_string" {
     iterator = i
     for_each = local.azure_resource_count == 0 ? [] : [0]

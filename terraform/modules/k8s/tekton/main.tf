@@ -9,7 +9,7 @@ resource "kubernetes_namespace" "tekton" {
 
 resource "helm_release" "tekton" {
   name       = "tekton"
-  chart      = "tekton"
+  chart      = "odahu-flow-tekton"
   version    = var.odahu_infra_version
   namespace  = var.namespace
   repository = "odahuflow"

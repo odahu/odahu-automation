@@ -1,7 +1,11 @@
+locals {
+  ingress_tls_secret_name = "odahu-flow-tls"
+}
+
 resource "kubernetes_secret" "tls_default" {
   count = length(var.tls_namespaces)
   metadata {
-    name      = "${var.cluster_name}-tls"
+    name      = local.ingress_tls_secret_name
     namespace = element(var.tls_namespaces, count.index)
   }
   data = {

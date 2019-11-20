@@ -1,0 +1,123 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "{{ .Release.Name }}-fluentd"
+  labels:
+    {{- include "fluentd.helm-labels" (dict "component" "fluentd" "root" .) | nindent 4 }}
+spec:
+  # FluentD is limited to 1 replica to avoid data overwriting
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "fluentd.helm-labels-for-search" (dict "component" "fluentd" "root" .) | nindent 6 }}
+  template:
+    metadata:
+      {{- if and (eq .Values.output.target "s3") (eq .Values.output.s3.authorization "iam" ) }}
+      annotations:
+        sidecar.istio.io/inject: "false"
+        iam.amazonaws.com/role: {{ .Values.output.s3.customIAMRole }}
+      {{- end }}
+      {{- if and (eq .Values.output.target "gcs") (eq .Values.output.gcs.authorization "sa" ) }}
+      annotations:
+        accounts.google.com/service-account: {{ ternary .Values.output.gcs.customSA "default" (hasKey .Values.output.gcs "customSA") }}
+        accounts.google.com/scopes: "https://www.googleapis.com/auth/devstorage.read_write"
+      {{- end }}
+      labels:
+        {{- include "fluentd.helm-labels" (dict "component" "fluentd" "root" .) | nindent 8 }}
+    spec:
+      containers:
+      - name: fluentd
+        image: "{{ include "fluentd.image-name" (dict "root" . "service" .Values.fluentd "tpl" "%sodahu-flow-fluentd:%s") }}"
+        command: ["fluentd"]
+        args: ["-c", "/opt/fluent-config/fluent.conf"]
+        resources:
+          {{- toYaml .Values.fluentd.resources | nindent 10 }}
+        env:
+        # Auth on external storage systems
+        {{- if eq .Values.output.target "s3" }}
+        {{- if eq .Values.output.s3.authorization "secret" }}
+        - name: AWS_ACCESS_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: "{{ .Release.Name }}-fluentd-secret"
+              key: AWSKeyID
+        - name: AWS_SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: "{{ .Release.Name }}-fluentd-secret"
+              key: AWSSecretKey
+        {{- end }}
+        {{- end }}
+        {{- if eq .Values.output.target "azureblob" }}
+        {{- if eq .Values.output.azureblob.authorization "accesskey" }}
+        - name: AZURE_STORAGE_ACCOUNT
+          valueFrom:
+            secretKeyRef:
+              name: "{{ .Release.Name }}-fluentd-secret"
+              key: AzureStorageAccount
+        - name: AZURE_STORAGE_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: "{{ .Release.Name }}-fluentd-secret"
+              key: AzureStorageAccessKey
+        {{- end }}
+        {{- if eq .Values.output.azureblob.authorization "sastoken" }}
+        - name: AZURE_STORAGE_ACCOUNT
+          valueFrom:
+            secretKeyRef:
+              name: "{{ .Release.Name }}-fluentd-secret"
+              key: AzureStorageAccount
+        - name: AZURE_STORAGE_SAS_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: "{{ .Release.Name }}-fluentd-secret"
+              key: AzureStorageSasToken
+        {{- end }}
+        {{- end }}
+        ports:
+        - containerPort: {{ .Values.fluentd.port }}
+          name: input
+          protocol: TCP
+        - containerPort: {{ .Values.fluentd.port }}
+          name: input-udp
+          protocol: UDP
+        volumeMounts:
+        - name: fluentd-config
+          mountPath: /opt/fluent-config
+        {{- if eq .Values.output.target "gcs" }}
+        {{- if eq .Values.output.gcs.authorization "keyfile" }}
+        - name: fluentd-keyfile
+          mountPath: /opt/fluent-keyfile
+          readOnly: true
+        {{- end }}
+        {{- end }}
+      volumes:
+      - name: fluentd-config
+        configMap:
+          name: "{{ .Release.Name }}-fluentd-config"
+      {{- if eq .Values.output.target "gcs" }}
+      {{- if eq .Values.output.gcs.authorization "keyfile" }}
+      - name: fluentd-keyfile
+        configMap:
+          name: "{{ .Release.Name }}-fluentd-keyfile"
+      {{- end }}
+      {{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: "fluentd"
+  labels:
+    {{- include "fluentd.helm-labels" (dict "component" "fluentd" "root" .) | nindent 4 }}
+spec:
+  selector:
+    {{- include "fluentd.helm-labels-for-search" (dict "component" "fluentd" "root" .) | nindent 4 }}
+  ports:
+  - name: input
+    port: {{ .Values.fluentd.port }}
+    targetPort: {{ .Values.fluentd.port }}
+    protocol: TCP
+  - name: input-udp
+    port: {{ .Values.fluentd.port }}
+    targetPort: {{ .Values.fluentd.port }}
+    protocol: UDP

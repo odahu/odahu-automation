@@ -12,7 +12,7 @@ variable "azure_storage_account" {
 
 variable "aks_common_tags" {
   description = "Set of common tags assigned to all cluster resources"
-  type        = "map"
+  type        = map
   default = {
     env = "Development"
   }
@@ -51,7 +51,7 @@ variable "root_domain" {
 }
 
 variable "tiller_image" {
-  default = "gcr.io/kubernetes-helm/tiller:v2.14.3"
+  default = "gcr.io/kubernetes-helm/tiller:v2.16.1"
 }
 
 variable "tls_key" {
@@ -77,63 +77,21 @@ variable "docker_repo" {
   description = "Odahuflow Docker repo url"
 }
 
-variable "docker_user" {
-  description = "Odahuflow Docker repo user"
-}
-
-variable "docker_password" {
-  description = "Odahuflow Docker repo password"
-}
-
-variable "model_docker_url" {
-  description = "Model docker url"
-}
-
-variable "git_examples_uri" {
-  default     = "git@github.com:odahuflow-platform/odahuflow.git"
-  description = "Model examples git url"
-}
-
-variable "git_examples_reference" {
-  default     = "origin/develop"
-  description = "Model reference"
-}
-
-variable "git_examples_web_ui_link" {
-  description = "Git examples web UI Link for Odahuflow connection"
-  default     = ""
-}
-
-variable "git_examples_description" {
-  description = "Git examples description for Odahuflow connection"
-  default     = ""
-}
-
-variable "model_resources_cpu" {
-  default     = "256m"
-  description = "Model pod cpu limit"
-}
-
-variable "model_resources_mem" {
-  default     = "256Mi"
-  description = "Model pod mem limit"
-}
-
-variable "git_examples_key" {
-  description = "Git ssh key for git connection"
-}
-
 variable "data_bucket" {
   description = "Odahuflow data storage bucket"
 }
 
-variable "collector_region" {
-  default     = "us-east1"
-  description = "Collector's storage bucket region"
-}
-
 variable "mlflow_toolchain_version" {
   description = "Version of odahuflow-mlflow helm chart"
+}
+
+variable "odahu_infra_version" {
+  description = "Odahuflow infra release version"
+}
+
+variable "odahuflow_connections" {
+  default     = []
+  description = "TODO"
 }
 
 # TODO: Remove after implementation of the issue https://github.com/odahuflow-platform/legion/issues/1008

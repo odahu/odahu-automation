@@ -1,3 +1,7 @@
+locals {
+  ingress_tls_secret_name = "odahu-flow-tls"
+}
+
 resource "kubernetes_namespace" "istio" {
   metadata {
     name = var.istio_namespace
@@ -6,7 +10,7 @@ resource "kubernetes_namespace" "istio" {
 
 resource "kubernetes_secret" "tls_istio" {
   metadata {
-    name      = "${var.cluster_name}-tls"
+    name      = local.ingress_tls_secret_name
     namespace = var.istio_namespace
   }
   data = {
@@ -36,9 +40,10 @@ resource "null_resource" "delay" {
 data "template_file" "istio_values" {
   template = file("${path.module}/templates/istio.yaml")
   vars = {
-    cluster_name         = var.cluster_name
-    root_domain          = var.root_domain
-    monitoring_namespace = var.monitoring_namespace
+    cluster_name            = var.cluster_name
+    root_domain             = var.root_domain
+    monitoring_namespace    = var.monitoring_namespace
+    ingress_tls_secret_name = local.ingress_tls_secret_name
   }
 }
 
@@ -68,7 +73,7 @@ resource "kubernetes_namespace" "knative" {
 
 resource "kubernetes_secret" "tls_knative" {
   metadata {
-    name      = "${var.cluster_name}-tls"
+    name      = local.ingress_tls_secret_name
     namespace = var.knative_namespace
   }
   data = {
@@ -81,7 +86,7 @@ resource "kubernetes_secret" "tls_knative" {
 
 resource "helm_release" "knative" {
   name       = "knative"
-  chart      = "knative"
+  chart      = "odahu-flow-knative"
   version    = var.odahu_infra_version
   namespace  = var.knative_namespace
   repository = "odahuflow"

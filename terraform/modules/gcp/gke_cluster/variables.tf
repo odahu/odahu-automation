@@ -142,7 +142,7 @@ variable "training_node_pool" {
       machine_type = "n1-highcpu-8"
       disk_size_gb = "100"
       labels = {
-        "mode" = "odahuflow-training"
+        "mode" = "odahu-flow-training"
       }
       taint = [{
         key    = "dedicated"
@@ -160,7 +160,7 @@ variable "training_gpu_node_pool" {
       machine_type = "n1-highcpu-8"
       disk_size_gb = "100"
       labels = {
-        "mode" = "odahuflow-training-gpu"
+        "mode" = "odahu-flow-training-gpu"
       }
       guest_accelerator = [{
         type  = "nvidia-tesla-p100"
@@ -180,7 +180,7 @@ variable "packaging_node_pool" {
     node_config = {
       disk_size_gb = "100"
       labels = {
-        "mode" = "odahuflow-packaging"
+        "mode" = "odahu-flow-packaging"
       }
       taint = [{
         key    = "dedicated"
@@ -200,7 +200,7 @@ variable "model_deployment_node_pool" {
 
     node_config = {
       labels = {
-        "mode" = "odahuflow-deployment"
+        "mode" = "odahu-flow-deployment"
       }
       taint = [{
         key    = "dedicated"

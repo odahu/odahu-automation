@@ -1,0 +1,505 @@
+namespace: kube-monitoring
+
+statsd-exporter:
+  image: prom/statsd-exporter:v0.9.0
+
+  service:
+    externalStatsdPromPort: 9102
+    externalStatsdTcpPort: 9125
+
+  deployment:
+    name: statsd-exporter
+
+prometheus-operator:
+  fullnameOverride: prometheus
+
+  defaultRules:
+    labels:
+      monitoring: prometheus
+  commonLabels:
+    monitoring: prometheus
+
+  alertmanager:
+    ingress:
+      enabled: true
+      hosts:
+        - "alertmanager.odahuflow-test.org"
+      tls:
+        - secretName: "odahuflow-test.org-tls"
+          hosts: ["alertmanager.odahuflow-test.org"]
+      annotations:
+        nginx.ingress.kubernetes.io/auth-signin: "https://auth.odahuflow.epm.org/oauth2/start?rd=https://$host$request_uri$is_args$args"
+        nginx.ingress.kubernetes.io/auth-url: "http://oauth2-proxy.kube-system.svc.cluster.local:4180/oauth2/auth"
+    alertmanagerSpec:
+      resources:
+        limits:
+          cpu: 500m
+          memory: 512Mi
+        requests:
+          cpu: 250m
+          memory: 256Mi
+      storageSpec:
+        volumeClaimTemplate:
+          spec:
+            storageClassName: gp2
+            accessModes: ["ReadWriteOnce"]
+            resources:
+              requests:
+                storage: 5Gi
+
+  prometheus:
+    ingress:
+      enabled: true
+      hosts:
+        - "prometheus.odahuflow-test.org"
+      tls:
+        - secretName: "odahuflow-test.org-tls"
+          hosts: ["prometheus.odahuflow-test.org"]
+      annotations:
+        nginx.ingress.kubernetes.io/auth-signin: "https://auth.odahuflow.epm.org/oauth2/start?rd=https://$host$request_uri$is_args$args"
+        nginx.ingress.kubernetes.io/auth-url: "http://oauth2-proxy.kube-system.svc.cluster.local:4180/oauth2/auth"
+    prometheusSpec:
+      resources:
+        limits:
+          cpu: 2
+          memory: 2Gi
+        requests:
+          cpu: 1
+          memory: 1Gi
+      ruleSelector:
+        matchLabels:
+          monitoring: prometheus
+      serviceMonitorSelector:
+        matchLabels:
+          monitoring: prometheus
+      storageSpec:
+        volumeClaimTemplate:
+          spec:
+            storageClassName: gp2
+            accessModes: ["ReadWriteOnce"]
+            resources:
+              requests:
+                storage: 20Gi
+      additionalScrapeConfigs:
+        # Controller endpoint
+        - job_name: controller
+          scrape_interval: 3s
+          scrape_timeout: 3s
+          kubernetes_sd_configs:
+            - role: pod
+          relabel_configs:
+            # Scrape only the the targets matching the following metadata
+            - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_pod_label_app, __meta_kubernetes_pod_container_port_name]
+              action: keep
+              regex: knative-serving;controller;metrics
+            # Rename metadata labels to be reader friendly
+            - source_labels: [__meta_kubernetes_namespace]
+              target_label: namespace
+            - source_labels: [__meta_kubernetes_pod_name]
+              target_label: pod
+            - source_labels: [__meta_kubernetes_service_name]
+              target_label: service
+        # Autoscaler endpoint
+        - job_name: autoscaler
+          scrape_interval: 3s
+          scrape_timeout: 3s
+          kubernetes_sd_configs:
+            - role: pod
+          relabel_configs:
+            # Scrape only the the targets matching the following metadata
+            - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_pod_label_app, __meta_kubernetes_pod_container_port_name]
+              action: keep
+              regex: knative-serving;autoscaler;metrics
+            # Rename metadata labels to be reader friendly
+            - source_labels: [__meta_kubernetes_namespace]
+              target_label: namespace
+            - source_labels: [__meta_kubernetes_pod_name]
+              target_label: pod
+            - source_labels: [__meta_kubernetes_service_name]
+              target_label: service
+        # Activator pods
+        - job_name: activator
+          scrape_interval: 3s
+          scrape_timeout: 3s
+          kubernetes_sd_configs:
+            - role: pod
+          relabel_configs:
+            # Scrape only the the targets matching the following metadata
+            - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_pod_label_app, __meta_kubernetes_pod_container_port_name]
+              action: keep
+              regex: knative-serving;activator;metrics-port
+            # Rename metadata labels to be reader friendly
+            - source_labels: [__meta_kubernetes_namespace]
+              target_label: namespace
+            - source_labels: [__meta_kubernetes_pod_name]
+              target_label: pod
+            - source_labels: [__meta_kubernetes_service_name]
+              target_label: service
+        # Istio config
+        - job_name: 'istio-mesh'
+          kubernetes_sd_configs:
+            - role: endpoints
+              namespaces:
+                names:
+                  - istio-system
+
+          relabel_configs:
+            - source_labels: [__meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
+              action: keep
+              regex: istio-telemetry;prometheus
+
+        # Scrape config for envoy stats
+        - job_name: 'envoy-stats'
+          metrics_path: /stats/prometheus
+          kubernetes_sd_configs:
+            - role: pod
+
+          relabel_configs:
+            - source_labels: [__meta_kubernetes_pod_container_port_name]
+              action: keep
+              regex: '.*-envoy-prom'
+            - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+              action: replace
+              regex: ([^:]+)(?::\d+)?;(\d+)
+              replacement: $1:15090
+              target_label: __address__
+            - action: labelmap
+              regex: __meta_kubernetes_pod_label_(.+)
+            - source_labels: [__meta_kubernetes_namespace]
+              action: replace
+              target_label: namespace
+            - source_labels: [__meta_kubernetes_pod_name]
+              action: replace
+              target_label: pod_name
+
+          metric_relabel_configs:
+            # Exclude some of the envoy metrics that have massive cardinality
+            # This list may need to be pruned further moving forward, as informed
+            # by performance and scalability testing.
+            - source_labels: [ cluster_name ]
+              regex: '(outbound|inbound|prometheus_stats).*'
+              action: drop
+            - source_labels: [ tcp_prefix ]
+              regex: '(outbound|inbound|prometheus_stats).*'
+              action: drop
+            - source_labels: [ listener_address ]
+              regex: '(.+)'
+              action: drop
+            - source_labels: [ http_conn_manager_listener_prefix ]
+              regex: '(.+)'
+              action: drop
+            - source_labels: [ http_conn_manager_prefix ]
+              regex: '(.+)'
+              action: drop
+            - source_labels: [ __name__ ]
+              regex: 'envoy_tls.*'
+              action: drop
+            - source_labels: [ __name__ ]
+              regex: 'envoy_tcp_downstream.*'
+              action: drop
+            - source_labels: [ __name__ ]
+              regex: 'envoy_http_(stats|admin).*'
+              action: drop
+            - source_labels: [ __name__ ]
+              regex: 'envoy_cluster_(lb|retry|bind|internal|max|original).*'
+              action: drop
+
+        - job_name: 'istio-policy'
+          kubernetes_sd_configs:
+            - role: endpoints
+              namespaces:
+                names:
+                  - istio-system
+
+          relabel_configs:
+            - source_labels: [__meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
+              action: keep
+              regex: istio-policy;http-monitoring
+
+        - job_name: 'istio-telemetry'
+          kubernetes_sd_configs:
+            - role: endpoints
+              namespaces:
+                names:
+                  - istio-system
+
+          relabel_configs:
+            - source_labels: [__meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
+              action: keep
+              regex: istio-telemetry;http-monitoring
+
+        - job_name: 'pilot'
+          kubernetes_sd_configs:
+            - role: endpoints
+              namespaces:
+                names:
+                  - istio-system
+
+          relabel_configs:
+            - source_labels: [__meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
+              action: keep
+              regex: istio-pilot;http-monitoring
+
+        - job_name: 'galley'
+          kubernetes_sd_configs:
+            - role: endpoints
+              namespaces:
+                names:
+                  - istio-system
+
+          relabel_configs:
+            - source_labels: [__meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
+              action: keep
+              regex: istio-galley;http-monitoring
+
+        - job_name: 'citadel'
+          kubernetes_sd_configs:
+            - role: endpoints
+              namespaces:
+                names:
+                  - istio-system
+
+          relabel_configs:
+            - source_labels: [__meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
+              action: keep
+              regex: istio-citadel;http-monitoring
+
+        # scrape config for API servers
+        - job_name: 'kubernetes-apiservers'
+          kubernetes_sd_configs:
+            - role: endpoints
+              namespaces:
+                names:
+                  - default
+          scheme: https
+          tls_config:
+            ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+          bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+          relabel_configs:
+            - source_labels: [__meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
+              action: keep
+              regex: kubernetes;https
+
+        # scrape config for nodes (kubelet)
+        - job_name: 'kubernetes-nodes'
+          scheme: https
+          tls_config:
+            ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+          bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+          kubernetes_sd_configs:
+            - role: node
+          relabel_configs:
+            - action: labelmap
+              regex: __meta_kubernetes_node_label_(.+)
+            - target_label: __address__
+              replacement: kubernetes.default.svc:443
+            - source_labels: [__meta_kubernetes_node_name]
+              regex: (.+)
+              target_label: __metrics_path__
+              replacement: /api/v1/nodes/${1}/proxy/metrics
+
+        # Scrape config for Kubelet cAdvisor.
+        #
+        # This is required for Kubernetes 1.7.3 and later, where cAdvisor metrics
+        # (those whose names begin with 'container_') have been removed from the
+        # Kubelet metrics endpoint.  This job scrapes the cAdvisor endpoint to
+        # retrieve those metrics.
+        #
+        # In Kubernetes 1.7.0-1.7.2, these metrics are only exposed on the cAdvisor
+        # HTTP endpoint; use "replacement: /api/v1/nodes/${1}:4194/proxy/metrics"
+        # in that case (and ensure cAdvisor's HTTP server hasn't been disabled with
+        # the --cadvisor-port=0 Kubelet flag).
+        #
+        # This job is not necessary and should be removed in Kubernetes 1.6 and
+        # earlier versions, or it will cause the metrics to be scraped twice.
+        - job_name: 'kubernetes-cadvisor'
+          scheme: https
+          tls_config:
+            ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+          bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+          kubernetes_sd_configs:
+            - role: node
+          relabel_configs:
+            - action: labelmap
+              regex: __meta_kubernetes_node_label_(.+)
+            - target_label: __address__
+              replacement: kubernetes.default.svc:443
+            - source_labels: [__meta_kubernetes_node_name]
+              regex: (.+)
+              target_label: __metrics_path__
+              replacement: /api/v1/nodes/${1}/proxy/metrics/cadvisor
+
+        # scrape config for service endpoints.
+        - job_name: 'kubernetes-service-endpoints'
+          kubernetes_sd_configs:
+            - role: endpoints
+          relabel_configs:
+            - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scrape]
+              action: keep
+              regex: true
+            - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scheme]
+              action: replace
+              target_label: __scheme__
+              regex: (https?)
+            - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_path]
+              action: replace
+              target_label: __metrics_path__
+              regex: (.+)
+            - source_labels: [__address__, __meta_kubernetes_service_annotation_prometheus_io_port]
+              action: replace
+              target_label: __address__
+              regex: ([^:]+)(?::\d+)?;(\d+)
+              replacement: $1:$2
+            - action: labelmap
+              regex: __meta_kubernetes_service_label_(.+)
+            - source_labels: [__meta_kubernetes_namespace]
+              action: replace
+              target_label: kubernetes_namespace
+            - source_labels: [__meta_kubernetes_service_name]
+              action: replace
+              target_label: kubernetes_name
+
+        - job_name: 'kubernetes-pods'
+          kubernetes_sd_configs:
+            - role: pod
+          relabel_configs:  # If first two labels are present, pod should be scraped  by the istio-secure job.
+            - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+              action: keep
+              regex: true
+            # Keep target if there's no sidecar or if prometheus.io/scheme is explicitly set to "http"
+            - source_labels: [__meta_kubernetes_pod_annotation_sidecar_istio_io_status, __meta_kubernetes_pod_annotation_prometheus_io_scheme]
+              action: keep
+              regex: ((;.*)|(.*;http))
+            - source_labels: [__meta_kubernetes_pod_annotation_istio_mtls]
+              action: drop
+              regex: (true)
+            - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+              action: replace
+              target_label: __metrics_path__
+              regex: (.+)
+            - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+              action: replace
+              regex: ([^:]+)(?::\d+)?;(\d+)
+              replacement: $1:$2
+              target_label: __address__
+            - action: labelmap
+              regex: __meta_kubernetes_pod_label_(.+)
+            - source_labels: [__meta_kubernetes_namespace]
+              action: replace
+              target_label: namespace
+            - source_labels: [__meta_kubernetes_pod_name]
+              action: replace
+              target_label: pod_name
+
+  grafana:
+    enabled: false
+    defaultDashboardsEnabled: false
+    sidecar:
+      datasources:
+        defaultDatasourceEnabled: false
+
+grafana:
+  enabled: false
+coreDns:
+  enabled: false
+
+odahuflow-grafana:
+  enabled: true
+  defaultDashboardsEnabled: true
+  fullnameOverride: grafana
+  image:
+    tag: 6.4.4
+
+  adminUser: grafana_admin
+  adminPassword: grafana_password
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+  sidecar:
+    dashboards:
+      enabled: true
+      label: grafana_dashboard
+      searchNamespace: ALL
+    datasources:
+      enabled: true
+      label: grafana_datasource
+
+  serviceMonitor:
+    selfMonitor: true
+
+  persistence:
+    enabled: true
+    initChownData: true
+    storageClassName: gp2
+    accessModes:
+    - ReadWriteOnce
+    size: 10Gi
+  ingress:
+    enabled: true
+    hosts:
+      - "grafana.odahuflow-test.org"
+    tls:
+      - secretName: "odahuflow-test.org-tls"
+        hosts: ["grafana.odahuflow-test.org"]
+    annotations:
+      nginx.ingress.kubernetes.io/auth-signin: "https://auth.odahuflow.epm.org/oauth2/start?rd=https://$host$request_uri$is_args$args"
+      nginx.ingress.kubernetes.io/auth-url: "http://oauth2-proxy.kube-system.svc.cluster.local:4180/oauth2/auth"
+  env:
+    GF_AUTH_ANONYMOUS_ENABLED: "true"
+
+  dashboardProviders:
+    dashboardproviders.yaml:
+      apiVersion: 1
+      providers:
+      - name: 'default'
+        orgId: 1
+        folder: ''
+        type: file
+        disableDeletion: false
+        editable: true
+        options:
+          path: /tmp/dashboards/default
+      - name: 'Istio'
+        orgId: 1
+        folder: 'Istio'
+        type: file
+        disableDeletion: false
+        editable: true
+        options:
+          path: /tmp/dashboards/istio
+      - name: 'Knative'
+        orgId: 1
+        folder: 'Knative'
+        type: file
+        disableDeletion: false
+        editable: true
+        options:
+          path: /tmp/dashboards/knative
+      - name: 'Monitoring'
+        orgId: 1
+        folder: 'Monitoring'
+        type: file
+        disableDeletion: false
+        editable: true
+        options:
+          path: /tmp/dashboards/monitoring
+      - name: 'odahuflow'
+        orgId: 1
+        folder: 'odahuflow'
+        type: file
+        disableDeletion: false
+        editable: true
+        options:
+          path: /tmp/dashboards/odahu-flow
+      - name: 'Kubernetes'
+        orgId: 1
+        folder: 'Kubernetes'
+        type: file
+        disableDeletion: false
+        editable: true
+        options:
+          path: /tmp/dashboards/k8s

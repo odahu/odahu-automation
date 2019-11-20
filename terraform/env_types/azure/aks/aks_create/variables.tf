@@ -26,7 +26,7 @@ variable "cluster_name" {
 
 variable "aks_common_tags" {
   description = "Set of common tags assigned to all cluster resources"
-  type        = "map"
+  type        = map
   default = {
     env     = "Development"
     purpose = "Kubernetes Cluster"
@@ -80,7 +80,7 @@ variable "bastion_machine_type" {
 variable "bastion_tags" {
   default     = {}
   description = "Bastion host tags"
-  type        = "map"
+  type        = map
 }
 
 variable "bastion_hostname" {

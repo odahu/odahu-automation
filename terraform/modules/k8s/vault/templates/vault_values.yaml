@@ -18,22 +18,22 @@ persistence:
 vault:
   externalConfig:
     policies:
-      - name: odahuflow
-        rules: path "odahuflow/connections/*" {
+      - name: odahu-flow
+        rules: path "odahu-flow/connections/*" {
           capabilities = ["create", "read", "update", "delete", "list"]
           }
     auth:
       - type: kubernetes
         roles:
-          - name: odahuflow
+          - name: odahu-flow
             bound_service_account_names:
-              - "odahuflow-edi"
-              - "odahuflow-operator"
-            bound_service_account_namespaces: ["odahuflow"]
-            policies: odahuflow
+              - "odahu-flow-api"
+              - "odahu-flow-operator"
+            bound_service_account_namespaces: ["odahu-flow"]
+            policies: odahu-flow
             ttl: 720h
     secrets:
-      - path: odahuflow/connections
+      - path: odahu-flow/connections
         type: kv
         description: Odahuflow connection storage.
   config:

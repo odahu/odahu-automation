@@ -57,38 +57,38 @@ resource "aws_security_group_rule" "node-ingress-self" {
   description              = "Allow node to communicate with each other"
   from_port                = 0
   protocol                 = "-1"
-  security_group_id        = "${aws_security_group.node.id}"
-  source_security_group_id = "${aws_security_group.node.id}"
+  security_group_id        = aws_security_group.node.id
+  source_security_group_id = aws_security_group.node.id
   to_port                  = 65535
   type                     = "ingress"
 }
 
 resource "aws_security_group_rule" "node-ingress-dns" {
-  description              = "Allow node to communicate with each other"
-  from_port                = 53
-  protocol                 = "udp"
-  security_group_id        = "${aws_security_group.node.id}"
-  cidr_blocks              = ["0.0.0.0/0"]
-  to_port                  = 53
-  type                     = "ingress"
+  description       = "Allow node to communicate with each other"
+  from_port         = 53
+  protocol          = "udp"
+  security_group_id = aws_security_group.node.id
+  cidr_blocks       = ["0.0.0.0/0"]
+  to_port           = 53
+  type              = "ingress"
 }
 
 resource "aws_security_group_rule" "node-ingress-dns-ephemeral" {
-  description              = "Allow node to communicate with each other"
-  from_port                = 1025
-  protocol                 = "udp"
-  security_group_id        = "${aws_security_group.node.id}"
-  cidr_blocks              = ["0.0.0.0/0"]
-  to_port                  = 65535
-  type                     = "ingress"
+  description       = "Allow node to communicate with each other"
+  from_port         = 1025
+  protocol          = "udp"
+  security_group_id = aws_security_group.node.id
+  cidr_blocks       = ["0.0.0.0/0"]
+  to_port           = 65535
+  type              = "ingress"
 }
 
 resource "aws_security_group_rule" "node-ingress-bastion" {
   description              = "Allow node to communicate with each other"
   from_port                = 0
   protocol                 = "-1"
-  security_group_id        = "${aws_security_group.node.id}"
-  source_security_group_id = "${aws_security_group.bastion.id}"
+  security_group_id        = aws_security_group.node.id
+  source_security_group_id = aws_security_group.bastion.id
   to_port                  = 65535
   type                     = "ingress"
 }
@@ -98,8 +98,8 @@ resource "aws_security_group_rule" "node-ingress-lb" {
   from_port                = 30000
   to_port                  = 30001
   protocol                 = "-1"
-  security_group_id        = "${aws_security_group.node.id}"
-  source_security_group_id = "${aws_security_group.lb.id}"
+  security_group_id        = aws_security_group.node.id
+  source_security_group_id = aws_security_group.lb.id
   type                     = "ingress"
 }
 
@@ -107,8 +107,8 @@ resource "aws_security_group_rule" "node-ingress-cluster" {
   description              = "Allow worker Kubelets and pods to receive communication from the cluster control plane"
   from_port                = 0
   protocol                 = "tcp"
-  security_group_id        = "${aws_security_group.node.id}"
-  source_security_group_id = "${aws_security_group.master.id}"
+  security_group_id        = aws_security_group.node.id
+  source_security_group_id = aws_security_group.master.id
   to_port                  = 65535
   type                     = "ingress"
 }
@@ -117,8 +117,8 @@ resource "aws_security_group_rule" "ingress-node-https" {
   description              = "Allow pods to communicate with the cluster API Server"
   from_port                = 443
   protocol                 = "tcp"
-  security_group_id        = "${aws_security_group.master.id}"
-  source_security_group_id = "${aws_security_group.node.id}"
+  security_group_id        = aws_security_group.master.id
+  source_security_group_id = aws_security_group.node.id
   to_port                  = 443
   type                     = "ingress"
 }

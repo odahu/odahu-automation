@@ -1,0 +1,25 @@
+toolchainVersion: "${mlflow_toolchain_version}"
+imagesRegistry: "${docker_repo}/"
+ingress:
+  globalDomain: "${cluster_domain}"
+  enabled: true
+  tlsEnabled: ${ingress_tls_enabled}
+  tlsSecretName: "${ingress_tls_secret_name}"
+
+security:
+  enabled: true
+  integration: oauth2_proxy
+
+tracking_server:
+  annotations:
+    sidecar.istio.io/inject: "false"
+  resources:
+    requests:
+      cpu: "200m"
+      memory: "256Mi"
+    limits:
+      cpu: "250m"
+      memory: "512Mi"
+
+toolchain_integration:
+  enabled: true

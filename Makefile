@@ -4,7 +4,7 @@ ROOT_DIR := terraform/env_types
 SECRET_DIR := $(CURDIR)/.secrets
 SECRET_FILE_NAME := cluster_profile.json
 ENV_TYPE := gcp/gke
-FIND_ALL_TER_MODULES_COMMAND := find terraform -name '*.tf' -printf "%h\n" | uniq | awk '!/aws/' | tr '\n' ' '
+FIND_ALL_TER_MODULES_COMMAND := find terraform -name '*.tf' -printf "%h\n" | uniq | tr '\n' ' '
 
 GKE_PROJECT :=
 GKE_ZONE :=
@@ -26,7 +26,7 @@ LEGION_PROFILES_DIR :=
 MODEL_REFERENCE :=
 TF_APPLY_CLI_ARGS :=
 
-EXPORT_HIERA_DOCKER_IMAGE := odahu/odahuflow-automation:${BUILD_TAG}
+EXPORT_HIERA_DOCKER_IMAGE := odahu/odahu-flow-automation:${BUILD_TAG}
 
 -include .env
 
@@ -63,14 +63,14 @@ cleanup-infra-crds:
 	$(call delete_crds,tekton)
 	$(call delete_crds,vault)
 
-## cleanup-legion-crds: Delete all legion CRDs from k8s cluster
-cleanup-legion-crds:
-	$(call delete_crds,legion)
+## cleanup-odahu-crds: Delete all odahu CRDs from k8s cluster
+cleanup-odahu-crds:
+	$(call delete_crds,odahu)
 
-## cleanup-all-crds: Delete all CRDs(3rtpart, legions) from k8s cluster
-cleanup-all-crds: cleanup-infra-crds cleanup-legion-crds
+## cleanup-all-crds: Delete all CRDs(3rtpart, odahus) from k8s cluster
+cleanup-all-crds: cleanup-infra-crds cleanup-odahu-crds
 
-## terraform-fmt: Rewrites all legion terraform modules to canonical format
+## terraform-fmt: Rewrites all odahu terraform modules to canonical format
 terraform-fmt:
 	for module_path in $$(${FIND_ALL_TER_MODULES_COMMAND}) ; do \
         terraform fmt $$module_path ; \
@@ -82,7 +82,7 @@ terraform-fmt-check:
         terraform fmt -check $$module_path ; \
     done
 
-## terraform-validate: Validate all legion terraform modules
+## terraform-validate: Validate all odahu terraform modules
 terraform-validate:
 	set -e; for module_path in $$(${FIND_ALL_TER_MODULES_COMMAND}) ; do \
 	    cd $$module_path ; \
@@ -94,7 +94,20 @@ terraform-validate:
 
 ## docker-build-terraform: Build terraform docker image
 docker-build-terraform:
-	docker build -t legion/odahuflow-automation:${BUILD_TAG} -f containers/terraform/Dockerfile .
+	docker build -t odahu/odahu-flow-automation:${BUILD_TAG} -f containers/terraform/Dockerfile .
+
+## docker-build-fluentd: Build fluentd image
+docker-build-fluentd:
+	docker build -t odahu/fluentd:${BUILD_TAG} -f containers/fluentd/Dockerfile .
+
+## docker-push-fluentd: Push fluentd docker image
+docker-push-fluentd:
+	docker tag odahu/fluentd:${BUILD_TAG} ${DOCKER_REGISTRY}odahu/fluentd:${TAG}
+	docker push ${DOCKER_REGISTRY}odahu/fluentd:${TAG}
+
+## shellcheck: Lint the bash scripts
+shellcheck:
+	shellcheck tools/*.sh
 
 ## install-vulnerabilities-checker: Install the vulnerabilities-checker
 install-vulnerabilities-checker:

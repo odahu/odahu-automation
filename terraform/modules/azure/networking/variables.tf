@@ -22,5 +22,5 @@ variable "allowed_ips" {
 variable "tags" {
   description = "Tags used for virtual network"
   default     = {}
-  type        = "map"
+  type        = map
 }

@@ -34,11 +34,11 @@ ingress:
   path: /oauth2
   enabled: true
   hosts:
-    - auth.${cluster_name}.${root_domain}
+    - odahu.${cluster_name}.${root_domain}
   tls:
-    - secretName: ${cluster_name}-tls
+    - secretName: ${ingress_tls_secret_name}
       hosts:
-        - auth.${cluster_name}.${root_domain}
+        - odahu.${cluster_name}.${root_domain}
  
 service:
   port: 4180

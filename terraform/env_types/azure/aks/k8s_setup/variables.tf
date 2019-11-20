@@ -63,10 +63,6 @@ variable "allowed_ips" {
   description = "CIDR to allow access from"
 }
 
-variable "alert_slack_url" {
-  description = "Slack alerts url"
-}
-
 variable "grafana_admin" {
   description = "Grafana admin username"
 }

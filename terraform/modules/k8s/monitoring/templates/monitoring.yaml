@@ -26,50 +26,21 @@ prometheus-operator:
         {{ define "slack.default.iconurl" }}{{ end }}
         {{ define "slack.default.text" }}{{ end }}
         {{ define "slack.default.footer" }}{{ end }}
-
-    config:
-      templates: ["/etc/alertmanager/secrets/default.tmpl"]
-      global:
-        resolve_timeout: 5m
-      route:
-        receiver: 'slack'
-        group_wait: 30s
-        group_interval: 2m
-        repeat_interval: 1h
-        group_by: [alertname]
-        routes: []
-      receivers:
-        - name: slack
-          slack_configs:
-            - send_resolved: false
-              api_url: "${alert_slack_url}"
-              channel: "#alerts"
-              username: '{{ template "slack.default.username" . }}'
-              color: '{{ if eq .Status "firing" }}danger{{ else }}good{{ end }}'
-              title: '{{ template "slack.default.title" . }}'
-              title_link: '{{ template "slack.default.titlelink" . }}'
-              pretext: '{{ .CommonAnnotations.summary }}'
-              text: |-
-                {{ range .Alerts }}
-                   *Alert:* {{ .Annotations.summary }} - `{{ .Labels.severity }}`
-                  *Description:* {{ .Annotations.description }}
-                  *Details:*
-                  {{ range .Labels.SortedPairs }} • *{{ .Name }}:* `{{ .Value }}`
-                  {{ end }}
-                {{ end }}
-              fallback: '{{ template "slack.default.fallback" . }}'
-              icon_emoji: '{{ template "slack.default.iconemoji" . }}'
-              icon_url: '{{ template "slack.default.iconurl" . }}'
-
+    alertmanagerSpec:
+      externalUrl: https://${cluster_domain}/alertmanager
+      routePrefix: /
     ingress:
       enabled: true
+      paths:
+        - /alertmanager
       hosts:
-        - "alertmanager.${cluster_name}.${root_domain}"
-        - "alertmanager.local.${cluster_name}.${root_domain}"
+        - "${cluster_domain}"
       tls:
-        - secretName: "${cluster_name}-tls"
-          hosts: ["alertmanager.${cluster_name}.${root_domain}"]
+        - secretName: "${ingress_tls_secret_name}"
+          hosts: ["${cluster_domain}"]
       annotations:
+        nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+        nginx.ingress.kubernetes.io/rewrite-target: /
         nginx.ingress.kubernetes.io/configuration-snippet: |-
             set_escape_uri $escaped_request_uri $request_uri;
             auth_request_set $user   $upstream_http_x_auth_request_user;
@@ -87,7 +58,7 @@ prometheus-operator:
                     ngx.header["Set-Cookie"] = "_oauth2_proxy_1=" .. ngx.var._oauth2_proxy_1 .. ngx.var.auth_cookie:match("(; .*)")
                 end
             }
-        nginx.ingress.kubernetes.io/auth-signin: https://auth.${cluster_name}.${root_domain}/oauth2/start?rd=https://$host$escaped_request_uri
+        nginx.ingress.kubernetes.io/auth-signin: https://${cluster_domain}/oauth2/start?rd=https://$host$escaped_request_uri
         nginx.ingress.kubernetes.io/auth-url: http://oauth2-proxy.kube-system.svc.cluster.local:4180/oauth2/auth
     alertmanagerSpec:
       storageSpec:
@@ -96,14 +67,20 @@ prometheus-operator:
             storageClassName: "${grafana_storage_class}"
 
   prometheus:
+    prometheusSpec:
+      externalUrl: https://${cluster_domain}/prometheus
+      routePrefix: /
     ingress:
+      paths:
+        - /prometheus
       hosts:
-        - "prometheus.${cluster_name}.${root_domain}"
-        - "prometheus.local.${cluster_name}.${root_domain}"
+        - "${cluster_domain}"
       tls:
-        - secretName: "${cluster_name}-tls"
-          hosts: ["prometheus.${cluster_name}.${root_domain}"]
+        - secretName: "${ingress_tls_secret_name}"
+          hosts: ["${cluster_domain}"]
       annotations:
+        nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+        nginx.ingress.kubernetes.io/rewrite-target: /
         nginx.ingress.kubernetes.io/configuration-snippet: |-
             set_escape_uri $escaped_request_uri $request_uri;
             auth_request_set $user   $upstream_http_x_auth_request_user;
@@ -121,7 +98,7 @@ prometheus-operator:
                     ngx.header["Set-Cookie"] = "_oauth2_proxy_1=" .. ngx.var._oauth2_proxy_1 .. ngx.var.auth_cookie:match("(; .*)")
                 end
             }
-        nginx.ingress.kubernetes.io/auth-signin: https://auth.${cluster_name}.${root_domain}/oauth2/start?rd=https://$host$escaped_request_uri
+        nginx.ingress.kubernetes.io/auth-signin: https://${cluster_domain}/oauth2/start?rd=https://$host$escaped_request_uri
         nginx.ingress.kubernetes.io/auth-url: http://oauth2-proxy.kube-system.svc.cluster.local:4180/oauth2/auth
     prometheusSpec:
       storageSpec:
@@ -135,14 +112,15 @@ odahuflow-grafana:
   persistence:
     storageClassName: "${grafana_storage_class}"
   ingress:
-    path: /
+    path: /grafana
     hosts:
-      - "grafana.${cluster_name}.${root_domain}"
-      - "grafana.local.${cluster_name}.${root_domain}"
+      - "${cluster_domain}"
     tls:
-      - secretName: "${cluster_name}-tls"
-        hosts: ["grafana.${cluster_name}.${root_domain}"]
+      - secretName: "${ingress_tls_secret_name}"
+        hosts: ["${cluster_domain}"]
     annotations:     
+      nginx.ingress.kubernetes.io/rewrite-target: "/"
+      nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
       nginx.ingress.kubernetes.io/configuration-snippet: |-
           set_escape_uri $escaped_request_uri $request_uri;
           auth_request_set $user   $upstream_http_x_auth_request_user;
@@ -160,7 +138,8 @@ odahuflow-grafana:
                   ngx.header["Set-Cookie"] = "_oauth2_proxy_1=" .. ngx.var._oauth2_proxy_1 .. ngx.var.auth_cookie:match("(; .*)")
               end
           }
-      nginx.ingress.kubernetes.io/auth-signin: https://auth.${cluster_name}.${root_domain}/oauth2/start?rd=https://$host$escaped_request_uri
+      nginx.ingress.kubernetes.io/auth-signin: https://${cluster_domain}/oauth2/start?rd=https://$host$escaped_request_uri
       nginx.ingress.kubernetes.io/auth-url: http://oauth2-proxy.kube-system.svc.cluster.local:4180/oauth2/auth
   env:
     GF_AUTH_ANONYMOUS_ENABLED: "true"
+    GF_SERVER_ROOT_URL: "https://${cluster_domain}/grafana/"

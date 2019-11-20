@@ -48,7 +48,7 @@ resource "aws_instance" "bastion" {
 ########################################################
 
 resource "aws_eks_cluster" "default" {
-  name     = "${var.cluster_name}"
+  name     = var.cluster_name
   role_arn = var.master_role_arn
   version  = var.k8s_version
 
@@ -90,16 +90,17 @@ resource "null_resource" "setup_cluster_autoscaler" {
 }
 
 resource "aws_launch_template" "main" {
-  name           = "tf-${var.cluster_name}-node"
-  image_id       = var.node_ami
-  instance_type  = var.node_machine_type
-  key_name       = var.cluster_name
-  user_data      = base64encode(templatefile("${path.module}/templates/node.tpl", {
-                                    endpoint              = aws_eks_cluster.default.endpoint,
-                                    certificate_authority = aws_eks_cluster.default.certificate_authority.0.data,
-                                    name                  = var.cluster_name,
-                                    taints                = "",
-                                    labels                = "" }))
+  name          = "tf-${var.cluster_name}-node"
+  image_id      = var.node_ami
+  instance_type = var.node_machine_type
+  key_name      = var.cluster_name
+  user_data = base64encode(templatefile("${path.module}/templates/node.tpl", {
+    endpoint              = aws_eks_cluster.default.endpoint,
+    certificate_authority = aws_eks_cluster.default.certificate_authority.0.data,
+    name                  = var.cluster_name,
+    taints                = "",
+    labels                = ""
+  }))
   iam_instance_profile {
     name = var.node_instance_profile_name
   }
@@ -118,17 +119,17 @@ resource "aws_launch_template" "main" {
 }
 
 resource "aws_autoscaling_group" "main" {
-  desired_capacity     = 1
-  max_size             = var.num_nodes_max
-  min_size             = var.num_nodes_min
-  name                 = "tf-${var.cluster_name}-node"
+  desired_capacity = 1
+  max_size         = var.num_nodes_max
+  min_size         = var.num_nodes_min
+  name             = "tf-${var.cluster_name}-node"
 
   launch_template {
-    id      = "${aws_launch_template.main.id}"
+    id      = aws_launch_template.main.id
     version = "$Latest"
   }
 
-  vpc_zone_identifier  = var.subnet_ids
+  vpc_zone_identifier = var.subnet_ids
 
   tag {
     key                 = "Name"
@@ -164,17 +165,18 @@ resource "aws_autoscaling_group" "main" {
 
 # Training node pool
 resource "aws_launch_template" "training" {
-  name           = "tf-${var.cluster_name}-training"
-  image_id       = var.node_ami
-  instance_type  = var.node_machine_type_highcpu
-  key_name       = var.cluster_name
+  name          = "tf-${var.cluster_name}-training"
+  image_id      = var.node_ami
+  instance_type = var.node_machine_type_highcpu
+  key_name      = var.cluster_name
 
   user_data = base64encode(templatefile("${path.module}/templates/node.tpl", {
-                               endpoint              = aws_eks_cluster.default.endpoint,
-                               certificate_authority = aws_eks_cluster.default.certificate_authority.0.data,
-                               name                  = var.cluster_name,
-                               taints                = "dedicated=training:NoSchedule",
-                               labels                = "mode=odahuflow-training" }))
+    endpoint              = aws_eks_cluster.default.endpoint,
+    certificate_authority = aws_eks_cluster.default.certificate_authority.0.data,
+    name                  = var.cluster_name,
+    taints                = "dedicated=training:NoSchedule",
+    labels                = "mode=odahu-flow-training"
+  }))
 
 
   block_device_mappings {
@@ -205,14 +207,14 @@ resource "aws_launch_template" "training" {
 }
 
 resource "aws_autoscaling_group" "training" {
-  desired_capacity     = 0
-  max_size             = var.num_nodes_highcpu_max
-  min_size             = 0
-  name                 = "tf-${var.cluster_name}-training"
-  vpc_zone_identifier  = var.subnet_ids
+  desired_capacity    = 0
+  max_size            = var.num_nodes_highcpu_max
+  min_size            = 0
+  name                = "tf-${var.cluster_name}-training"
+  vpc_zone_identifier = var.subnet_ids
 
   launch_template {
-    id      = "${aws_launch_template.training.id}"
+    id      = aws_launch_template.training.id
     version = "$Latest"
   }
 
@@ -242,7 +244,7 @@ resource "aws_autoscaling_group" "training" {
 
   tag {
     key                 = "k8s.io/cluster-autoscaler/node-template/label/mode"
-    value               = "odahuflow-training"
+    value               = "odahu-flow-training"
     propagate_at_launch = true
   }
 
@@ -264,12 +266,13 @@ resource "aws_launch_template" "packaging" {
   image_id      = var.node_ami
   instance_type = var.node_machine_type_highcpu
   key_name      = var.cluster_name
-  user_data     = base64encode(templatefile("${path.module}/templates/node.tpl", {
-                                   endpoint              = aws_eks_cluster.default.endpoint,
-                                   certificate_authority = aws_eks_cluster.default.certificate_authority.0.data,
-                                   name                  = var.cluster_name,
-                                   taints                = "dedicated=packaging:NoSchedule",
-                                   labels                = "mode=odahuflow-packaging" }))
+  user_data = base64encode(templatefile("${path.module}/templates/node.tpl", {
+    endpoint              = aws_eks_cluster.default.endpoint,
+    certificate_authority = aws_eks_cluster.default.certificate_authority.0.data,
+    name                  = var.cluster_name,
+    taints                = "dedicated=packaging:NoSchedule",
+    labels                = "mode=odahu-flow-packaging"
+  }))
 
   iam_instance_profile {
     name = var.node_instance_profile_name
@@ -299,14 +302,14 @@ resource "aws_launch_template" "packaging" {
 }
 
 resource "aws_autoscaling_group" "packaging" {
-  desired_capacity     = 0
-  max_size             = var.num_nodes_highcpu_max
-  min_size             = 0
-  name                 = "tf-${var.cluster_name}-packaging"
-  vpc_zone_identifier  = var.subnet_ids
+  desired_capacity    = 0
+  max_size            = var.num_nodes_highcpu_max
+  min_size            = 0
+  name                = "tf-${var.cluster_name}-packaging"
+  vpc_zone_identifier = var.subnet_ids
 
   launch_template {
-    id      = "${aws_launch_template.packaging.id}"
+    id      = aws_launch_template.packaging.id
     version = "$Latest"
   }
 
@@ -336,7 +339,7 @@ resource "aws_autoscaling_group" "packaging" {
 
   tag {
     key                 = "k8s.io/cluster-autoscaler/node-template/label/mode"
-    value               = "odahuflow-packaging"
+    value               = "odahu-flow-packaging"
     propagate_at_launch = true
   }
 
@@ -358,12 +361,13 @@ resource "aws_launch_template" "deployment" {
   image_id      = var.node_ami
   instance_type = var.node_machine_type_highcpu
   key_name      = var.cluster_name
-  user_data     = base64encode(templatefile("${path.module}/templates/node.tpl", {
-                                   endpoint              = aws_eks_cluster.default.endpoint,
-                                   certificate_authority = aws_eks_cluster.default.certificate_authority.0.data,
-                                   name                  = var.cluster_name,
-                                   taints                = "dedicated=deployment:NoSchedule",
-                                   labels                = "mode=odahuflow-deployment" }))
+  user_data = base64encode(templatefile("${path.module}/templates/node.tpl", {
+    endpoint              = aws_eks_cluster.default.endpoint,
+    certificate_authority = aws_eks_cluster.default.certificate_authority.0.data,
+    name                  = var.cluster_name,
+    taints                = "dedicated=deployment:NoSchedule",
+    labels                = "mode=odahu-flow-deployment"
+  }))
 
   iam_instance_profile {
     name = var.node_instance_profile_name
@@ -383,14 +387,14 @@ resource "aws_launch_template" "deployment" {
 }
 
 resource "aws_autoscaling_group" "deployment" {
-  desired_capacity     = 0
-  max_size             = var.num_nodes_highcpu_max
-  min_size             = 0
-  name                 = "tf-${var.cluster_name}-deployment"
-  vpc_zone_identifier  = var.subnet_ids
+  desired_capacity    = 0
+  max_size            = var.num_nodes_highcpu_max
+  min_size            = 0
+  name                = "tf-${var.cluster_name}-deployment"
+  vpc_zone_identifier = var.subnet_ids
 
   launch_template {
-    id      = "${aws_launch_template.deployment.id}"
+    id      = aws_launch_template.deployment.id
     version = "$Latest"
   }
 
@@ -420,7 +424,7 @@ resource "aws_autoscaling_group" "deployment" {
 
   tag {
     key                 = "k8s.io/cluster-autoscaler/node-template/label/mode"
-    value               = "odahuflow-deployment"
+    value               = "odahu-flow-deployment"
     propagate_at_launch = true
   }
 

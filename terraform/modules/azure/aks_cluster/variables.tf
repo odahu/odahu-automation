@@ -49,7 +49,7 @@ variable "allowed_ips" {
 variable "aks_tags" {
   description = "Tags used for Azure Kubernetes cluster definition"
   default     = {}
-  type        = "map"
+  type        = map
 }
 
 variable "aks_analytics_workspace_id" {

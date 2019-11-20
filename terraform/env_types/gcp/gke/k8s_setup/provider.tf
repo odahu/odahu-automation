@@ -1,5 +1,5 @@
 provider "google" {
-  version = "2.16.0"
+  version = "2.20.0"
 }
 
 provider "helm" {

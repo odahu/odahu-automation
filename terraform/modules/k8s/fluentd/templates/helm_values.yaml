@@ -1,0 +1,2 @@
+fluentdVersion: "${odahu_infra_version}"
+imagesRegistry: "${docker_repo}/"
