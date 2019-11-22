@@ -159,6 +159,8 @@ config:
     metric_url: "https://mlflow.${cluster_name}.${root_domain}"
     model_trainer:
       image: "${docker_repo}/odahuflow-model-trainer:${odahuflow_version}"
+    model_validator:
+      image: "${docker_repo}/odahuflow-cli:${odahuflow_version}"
 
   packaging:
 %{ if cloud_type == "azure" ~}

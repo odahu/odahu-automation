@@ -160,6 +160,7 @@ resource "helm_release" "odahuflow" {
   version    = var.odahuflow_version
   namespace  = var.odahuflow_namespace
   repository = data.helm_repository.odahuflow.metadata[0].name
+  timeout = 600
 
   values = [
     data.template_file.odahuflow_values.rendered,
