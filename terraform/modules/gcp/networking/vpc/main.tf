@@ -12,7 +12,6 @@ resource "google_compute_subnetwork" "subnet" {
   ip_cidr_range            = var.subnet_cidr
   network                  = google_compute_network.vpc.self_link
   region                   = var.region
-  enable_flow_logs         = false
   private_ip_google_access = true
 }
 

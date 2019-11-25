@@ -83,9 +83,6 @@ resource "google_container_cluster" "cluster" {
     http_load_balancing {
       disabled = true
     }
-    kubernetes_dashboard {
-      disabled = true
-    }
     horizontal_pod_autoscaling {
       disabled = true
     }

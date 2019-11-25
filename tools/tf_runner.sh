@@ -5,7 +5,7 @@ set -e
 
 function ReadArguments() {
 	export VERBOSE=false
-	export TF_SUPPORTED_COMMANDS=(create destroy)
+	export TF_SUPPORTED_COMMANDS=(create destroy suspend resume)
 
 	if [[ $# == 0 ]]; then
 		echo "ERROR: Options not specified! Use -h for help!"
@@ -16,10 +16,8 @@ function ReadArguments() {
 		case "$1" in
 			-h|--help)
 				echo "tf_runner.sh - Run Terraform modules for Odahuflow clusters orchestration."
-				echo "Usage: ./tf_runner.sh [OPTIONS]"
-				echo " "
-				echo "options:"
-				echo -e "[create|destroy]\tcommand to execute: ${TF_SUPPORTED_COMMANDS[@]}"
+				echo -e "Usage: ./tf_runner.sh [OPTIONS]\n\noptions:"
+				echo "command to execute: \"${TF_SUPPORTED_COMMANDS[@]}\""
 				echo -e "-v  --verbose\t\tverbose mode for debug purposes"
 				echo -e "-h  --help\t\tshow brief help"
 				exit 0
@@ -31,6 +29,14 @@ function ReadArguments() {
 			destroy)
 				shift
 				export COMMAND="destroy"
+				;;
+			suspend)
+				shift
+				export COMMAND="suspend"
+				;;
+			resume)
+				shift
+				export COMMAND="resume"
 				;;
 			-v|--verbose)
 				export VERBOSE=true
@@ -65,9 +71,9 @@ function ReadArguments() {
 
 # Get parameter from cluster profile
 function GetParam() {
-	result=$(jq -r ".$1" $PROFILE)
+	result=$(jq -r '.'"$1" $PROFILE)
 	if [[ $result == null ]]; then
-		echo "ERROR: $1 parameter is missing in $PROFILE cluster profile"
+		echo "ERROR: \"$1\" parameter is missing in $PROFILE cluster profile"
 		exit 1
 	else
 		echo $result
@@ -86,7 +92,6 @@ function IngressTFCrutch() {
 }
 
 function TerraformRun() {
-	MODULES_ROOT="/opt/odahuflow/terraform/env_types/$(GetParam 'cluster_type')/"
 	TF_MODULE=$1
 	TF_COMMAND=$2
 	WORK_DIR=$MODULES_ROOT/$TF_MODULE
@@ -215,21 +220,25 @@ function TerraformDestroy() {
 function CheckCluster() {
 	case $(GetParam 'cluster_type') in
 		"aws/eks")
-			if aws eks list-clusters --region $(GetParam 'aws_region') | grep $(GetParam 'cluster_name'); then
+			if aws eks list-clusters \
+				--region $(GetParam 'aws_region') | grep $(GetParam 'cluster_name'); then
 				true
 			else
 				false
 			fi
 			;;
 		"gcp/gke")
-			if gcloud container clusters list --zone $(GetParam 'location') | grep -E "^$(GetParam 'cluster_name') .*"; then
+			if gcloud container clusters list \
+				--zone $(GetParam 'location') | grep -E "^$(GetParam 'cluster_name') .*"; then
 				true
 			else
 				false
 			fi
 			;;
 		"azure/aks")
-			if az aks list --resource-group $(GetParam 'azure_resource_group') --query [].name -o tsv | grep -E "^$(GetParam 'cluster_name')$"; then
+			if az aks list \
+				--resource-group $(GetParam 'azure_resource_group') \
+				--query [].name -o tsv | grep -E "^$(GetParam 'cluster_name')$"; then
 				true
 			else
 				false
@@ -243,13 +252,114 @@ function FetchKubeConfig() {
 	echo 'INFO : Authorize Kubernetes API access'
 	case $(GetParam "cluster_type") in
 		"aws/eks")
-			aws eks --region $(GetParam 'aws_region') update-kubeconfig --name $(GetParam 'cluster_name')
+			aws eks update-kubeconfig --name $(GetParam 'cluster_name') \
+				 --region $(GetParam 'aws_region')
 			;;
 		"gcp/gke")
-			gcloud container clusters get-credentials $(GetParam 'cluster_name') --zone $(GetParam 'location') --project=$(GetParam 'project_id')
+			gcloud container clusters get-credentials $(GetParam 'cluster_name') \
+				--zone $(GetParam 'location') \
+				--project=$(GetParam 'project_id')
 			;;
 		"azure/aks")
-			az aks get-credentials --name $(GetParam 'cluster_name') --resource-group $(GetParam 'azure_resource_group')
+			az aks get-credentials --name $(GetParam 'cluster_name') \
+				--resource-group $(GetParam 'azure_resource_group')
+			;;
+	esac
+}
+
+function SuspendCluster() {
+	local cluster_type
+	local cluster_name
+
+	cluster_type=$(GetParam "cluster_type") || exit 1
+	cluster_name=$(GetParam "cluster_name") || exit 1
+
+	case ${cluster_type} in
+		"gcp/gke")
+			if CheckCluster; then
+				FetchKubeConfig
+
+				local k_nodes=$(kubectl get nodes --no-headers=true 2>/dev/null | awk '{print $1}')
+				if [[ ! -z "${k_nodes}" ]]; then
+					for node in ${k_nodes}; do
+						kubectl cordon $node
+					done
+
+					gcloud beta container clusters update ${cluster_name} \
+						--node-pool "${cluster_name}-main" \
+						--min-nodes 0 --max-nodes $(( $(GetParam 'initial_node_count') / 2 )) \
+						--node-locations $(GetParam 'node_locations | join(",")') \
+						--region $(GetParam 'region') \
+						--quiet
+
+					gcloud beta container clusters update ${cluster_name} \
+						--region=$(GetParam 'region') \
+						--node-pool "${cluster_name}-main" \
+						--enable-autoscaling \
+						--max-nodes=$(echo ${k_nodes} | wc -w) \
+						--quiet
+
+					kubectl get pods --no-headers=true --all-namespaces | \
+						sed -r 's/(\S+)\s+(\S+).*/kubectl --namespace \1 delete pod --grace-period=0 --force \2 2>\/dev\/null/e'
+
+					gcloud beta container clusters resize ${cluster_name} \
+						--region=$(GetParam 'region') \
+						--node-pool "${cluster_name}-main" \
+						--num-nodes 0 \
+						--quiet
+
+					gcloud compute instances list --format="csv[no-heading](name,zone)" \
+						--filter="labels.cluster_name:${cluster_name} AND name ~ ^bastion" | \
+						sed -r 's/(\S+),(\S+).*/gcloud compute instances stop \1 --zone \2/e'
+				else
+					echo "ERROR: List of cluster nodes is empty - there's nothing to suspend"
+					exit 1
+				fi
+			fi
+			;;
+		*)
+			echo "ERROR: Unknown cluster type \"$1\" provided"
+			exit 1
+			;;
+	esac
+}
+
+function ResumeCluster() {
+	local cluster_type
+	local cluster_name
+
+	cluster_type=$(GetParam "cluster_type") || exit 1
+	cluster_name=$(GetParam "cluster_name") || exit 1
+
+	case ${cluster_type} in
+		"gcp/gke")
+			if CheckCluster; then
+				FetchKubeConfig
+
+				local k_nodes=$(kubectl get nodes --no-headers=true 2>/dev/null | awk '{print $1}')
+				if [[ -z "${k_nodes}" ]]; then
+					gcloud compute instances list --format="csv[no-heading](name,zone)" \
+						--filter="labels.cluster_name:${cluster_name} AND name ~ ^bastion" | \
+						sed -r 's/(\S+),(\S+).*/gcloud compute instances start \1 --zone \2/e'
+
+					gcloud beta container clusters resize ${cluster_name} \
+						--region=$(GetParam 'region') \
+						--node-pool "${cluster_name}-main" \
+						--num-nodes $(( $(GetParam 'initial_node_count') / 2 - 1 )) \
+						--quiet
+
+					until [[ -z "$(kubectl get pods --no-headers=true --all-namespaces --field-selector=status.phase!=Running 2>/dev/null)" ]]; do
+						sleep 5
+					done
+				else
+					echo "ERROR: List of cluster nodes is not empty - it seems that cluster is already resumed"
+					exit 1
+				fi
+			fi
+			;;
+		*)
+			echo "ERROR: Unknown cluster type \"$1\" provided"
+			exit 1
 			;;
 	esac
 }
@@ -272,4 +382,8 @@ if [[ $COMMAND == 'create' ]]; then
 	TerraformCreate
 elif [[ $COMMAND == 'destroy' ]]; then
 	TerraformDestroy
+elif [[ $COMMAND == 'suspend' ]]; then
+	SuspendCluster
+elif [[ $COMMAND == 'resume' ]]; then
+	ResumeCluster
 fi
