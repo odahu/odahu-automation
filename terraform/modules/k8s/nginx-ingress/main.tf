@@ -36,7 +36,7 @@ resource "helm_release" "nginx-ingress" {
     for_each = local.gcp_resource_count == 0 ? [] : [0]
     content {
       name  = "defaultBackend.service.type"
-      value = lookup(local.nginx_service_types, var.cluster_type)
+      value = "ClusterIP"
     }
   }
 
@@ -46,6 +46,15 @@ resource "helm_release" "nginx-ingress" {
     content {
       name  = "controller.service.loadBalancerIP"
       value = google_compute_address.ingress_lb_address[0].address
+    }
+  }
+
+  dynamic "set_string" {
+    iterator = i
+    for_each = local.gcp_resource_count == 0 ? [] : [0]
+    content {
+      name  = "controller.service.loadBalancerSourceRanges"
+      value = "{${join(",", formatlist("%s", var.allowed_ips))}}"
     }
   }
 
