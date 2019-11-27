@@ -17,7 +17,7 @@ function ReadArguments() {
 			-h|--help)
 				echo "tf_runner.sh - Run Terraform modules for Odahuflow clusters orchestration."
 				echo -e "Usage: ./tf_runner.sh [OPTIONS]\n\noptions:"
-				echo "command to execute: \"${TF_SUPPORTED_COMMANDS[@]}\""
+				echo "command to execute: \"${TF_SUPPORTED_COMMANDS[*]}\""
 				echo -e "-v  --verbose\t\tverbose mode for debug purposes"
 				echo -e "-h  --help\t\tshow brief help"
 				exit 0
@@ -60,8 +60,8 @@ function ReadArguments() {
 		exit 1
 	fi
 	# Validate Command parameter
-	if [[ ! " ${TF_SUPPORTED_COMMANDS[@]} " =~ " ${COMMAND} " ]]; then
-		echo "ERROR: incorrect Command parameter \"$COMMAND\", must be one of ${TF_SUPPORTED_COMMANDS[@]}!"
+	if [[ ! "${TF_SUPPORTED_COMMANDS[*]}" =~ ${COMMAND} ]]; then
+		echo "ERROR: incorrect Command parameter \"$COMMAND\", must be one of: ${TF_SUPPORTED_COMMANDS[*]}!"
 		exit 1
 	fi
 	if [[ $VERBOSE == true ]]; then
@@ -71,15 +71,16 @@ function ReadArguments() {
 
 # Get parameter from cluster profile
 function GetParam() {
-	result=$(jq -r '.'"$1" $PROFILE)
-	if [[ $result == null ]]; then
-		echo "ERROR: \"$1\" parameter is missing in $PROFILE cluster profile"
+	result=$(jq -r ".$1" "${PROFILE}")
+	if [[ "$result" == null ]]; then
+		echo "ERROR: $1 parameter is missing in ${PROFILE} cluster profile"
 		exit 1
 	else
-		echo $result
+		echo "$result"
 	fi
 }
 
+# shellcheck disable=SC2044,SC2086,1001
 function IngressTFCrutch() {
        for file in $(find $1 -type f -name "*.tf" ! \( \
        -name "main.tf" -o \
@@ -96,8 +97,11 @@ function TerraformRun() {
 	TF_COMMAND=$2
 	WORK_DIR=$MODULES_ROOT/$TF_MODULE
 
-	cd $WORK_DIR
-	export TF_DATA_DIR="/tmp/.terraform/$(GetParam 'cluster_name')/$TF_MODULE"
+	cd "${WORK_DIR}"
+
+	TF_DATA_DIR="/tmp/.terraform/$(GetParam 'cluster_name')/$TF_MODULE"
+	export TF_DATA_DIR
+
 	case $(GetParam "cluster_type") in
 		"aws/eks")
 			terraform init -no-color \
@@ -119,7 +123,7 @@ function TerraformRun() {
 	esac
 
 	echo "INFO : Execute $TF_COMMAND on $TF_MODULE state"
-	terraform $TF_COMMAND -no-color -auto-approve -var-file=$PROFILE
+	terraform "${TF_COMMAND}" -no-color -auto-approve "-var-file=${PROFILE}"
 }
 
 function SetupCloudAccess() {
@@ -134,7 +138,7 @@ function SetupCloudAccess() {
 				echo -e "\tPass path to the credentials json file as GOOGLE_CREDENTIALS env var!"
 				exit 1
 			fi
-			gcloud auth activate-service-account --key-file=$GOOGLE_CREDENTIALS --project=$(GetParam 'project_id')
+			gcloud auth activate-service-account "--key-file=${GOOGLE_CREDENTIALS}" "--project=$(GetParam 'project_id')"
 			;;
 		"azure/aks")
 			if [[ $VERBOSE == true ]]; then set +x; fi
@@ -143,7 +147,7 @@ function SetupCloudAccess() {
 				echo -e "\tDeclare ARM_CLIENT_ID, ARM_CLIENT_SECRET, ARM_TENANT_ID, ARM_SUBSCRIPTION_ID env vars!"
 				exit 1
 			fi
-			az login --service-principal -u $ARM_CLIENT_ID -p $ARM_CLIENT_SECRET --tenant $ARM_TENANT_ID
+			az login --service-principal -u "${ARM_CLIENT_ID}" -p "${ARM_CLIENT_SECRET}" --tenant "${ARM_TENANT_ID}"
 			export TF_VAR_sp_client_id=${ARM_CLIENT_ID}
 			export TF_VAR_sp_secret=${ARM_CLIENT_SECRET}
 			if [[ $VERBOSE == true ]]; then set -x; fi
@@ -203,8 +207,8 @@ function TerraformDestroy() {
 		"gcp/gke")
 			echo 'INFO : Remove auto-generated fw rules'
 			fw_filter="name:k8s- AND network:$(GetParam 'cluster_name')-vpc"
-			for i in $(gcloud compute firewall-rules list --filter="${fw_filter}" --format='value(name)' --project=$(GetParam 'project_id')); do
-				gcloud compute firewall-rules delete $i --quiet
+			for i in $(gcloud compute firewall-rules list --filter="${fw_filter}" --format='value(name)' "--project=$(GetParam 'project_id')"); do
+				gcloud compute firewall-rules delete "${i}" --quiet
 			done
 			echo 'INFO : Destroy GKE cluster'
 			TerraformRun gke_create destroy
@@ -221,7 +225,7 @@ function CheckCluster() {
 	case $(GetParam 'cluster_type') in
 		"aws/eks")
 			if aws eks list-clusters \
-				--region $(GetParam 'aws_region') | grep $(GetParam 'cluster_name'); then
+				--region "$(GetParam 'aws_region')" | grep "$(GetParam 'cluster_name')"; then
 				true
 			else
 				false
@@ -229,7 +233,7 @@ function CheckCluster() {
 			;;
 		"gcp/gke")
 			if gcloud container clusters list \
-				--zone $(GetParam 'location') | grep -E "^$(GetParam 'cluster_name') .*"; then
+				--zone "$(GetParam 'location')" | grep -E "^$(GetParam 'cluster_name') .*"; then
 				true
 			else
 				false
@@ -237,7 +241,7 @@ function CheckCluster() {
 			;;
 		"azure/aks")
 			if az aks list \
-				--resource-group $(GetParam 'azure_resource_group') \
+				--resource-group "$(GetParam 'azure_resource_group')" \
 				--query [].name -o tsv | grep -E "^$(GetParam 'cluster_name')$"; then
 				true
 			else
@@ -252,17 +256,17 @@ function FetchKubeConfig() {
 	echo 'INFO : Authorize Kubernetes API access'
 	case $(GetParam "cluster_type") in
 		"aws/eks")
-			aws eks update-kubeconfig --name $(GetParam 'cluster_name') \
-				 --region $(GetParam 'aws_region')
+			aws eks update-kubeconfig --name "$(GetParam 'cluster_name')" \
+				 --region "$(GetParam 'aws_region')"
 			;;
 		"gcp/gke")
-			gcloud container clusters get-credentials $(GetParam 'cluster_name') \
-				--zone $(GetParam 'location') \
-				--project=$(GetParam 'project_id')
+			gcloud container clusters get-credentials "$(GetParam 'cluster_name')" \
+				--zone "$(GetParam 'location')" \
+				--project "$(GetParam 'project_id')"
 			;;
 		"azure/aks")
-			az aks get-credentials --name $(GetParam 'cluster_name') \
-				--resource-group $(GetParam 'azure_resource_group')
+			az aks get-credentials --name "$(GetParam 'cluster_name')" \
+				--resource-group "$(GetParam 'azure_resource_group')"
 			;;
 	esac
 }
@@ -279,31 +283,32 @@ function SuspendCluster() {
 			if CheckCluster; then
 				FetchKubeConfig
 
-				local k_nodes=$(kubectl get nodes --no-headers=true 2>/dev/null | awk '{print $1}')
-				if [[ ! -z "${k_nodes}" ]]; then
+				k_nodes=$(kubectl get nodes --no-headers=true 2>/dev/null | awk '{print $1}')
+				local k_nodes
+				if [[ -n "${k_nodes}" ]]; then
 					for node in ${k_nodes}; do
-						kubectl cordon $node
+						kubectl cordon "$node"
 					done
 
-					gcloud beta container clusters update ${cluster_name} \
+					gcloud beta container clusters update "${cluster_name}" \
 						--node-pool "${cluster_name}-main" \
 						--min-nodes 0 --max-nodes $(( $(GetParam 'initial_node_count') / 2 )) \
-						--node-locations $(GetParam 'node_locations | join(",")') \
-						--region $(GetParam 'region') \
+						--node-locations "$(GetParam 'node_locations | join(",")')" \
+						--region "$(GetParam 'region')" \
 						--quiet
 
-					gcloud beta container clusters update ${cluster_name} \
-						--region=$(GetParam 'region') \
+					gcloud beta container clusters update "${cluster_name}" \
+						--region "$(GetParam 'region')" \
 						--node-pool "${cluster_name}-main" \
 						--enable-autoscaling \
-						--max-nodes=$(echo ${k_nodes} | wc -w) \
+						--max-nodes "$(echo "${k_nodes}" | wc -w)" \
 						--quiet
 
 					kubectl get pods --no-headers=true --all-namespaces | \
 						sed -r 's/(\S+)\s+(\S+).*/kubectl --namespace \1 delete pod --grace-period=0 --force \2 2>\/dev\/null/e'
 
-					gcloud beta container clusters resize ${cluster_name} \
-						--region=$(GetParam 'region') \
+					gcloud beta container clusters resize "${cluster_name}" \
+						--region "$(GetParam 'region')" \
 						--node-pool "${cluster_name}-main" \
 						--num-nodes 0 \
 						--quiet
@@ -318,7 +323,7 @@ function SuspendCluster() {
 			fi
 			;;
 		*)
-			echo "ERROR: Unknown cluster type \"$1\" provided"
+			echo "ERROR: Unknown cluster type \"${cluster_type}\" provided"
 			exit 1
 			;;
 	esac
@@ -336,14 +341,15 @@ function ResumeCluster() {
 			if CheckCluster; then
 				FetchKubeConfig
 
-				local k_nodes=$(kubectl get nodes --no-headers=true 2>/dev/null | awk '{print $1}')
+				k_nodes=$(kubectl get nodes --no-headers=true 2>/dev/null | awk '{print $1}')
+				local k_nodes
 				if [[ -z "${k_nodes}" ]]; then
 					gcloud compute instances list --format="csv[no-heading](name,zone)" \
 						--filter="labels.cluster_name:${cluster_name} AND name ~ ^bastion" | \
 						sed -r 's/(\S+),(\S+).*/gcloud compute instances start \1 --zone \2/e'
 
-					gcloud beta container clusters resize ${cluster_name} \
-						--region=$(GetParam 'region') \
+					gcloud beta container clusters resize "${cluster_name}" \
+						--region "$(GetParam 'region')" \
 						--node-pool "${cluster_name}-main" \
 						--num-nodes $(( $(GetParam 'initial_node_count') / 2 - 1 )) \
 						--quiet
@@ -358,7 +364,7 @@ function ResumeCluster() {
 			fi
 			;;
 		*)
-			echo "ERROR: Unknown cluster type \"$1\" provided"
+			echo "ERROR: Unknown cluster type \"${cluster_type}\" provided"
 			exit 1
 			;;
 	esac
@@ -374,7 +380,8 @@ SetupCloudAccess
 
 export TF_IN_AUTOMATION=true
 export TF_PLUGIN_CACHE_DIR=/tmp/.terraform/cache && mkdir -p $TF_PLUGIN_CACHE_DIR
-export MODULES_ROOT="/opt/odahuflow/terraform/env_types/$(GetParam 'cluster_type')"
+MODULES_ROOT="/opt/odahu-flow/terraform/env_types/$(GetParam 'cluster_type')"
+export MODULES_ROOT
 
 IngressTFCrutch "$MODULES_ROOT/../../../modules/k8s/nginx-ingress/"
 

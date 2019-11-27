@@ -1,0 +1,8 @@
+dependencies:
+  - name: grafana
+    alias: odahuflow-grafana
+    version: "4.0.4"
+    repository: "@stable"
+  - name: prometheus-operator
+    version: "5.12.3"
+    repository: "@stable"

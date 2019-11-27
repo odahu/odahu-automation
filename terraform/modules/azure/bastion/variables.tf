@@ -27,7 +27,7 @@ variable "bastion_machine_type" {
 variable "bastion_tags" {
   default     = {}
   description = "Bastion host tags"
-  type        = "map"
+  type        = map
 }
 
 variable "bastion_hostname" {

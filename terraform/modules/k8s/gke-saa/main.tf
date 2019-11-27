@@ -22,7 +22,7 @@ data "template_file" "gke_saa_values" {
 resource "helm_release" "gke_saa" {
   count      = local.gcp_resource_count
   name       = "gke-saa"
-  chart      = "k8s-gke-saa"
+  chart      = "odahu-flow-k8s-gke-saa"
   version    = var.odahu_infra_version
   repository = "odahuflow"
   namespace  = "kube-system"

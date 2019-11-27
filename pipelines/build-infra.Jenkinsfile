@@ -123,8 +123,16 @@ pipeline {
                 stage("Build Terraform") {
                     steps {
                         script {
-                            cicdLibrary.buildLegionImage('odahuflow-automation', ".", "containers/terraform/Dockerfile")
-                            cicdLibrary.uploadDockerImage('odahuflow-automation', env.param_stable_release.toBoolean() && env.param_dockerhub_publishing_enabled.toBoolean())
+                            cicdLibrary.buildLegionImage('odahu-flow-automation', ".", "containers/terraform/Dockerfile")
+                            cicdLibrary.uploadDockerImage('odahu-flow-automation', env.param_stable_release.toBoolean() && env.param_dockerhub_publishing_enabled.toBoolean())
+                        }
+                    }
+                }
+                stage("Build Fluentd Docker image") {
+                    steps {
+                        script {
+                            cicdLibrary.buildLegionImage('odahu-flow-fluentd', 'containers/fluentd')
+                            cicdLibrary.uploadDockerImage('odahu-flow-fluentd', env.param_stable_release.toBoolean() && env.param_dockerhub_publishing_enabled.toBoolean())
                         }
                     }
                 }

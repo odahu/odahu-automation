@@ -1,0 +1,19 @@
+name: odahu-flow-knative
+version: 0.1.0
+appVersion: v0.6.1
+description: Knative chart
+keywords:
+  - ML
+maintainers:
+  - name: Dmitrii Suslov
+    email: suslov.dimitriy@gmail.com
+  - name: Vlad Tokarev
+    email: vlad.tokarev.94@gmail.com
+  - name: Dmitriy Karbyshev
+    email: karbyshevds@gmail.com
+  - name: Max Kochubey
+    email: maxkochubey@gmail.com
+  - name: Kirill Makhonin
+    email: kirill@makhonin.biz
+  - name: Vitalik Solodilov
+    email: mcdkr@yandex.ru

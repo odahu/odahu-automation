@@ -1,0 +1,38 @@
+odahuFlowVersion: "${odahuflow_version}"
+imagesRegistry: "${docker_repo}/"
+logLevel: debug
+
+ingress:
+  enabled: true
+  globalDomain: "${cluster_domain}"
+  tlsEnabled: ${ingress_tls_enabled}
+  tlsSecretName: "${ingress_tls_secret_name}"
+
+security:
+  enabled: true
+  integration: oauth2_proxy
+
+feedback:
+  enabled: true
+
+api:
+  replicas: 2
+  env:
+    VAULT_CACERT: /vault/tls/ca.crt
+
+  volumeMounts:
+    - name: vault-tls
+      mountPath: /vault/tls
+
+  volumes:
+    - name: vault-tls
+      secret:
+        secretName: vault-tls
+
+metrics:
+  enabled: true
+  dashboardFolder: /tmp/dashboards/odahu-flow
+
+${connections}
+
+${config}

@@ -70,7 +70,7 @@ resource "null_resource" "add_helm_repository_stable" {
     command = "helm repo add stable https://kubernetes-charts.storage.googleapis.com"
   }
   provisioner "local-exec" {
-    when    = "destroy"
+    when    = destroy
     command = "helm repo rm stable || true"
   }
   depends_on = [null_resource.reinit_helm_client]

@@ -2,8 +2,8 @@ FROM ubuntu:18.04
 
 ENV DEBIAN_FRONTEND=noninteractive \
     KUBECTL_VERSION=v1.13.12 \
-    TERRAFORM_VERSION=0.12.9 \
-    HELM_VERSION=v2.14.3
+    TERRAFORM_VERSION=0.12.16 \
+    HELM_VERSION=v2.16.1
 
 # install system utilities
 RUN apt-get update && apt-get install -y \
@@ -50,7 +50,7 @@ RUN curl -sL https://bootstrap.pypa.io/get-pip.py | python3 && \
 COPY tools/tf_runner.sh /usr/bin/tf_runner
 
 # Deploy odahuflow
-COPY terraform /opt/odahuflow/terraform
-COPY version.info /opt/odahuflow/version.info
+COPY terraform /opt/odahu-flow/terraform
+COPY version.info /opt/odahu-flow/version.info
 
-WORKDIR /opt/odahuflow
+WORKDIR /opt/odahu-flow

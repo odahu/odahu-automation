@@ -22,7 +22,7 @@ resource "aws_customer_gateway" "to_gcp" {
 
 # Virtual Private gateway at AWS
 resource "aws_vpn_gateway" "vpn_gateway" {
-  vpc_id    = "${var.aws_vpc_id}"
+  vpc_id = var.aws_vpc_id
   tags = {
     Name    = "${var.cluster_name}-gcp"
     Project = "odahuflow"

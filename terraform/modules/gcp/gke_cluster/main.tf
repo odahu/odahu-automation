@@ -39,10 +39,10 @@ resource "google_container_cluster" "cluster" {
 
   lifecycle {
     ignore_changes = [
-      "initial_node_count",
-      "node_pool",
-      "network",
-      "network_policy",
+      initial_node_count,
+      node_pool,
+      network,
+      network_policy,
     ]
   }
 

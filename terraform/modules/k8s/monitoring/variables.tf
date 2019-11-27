@@ -1,17 +1,12 @@
 ##################
 # Common
 ##################
-variable "cluster_name" {
-  default     = "odahuflow"
-  description = "Odahuflow cluster name"
-}
-
 variable "helm_repo" {
   description = "Odahuflow helm repo"
 }
 
-variable "root_domain" {
-  description = "Odahuflow cluster root domain"
+variable "cluster_domain" {
+  description = "Odahuflow cluster domain"
 }
 
 ########################
@@ -24,10 +19,6 @@ variable "monitoring_namespace" {
 
 variable "odahu_infra_version" {
   description = "Odahuflow infra release version"
-}
-
-variable "alert_slack_url" {
-  description = "Alert slack usrl"
 }
 
 variable "grafana_admin" {

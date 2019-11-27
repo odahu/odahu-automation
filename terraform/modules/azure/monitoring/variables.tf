@@ -21,5 +21,5 @@ variable "resource_group" {
 variable "tags" {
   description = "Tags used for resource"
   default     = {}
-  type        = "map"
+  type        = map
 }

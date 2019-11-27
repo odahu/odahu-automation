@@ -1,0 +1,5 @@
+output:
+  target: "gcs"
+  gcs:
+    bucket: "${data_bucket}"
+    customSA: "${collector_sa}"

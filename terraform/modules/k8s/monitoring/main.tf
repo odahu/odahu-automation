@@ -1,3 +1,7 @@
+locals {
+  ingress_tls_secret_name = "odahu-flow-tls"
+}
+
 ########################################################
 # Prometheus monitoring
 ########################################################
@@ -19,7 +23,7 @@ resource "kubernetes_namespace" "monitoring" {
 
 resource "kubernetes_secret" "tls_monitoring" {
   metadata {
-    name      = "${var.cluster_name}-tls"
+    name      = local.ingress_tls_secret_name
     namespace = var.monitoring_namespace
   }
   data = {
@@ -33,21 +37,20 @@ resource "kubernetes_secret" "tls_monitoring" {
 data "template_file" "monitoring_values" {
   template = file("${path.module}/templates/monitoring.yaml")
   vars = {
-    monitoring_namespace  = var.monitoring_namespace
-    odahu_infra_version   = var.odahu_infra_version
-    cluster_name          = var.cluster_name
-    root_domain           = var.root_domain
-    docker_repo           = var.docker_repo
-    alert_slack_url       = var.alert_slack_url
-    grafana_admin         = var.grafana_admin
-    grafana_pass          = var.grafana_pass
-    grafana_storage_class = var.grafana_storage_class
+    monitoring_namespace    = var.monitoring_namespace
+    odahu_infra_version     = var.odahu_infra_version
+    cluster_domain          = var.cluster_domain
+    docker_repo             = var.docker_repo
+    grafana_admin           = var.grafana_admin
+    grafana_pass            = var.grafana_pass
+    grafana_storage_class   = var.grafana_storage_class
+    ingress_tls_secret_name = local.ingress_tls_secret_name
   }
 }
 
 resource "helm_release" "monitoring" {
   name       = "monitoring"
-  chart      = "monitoring"
+  chart      = "odahu-flow-monitoring"
   version    = var.odahu_infra_version
   namespace  = var.monitoring_namespace
   repository = "odahuflow"
