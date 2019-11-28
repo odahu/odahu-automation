@@ -75,6 +75,19 @@ resource "kubernetes_secret" "tls_odahuflow" {
   depends_on = [kubernetes_namespace.odahuflow]
 }
 
+resource "kubernetes_namespace" "jupyterhub" {
+  metadata {
+    annotations = {
+      name = var.jupyterhub_namespace
+    }
+    labels = {
+      project         = "odahuflow"
+      istio-injection = "enabled"
+    }
+    name = var.jupyterhub_namespace
+  }
+}
+
 locals {
   vault_tls_secret_name = "vault-tls"
 }
@@ -94,6 +107,20 @@ resource "kubernetes_secret" "odahuflow_vault_tls" {
   }
   data       = data.kubernetes_secret.vault_tls.data
   depends_on = [kubernetes_namespace.odahuflow]
+}
+
+resource "kubernetes_secret" "jupyterhub_tls" {
+  metadata {
+    name      = local.ingress_tls_secret_name
+    namespace = var.jupyterhub_namespace
+  }
+  data = {
+    "tls.key" = var.tls_secret_key
+    "tls.crt" = var.tls_secret_crt
+  }
+  type = "kubernetes.io/tls"
+
+  depends_on = [kubernetes_namespace.jupyterhub]
 }
 
 ########################################################
@@ -263,5 +290,27 @@ resource "helm_release" "jupyterlab" {
   depends_on = [
     helm_release.odahuflow,
     kubernetes_namespace.odahuflow
+  ]
+}
+
+########################################################
+# Install Jupiterhub flow chart
+########################################################
+resource "helm_release" "jupyterhub" {
+  name       = "jupyterhub"
+  chart      = "jupyterhub/jupyterhub"
+  version    = var.jupyterhub_chart_version
+  namespace  = var.jupyterhub_namespace
+  repository = "jupyterhub"
+
+  values = [
+    templatefile("${path.module}/templates/jupyterhub.yaml", {
+      cluster_domain = var.cluster_domain
+      secret_token   = var.secret_token
+    }),
+  ]
+
+  depends_on = [
+    kubernetes_namespace.jupyterhub
   ]
 }

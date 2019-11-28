@@ -94,10 +94,11 @@ variable "odahuflow_connection_decrypt_token" {
 }
 
 variable "jupyterlab_version" {}
-variable "packager_version" {}
 
+variable "packager_version" {}
 
 variable "odahuflow_connections" {
   default     = []
   description = "TODO"
 }
+variable "jupyterhub_chart_version" {}

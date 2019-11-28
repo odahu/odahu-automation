@@ -36,4 +36,6 @@ module "odahuflow_helm" {
   odahuflow_connections              = concat(var.odahuflow_connections, module.odahuflow_prereqs.odahuflow_connections)
   extra_external_urls                = module.odahuflow_prereqs.extra_external_urls
   odahuflow_connection_decrypt_token = var.odahuflow_connection_decrypt_token
+
+  jupyterhub_chart_version = var.jupyterhub_chart_version
 }

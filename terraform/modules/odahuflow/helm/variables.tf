@@ -18,6 +18,18 @@ variable "jupyterlab_version" {
   description = "Jupyterlab version"
 }
 
+variable "jupyterhub_namespace" {
+  default = "jupyterhub"
+}
+
+variable "jupyterhub_chart_version" {
+  description = "Jupyterhub chart version"
+}
+
+variable "secret_token" {
+  description = "Jupyterhub secret token"
+}
+
 variable "packager_version" {
   description = "Packager version"
 }

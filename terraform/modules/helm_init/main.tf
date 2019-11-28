@@ -105,3 +105,13 @@ resource "null_resource" "add_helm_vault_repository" {
   }
   depends_on = [null_resource.add_helm_repository_istio]
 }
+
+resource "null_resource" "add_helm_jupyterhub_repository" {
+  triggers = {
+    build_number = timestamp()
+  }
+  provisioner "local-exec" {
+    command = "helm repo add jupyterhub https://jupyterhub.github.io/helm-chart/"
+  }
+  depends_on = [null_resource.add_helm_vault_repository]
+}
