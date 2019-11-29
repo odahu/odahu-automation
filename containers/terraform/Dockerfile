@@ -3,7 +3,7 @@ FROM ubuntu:18.04
 ENV DEBIAN_FRONTEND=noninteractive \
     KUBECTL_VERSION=v1.13.12 \
     TERRAFORM_VERSION=0.12.16 \
-    HELM_VERSION=v2.16.1
+    HELM_VERSION=v2.14.3
 
 # install system utilities
 RUN apt-get update && apt-get install -y \

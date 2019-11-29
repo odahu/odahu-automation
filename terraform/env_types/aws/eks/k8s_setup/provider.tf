@@ -1,5 +1,5 @@
 provider "helm" {
-  version        = "0.10.2"
+  version        = "0.10.4"
   install_tiller = false
 
   kubernetes {

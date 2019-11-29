@@ -1,5 +1,5 @@
 provider "helm" {
-  version         = "0.10.2"
+  version         = "0.10.4"
   namespace       = "kube-system"
   service_account = "tiller"
   install_tiller  = true
