@@ -77,6 +77,10 @@ variable "allowed_ips" {
   description = "CIDR to allow access from"
 }
 
+variable "pods_cidr" {
+  description = "CIDR to use for cluster pods"
+}
+
 variable "grafana_admin" {
   description = "Grafana admion username"
 }

@@ -14,7 +14,7 @@ module "nginx-ingress" {
   project_id    = var.project_id
   cluster_name  = var.cluster_name
   cluster_type  = var.cluster_type
-  allowed_ips   = var.allowed_ips
+  allowed_ips   = concat(var.allowed_ips, [var.pods_cidr])
   root_domain   = var.root_domain
   dns_zone_name = var.dns_zone_name
   network_name  = var.network_name
