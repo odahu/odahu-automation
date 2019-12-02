@@ -8,16 +8,20 @@ module "base_setup" {
   tls_secret_crt = var.tls_crt
 }
 
-module "nginx-ingress" {
-  source        = "../../../../modules/k8s/nginx-ingress"
+module "nginx_ingress_prereqs" {
+  source        = "../../../../modules/k8s/nginx-ingress/prereqs/gke"
   region        = var.region
   project_id    = var.project_id
   cluster_name  = var.cluster_name
-  cluster_type  = var.cluster_type
   allowed_ips   = concat(var.allowed_ips, [var.pods_cidr])
   root_domain   = var.root_domain
   dns_zone_name = var.dns_zone_name
   network_name  = var.network_name
+}
+
+module "nginx_ingress_helm" {
+  source      = "../../../../modules/k8s/nginx-ingress/helm"
+  helm_values = module.nginx_ingress_prereqs.helm_values
 }
 
 module "auth" {

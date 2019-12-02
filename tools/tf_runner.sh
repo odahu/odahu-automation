@@ -80,18 +80,6 @@ function GetParam() {
 	fi
 }
 
-# shellcheck disable=SC2044,SC2086,1001
-function IngressTFCrutch() {
-       for file in $(find $1 -type f -name "*.tf" ! \( \
-       -name "main.tf" -o \
-       -name "versions.tf" -o \
-       -name "variables.tf" -o \
-       -name "$(GetParam 'cluster_type' | awk -F\/ '{print $1}').tf" \)); do
-               # Rename extra provider tf files :/
-               mv "$file" "$file.bak"
-       done
-}
-
 function TerraformRun() {
 	TF_MODULE=$1
 	TF_COMMAND=$2
@@ -382,8 +370,6 @@ export TF_IN_AUTOMATION=true
 export TF_PLUGIN_CACHE_DIR=/tmp/.terraform/cache && mkdir -p $TF_PLUGIN_CACHE_DIR
 MODULES_ROOT="/opt/odahu-flow/terraform/env_types/$(GetParam 'cluster_type')"
 export MODULES_ROOT
-
-IngressTFCrutch "$MODULES_ROOT/../../../modules/k8s/nginx-ingress/"
 
 if [[ $COMMAND == 'create' ]]; then
 	TerraformCreate
