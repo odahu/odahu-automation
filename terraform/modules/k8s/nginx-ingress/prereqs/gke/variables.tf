@@ -18,6 +18,11 @@ variable "project_id" {
   description = "Target project id"
 }
 
+variable "dns_project_id" {
+  default     = ""
+  description = "Target project id"
+}
+
 variable "region" {
   default     = ""
   description = "Region of resources"

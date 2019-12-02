@@ -9,6 +9,11 @@ variable "project_id" {
   description = "Target project id"
 }
 
+variable "dns_project_id" {
+  default     = ""
+  description = "Target project id to create DNS record"
+}
+
 variable "zone" {
   default     = "us-east1-b"
   description = "Default zone"
