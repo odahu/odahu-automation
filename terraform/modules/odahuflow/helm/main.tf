@@ -120,6 +120,11 @@ resource "kubernetes_secret" "tls_odahuflow" {
   depends_on = [kubernetes_namespace.odahuflow]
 }
 
+locals {
+  vault_tls_secret_name = "vault-tls"
+}
+
+# Copy tls secret from vault namespace to odahuflow
 data "kubernetes_secret" "vault_tls" {
   metadata {
     name      = local.vault_tls_secret_name
