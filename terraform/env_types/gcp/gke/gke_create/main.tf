@@ -44,6 +44,7 @@ module "iam" {
 module "gke_cluster" {
   source             = "../../../../modules/gcp/gke_cluster"
   project_id         = var.project_id
+  dns_project_id     = length(var.dns_project_id) == 0 ? var.project_id : var.dns_project_id
   cluster_name       = var.cluster_name
   zone               = var.zone
   allowed_ips        = var.allowed_ips

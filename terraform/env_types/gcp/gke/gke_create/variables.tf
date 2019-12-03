@@ -15,6 +15,11 @@ variable "project_id" {
   description = "Target project id"
 }
 
+variable "dns_project_id" {
+  default     = ""
+  description = "Target project id"
+}
+
 variable "cluster_name" {
   default     = "odahuflow"
   description = "Odahuflow cluster name"
