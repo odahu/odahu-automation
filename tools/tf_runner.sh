@@ -283,8 +283,8 @@ function SuspendCluster() {
 			if CheckCluster; then
 				FetchKubeConfig
 
-				k_nodes=$(kubectl get nodes --no-headers=true 2>/dev/null | awk '{print $1}')
 				local k_nodes
+				k_nodes=$(kubectl get nodes --no-headers=true 2>/dev/null | awk '{print $1}')
 				if [[ -n "${k_nodes}" ]]; then
 					for node in ${k_nodes}; do
 						kubectl cordon "$node"
@@ -341,8 +341,8 @@ function ResumeCluster() {
 			if CheckCluster; then
 				FetchKubeConfig
 
-				k_nodes=$(kubectl get nodes --no-headers=true 2>/dev/null | awk '{print $1}')
 				local k_nodes
+				k_nodes=$(kubectl get nodes --no-headers=true 2>/dev/null | awk '{print $1}')
 				if [[ -z "${k_nodes}" ]]; then
 					gcloud compute instances list --format="csv[no-heading](name,zone)" \
 						--filter="labels.cluster_name:${cluster_name} AND name ~ ^bastion" | \
