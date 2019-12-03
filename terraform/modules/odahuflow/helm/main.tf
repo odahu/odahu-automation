@@ -108,7 +108,7 @@ data "helm_repository" "odahuflow" {
 locals {
   url_schema = local.ingress_tls_enabled ? "https" : "http"
   default_external_urls = [
-    { name = "Documentation", url = "https://odahu.github.io" },
+    { name = "Documentation", url = "https://docs.odahu.org" },
     { name = "API Gateway", url = "${local.url_schema}://${var.cluster_domain}/swagger/index.html" },
     { name = "ML Metrics", url = "${local.url_schema}://${var.cluster_domain}/mlflow" },
     { name = "Jupyterlab", url = "${local.url_schema}://${var.cluster_domain}/jupyterlab" },
