@@ -18,12 +18,15 @@ module "base_setup" {
   tls_secret_crt = var.tls_crt
 }
 
-module "nginx-ingress" {
-  source                = "../../../../modules/k8s/nginx-ingress"
-  cluster_type          = var.cluster_type
+module "nginx_ingress_prereqs" {
+  source                = "../../../../modules/k8s/nginx-ingress/prereqs/aks"
   cluster_name          = var.cluster_name
-  allowed_ips           = var.allowed_ips
   aks_ip_resource_group = var.azure_resource_group
+}
+
+module "nginx_ingress_helm" {
+  source      = "../../../../modules/k8s/nginx-ingress/helm"
+  helm_values = module.nginx_ingress_prereqs.helm_values
 }
 
 module "auth" {

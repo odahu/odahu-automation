@@ -85,9 +85,9 @@ terraform-fmt-check:
 ## terraform-validate: Validate all odahu terraform modules
 terraform-validate:
 	set -e; for module_path in $$(${FIND_ALL_TER_MODULES_COMMAND}) ; do \
-	    cd $$module_path ; \
-	    echo Current module: $$module_path ; \
-	    terraform init -backend=false &> /dev/null && \
+	    cd $$module_path && \
+	    echo Current module: $$module_path && \
+	    terraform init -backend=false && \
 	    terraform validate ; \
 	    cd - &> /dev/null ; \
 	done
