@@ -216,8 +216,8 @@ resource "helm_release" "mlflow" {
 ########################################################
 
 resource "helm_release" "rest_packagers" {
-  name       = "odahu-flow-rest-packager"
-  chart      = "odahu-flow-rest-packager"
+  name       = "odahu-flow-packagers"
+  chart      = "odahu-flow-packagers"
   version    = var.packager_version
   namespace  = var.odahuflow_namespace
   repository = data.helm_repository.odahuflow.metadata[0].name
