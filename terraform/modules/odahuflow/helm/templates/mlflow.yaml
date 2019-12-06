@@ -10,6 +10,9 @@ security:
   enabled: true
   integration: oauth2_proxy
 
+odahuflowctl:
+  image: "${docker_repo}/odahu-flow-cli:${odahuflow_version}"
+
 tracking_server:
   annotations:
     sidecar.istio.io/inject: "false"
