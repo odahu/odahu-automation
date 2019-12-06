@@ -202,6 +202,8 @@ resource "helm_release" "mlflow" {
 
       docker_repo              = var.docker_repo
       mlflow_toolchain_version = var.mlflow_toolchain_version
+
+      odahuflow_version = var.odahuflow_version
     }),
   ]
 
@@ -216,16 +218,17 @@ resource "helm_release" "mlflow" {
 ########################################################
 
 resource "helm_release" "rest_packagers" {
-  name       = "odahu-flow-rest-packager"
-  chart      = "odahu-flow-rest-packager"
+  name       = "odahu-flow-packagers"
+  chart      = "odahu-flow-packagers"
   version    = var.packager_version
   namespace  = var.odahuflow_namespace
   repository = data.helm_repository.odahuflow.metadata[0].name
 
   values = [
     templatefile("${path.module}/templates/packagers.yaml", {
-      docker_repo      = var.docker_repo
-      packager_version = var.packager_version
+      docker_repo       = var.docker_repo
+      packager_version  = var.packager_version
+      odahuflow_version = var.odahuflow_version
     }),
   ]
 

@@ -1,2 +1,5 @@
 packagerVersion: "${packager_version}"
 imagesRegistry: "${docker_repo}/"
+
+odahuflowctl:
+  image: "${docker_repo}/odahu-flow-cli:${odahuflow_version}"
