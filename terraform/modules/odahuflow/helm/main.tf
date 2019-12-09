@@ -8,15 +8,15 @@ locals {
     { name = "Documentation", url = "https://docs.odahu.org" },
     { name = "API Gateway", url = "${local.url_schema}://${var.cluster_domain}/swagger/index.html" },
     { name = "ML Metrics", url = "${local.url_schema}://${var.cluster_domain}/mlflow" },
-    var.jupyterhub_enabled ?
-      { name = "JupyterHub", url = "${local.url_schema}://${var.cluster_domain}/jupyterhub" } :
-      { name = "JupyterLab", url = "${local.url_schema}://${var.cluster_domain}/jupyterlab" },
     { name = "Service Catalog", url = "${local.url_schema}://${var.cluster_domain}/service-catalog/swagger/index.html" },
     { name = "Cluster Monitoring", url = "${local.url_schema}://${var.cluster_domain}/grafana" },
   ]
+  jupyterhub_url = var.jupyterhub_enabled ? [
+    { name = "JupyterHub", url = "${local.url_schema}://${var.cluster_domain}/jupyterhub" }
+  ] : []
   odahuflow_config = {
     common = {
-      external_urls = concat(local.default_external_urls, var.extra_external_urls)
+      external_urls = concat(local.default_external_urls, local.jupyterhub_url, var.extra_external_urls)
     }
     connection = {
       repository_type = var.connection_repository_type
@@ -227,35 +227,6 @@ resource "helm_release" "rest_packagers" {
       docker_repo       = var.docker_repo
       packager_version  = var.packager_version
       odahuflow_version = var.odahuflow_version
-    }),
-  ]
-
-  depends_on = [
-    helm_release.odahuflow,
-    kubernetes_namespace.odahuflow
-  ]
-}
-
-########################################################
-# Install JupyterLab chart
-########################################################
-
-resource "helm_release" "jupyterlab" {
-  count      = var.jupyterhub_enabled ? 0 : 1
-  name       = "odahu-flow-jupyterlab"
-  chart      = "odahu-flow-jupyterlab"
-  version    = var.jupyterlab_version
-  namespace  = var.odahuflow_namespace
-  repository = data.helm_repository.odahuflow.metadata[0].name
-
-  values = [
-    templatefile("${path.module}/templates/jupyterlab.yaml", {
-      cluster_domain          = var.cluster_domain
-      ingress_tls_secret_name = local.ingress_tls_secret_name
-      ingress_tls_enabled     = local.ingress_tls_enabled
-
-      docker_repo        = var.docker_repo
-      jupyterlab_version = var.jupyterlab_version
     }),
   ]
 

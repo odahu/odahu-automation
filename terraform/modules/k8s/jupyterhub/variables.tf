@@ -5,7 +5,7 @@ variable "docker_repo" {
 variable "jupyterhub_enabled" {
   default     = false
   type        = bool
-  description = "Flag to install JupyterHub (true) or JupyterLab (false)"
+  description = "Flag to install JupyterHub (true) or not (false)"
 }
 
 variable "jupyterhub_namespace" {

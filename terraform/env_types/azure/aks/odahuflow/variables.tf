@@ -115,12 +115,10 @@ variable "odahuflow_connection_decrypt_token" {
   default = "Token for getting a decrypted connection"
 }
 
-variable "jupyterlab_version" {}
-
 variable "jupyterhub_enabled" {
   default     = false
   type        = bool
-  description = "Flag to install JupyterHub (true) or JupyterLab (false)"
+  description = "Flag to install JupyterHub (true) or not (false)"
 }
 
 variable "packager_version" {}

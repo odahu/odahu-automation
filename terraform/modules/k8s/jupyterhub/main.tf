@@ -17,6 +17,7 @@ locals {
 }
 
 resource "random_string" "secret" {
+  count       = var.jupyterhub_enabled ? 1 : 0
   length      = 64
   upper       = false
   lower       = true
@@ -26,6 +27,7 @@ resource "random_string" "secret" {
 }
 
 resource "kubernetes_namespace" "jupyterhub" {
+  count = var.jupyterhub_enabled ? 1 : 0
   metadata {
     annotations = {
       name = var.jupyterhub_namespace
@@ -39,6 +41,7 @@ resource "kubernetes_namespace" "jupyterhub" {
 }
 
 resource "kubernetes_secret" "jupyterhub_tls" {
+  count = var.jupyterhub_enabled ? 1 : 0
   metadata {
     name      = local.ingress_tls_secret_name
     namespace = var.jupyterhub_namespace
@@ -49,10 +52,11 @@ resource "kubernetes_secret" "jupyterhub_tls" {
   }
   type = "kubernetes.io/tls"
 
-  depends_on = [kubernetes_namespace.jupyterhub]
+  depends_on = [kubernetes_namespace.jupyterhub[0]]
 }
 
 resource "helm_release" "jupyterhub" {
+  count      = var.jupyterhub_enabled ? 1 : 0
   name       = "jupyterhub"
   chart      = "jupyterhub/jupyterhub"
   version    = var.jupyterhub_chart_version
@@ -64,7 +68,7 @@ resource "helm_release" "jupyterhub" {
     templatefile("${path.module}/templates/jupyterhub.yaml", {
       cluster_domain          = var.cluster_domain
       ingress_tls_secret_name = local.ingress_tls_secret_name
-      jupyterhub_secret_token = var.jupyterhub_secret_token == "" ? random_string.secret.result : var.jupyterhub_secret_token
+      jupyterhub_secret_token = var.jupyterhub_secret_token == "" ? random_string.secret[0].result : var.jupyterhub_secret_token
 
       oauth_client_id       = var.oauth_client_id
       oauth_client_secret   = var.oauth_client_secret
@@ -75,7 +79,7 @@ resource "helm_release" "jupyterhub" {
   ]
 
   depends_on = [
-    kubernetes_namespace.jupyterhub,
-    kubernetes_secret.jupyterhub_tls
+    kubernetes_namespace.jupyterhub[0],
+    kubernetes_secret.jupyterhub_tls[0]
   ]
 }

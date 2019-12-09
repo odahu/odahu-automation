@@ -13,8 +13,6 @@ RUN apt-get update && apt-get install -y git && \
     jupyterlab==${JUPYTERLAB_VERSION} \
     jupytext==1.1.7 \
     jupyterlab-git \
-    pydantic==0.32.2 \
-    aiohttp>=3.6.2 \
     ${ODAHU_PLUGIN_NAME}==${ODAHU_PLUGIN_VERSION//-/}
 
 RUN jupyter serverextension enable --sys-prefix --py odahuflow.jupyterlab && \

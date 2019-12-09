@@ -27,7 +27,6 @@ module "odahuflow_helm" {
   helm_repo                = var.helm_repo
   docker_repo              = var.docker_repo
   odahuflow_version        = var.odahuflow_version
-  jupyterlab_version       = var.jupyterlab_version
   jupyterhub_enabled       = var.jupyterhub_enabled
   packager_version         = var.packager_version
   mlflow_toolchain_version = var.mlflow_toolchain_version

@@ -14,10 +14,6 @@ variable "odahuflow_version" {
   description = "Odahuflow release version"
 }
 
-variable "jupyterlab_version" {
-  description = "Jupyterlab version"
-}
-
 variable "packager_version" {
   description = "Packager version"
 }
