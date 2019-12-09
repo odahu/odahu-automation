@@ -1,10 +1,6 @@
 ##################
 # Common
 ##################
-variable "project_id" {
-  description = "Target project id"
-}
-
 variable "cloud_type" {}
 
 variable "cluster_type" {}
@@ -20,6 +16,10 @@ variable "config_context_auth_info" {
 
 variable "config_context_cluster" {
   description = "Odahuflow cluster context name"
+}
+
+variable "project_id" {
+  description = "Target project id"
 }
 
 variable "zone" {
@@ -83,6 +83,14 @@ variable "keycloak_url" {
   description = "Keycloak URL"
 }
 
+variable "oauth_client_id" {
+  description = "OAuth2 Client ID"
+}
+
+variable "oauth_client_secret" {
+  description = "OAuth2 Client Secret"
+}
+
 variable "model_authorization_enabled" {
   description = "Is model authorization enabled"
   default     = "false"
@@ -93,12 +101,21 @@ variable "odahuflow_connection_decrypt_token" {
   default = "Token for getting a decrypted connection"
 }
 
-variable "jupyterlab_version" {}
+variable "jupyterlab_version" {
+  description = ""
+}
 
-variable "packager_version" {}
+variable "jupyterhub_enabled" {
+  default     = false
+  type        = bool
+  description = "Flag to install JupyterHub (true) or JupyterLab (false)"
+}
+
+variable "packager_version" {
+  description = ""
+}
 
 variable "odahuflow_connections" {
   default     = []
   description = "TODO"
 }
-variable "jupyterhub_chart_version" {}

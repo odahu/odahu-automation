@@ -85,6 +85,22 @@ variable "mlflow_toolchain_version" {
   description = "Version of odahuflow-mlflow helm chart"
 }
 
+variable "keycloak_realm" {
+  description = "Keycloak realm"
+}
+
+variable "keycloak_url" {
+  description = "Keycloak URL"
+}
+
+variable "oauth_client_id" {
+  description = "OAuth2 Client ID"
+}
+
+variable "oauth_client_secret" {
+  description = "OAuth2 Client Secret"
+}
+
 variable "odahu_infra_version" {
   description = "Odahuflow infra release version"
 }
@@ -100,4 +116,11 @@ variable "odahuflow_connection_decrypt_token" {
 }
 
 variable "jupyterlab_version" {}
+
+variable "jupyterhub_enabled" {
+  default     = false
+  type        = bool
+  description = "Flag to install JupyterHub (true) or JupyterLab (false)"
+}
+
 variable "packager_version" {}

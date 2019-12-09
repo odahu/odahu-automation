@@ -28,10 +28,25 @@ module "odahuflow_helm" {
   docker_repo              = var.docker_repo
   odahuflow_version        = var.odahuflow_version
   jupyterlab_version       = var.jupyterlab_version
+  jupyterhub_enabled       = var.jupyterhub_enabled
   packager_version         = var.packager_version
   mlflow_toolchain_version = var.mlflow_toolchain_version
 
   odahuflow_connections              = concat(var.odahuflow_connections, module.odahuflow_prereqs.odahuflow_connections)
   extra_external_urls                = module.odahuflow_prereqs.extra_external_urls
   odahuflow_connection_decrypt_token = var.odahuflow_connection_decrypt_token
+}
+
+module "jupyterhub_helm" {
+  source = "../../../../modules/k8s/jupyterhub"
+
+  jupyterhub_enabled = var.jupyterhub_enabled
+  cluster_domain     = "odahu.${var.cluster_name}.${var.root_domain}"
+  tls_secret_crt     = var.tls_crt
+  tls_secret_key     = var.tls_key
+  docker_repo        = var.docker_repo
+
+  oauth_client_id       = var.oauth_client_id
+  oauth_client_secret   = var.oauth_client_secret
+  oauth_oidc_issuer_url = "${var.keycloak_url}/auth/realms/${var.keycloak_realm}"
 }

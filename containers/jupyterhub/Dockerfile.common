@@ -1,0 +1,26 @@
+SHELL ["/bin/bash", "-c"]
+
+ARG JUPYTERLAB_VERSION=1.2.3
+ARG ODAHU_PLUGIN_NAME=odahu-flow-jupyterlab-plugin
+ARG ODAHU_PLUGIN_VERSION=1.0.0-rc32
+
+USER root
+
+RUN apt-get update && apt-get install -y git && \
+    rm -rf /var/lib/apt/lists/* \
+    && \
+    pip install --no-cache-dir \
+    jupyterlab==${JUPYTERLAB_VERSION} \
+    jupytext==1.1.7 \
+    jupyterlab-git \
+    pydantic==0.32.2 \
+    aiohttp>=3.6.2 \
+    ${ODAHU_PLUGIN_NAME}==${ODAHU_PLUGIN_VERSION//-/}
+
+RUN jupyter serverextension enable --sys-prefix --py odahuflow.jupyterlab && \
+    jupyter serverextension enable --sys-prefix --py jupyterlab_git && \
+    jupyter nbextension install --sys-prefix --py jupytext && \
+    jupyter nbextension enable --sys-prefix --py jupytext && \
+    jupyter labextension install ${ODAHU_PLUGIN_NAME}@${ODAHU_PLUGIN_VERSION}
+
+USER $NB_UID

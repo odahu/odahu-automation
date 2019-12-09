@@ -1,0 +1,1 @@
+FROM jupyter/tensorflow-notebook@sha256:397a1f7934faa8dc857b9e8fb4b796a72f35f0af36f8974f9479b1f48a0b6741

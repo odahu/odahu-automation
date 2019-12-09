@@ -20,13 +20,8 @@ LEGION_DOCKER_REPO :=
 CLOUD_PROVIDER :=
 CLUSTER_NAME :=
 
-HIERA_KEYS_DIR :=
-LEGION_PROFILES_DIR :=
-
 MODEL_REFERENCE :=
 TF_APPLY_CLI_ARGS :=
-
-EXPORT_HIERA_DOCKER_IMAGE := odahu/odahu-flow-automation:${BUILD_TAG}
 
 -include .env
 
@@ -104,6 +99,21 @@ docker-build-fluentd:
 docker-push-fluentd:
 	docker tag odahu/fluentd:${BUILD_TAG} ${DOCKER_REGISTRY}odahu/fluentd:${TAG}
 	docker push ${DOCKER_REGISTRY}odahu/fluentd:${TAG}
+
+## docker-build-base-notebook: Build base JupyterLab docker image
+docker-build-base-notebook:
+	cat ./containers/jupyterhub/Dockerfile.{base,common} | docker build -t odahu/base-notebook:${BUILD_TAG} -f - .
+
+## docker-build-tensolflow-notebook: Build JupyterLab docker image with Tensorflow
+docker-build-tensolflow-notebook:
+	cat ./containers/jupyterhub/Dockerfile.{tensorflow,common} | docker build -t odahu/tensorflow-notebook:${BUILD_TAG} -f - .
+
+## docker-build-datascience-notebook: Build JupyterLab docker image with data science libraries
+docker-build-datascience-notebook:
+	cat ./containers/jupyterhub/Dockerfile.{datascience,common} | docker build -t odahu/datascience-notebook:${BUILD_TAG} -f - .
+
+## docker-build-notebooks: Build all kinds of notebook images
+docker-build-notebooks: docker-build-base-notebook docker-build-tensolflow-notebook docker-build-datascience-notebook
 
 ## shellcheck: Lint the bash scripts
 shellcheck:

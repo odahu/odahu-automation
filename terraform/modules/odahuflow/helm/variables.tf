@@ -18,18 +18,6 @@ variable "jupyterlab_version" {
   description = "Jupyterlab version"
 }
 
-variable "jupyterhub_namespace" {
-  default = "jupyterhub"
-}
-
-variable "jupyterhub_chart_version" {
-  description = "Jupyterhub chart version"
-}
-
-variable "secret_token" {
-  description = "Jupyterhub secret token"
-}
-
 variable "packager_version" {
   description = "Packager version"
 }
@@ -97,6 +85,12 @@ variable "fluentd_namespace" {
 variable "odahuflow_connections" {
   default     = []
   description = "TODO"
+}
+
+variable "jupyterhub_enabled" {
+  default     = false
+  type        = bool
+  description = "Flag to install JupyterHub (true) or JupyterLab (false)"
 }
 
 ##################
