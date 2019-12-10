@@ -67,5 +67,5 @@ module "jupyterhub_helm" {
 
   oauth_client_id       = var.oauth_client_id
   oauth_client_secret   = var.oauth_client_secret
-  oauth_oidc_issuer_url = "${var.keycloak_url}/auth/realms/${var.keycloak_realm}"
+  oauth_oidc_issuer_url = var.oauth_oidc_issuer_url
 }

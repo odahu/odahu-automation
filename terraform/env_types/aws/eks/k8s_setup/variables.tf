@@ -117,20 +117,16 @@ variable "oauth_cookie_secret" {
   description = "OAuth2 Cookie Secret"
 }
 
-variable "keycloak_realm" {
-  description = "Keycloak realm"
+variable "oauth_oidc_issuer_url" {
+  description = "OAuth2/OIDC provider Issuer URL"
 }
 
-variable "keycloak_url" {
-  description = "Keycloak URL"
+variable "oauth_oidc_audience" {
+  description = "Oauth2 access token audience"
 }
 
-variable "keycloak_realm_audience" {
-  description = "Keycloak real audience"
-}
-
-variable "oauth_scope" {
-  description = "Scope for OAuth"
+variable "oauth_oidc_scope" {
+  description = "OAuth2 scope"
 }
 
 ########################

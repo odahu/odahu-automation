@@ -85,12 +85,8 @@ variable "mlflow_toolchain_version" {
   description = "Version of odahuflow-mlflow helm chart"
 }
 
-variable "keycloak_realm" {
-  description = "Keycloak realm"
-}
-
-variable "keycloak_url" {
-  description = "Keycloak URL"
+variable "oauth_oidc_issuer_url" {
+  description = "OAuth2/OIDC provider Issuer URL"
 }
 
 variable "oauth_client_id" {
