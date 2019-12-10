@@ -2,6 +2,11 @@ variable "docker_repo" {
   description = "Odahuflow Docker repo url"
 }
 
+variable "docker_tag" {
+  description = "Version of Docker containers used as JupyterHub Single Notebooks"
+  default     = "1.0.0-rc32"
+}
+
 variable "jupyterhub_enabled" {
   default     = false
   type        = bool

@@ -17,24 +17,10 @@ hub:
     OAUTH2_TOKEN_URL: ${oauth_oidc_issuer_url}/protocol/openid-connect/token
     OAUTH_CALLBACK_URL: https://${cluster_domain}/jupyterhub/hub/oauth_callback
 
-ingress:
-  enabled: true
-  hosts:
-    - ${cluster_domain}
-  tls:
-    - secretName: "${ingress_tls_secret_name}"
-      hosts:
-        - ${cluster_domain}
-  annotations:
-    kubernetes.io/ingress.class: nginx
-
-debug:
-  enabled: true
+${ingress}
 
 auth:
   type: custom
-  admin:
-    access: true
   custom:
     className: oauthenticator.generic.GenericOAuthenticator
     config:
@@ -54,7 +40,7 @@ singleuser:
   defaultUrl: "/lab"
   image:
     name: ${docker_repo}/base-notebook
-    tag: 1.0.0-rc32
+    tag: ${version}
   profileList:
     - display_name: "Base Jupyter Notebook"
       description: "Base image for Jupyter Notebook with ODAHU plugin"
@@ -62,8 +48,8 @@ singleuser:
     - display_name: "Datascience environment"
       description: "Python, R, and Julia with ODAHU plugin."
       kubespawner_override:
-        image: ${docker_repo}/datascience-notebook:1.0.0-rc32
+        image: ${docker_repo}/datascience-notebook:${version}
     - display_name: "Tensorflow environment"
       description: "Jupyter Notebook Scientific Python Stack w/ Tensorflow and ODAHU plugin"
       kubespawner_override:
-        image: ${docker_repo}/tensorflow-notebook:1.0.0-rc32
+        image: ${docker_repo}/tensorflow-notebook:${version}

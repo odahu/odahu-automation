@@ -1,3 +1,25 @@
+locals {
+  ingress_tls_enabled     = var.tls_secret_crt != "" && var.tls_secret_key != ""
+  url_schema              = local.ingress_tls_enabled ? "https" : "http"
+  ingress_tls_secret_name = "jupyterhub-tls"
+
+  ingress_common = {
+    enabled = true
+    annotations = {
+      "kubernetes.io/ingress.class" = "nginx"
+    }
+    hosts = [ var.cluster_domain ]
+  }
+
+  ingress_tls = local.ingress_tls_enabled ? {
+    tls = [
+      { secretName = local.ingress_tls_secret_name, hosts = [ var.cluster_domain ] }
+    ]
+  } : {}
+
+  ingress_config = merge(local.ingress_common, local.ingress_tls)
+}
+
 ########################################################
 # Install Jupyterhub flow chart
 ########################################################
@@ -10,10 +32,6 @@ resource "null_resource" "add_helm_jupyterhub_repository" {
   provisioner "local-exec" {
     command = "helm repo add jupyterhub ${var.jupyterhub_helm_repo}"
   }
-}
-
-locals {
-  ingress_tls_secret_name = "odahu-flow-tls"
 }
 
 resource "random_string" "secret" {
@@ -41,7 +59,7 @@ resource "kubernetes_namespace" "jupyterhub" {
 }
 
 resource "kubernetes_secret" "jupyterhub_tls" {
-  count = var.jupyterhub_enabled ? 1 : 0
+  count = var.jupyterhub_enabled && local.ingress_tls_enabled ? 1 : 0
   metadata {
     name      = local.ingress_tls_secret_name
     namespace = var.jupyterhub_namespace
@@ -74,6 +92,9 @@ resource "helm_release" "jupyterhub" {
       oauth_client_secret   = var.oauth_client_secret
       oauth_oidc_issuer_url = var.oauth_oidc_issuer_url
 
+      ingress = yamlencode({ ingress = local.ingress_config })
+
+      version     = var.docker_tag
       docker_repo = var.docker_repo
     }),
   ]

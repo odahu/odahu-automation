@@ -11,12 +11,9 @@ locals {
     { name = "Service Catalog", url = "${local.url_schema}://${var.cluster_domain}/service-catalog/swagger/index.html" },
     { name = "Cluster Monitoring", url = "${local.url_schema}://${var.cluster_domain}/grafana" },
   ]
-  jupyterhub_url = var.jupyterhub_enabled ? [
-    { name = "JupyterHub", url = "${local.url_schema}://${var.cluster_domain}/jupyterhub" }
-  ] : []
   odahuflow_config = {
     common = {
-      external_urls = concat(local.default_external_urls, local.jupyterhub_url, var.extra_external_urls)
+      external_urls = concat(local.default_external_urls, var.extra_external_urls)
     }
     connection = {
       repository_type = var.connection_repository_type
