@@ -90,5 +90,6 @@ resource "helm_release" "knative" {
   version    = var.odahu_infra_version
   namespace  = var.knative_namespace
   repository = "odahuflow"
+  timeout    = "600"
   depends_on = [kubernetes_namespace.knative, helm_release.istio]
 }
