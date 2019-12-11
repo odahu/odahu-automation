@@ -1,10 +1,6 @@
 ##################
 # Common
 ##################
-variable "project_id" {
-  description = "Target project id"
-}
-
 variable "cloud_type" {}
 
 variable "cluster_type" {}
@@ -20,6 +16,10 @@ variable "config_context_auth_info" {
 
 variable "config_context_cluster" {
   description = "Odahuflow cluster context name"
+}
+
+variable "project_id" {
+  description = "Target project id"
 }
 
 variable "zone" {
@@ -75,12 +75,16 @@ variable "mlflow_toolchain_version" {
   description = "Version of odahuflow-mlflow helm chart"
 }
 
-variable "keycloak_realm" {
-  description = "Keycloak realm"
+variable "oauth_oidc_issuer_url" {
+  description = "OAuth2/OIDC provider Issuer URL"
 }
 
-variable "keycloak_url" {
-  description = "Keycloak URL"
+variable "oauth_client_id" {
+  description = "OAuth2 Client ID"
+}
+
+variable "oauth_client_secret" {
+  description = "OAuth2 Client Secret"
 }
 
 variable "model_authorization_enabled" {
@@ -93,9 +97,20 @@ variable "odahuflow_connection_decrypt_token" {
   default = "Token for getting a decrypted connection"
 }
 
-variable "jupyterlab_version" {}
-variable "packager_version" {}
+variable "jupyterhub_enabled" {
+  default     = false
+  type        = bool
+  description = "Flag to install JupyterHub (true) or not (false)"
+}
 
+variable "jupyterlab_version" {
+  default     = "latest"
+  description = "Tag of docker images used as JupyterHub notebooks"
+}
+
+variable "packager_version" {
+  description = ""
+}
 
 variable "odahuflow_connections" {
   default     = []

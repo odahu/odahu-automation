@@ -1,117 +1,13 @@
-########################################################
-# Odahuflow namespaces
-########################################################
-
-resource "kubernetes_namespace" "odahuflow" {
-  metadata {
-    annotations = {
-      name = var.odahuflow_namespace
-    }
-    labels = {
-      project = "odahu-flow"
-    }
-    name = var.odahuflow_namespace
-  }
-}
-
-resource "kubernetes_namespace" "odahuflow_training" {
-  metadata {
-    annotations = {
-      name = var.odahuflow_training_namespace
-    }
-    labels = {
-      project = "odahuflow"
-    }
-    name = var.odahuflow_training_namespace
-  }
-}
-
-resource "kubernetes_namespace" "odahuflow_packaging" {
-  metadata {
-    annotations = {
-      name = var.odahuflow_packaging_namespace
-    }
-    labels = {
-      project = "odahuflow"
-    }
-    name = var.odahuflow_packaging_namespace
-  }
-}
-
-resource "kubernetes_namespace" "odahuflow_deployment" {
-  metadata {
-    annotations = {
-      name = var.odahuflow_deployment_namespace
-    }
-    labels = {
-      project         = "odahu-flow"
-      istio-injection = "enabled"
-    }
-    name = var.odahuflow_deployment_namespace
-  }
-}
-
-########################################################
-# Odahuflow secrets
-########################################################
-
 locals {
-  ingress_tls_enabled     = var.tls_secret_crt != null || var.tls_secret_key != null
+  ingress_tls_enabled     = var.tls_secret_crt != "" && var.tls_secret_key != ""
+  url_schema              = local.ingress_tls_enabled ? "https" : "http"
   ingress_tls_secret_name = "odahu-flow-tls"
-}
+  vault_tls_secret_name   = "vault-tls"
 
-resource "kubernetes_secret" "tls_odahuflow" {
-  count = local.ingress_tls_enabled ? 1 : 0
-  metadata {
-    name      = local.ingress_tls_secret_name
-    namespace = var.odahuflow_namespace
-  }
-  data = {
-    "tls.key" = var.tls_secret_key
-    "tls.crt" = var.tls_secret_crt
-  }
-  type = "kubernetes.io/tls"
-
-  depends_on = [kubernetes_namespace.odahuflow]
-}
-
-locals {
-  vault_tls_secret_name = "vault-tls"
-}
-
-data "kubernetes_secret" "vault_tls" {
-  metadata {
-    name      = local.vault_tls_secret_name
-    namespace = var.vault_namespace
-  }
-  depends_on = [kubernetes_namespace.odahuflow]
-}
-
-resource "kubernetes_secret" "odahuflow_vault_tls" {
-  metadata {
-    name      = local.vault_tls_secret_name
-    namespace = var.odahuflow_namespace
-  }
-  data       = data.kubernetes_secret.vault_tls.data
-  depends_on = [kubernetes_namespace.odahuflow]
-}
-
-########################################################
-# Install Odahuflow chart
-########################################################
-
-data "helm_repository" "odahuflow" {
-  name = "odahuflow"
-  url  = var.helm_repo
-}
-
-locals {
-  url_schema = local.ingress_tls_enabled ? "https" : "http"
   default_external_urls = [
     { name = "Documentation", url = "https://docs.odahu.org" },
     { name = "API Gateway", url = "${local.url_schema}://${var.cluster_domain}/swagger/index.html" },
     { name = "ML Metrics", url = "${local.url_schema}://${var.cluster_domain}/mlflow" },
-    { name = "Jupyterlab", url = "${local.url_schema}://${var.cluster_domain}/jupyterlab" },
     { name = "Service Catalog", url = "${local.url_schema}://${var.cluster_domain}/service-catalog/swagger/index.html" },
     { name = "Cluster Monitoring", url = "${local.url_schema}://${var.cluster_domain}/grafana" },
   ]
@@ -152,6 +48,104 @@ locals {
   }
 }
 
+########################################################
+# Odahuflow namespaces
+########################################################
+
+resource "kubernetes_namespace" "odahuflow" {
+  metadata {
+    annotations = {
+      name = var.odahuflow_namespace
+    }
+    labels = {
+      project = "odahu-flow"
+    }
+    name = var.odahuflow_namespace
+  }
+}
+
+resource "kubernetes_namespace" "odahuflow_training" {
+  metadata {
+    annotations = {
+      name = var.odahuflow_training_namespace
+    }
+    labels = {
+      project = "odahu-flow"
+    }
+    name = var.odahuflow_training_namespace
+  }
+}
+
+resource "kubernetes_namespace" "odahuflow_packaging" {
+  metadata {
+    annotations = {
+      name = var.odahuflow_packaging_namespace
+    }
+    labels = {
+      project = "odahu-flow"
+    }
+    name = var.odahuflow_packaging_namespace
+  }
+}
+
+resource "kubernetes_namespace" "odahuflow_deployment" {
+  metadata {
+    annotations = {
+      name = var.odahuflow_deployment_namespace
+    }
+    labels = {
+      project         = "odahu-flow"
+      istio-injection = "enabled"
+    }
+    name = var.odahuflow_deployment_namespace
+  }
+}
+
+########################################################
+# Odahuflow secrets
+########################################################
+
+resource "kubernetes_secret" "tls_odahuflow" {
+  count = local.ingress_tls_enabled ? 1 : 0
+  metadata {
+    name      = local.ingress_tls_secret_name
+    namespace = var.odahuflow_namespace
+  }
+  data = {
+    "tls.key" = var.tls_secret_key
+    "tls.crt" = var.tls_secret_crt
+  }
+  type = "kubernetes.io/tls"
+
+  depends_on = [kubernetes_namespace.odahuflow]
+}
+
+data "kubernetes_secret" "vault_tls" {
+  metadata {
+    name      = local.vault_tls_secret_name
+    namespace = var.vault_namespace
+  }
+  depends_on = [kubernetes_namespace.odahuflow]
+}
+
+resource "kubernetes_secret" "odahuflow_vault_tls" {
+  metadata {
+    name      = local.vault_tls_secret_name
+    namespace = var.odahuflow_namespace
+  }
+  data       = data.kubernetes_secret.vault_tls.data
+  depends_on = [kubernetes_namespace.odahuflow]
+}
+
+########################################################
+# Install Odahuflow chart
+########################################################
+
+data "helm_repository" "odahuflow" {
+  name = "odahuflow"
+  url  = var.helm_repo
+}
+
 resource "helm_release" "odahuflow" {
   name       = "odahu-flow"
   chart      = "odahu-flow-core"
@@ -185,8 +179,9 @@ resource "helm_release" "odahuflow" {
 }
 
 ########################################################
-# Install Odahuflow-mlflow charts
+# Install Odahuflow-mlflow chart
 ########################################################
+
 resource "helm_release" "mlflow" {
   name       = "odahu-flow-mlflow"
   chart      = "odahu-flow-mlflow"
@@ -229,34 +224,6 @@ resource "helm_release" "rest_packagers" {
       docker_repo       = var.docker_repo
       packager_version  = var.packager_version
       odahuflow_version = var.odahuflow_version
-    }),
-  ]
-
-  depends_on = [
-    helm_release.odahuflow,
-    kubernetes_namespace.odahuflow
-  ]
-}
-
-########################################################
-# Install Odahuflow-mlflow charts
-########################################################
-
-resource "helm_release" "jupyterlab" {
-  name       = "odahu-flow-jupyterlab"
-  chart      = "odahu-flow-jupyterlab"
-  version    = var.jupyterlab_version
-  namespace  = var.odahuflow_namespace
-  repository = data.helm_repository.odahuflow.metadata[0].name
-
-  values = [
-    templatefile("${path.module}/templates/jupyterlab.yaml", {
-      cluster_domain          = var.cluster_domain
-      ingress_tls_secret_name = local.ingress_tls_secret_name
-      ingress_tls_enabled     = local.ingress_tls_enabled
-
-      docker_repo        = var.docker_repo
-      jupyterlab_version = var.jupyterlab_version
     }),
   ]
 

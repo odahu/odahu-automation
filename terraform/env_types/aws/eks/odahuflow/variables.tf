@@ -48,6 +48,18 @@ variable "mlflow_toolchain_version" {
   description = "Version of odahuflow-mlflow helm chart"
 }
 
+variable "oauth_oidc_issuer_url" {
+  description = "OAuth2/OIDC provider Issuer URL"
+}
+
+variable "oauth_client_id" {
+  description = "OAuth2 Client ID"
+}
+
+variable "oauth_client_secret" {
+  description = "OAuth2 Client Secret"
+}
+
 variable "odahu_infra_version" {
   description = "Odahuflow infra release version"
 }
@@ -66,5 +78,15 @@ variable "odahuflow_connection_decrypt_token" {
   default = "Token for getting a decrypted connection"
 }
 
-variable "jupyterlab_version" {}
+variable "jupyterhub_enabled" {
+  default     = false
+  type        = bool
+  description = "Flag to install JupyterHub (true) or not (false)"
+}
+
+variable "jupyterlab_version" {
+  default     = "latest"
+  description = "Tag of docker images used as JupyterHub notebooks"
+}
+
 variable "packager_version" {}
