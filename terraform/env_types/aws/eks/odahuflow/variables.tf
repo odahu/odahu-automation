@@ -84,4 +84,9 @@ variable "jupyterhub_enabled" {
   description = "Flag to install JupyterHub (true) or not (false)"
 }
 
+variable "jupyterlab_version" {
+  default     = "latest"
+  description = "Tag of docker images used as JupyterHub notebooks"
+}
+
 variable "packager_version" {}

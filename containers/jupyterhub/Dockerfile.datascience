@@ -1,1 +1,0 @@
-FROM jupyter/datascience-notebook@sha256:18ef2702c6a25bd26b81e7b6dc831adb2bc294ae7bc9b011150b8f4573c41d4a

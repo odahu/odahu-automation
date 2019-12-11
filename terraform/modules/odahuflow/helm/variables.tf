@@ -83,12 +83,6 @@ variable "odahuflow_connections" {
   description = "TODO"
 }
 
-variable "jupyterhub_enabled" {
-  default     = false
-  type        = bool
-  description = "Flag to install JupyterHub (true) or JupyterLab (false)"
-}
-
 ##################
 # Odahuflow config
 ##################

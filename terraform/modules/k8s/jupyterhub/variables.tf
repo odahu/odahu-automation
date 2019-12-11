@@ -3,8 +3,7 @@ variable "docker_repo" {
 }
 
 variable "docker_tag" {
-  description = "Version of Docker containers used as JupyterHub Single Notebooks"
-  default     = "1.0.0-rc32"
+  description = "Tag of Docker containers used as JupyterHub Notebooks"
 }
 
 variable "jupyterhub_enabled" {

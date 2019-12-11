@@ -40,7 +40,7 @@ singleuser:
   defaultUrl: "/lab"
   image:
     name: ${docker_repo}/base-notebook
-    tag: ${version}
+    tag: ${docker_tag}
   profileList:
     - display_name: "Base Jupyter Notebook"
       description: "Base image for Jupyter Notebook with ODAHU plugin"
@@ -48,8 +48,8 @@ singleuser:
     - display_name: "Datascience environment"
       description: "Python, R, and Julia with ODAHU plugin."
       kubespawner_override:
-        image: ${docker_repo}/datascience-notebook:${version}
+        image: ${docker_repo}/datascience-notebook:${docker_tag}
     - display_name: "Tensorflow environment"
       description: "Jupyter Notebook Scientific Python Stack w/ Tensorflow and ODAHU plugin"
       kubespawner_override:
-        image: ${docker_repo}/tensorflow-notebook:${version}
+        image: ${docker_repo}/tensorflow-notebook:${docker_tag}

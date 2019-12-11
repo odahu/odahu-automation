@@ -94,7 +94,7 @@ resource "helm_release" "jupyterhub" {
 
       ingress = yamlencode({ ingress = local.ingress_config })
 
-      version     = var.docker_tag
+      docker_tag  = var.docker_tag
       docker_repo = var.docker_repo
     }),
   ]
