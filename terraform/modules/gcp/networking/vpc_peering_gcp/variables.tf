@@ -1,3 +1,8 @@
+variable "infra_vpc_peering" {
+  default     = 1
+  description = "If VPC peering is required"
+}
+
 variable "project_id" {
   description = "Target project id"
 }
