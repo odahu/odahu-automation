@@ -46,8 +46,7 @@ function ReadArguments() {
 				;;
 			-o|--output)
 				export OUTPUT_FILE=$2
-				shift
-				shift
+				shift 2
 				;;
 			*)
 				echo "ERROR: Unknown option: $1. Use -h for help."
