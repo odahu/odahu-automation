@@ -1,0 +1,55 @@
+proxy:
+  secretToken: ${jupyterhub_secret_token}
+  service:
+    type: ClusterIP
+  https:
+    enabled: false
+
+hub:
+  service:
+    type: ClusterIP
+  baseUrl: /jupyterhub
+  extraConfig:
+    jupyterlab: |
+      c.Spawner.cmd = ['jupyter-labhub']
+  extraEnv:
+    OAUTH2_AUTHORIZE_URL: ${oauth_oidc_issuer_url}/protocol/openid-connect/auth
+    OAUTH2_TOKEN_URL: ${oauth_oidc_issuer_url}/protocol/openid-connect/token
+    OAUTH_CALLBACK_URL: https://${cluster_domain}/jupyterhub/hub/oauth_callback
+
+${ingress}
+
+auth:
+  type: custom
+  custom:
+    className: oauthenticator.generic.GenericOAuthenticator
+    config:
+      login_service: "keycloak"
+      client_id: "${oauth_client_id}"
+      client_secret: "${oauth_client_secret}"
+      token_url: "${oauth_oidc_issuer_url}/protocol/openid-connect/token"
+      userdata_url: "${oauth_oidc_issuer_url}/protocol/openid-connect/userinfo"
+      userdata_method: GET
+      userdata_params: {'state': 'state'}
+      username_key: preferred_username
+
+singleuser:
+  extraEnv:
+    API_AUTH_ENABLED: "false"
+    DEFAULT_API_ENDPOINT: "http://odahu-flow-api.odahu-flow.svc.cluster.local:80"
+  defaultUrl: "/lab"
+  image:
+    name: ${docker_repo}/base-notebook
+    tag: ${docker_tag}
+  profileList:
+    - display_name: "Base Jupyter Notebook"
+      description: "Base image for Jupyter Notebook with ODAHU plugin"
+      default: true
+    - display_name: "Datascience environment"
+      description: "Python, R, and Julia with ODAHU plugin."
+      kubespawner_override:
+        image: ${docker_repo}/datascience-notebook:${docker_tag}
+    - display_name: "Tensorflow environment"
+      description: "Jupyter Notebook Scientific Python Stack w/ Tensorflow and ODAHU plugin"
+      kubespawner_override:
+        image: ${docker_repo}/tensorflow-notebook:${docker_tag}

@@ -5,4 +5,3 @@ output "service_account" {
 output "service_account_key" {
   value = google_service_account_key.nodes_sa_key.private_key
 }
-

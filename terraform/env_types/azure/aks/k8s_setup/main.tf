@@ -36,11 +36,11 @@ module "auth" {
   oauth_client_id       = var.oauth_client_id
   oauth_client_secret   = var.oauth_client_secret
   oauth_redirect_url    = "https://odahu.${var.cluster_name}.${var.root_domain}/oauth2/callback"
-  oauth_oidc_issuer_url = "${var.keycloak_url}/auth/realms/${var.keycloak_realm}"
-  oauth_oidc_audience   = var.keycloak_realm_audience
+  oauth_oidc_issuer_url = var.oauth_oidc_issuer_url
+  oauth_oidc_audience   = var.oauth_oidc_audience
   oauth_cookie_expire   = "168h0m0s"
   oauth_cookie_secret   = var.oauth_cookie_secret
-  oauth_oidc_scope      = var.oauth_scope
+  oauth_oidc_scope      = var.oauth_oidc_scope
 }
 
 module "monitoring" {
