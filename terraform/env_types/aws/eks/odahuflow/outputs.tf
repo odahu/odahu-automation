@@ -1,4 +1,4 @@
-output "odahu_api_url" {
-  value = module.odahuflow_helm.odahu_api_url
+output "odahu_urls" {
+  value = module.odahuflow_helm.odahu_urls
 }
 

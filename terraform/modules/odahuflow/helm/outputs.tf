@@ -1,3 +1,3 @@
-output "odahu_api_url" {
-  value = var.cluster_domain
+output "odahu_urls" {
+  value = local.odahuflow_config["common"]["external_urls"]
 }
