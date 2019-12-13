@@ -1,30 +1,35 @@
 data "google_compute_network" "gcp_network_1" {
+  count   = var.infra_vpc_peering
   project = var.project_id
   name    = var.gcp_network_1_name
 }
 
 data "google_compute_network" "gcp_network_2" {
+  count   = var.infra_vpc_peering
   project = var.project_id
   name    = var.gcp_network_2_name
 }
 
 resource "google_compute_network_peering" "peering1" {
-  name         = "${data.google_compute_network.gcp_network_2.name}-${data.google_compute_network.gcp_network_1.name}-peering"
-  network      = data.google_compute_network.gcp_network_1.self_link
-  peer_network = data.google_compute_network.gcp_network_2.self_link
+  count        = var.infra_vpc_peering
+  name         = substr("${data.google_compute_network.gcp_network_2[0].name}-${data.google_compute_network.gcp_network_1[0].name}-peering", 0, 62)
+  network      = data.google_compute_network.gcp_network_1[0].self_link
+  peer_network = data.google_compute_network.gcp_network_2[0].self_link
 }
 
 resource "google_compute_network_peering" "peering2" {
-  name         = "${data.google_compute_network.gcp_network_1.name}-${data.google_compute_network.gcp_network_2.name}-peering"
-  network      = data.google_compute_network.gcp_network_2.self_link
-  peer_network = data.google_compute_network.gcp_network_1.self_link
+  count        = var.infra_vpc_peering
+  name         = substr("${data.google_compute_network.gcp_network_1[0].name}-${data.google_compute_network.gcp_network_2[0].name}-peering", 0, 62)
+  network      = data.google_compute_network.gcp_network_2[0].self_link
+  peer_network = data.google_compute_network.gcp_network_1[0].self_link
   depends_on   = [google_compute_network_peering.peering1]
 }
 
 resource "google_compute_firewall" "to_network_1" {
+  count         = var.infra_vpc_peering
   project       = var.project_id
-  name          = "${data.google_compute_network.gcp_network_2.name}-${data.google_compute_network.gcp_network_1.name}"
-  network       = data.google_compute_network.gcp_network_2.name
+  name          = substr("${data.google_compute_network.gcp_network_2[0].name}-${data.google_compute_network.gcp_network_1[0].name}", 0, 62)
+  network       = data.google_compute_network.gcp_network_2[0].name
   source_ranges = var.gcp_network_1_range
 
   allow {
@@ -41,9 +46,10 @@ resource "google_compute_firewall" "to_network_1" {
 }
 
 resource "google_compute_firewall" "to_network_2" {
+  count         = var.infra_vpc_peering
   project       = var.project_id
-  name          = "${data.google_compute_network.gcp_network_1.name}-${data.google_compute_network.gcp_network_2.name}"
-  network       = data.google_compute_network.gcp_network_1.name
+  name          = substr("${data.google_compute_network.gcp_network_1[0].name}-${data.google_compute_network.gcp_network_2[0].name}", 0, 62)
+  network       = data.google_compute_network.gcp_network_1[0].name
   source_ranges = var.gcp_network_2_range
 
   allow {
