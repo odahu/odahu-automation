@@ -5,6 +5,7 @@ set -e
 
 function ReadArguments() {
 	export VERBOSE=false
+	export OUTPUT_FILE="output.json"
 	export TF_SUPPORTED_COMMANDS=(create destroy suspend resume)
 
 	if [[ $# == 0 ]]; then
@@ -19,6 +20,7 @@ function ReadArguments() {
 				echo -e "Usage: ./tf_runner.sh [OPTIONS]\n\noptions:"
 				echo "command to execute: \"${TF_SUPPORTED_COMMANDS[*]}\""
 				echo -e "-v  --verbose\t\tverbose mode for debug purposes"
+				echo -e "-o  --output\t\toutput file name"
 				echo -e "-h  --help\t\tshow brief help"
 				exit 0
 				;;
@@ -40,6 +42,11 @@ function ReadArguments() {
 				;;
 			-v|--verbose)
 				export VERBOSE=true
+				shift
+				;;
+			-o|--output)
+				export OUTPUT_FILE=$2
+				shift
 				shift
 				;;
 			*)
@@ -111,7 +118,14 @@ function TerraformRun() {
 	esac
 
 	echo "INFO : Execute $TF_COMMAND on $TF_MODULE state"
-	terraform "${TF_COMMAND}" -no-color -auto-approve "-var-file=${PROFILE}"
+        case ${TF_COMMAND} in
+                "output")
+                        terraform "${TF_COMMAND}" -json -no-color > ${OUTPUT_FILE}
+                        ;;
+                *)
+                        terraform "${TF_COMMAND}" -no-color -auto-approve "-var-file=${PROFILE}"
+                        ;;
+        esac
 }
 
 function SetupCloudAccess() {
@@ -168,6 +182,14 @@ function TerraformCreate() {
 	TerraformRun k8s_setup apply
 	echo 'INFO : Deploy Odahuflow components'
 	TerraformRun odahuflow apply
+	echo "INFO : Save cluster info to ${OUTPUT_FILE}"
+        TerraformOutput
+}
+
+# Create Odahuflow cluster
+function TerraformOutput() {
+	echo 'INFO : Return cluster data in JSON'
+        TerraformRun odahuflow output
 }
 
 # Destroy Odahuflow cluster
