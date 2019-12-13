@@ -1,3 +1,8 @@
+locals {
+  vpc    = length(var.vpc_name) == 0 ? google_compute_network.vpc[0] : data.google_compute_network.vpc[0]
+  subnet = length(var.subnet_name) == 0 ? google_compute_subnetwork.subnet[0] : data.google_compute_subnetwork.subnet[0]
+}
+
 # Create VPC
 resource "google_compute_network" "vpc" {
   count                   = length(var.vpc_name) == 0 ? 1 : 0
@@ -17,7 +22,7 @@ resource "google_compute_subnetwork" "subnet" {
   project                  = var.project_id
   name                     = "${var.cluster_name}-subnet"
   ip_cidr_range            = var.subnet_cidr
-  network                  = length(var.vpc_name) == 0 ? google_compute_network.vpc[0].self_link : data.google_compute_network.vpc[0].self_link
+  network                  = local.vpc.self_link
   region                   = var.region
   private_ip_google_access = true
 }
@@ -30,7 +35,7 @@ data "google_compute_subnetwork" "subnet" {
 resource "google_compute_router" "router" {
   name    = "${var.cluster_name}-nat-router"
   region  = var.region
-  network = length(var.vpc_name) == 0 ? google_compute_network.vpc[0].self_link : data.google_compute_network.vpc[0].self_link
+  network = local.vpc.self_link
 }
 
 data "google_compute_address" "nat_gw_ip" {
