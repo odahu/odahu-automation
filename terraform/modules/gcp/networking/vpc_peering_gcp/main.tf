@@ -28,7 +28,7 @@ resource "google_compute_network_peering" "peering2" {
 resource "google_compute_firewall" "to_network_1" {
   count         = var.infra_vpc_peering
   project       = var.project_id
-  name          = "${data.google_compute_network.gcp_network_2[0].name}-${data.google_compute_network.gcp_network_1[0].name}"
+  name          = substr("${data.google_compute_network.gcp_network_2[0].name}-${data.google_compute_network.gcp_network_1[0].name}", 0, 62)
   network       = data.google_compute_network.gcp_network_2[0].name
   source_ranges = var.gcp_network_1_range
 
