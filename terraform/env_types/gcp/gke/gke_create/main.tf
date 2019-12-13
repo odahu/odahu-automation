@@ -7,6 +7,8 @@ module "vpc" {
   region       = var.region
   cluster_name = var.cluster_name
   subnet_cidr  = var.gcp_cidr
+  subnet_name  = var.subnet_name
+  vpc_name     = var.vpc_name
 }
 
 module "firewall" {

@@ -1,6 +1,16 @@
 ##################
 # Common
 ##################
+variable "vpc_name" {
+  default     = ""
+  description = "Name of existing VPC to use"
+}
+
+variable "subnet_name" {
+  default     = ""
+  description = "Name of existing subnet to use"
+}
+
 variable "project_id" {
   description = "Target project id"
 }
