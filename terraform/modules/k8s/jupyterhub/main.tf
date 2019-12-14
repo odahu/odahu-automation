@@ -100,6 +100,7 @@ resource "helm_release" "jupyterhub" {
   ]
 
   depends_on = [
+    null_resource.add_helm_jupyterhub_repository[0],
     kubernetes_namespace.jupyterhub[0],
     kubernetes_secret.jupyterhub_tls[0]
   ]
