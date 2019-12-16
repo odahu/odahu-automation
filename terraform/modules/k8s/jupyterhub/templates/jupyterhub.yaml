@@ -53,3 +53,5 @@ singleuser:
       description: "Jupyter Notebook Scientific Python Stack w/ Tensorflow and ODAHU plugin"
       kubespawner_override:
         image: ${docker_repo}/tensorflow-notebook:${docker_tag}
+
+${culling}
