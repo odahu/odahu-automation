@@ -31,6 +31,22 @@ variable "jupyterhub_secret_token" {
   default     = ""
 }
 
+variable "jupyterhub_culling_enabled" {
+  default     = true
+  type        = bool
+  description = "JupyterHub will automatically delete any user pods that have no activity for a period of time"
+}
+
+variable "jupyterhub_culling_timeout" {
+  default     = "3600"
+  description = "Time in seconds of the user's browser inactivity which is defined as no response by JupyterHub"
+}
+
+variable "jupyterhub_culling_frequency" {
+  default     = "600"
+  description = "Period in seconds with which JupyterHub pings browser session to check whether it is open"
+}
+
 variable "oauth_client_id" {
   description = "OAuth 2 Client ID"
 }
