@@ -38,12 +38,12 @@ variable "jupyterhub_culling_enabled" {
 }
 
 variable "jupyterhub_culling_timeout" {
-  default     = "3600"
+  default     = "1200"
   description = "Time in seconds of the user's browser inactivity which is defined as no response by JupyterHub"
 }
 
 variable "jupyterhub_culling_frequency" {
-  default     = "600"
+  default     = "300"
   description = "Period in seconds with which JupyterHub pings browser session to check whether it is open"
 }
 
