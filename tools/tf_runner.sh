@@ -150,13 +150,16 @@ function SetupCloudAccess() {
 		"aws/eks")
 			;;
 		"gcp/gke")
-			# Read GCP credentials path from env
-			if [[ -z $GOOGLE_CREDENTIALS || ! -f $GOOGLE_CREDENTIALS ]]; then
-				echo -e "ERROR:\tNo GCP credentials file found!"
-				echo -e "\tPass path to the credentials json file as GOOGLE_CREDENTIALS env var!"
-				exit 1
-			fi
-			gcloud auth activate-service-account "--key-file=${GOOGLE_CREDENTIALS}" "--project=$(GetParam 'project_id')"
+			# Get current gcloud account
+                        GCLOUD_ACCOUNT=$(gcloud info --format=json | jq .config.account)
+                        # Read GCP credentials path from env
+                        if [[ -z $GOOGLE_CREDENTIALS || ! -f $GOOGLE_CREDENTIALS ]] && [[ $GCLOUD_ACCOUNT == "null"  ]]; then
+                                echo -e "ERROR:\tNo GCP credentials file found!"
+                                echo -e "\tPass path to the credentials json file as GOOGLE_CREDENTIALS env var!"
+                                exit 1
+                        elif [[ $GCLOUD_ACCOUNT == "null"  ]]; then
+                          gcloud auth activate-service-account "--key-file=${GOOGLE_CREDENTIALS}" "--project=$(GetParam 'project_id')"
+                        fi
 			;;
 		"azure/aks")
 			if [[ $VERBOSE == true ]]; then set +x; fi
