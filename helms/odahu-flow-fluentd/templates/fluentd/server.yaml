@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: "{{ .Release.Name }}-fluentd"
+  name: "{{ .Release.Name }}"
   labels:
     {{- include "fluentd.helm-labels" (dict "component" "fluentd" "root" .) | nindent 4 }}
 spec:
@@ -39,12 +39,12 @@ spec:
         - name: AWS_ACCESS_KEY_ID
           valueFrom:
             secretKeyRef:
-              name: "{{ .Release.Name }}-fluentd-secret"
+              name: "{{ .Release.Name }}-secret"
               key: AWSKeyID
         - name: AWS_SECRET_ACCESS_KEY
           valueFrom:
             secretKeyRef:
-              name: "{{ .Release.Name }}-fluentd-secret"
+              name: "{{ .Release.Name }}-secret"
               key: AWSSecretKey
         {{- end }}
         {{- end }}
@@ -53,24 +53,24 @@ spec:
         - name: AZURE_STORAGE_ACCOUNT
           valueFrom:
             secretKeyRef:
-              name: "{{ .Release.Name }}-fluentd-secret"
+              name: "{{ .Release.Name }}-secret"
               key: AzureStorageAccount
         - name: AZURE_STORAGE_ACCESS_KEY
           valueFrom:
             secretKeyRef:
-              name: "{{ .Release.Name }}-fluentd-secret"
+              name: "{{ .Release.Name }}-secret"
               key: AzureStorageAccessKey
         {{- end }}
         {{- if eq .Values.output.azureblob.authorization "sastoken" }}
         - name: AZURE_STORAGE_ACCOUNT
           valueFrom:
             secretKeyRef:
-              name: "{{ .Release.Name }}-fluentd-secret"
+              name: "{{ .Release.Name }}-secret"
               key: AzureStorageAccount
         - name: AZURE_STORAGE_SAS_TOKEN
           valueFrom:
             secretKeyRef:
-              name: "{{ .Release.Name }}-fluentd-secret"
+              name: "{{ .Release.Name }}-secret"
               key: AzureStorageSasToken
         {{- end }}
         {{- end }}
@@ -94,12 +94,12 @@ spec:
       volumes:
       - name: fluentd-config
         configMap:
-          name: "{{ .Release.Name }}-fluentd-config"
+          name: "{{ .Release.Name }}-config"
       {{- if eq .Values.output.target "gcs" }}
       {{- if eq .Values.output.gcs.authorization "keyfile" }}
       - name: fluentd-keyfile
         configMap:
-          name: "{{ .Release.Name }}-fluentd-keyfile"
+          name: "{{ .Release.Name }}-keyfile"
       {{- end }}
       {{- end }}
 ---
