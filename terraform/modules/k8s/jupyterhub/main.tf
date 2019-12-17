@@ -18,6 +18,12 @@ locals {
   } : {}
 
   ingress_config = merge(local.ingress_common, local.ingress_tls)
+
+  culling_config = {
+    enabled = var.jupyterhub_culling_enabled
+    timeout = var.jupyterhub_culling_timeout
+    every   = var.jupyterhub_culling_frequency
+  }
 }
 
 ########################################################
@@ -93,6 +99,7 @@ resource "helm_release" "jupyterhub" {
       oauth_oidc_issuer_url = var.oauth_oidc_issuer_url
 
       ingress = yamlencode({ ingress = local.ingress_config })
+      culling = yamlencode({ cull = local.culling_config })
 
       docker_tag  = var.docker_tag
       docker_repo = var.docker_repo
