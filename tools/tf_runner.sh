@@ -122,7 +122,7 @@ function TerraformRun() {
                         terraform "${TF_COMMAND}" -json -no-color > ${OUTPUT_FILE}
                         ;;
                 *)
-                        terraform "${TF_COMMAND}" -no-color -auto-approve "-var-file=${PROFILE}"
+                        terraform "${TF_COMMAND}" -no-color -auto-approve -compact-warnings "-var-file=${PROFILE}"
                         ;;
         esac
 }
