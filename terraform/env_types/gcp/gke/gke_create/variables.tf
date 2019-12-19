@@ -35,6 +35,11 @@ variable "infra_vpc_name" {
   description = "Region of resources"
 }
 
+variable "infra_vpc_peering" {
+  default     = "1"
+  description = "Region of resources"
+}
+
 variable "infra_cidr" {
   default     = ""
   description = "GCP infra network CIDR"
