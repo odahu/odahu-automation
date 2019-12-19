@@ -98,17 +98,17 @@ function TerraformRun() {
 
 	case $(GetParam "cluster_type") in
 		"aws/eks")
-			terraform init -no-color \
+			terraform init -no-color -compact-warnings \
 				-backend-config="bucket=$(GetParam 'tfstate_bucket')" \
 				-backend-config="region=$(GetParam 'aws_region')"
 			;;
 		"gcp/gke")
-			terraform init -no-color \
+			terraform init -no-color -compact-warnings \
 				-backend-config="bucket=$(GetParam 'tfstate_bucket')" \
 				-backend-config="prefix=$TF_MODULE"
 			;;
 		"azure/aks")
-			terraform init -no-color \
+			terraform init -no-color -compact-warnings \
 				-backend-config="container_name=$(GetParam 'tfstate_bucket')" \
 				-backend-config="resource_group_name=$(GetParam 'azure_resource_group')" \
 				-backend-config="storage_account_name=$(GetParam 'azure_storage_account')" \
