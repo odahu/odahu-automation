@@ -91,6 +91,8 @@ function TerraformRun() {
 	TF_COMMAND=$2
 	WORK_DIR=$MODULES_ROOT/$TF_MODULE
 
+	local TF_COMMON_ARGS="-no-color -compact-warnings"
+
 	cd "${WORK_DIR}"
 
 	TF_DATA_DIR="/tmp/.terraform/$(GetParam 'cluster_name')/$TF_MODULE"
@@ -98,17 +100,17 @@ function TerraformRun() {
 
 	case $(GetParam "cluster_type") in
 		"aws/eks")
-			terraform init -no-color \
+			terraform init $TF_COMMON_ARGS \
 				-backend-config="bucket=$(GetParam 'tfstate_bucket')" \
 				-backend-config="region=$(GetParam 'aws_region')"
 			;;
 		"gcp/gke")
-			terraform init -no-color \
+			terraform init $TF_COMMON_ARGS \
 				-backend-config="bucket=$(GetParam 'tfstate_bucket')" \
 				-backend-config="prefix=$TF_MODULE"
 			;;
 		"azure/aks")
-			terraform init -no-color \
+			terraform init $TF_COMMON_ARGS \
 				-backend-config="container_name=$(GetParam 'tfstate_bucket')" \
 				-backend-config="resource_group_name=$(GetParam 'azure_resource_group')" \
 				-backend-config="storage_account_name=$(GetParam 'azure_storage_account')" \
@@ -122,7 +124,7 @@ function TerraformRun() {
                         terraform "${TF_COMMAND}" -json -no-color > ${OUTPUT_FILE}
                         ;;
                 *)
-                        terraform "${TF_COMMAND}" -no-color -auto-approve "-var-file=${PROFILE}"
+                        terraform "${TF_COMMAND}" $TF_COMMON_ARGS -auto-approve "-var-file=${PROFILE}"
                         ;;
         esac
 }
@@ -182,7 +184,7 @@ function TerraformCreate() {
 	echo 'INFO : Deploy Odahuflow components'
 	TerraformRun odahuflow apply
 	echo "INFO : Save cluster info to ${OUTPUT_FILE}"
-        TerraformOutput
+	TerraformOutput
 }
 
 # Create Odahuflow cluster
