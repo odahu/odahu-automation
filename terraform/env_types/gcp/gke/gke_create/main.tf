@@ -56,8 +56,6 @@ module "gke_cluster" {
   initial_node_count = var.initial_node_count
   network            = module.vpc.network_name
   subnetwork         = module.vpc.subnet_name
-  dns_zone_name      = var.dns_zone_name
-  root_domain        = var.root_domain
   k8s_version        = var.k8s_version
   node_version       = var.node_version
   bastion_tag        = var.bastion_tag

@@ -40,10 +40,6 @@ variable "infra_cidr" {
   description = "GCP infra network CIDR"
 }
 
-variable "root_domain" {
-  description = "Odahuflow cluster root domain"
-}
-
 variable "aws_vpc_id" {
   description = "AWS VPC id to establish peering with"
 }
@@ -112,10 +108,6 @@ variable "allowed_ips" {
 variable "agent_cidr" {
   description = "Jenkins agent CIDR to allow access for CI jobs or your WAN address in case of locla run"
   default     = "0.0.0.0/0"
-}
-
-variable "dns_zone_name" {
-  description = "Cluster root DNS zone name"
 }
 
 variable "ssh_key" {
