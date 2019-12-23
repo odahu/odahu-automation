@@ -204,7 +204,7 @@ function TerraformCreate() {
         K8S_API_IP=$(jq -rc '.k8s_api_address.value' $MODULES_ROOT/gke_create/$OUTPUT_FILE)
         BASTION_IP=$(jq -rc '.bastion_address.value' $MODULES_ROOT/gke_create/$OUTPUT_FILE)
         export TF_VAR_records=$(jq -rn "[{name: \"bastion.$(GetParam 'cluster_name')\", value: \"$BASTION_IP\"}, {name: \"odahu.$(GetParam 'cluster_name')\", value: \"$LB_IP\"}, {name: \"api.$(GetParam 'cluster_name')\", value: \"$K8S_API_IP\"}]")
-	echo "INFO : Create DNS records"
+	echo "INFO : Create DNS records: ${TF_VAR_records}"
         TerragruntRun odahu_dns apply
 	echo "INFO : Save cluster info to ${OUTPUT_FILE}"
         TerraformOutput odahuflow

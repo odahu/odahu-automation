@@ -1,11 +1,19 @@
 terraform {
-  source = "${path_relative_from_include()}/modules//${local.config.dns_provider}"
+  source = "${path_relative_from_include()}/modules//${local.dns_provider}"
 
-  before_hook "backend" {
+  before_hook "setup_backend" {
     commands = ["init"]
 
     execute = [
-      "/bin/cp", "${get_terragrunt_dir()}/${path_relative_from_include()}/templates/${local.config.dns_provider}.tf", "./backend.tf"
+      "/bin/cp", "${get_terragrunt_dir()}/${path_relative_from_include()}/templates/backend/${local.config.cloud_type}.tf", "./backend.tf"
+    ]
+  }
+
+  before_hook "setup_provider" {
+    commands = ["init"]
+
+    execute = [
+      "/bin/cp", "${get_terragrunt_dir()}/${path_relative_from_include()}/templates/provider/${local.config.dns_provider}.tf", "./provider.tf"
     ]
   }
 
@@ -23,6 +31,8 @@ terraform {
 locals {
   profile = get_env("PROFILE", "${get_terragrunt_dir()}//profile.json")
   config  = jsondecode(file(local.profile))
+  cloud_type     = local.config.cloud_type
+  dns_provider   = lookup(local.config, "dns_provider", "google")
   records = lookup(local.config, "dns_records", get_env("TF_VAR_records", "[]"))
 }
 
