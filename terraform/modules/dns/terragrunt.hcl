@@ -40,7 +40,7 @@ locals {
   profile        = get_env("PROFILE", "${get_terragrunt_dir()}//profile.json")
   config         = jsondecode(file(local.profile))
   cloud_type     = local.config.cloud_type
-  dns_provider   = lookup(local.config, "dns_provider", "google")
+  dns_provider   = lookup(local.config, "dns_provider", "gcp")
   records        = lookup(local.config, "dns_records", get_env("TF_VAR_records", "[]"))
 }
 
