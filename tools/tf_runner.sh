@@ -199,10 +199,23 @@ function TerraformCreate() {
 	echo 'INFO : Deploy Odahuflow components'
 	TerraformRun odahuflow apply
         TerraformOutput k8s_setup
-        TerraformOutput gke_create
-        LB_IP=$(jq -rc '.helm_values.value["controller.service.loadBalancerIP"]' $MODULES_ROOT/k8s_setup/$OUTPUT_FILE)
-        K8S_API_IP=$(jq -rc '.k8s_api_address.value' $MODULES_ROOT/gke_create/$OUTPUT_FILE)
-        BASTION_IP=$(jq -rc '.bastion_address.value' $MODULES_ROOT/gke_create/$OUTPUT_FILE)
+	case $(GetParam "cluster_type") in
+		"aws/eks")
+                        TerraformOutput eks_create
+                        LB_IP=$(jq -rc '.load_balancer_ip' $MODULES_ROOT/k8s_setup/$OUTPUT_FILE)
+                        K8S_API_IP=$(jq -rc '.k8s_api_address.value' $MODULES_ROOT/eks_create/$OUTPUT_FILE)
+                        BASTION_IP=$(jq -rc '.bastion_address.value' $MODULES_ROOT/eks_create/$OUTPUT_FILE)
+			;;
+		"gcp/gke")
+                        TerraformOutput gke_create
+                        LB_IP=$(jq -rc '.helm_values.value["controller.service.loadBalancerIP"]' $MODULES_ROOT/k8s_setup/$OUTPUT_FILE)
+                        K8S_API_IP=$(jq -rc '.k8s_api_address.value' $MODULES_ROOT/gke_create/$OUTPUT_FILE)
+                        BASTION_IP=$(jq -rc '.bastion_address.value' $MODULES_ROOT/gke_create/$OUTPUT_FILE)
+			;;
+		"azure/aks")
+			TerraformOutput aks_create
+			;;
+	esac
         export TF_VAR_records=$(jq -rn "[{name: \"bastion.$(GetParam 'cluster_name')\", value: \"$BASTION_IP\"}, {name: \"odahu.$(GetParam 'cluster_name')\", value: \"$LB_IP\"}, {name: \"api.$(GetParam 'cluster_name')\", value: \"$K8S_API_IP\"}]")
 	echo "INFO : Create DNS records: ${TF_VAR_records}"
         TerragruntRun odahu_dns apply
@@ -223,6 +236,10 @@ function TerraformDestroy() {
 		FetchKubeConfig
                 case $(GetParam 'cluster_type') in
                     "gcp/gke")
+                        export TF_VAR_records='[]'
+                        TerragruntRun odahu_dns destroy
+                        ;;
+                    "aws/eks")
                         export TF_VAR_records='[]'
                         TerragruntRun odahu_dns destroy
                         ;;
