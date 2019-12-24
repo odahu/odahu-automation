@@ -19,8 +19,6 @@ pipeline {
         /*
         Job parameters
         */
-        pathToCharts = "${WORKSPACE}/helms"
-        sharedLibPath = "legion-cicd/pipelines/legionPipeline.groovy"
         //Git Branch to build package from
         param_git_branch = "${params.GitBranch}"
 
@@ -33,19 +31,12 @@ pipeline {
         param_release_version = "${params.ReleaseVersion}"
         //Push release git tag
         param_push_git_tag = "${params.PushGitTag}"
-        //Rewrite git tag i exists
+        //Rewrite git tag if exists
         param_force_tag_push = "${params.ForceTagPush}"
         param_update_version_string = "${params.UpdateVersionString}"
         param_update_master = "${params.UpdateMaster}"
         //Build major version release and optionally push it to public repositories
         param_stable_release = "${params.StableRelease}"
-
-        /*
-        Helm
-        */
-        param_helm_repo_git_url = "${params.HelmRepoGitUrl}"
-        param_helm_repo_git_branch = "${params.HelmRepoGitBranch}"
-        param_helm_repository = "${params.HelmRepository}"
 
         /*
         Docker
@@ -57,14 +48,15 @@ pipeline {
         param_docker_cache_source = "${params.DockerCacheSource}"
 
         /*
-        CICD repository
+        CI/CD repository
         */
-        legionCicdGitlabKey = "${params.legionCicdGitlabKey}"
         param_git_deploy_key = "${params.GitDeployKey}"
-        //Legion CICD repo url (for pipeline methods import)
-        param_legion_cicd_repo = "${params.LegionCicdRepo}"
-        //Legion repo branch (tag or branch name)
-        param_legion_cicd_branch = "${params.LegionCicdBranch}"
+        // CI/CD repo url (for pipeline methods import)
+        param_cicd_repo = "${params.LegionCicdRepo}"
+        // CI/CD repo branch (tag or branch name)
+        param_cicd_branch = "${params.LegionCicdBranch}"
+        param_cicd_key = "${params.legionCicdGitlabKey}"
+        param_cicd_shared_lib = "legion-cicd/pipelines/legionPipeline.groovy"
     }
 
     stages {
@@ -73,56 +65,34 @@ pipeline {
                 cleanWs()
                 checkout scm
                 script {
-                    sh 'echo RunningOn: $(curl http://checkip.amazonaws.com/)'
-
-                    // import Legion components
-                    sshagent(["${env.legionCicdGitlabKey}"]) {
-                        print("Checkout Legion-cicd repo")
+                    // import CI/CD components
+                    sshagent(["${env.param_cicd_key}"]) {
+                        print("Checkout CI/CD repo")
                         sh """#!/bin/bash -ex
-                        mkdir -p \$(getent passwd \$(whoami) | cut -d: -f6)/.ssh && ssh-keyscan git.epam.com >> \$(getent passwd \$(whoami) | cut -d: -f6)/.ssh/known_hosts
-                        if [ ! -d "legion-cicd" ]; then
-                            git clone ${env.param_legion_cicd_repo} legion-cicd
-                        fi
-                        cd legion-cicd && git checkout ${env.param_legion_cicd_branch}
+                            export GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
+                            if [ ! -d "legion-cicd" ]; then
+                                git clone ${env.param_cicd_repo} legion-cicd
+                            fi
+                            cd legion-cicd && git checkout ${env.param_cicd_branch}
                         """
 
-                        print("Load odahu pipeline common library")
-                        cicdLibrary = load "${env.sharedLibPath}"
+                        print("Load common CI/CD library")
+                        cicdLibrary = load "${env.param_cicd_shared_lib}"
                     }
 
                     def verFiles = [
-                            'version.info'
+                        'version.info'
                     ]
                     cicdLibrary.setBuildMeta(verFiles)
                 }
             }
         }
 
-        stage("Build Docker images & Upload Helm charts") {
-            parallel {
-                stage("Build Terraform") {
-                    steps {
-                        script {
-                            cicdLibrary.buildDockerImage('odahu-flow-automation', ".", "containers/terraform/Dockerfile")
-                            cicdLibrary.uploadDockerImage('odahu-flow-automation', false)
-                        }
-                    }
-                }
-                stage("Build Fluentd Docker image") {
-                    steps {
-                        script {
-                            cicdLibrary.buildDockerImage('odahu-flow-fluentd', 'containers/fluentd')
-                            cicdLibrary.uploadDockerImage('odahu-flow-fluentd', env.param_stable_release.toBoolean() && env.param_dockerhub_publishing_enabled.toBoolean())
-                        }
-                    }
-                }
-            }
-        }
-
-        stage('Package and upload helm charts') {
+        stage("Build Terraform Docker image") {
             steps {
                 script {
-                    cicdLibrary.uploadHelmCharts(env.pathToCharts)
+                    cicdLibrary.buildDockerImage('odahu-flow-automation', ".", "containers/terraform/Dockerfile")
+                    cicdLibrary.uploadDockerImage('odahu-flow-automation', false)
                 }
             }
         }
@@ -131,11 +101,12 @@ pipeline {
             steps {
                 script {
                     cicdLibrary.updateReleaseBranches(
-                            env.param_stable_release.toBoolean(),
-                            env.param_push_git_tag.toBoolean(),
-                            env.param_update_version_string.toBoolean(),
-                            env.param_update_master.toBoolean(),
-                            env.param_git_deploy_key)
+                        env.param_stable_release.toBoolean(),
+                        env.param_push_git_tag.toBoolean(),
+                        env.param_update_version_string.toBoolean(),
+                        env.param_update_master.toBoolean(),
+                        env.param_git_deploy_key
+                    )
                 }
             }
         }

@@ -31,5 +31,4 @@ jobs:
       before_script: skip
       script:
         - make docker-build-terraform
-        - make docker-build-fluentd
 
