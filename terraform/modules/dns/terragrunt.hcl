@@ -38,6 +38,17 @@ terraform {
       AWS_DEFAULT_REGION = lookup(local.config, "aws_region", "")
     }
   }
+
+  extra_arguments "env_vars" {
+    commands = [
+      "apply destroy output get plan refresh show"
+    ]
+
+    env_vars = {
+      AWS_DEFAULT_REGION = lookup(local.config, "aws_region", "")
+    }
+  }
+
 }
 
 locals {
