@@ -221,9 +221,12 @@ function TerraformOutput() {
 function TerraformDestroy() {
 	if CheckCluster; then
 		FetchKubeConfig
-                export TF_VAR_records='[]'
-                TerragruntRun odahu_dns destroy
-
+                case $(GetParam 'cluster_type') in
+                    "gcp/gke")
+                        export TF_VAR_records='[]'
+                        TerragruntRun odahu_dns destroy
+                        ;;
+                esac
 		echo 'INFO : Init HELM'
 		helm init --client-only
 
