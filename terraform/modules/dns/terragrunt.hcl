@@ -13,7 +13,7 @@ terraform {
     commands = ["init"]
 
     execute = [
-      "/bin/cp", "${get_terragrunt_dir()}/${path_relative_from_include()}/templates/provider/${local.dns_provider}.tf", "./provider.tf"
+      "/bin/cp", "${get_terragrunt_dir()}/${path_relative_from_include()}/templates/provider/${local.dns_provider}.tf", "./${local.dns_provider}_provider.tf"
     ]
   }
 
@@ -33,6 +33,10 @@ terraform {
     arguments = [
       "-backend-config=bucket=${local.config.tfstate_bucket}",
     ]
+
+    env_vars = {
+      AWS_DEFAULT_REGION = lookup(local.config, "aws_region", "")
+    }
   }
 }
 
@@ -48,7 +52,7 @@ inputs = {
   records        = local.records,
   tfstate_bucket = local.config.tfstate_bucket,
   managed_zone   = lookup(local.config, "dns_zone_name", ""),
-  region         = lookup(local.config, "aws_region", ""),
+  aws_region     = lookup(local.config, "aws_region", ""),
   domain         = lookup(local.config, "domain", ""),
   project_id     = local.config.project_id
 }
