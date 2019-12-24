@@ -203,7 +203,7 @@ function TerraformCreate() {
 		"aws/eks")
                         TerraformOutput eks_create
                         LB_IP=$(jq -rc '.load_balancer_ip.value' $MODULES_ROOT/k8s_setup/$OUTPUT_FILE)
-                        K8S_API_IP=$(jq -rc '.k8s_api_address.value' $MODULES_ROOT/eks_create/$OUTPUT_FILE)
+                        K8S_API_IP=$(jq -rc '.k8s_api_address.value' $MODULES_ROOT/eks_create/$OUTPUT_FILE | sed -e 's/https:\/\///')
                         BASTION_IP=$(jq -rc '.bastion_address.value' $MODULES_ROOT/eks_create/$OUTPUT_FILE)
                         export TF_VAR_records=$(jq -rn "[{name: \"bastion.$(GetParam 'cluster_name')\", value: \"$BASTION_IP\"}, {name: \"odahu.$(GetParam 'cluster_name')\", value: \"$LB_IP\", type: 'CNAME'}, {name: \"api.$(GetParam 'cluster_name')\", value: \"$K8S_API_IP\", type: 'CNAME']}")
 			;;
