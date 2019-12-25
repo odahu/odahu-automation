@@ -237,17 +237,12 @@ function TerraformOutput() {
 # Destroy Odahuflow cluster
 function TerraformDestroy() {
 	if CheckCluster; then
+		echo 'Destroy DNS records'
+                export TF_VAR_records='[]'
+                TerragruntRun odahu_dns destroy
+
 		FetchKubeConfig
-                case $(GetParam 'cluster_type') in
-                    "gcp/gke")
-                        export TF_VAR_records='[]'
-                        TerragruntRun odahu_dns destroy
-                        ;;
-                    "aws/eks")
-                        export TF_VAR_records='[]'
-                        TerragruntRun odahu_dns destroy
-                        ;;
-                esac
+
 		echo 'INFO : Init HELM'
 		helm init --client-only
 
