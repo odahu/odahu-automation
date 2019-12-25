@@ -91,15 +91,6 @@ terraform-validate:
 docker-build-terraform:
 	docker build -t odahu/odahu-flow-automation:${BUILD_TAG} -f containers/terraform/Dockerfile .
 
-## docker-build-fluentd: Build fluentd image
-docker-build-fluentd:
-	docker build -t odahu/fluentd:${BUILD_TAG} -f containers/fluentd/Dockerfile .
-
-## docker-push-fluentd: Push fluentd docker image
-docker-push-fluentd:
-	docker tag odahu/fluentd:${BUILD_TAG} ${DOCKER_REGISTRY}odahu/fluentd:${TAG}
-	docker push ${DOCKER_REGISTRY}odahu/fluentd:${TAG}
-
 ## shellcheck: Lint the bash scripts
 shellcheck:
 	shellcheck tools/*.sh

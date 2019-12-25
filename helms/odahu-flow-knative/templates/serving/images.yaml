@@ -1,9 +1,0 @@
-apiVersion: caching.internal.knative.dev/v1alpha1
-kind: Image
-metadata:
-  labels:
-        {{- include "knative.labels" (dict "root" . "name" "common") | nindent 4 }}
-  name: queue-proxy
-  namespace: {{ .Release.Namespace }}
-spec:
-  image: gcr.io/knative-releases/github.com/knative/serving/cmd/queue@sha256:4daec44d70f2fae4633b774d7ffbce5221180d270855a8a9864366c48c690f74
