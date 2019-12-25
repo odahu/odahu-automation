@@ -1,9 +1,7 @@
 **
 !Makefile
 !containers/**
-!helms/**
 !terraform/**
 !tools/**
 !version.info
-!*vars_template.yaml
 **/.terraform

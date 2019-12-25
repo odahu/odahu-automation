@@ -73,9 +73,5 @@ _tfstate
 # Module directory
 .terraform/
 
-# Chart dependencies
-/helms/legion/charts/
-/helms/legion-core/charts/
-
 /.hiera_keys/
 /.secrets/
