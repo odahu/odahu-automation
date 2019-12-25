@@ -24,28 +24,6 @@ terraform {
       "/bin/cp", "${get_terragrunt_dir()}/${path_relative_from_include()}/templates/provider/${local.cloud_type}.tf", "./${local.cloud_type}_provider.tf"
     ]
   }
-
-  extra_arguments "init_vars" {
-    commands = [
-      "init"
-    ]
-
-    arguments = [
-      "-backend-config=bucket=${local.config.tfstate_bucket}",
-    ]
-
-    env_vars = {
-      AWS_DEFAULT_REGION = lookup(local.config, "aws_region", "")
-    }
-  }
-
-  extra_arguments "env_vars" {
-    commands = [ "apply", "destroy", "output", "get", "plan", "refresh", "show" ]
-
-    env_vars = {
-      AWS_DEFAULT_REGION = lookup(local.config, "aws_region", "")
-    }
-  }
 }
 
 locals {
@@ -57,10 +35,12 @@ locals {
 }
 
 inputs = {
-  records        = local.records,
-  tfstate_bucket = local.config.tfstate_bucket,
-  managed_zone   = lookup(local.config, "dns_zone_name", ""),
-  aws_region     = lookup(local.config, "aws_region", ""),
-  domain         = lookup(local.config, "domain", ""),
-  project_id     = local.config.project_id
+  records              = local.records,
+  tfstate_bucket       = local.config.tfstate_bucket,
+  managed_zone         = lookup(local.config, "dns_zone_name", ""),
+  aws_region           = lookup(local.config, "aws_region", ""),
+  domain               = lookup(local.config, "domain", ""),
+  project_id           = lookup(local.config, "project_id", ""),
+  resource_group_name  = lookup(local.config, "azure_resource_group", ""),
+  storage_account_name = lookup(local.config, "azure_storage_account", "")
 }
