@@ -1,29 +1,29 @@
 terraform {
   source = "${path_relative_from_include()}/modules//${local.dns_provider}"
 
-  before_hook "setup_backend" {
-    commands = ["init"]
+#  before_hook "setup_backend" {
+#    commands = ["init"]
+#
+#    execute = [
+#      "/bin/cp", "${get_terragrunt_dir()}/${path_relative_from_include()}/templates/backend/${local.cloud_type}.tf", "./backend.tf"
+#    ]
+#  }
 
-    execute = [
-      "/bin/cp", "${get_terragrunt_dir()}/${path_relative_from_include()}/templates/backend/${local.cloud_type}.tf", "./backend.tf"
-    ]
-  }
+#  before_hook "setup_provider" {
+#    commands = ["init"]
 
-  before_hook "setup_provider" {
-    commands = ["init"]
+#    execute = [
+#      "/bin/cp", "${get_terragrunt_dir()}/${path_relative_from_include()}/templates/provider/${local.dns_provider}.tf", "./${local.dns_provider}_provider.tf"
+#    ]
+#  }
 
-    execute = [
-      "/bin/cp", "${get_terragrunt_dir()}/${path_relative_from_include()}/templates/provider/${local.dns_provider}.tf", "./${local.dns_provider}_provider.tf"
-    ]
-  }
+#  before_hook "setup_backend_provider" {
+#    commands = ["init"]
 
-  before_hook "setup_backend_provider" {
-    commands = ["init"]
-
-    execute = [
-      "/bin/cp", "${get_terragrunt_dir()}/${path_relative_from_include()}/templates/provider/${local.cloud_type}.tf", "./${local.cloud_type}_provider.tf"
-    ]
-  }
+#    execute = [
+#      "/bin/cp", "${get_terragrunt_dir()}/${path_relative_from_include()}/templates/provider/${local.cloud_type}.tf", "./${local.cloud_type}_provider.tf"
+#    ]
+#  }
 }
 
 locals {
