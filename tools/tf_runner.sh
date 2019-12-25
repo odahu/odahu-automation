@@ -217,12 +217,11 @@ function TerraformCreate() {
 		"azure/aks")
 			TerraformOutput aks_create
                         LB_IP=$(jq -rc '.helm_values.value["controller.service.loadBalancerIP"]' $MODULES_ROOT/k8s_setup/$OUTPUT_FILE)
-                        K8S_API_IP=$(jq -rc '.k8s_api_address.value' $MODULES_ROOT/aks_create/$OUTPUT_FILE)
+                        K8S_API_IP="$(jq -rc '.k8s_api_address.value' $MODULES_ROOT/aks_create/$OUTPUT_FILE | sed -e 's/^https:\/\///'| sed -e 's/:443//')."
                         BASTION_IP=$(jq -rc '.bastion_address.value' $MODULES_ROOT/aks_create/$OUTPUT_FILE)
-                        export TF_VAR_records=$(jq -rn "[{name: \"bastion.$(GetParam 'cluster_name')\", value: \"$BASTION_IP\"}, {name: \"odahu.$(GetParam 'cluster_name')\", value: \"$LB_IP\"}, {name: \"api.$(GetParam 'cluster_name')\", value: \"$K8S_API_IP\"}]")
+                        export TF_VAR_records=$(jq -rn "[{name: \"bastion.$(GetParam 'cluster_name')\", value: \"$BASTION_IP\"}, {name: \"odahu.$(GetParam 'cluster_name')\", value: \"$LB_IP\"}, {name: \"api.$(GetParam 'cluster_name')\", value: \"$K8S_API_IP\", type: \"CNAME\"}]")
 			;;
 	esac
-	echo "INFO : Create DNS records: ${TF_VAR_records}"
         TerragruntRun odahu_dns apply
 	echo "INFO : Save cluster info to ${OUTPUT_FILE}"
         TerraformOutput odahuflow
