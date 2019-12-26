@@ -14,10 +14,6 @@ variable "zone" {
   description = "Default zone"
 }
 
-variable "root_domain" {
-  description = "Odahuflow cluster root domain"
-}
-
 ################
 # GKE variables
 ################
@@ -60,10 +56,6 @@ variable "allowed_ips" {
 
 variable "agent_cidr" {
   description = "Jenkins agent CIDR to allow access for CI jobs or your WAN address in case of locla run"
-}
-
-variable "dns_zone_name" {
-  description = "Cluster root DNS zone name"
 }
 
 variable "ssh_user" {

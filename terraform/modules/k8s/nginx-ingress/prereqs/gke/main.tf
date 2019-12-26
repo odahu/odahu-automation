@@ -5,15 +5,6 @@ resource "google_compute_address" "ingress_lb_address" {
   address_type = "EXTERNAL"
 }
 
-resource "google_dns_record_set" "ingress_lb" {
-  project      = var.project_id
-  name         = "*.${var.cluster_name}.${var.root_domain}."
-  type         = "A"
-  ttl          = 300
-  managed_zone = var.dns_zone_name
-  rrdatas      = [google_compute_address.ingress_lb_address.address]
-}
-
 # Whitelist allowed_ips and cluster NAT ip on the cluster ingress
 data "google_compute_address" "nat_gw_ip" {
   project = var.project_id
