@@ -8,11 +8,6 @@ variable "root_domain" {
   description = "Odahuflow cluster root domain"
 }
 
-variable "dns_zone_name" {
-  default     = ""
-  description = "Cluster root DNS zone name"
-}
-
 variable "allowed_ips" {
   type        = list(string)
   description = "CIDR to allow access from"
