@@ -196,8 +196,7 @@ function TerraformCreate() {
 	TerraformRun helm_init apply
 	echo 'INFO : Setup K8S Odahuflow dependencies'
 	TerraformRun k8s_setup apply
-	echo 'INFO : Deploy Odahuflow components'
-	TerraformRun odahuflow apply
+	echo 'INFO : Create Odahuflow DNS records'
         TerraformOutput k8s_setup
 	case $(GetParam "cluster_type") in
 		"aws/eks")
@@ -223,6 +222,8 @@ function TerraformCreate() {
 			;;
 	esac
         TerragruntRun odahu_dns apply
+	echo 'INFO : Deploy Odahuflow components'
+	TerraformRun odahuflow apply
 	echo "INFO : Save cluster info to ${OUTPUT_FILE}"
         TerraformOutput odahuflow
 }
