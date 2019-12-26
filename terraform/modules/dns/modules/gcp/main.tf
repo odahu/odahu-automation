@@ -1,6 +1,6 @@
 locals {
   # split `domain` variable to zone_name and root_domain parts, e.x.: mydomain.test.com will split to zone_name="mydomain" & root_domain="test.com"
-  parsed = length(var.domain) == 0 ? {} : regex("^(?P<zone_name>\\w+[\\w-]*?\\w+).(?P<root_domain>.*)", var.domain)
+  parsed = length(var.domain) == 0 ? {} : regex("^(?P<zone_name>[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?).(?P<root_domain>.*)", var.domain)
 
   zone_name    = lookup(local.parsed, "zone_name", "")
   root_domain  = lookup(local.parsed, "root_domain", "")
