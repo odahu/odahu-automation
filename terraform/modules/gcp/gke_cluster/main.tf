@@ -228,28 +228,6 @@ resource "google_compute_instance" "gke_bastion" {
   }
 }
 
-########################################################
-#  DNS records
-########################################################
-
-resource "google_dns_record_set" "gke_bastion" {
-  project      = var.project_id
-  name         = "bastion.${var.cluster_name}.${var.root_domain}."
-  type         = "A"
-  ttl          = 300
-  managed_zone = var.dns_zone_name
-  rrdatas      = [google_compute_instance.gke_bastion.network_interface[0].access_config[0].nat_ip]
-}
-
-resource "google_dns_record_set" "gke_api" {
-  project      = var.project_id
-  name         = "api.${var.cluster_name}.${var.root_domain}."
-  type         = "A"
-  ttl          = 300
-  managed_zone = var.dns_zone_name
-  rrdatas      = [google_container_cluster.cluster.endpoint]
-}
-
 # Wait for cluster startup
 resource "null_resource" "kubectl_config" {
   triggers = {

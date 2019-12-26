@@ -72,6 +72,7 @@ _tfstate
 .DS_Store
 # Module directory
 .terraform/
+.terragrunt-cache/
 
 /.hiera_keys/
 /.secrets/

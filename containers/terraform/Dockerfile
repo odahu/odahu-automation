@@ -3,6 +3,7 @@ FROM ubuntu:18.04
 ENV DEBIAN_FRONTEND=noninteractive \
     KUBECTL_VERSION=v1.13.12 \
     TERRAFORM_VERSION=0.12.18 \
+    TERRAGRUNT_VERSION=v0.21.10 \
     HELM_VERSION=v2.14.3
 
 # install system utilities
@@ -24,6 +25,11 @@ RUN wget -qO /usr/local/bin/kubectl "https://storage.googleapis.com/kubernetes-r
 RUN wget -qO /tmp/terraform.zip "https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip" && \
     cd /tmp && unzip /tmp/terraform.zip && \
     mv /tmp/terraform /usr/local/bin/terraform && rm -rf /tmp/terraform*
+
+# Install Terragrunt
+RUN wget -qO /tmp/terragrunt "https://github.com/gruntwork-io/terragrunt/releases/download/${TERRAGRUNT_VERSION}/terragrunt_linux_amd64" && \
+    mv /tmp/terragrunt /usr/local/bin/terragrunt && \
+    chmod a+x /usr/local/bin/terragrunt
 
 # Install Helm
 RUN curl -fsSLO https://kubernetes-helm.storage.googleapis.com/helm-${HELM_VERSION}-linux-amd64.tar.gz && \
@@ -48,6 +54,7 @@ RUN curl -sL https://bootstrap.pypa.io/get-pip.py | python3 && \
     pip3 install awscli
 
 COPY tools/tf_runner.sh /usr/bin/tf_runner
+RUN chmod a+x /usr/bin/tf_runner
 
 # Deploy odahuflow
 COPY terraform /opt/odahu-flow/terraform
