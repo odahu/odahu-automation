@@ -12,7 +12,7 @@ resource "google_dns_managed_zone" "this" {
   count = length(var.managed_zone) == 0 ? 1 : 0
 
   project     = var.project_id
-  name        = replace("${var.domain}", ".", "-")
+  name        = replace(var.domain, ".", "-")
   dns_name    = "${var.domain}."
   description = "Managed by Terraform"
 }
