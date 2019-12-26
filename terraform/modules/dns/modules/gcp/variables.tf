@@ -12,7 +12,7 @@ variable "project_id" {
 
 variable "records" {
   default = []
-  type    = list
+  type    = list(map(string))
 }
 
 variable "tfstate_bucket" {
