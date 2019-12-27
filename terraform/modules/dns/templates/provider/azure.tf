@@ -1,4 +1,4 @@
 provider "azurerm" {
-  version = "1.36.1"
+  version = "1.39.0"
 }
 
