@@ -40,6 +40,12 @@ resource "azurerm_kubernetes_cluster" "aks" {
     }
   }
 
+  lifecycle {
+    ignore_changes = [
+      default_node_pool
+    ]
+  }
+
   dynamic "agent_pool_profile" {
     for_each = var.node_pools
     content {
