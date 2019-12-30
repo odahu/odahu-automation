@@ -412,7 +412,7 @@ function ResumeCluster() {
 						--num-nodes $(( $(GetParam 'initial_node_count') / 2 - 1 )) \
 						--quiet
 
-					until [[ -z "$(kubectl get pods --no-headers=true --all-namespaces --field-selector=status.phase!=Running 2>/dev/null)" ]]; do
+					until [[ -z "$(kubectl get pods --no-headers=true --all-namespaces --field-selector=status.phase==Pending 2>/dev/null)" ]]; do
 						sleep 5
 					done
 				else
