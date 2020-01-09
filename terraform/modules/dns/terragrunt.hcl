@@ -8,6 +8,7 @@ locals {
   cloud_type     = local.config.cloud_type
   dns_provider   = lookup(local.config, "dns_provider", "gcp")
   records        = lookup(local.config, "dns_records", get_env("TF_VAR_records", "[]"))
+  project_id     = lookup(local.config, "dns_project_id", lookup(local.config, "project_id", "")),
 }
 
 inputs = {
