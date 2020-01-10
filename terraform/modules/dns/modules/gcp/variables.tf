@@ -17,4 +17,3 @@ variable "records" {
 
 variable "tfstate_bucket" {
 }
-

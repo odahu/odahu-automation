@@ -66,8 +66,14 @@ variable "sp_secret" {
 }
 
 variable "node_pools" {
-  description = "List of k8s node pools map definitions"
-  default     = []
+  default = {
+    main = {
+      init_node_count = 3
+      min_node_count  = 1
+      max_node_count  = 5
+    }
+  }
+  description = "Default node pools configuration"
 }
 
 variable "egress_ip_name" {

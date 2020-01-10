@@ -88,25 +88,13 @@ variable "bastion_hostname" {
   description = "bastion hostname"
 }
 
-################
-# k8s node pools
-################
 variable "node_pools" {
-  default = [
-    {
-      name               = "main"
-      initial_node_count = "4"
-      max_pods           = "64"
-
-      autoscaling = {
-        min_node_count = "1"
-        max_node_count = "5"
-      }
-
-      node_config = {
-        machine_type = "Standard_B4ms"
-        disk_size_gb = 96
-      }
+  default = {
+    main = {
+      init_node_count = 3
+      min_node_count  = 1
+      max_node_count  = 5
     }
-  ]
+  }
+  description = "Default node pools configuration"
 }

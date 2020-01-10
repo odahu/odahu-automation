@@ -1,7 +1,3 @@
-resource "random_id" "pool_name" {
-  byte_length = 8
-}
-
 data "azurerm_public_ip" "egress" {
   name                = var.egress_ip_name
   resource_group_name = var.resource_group
@@ -15,6 +11,8 @@ locals {
     list("${var.bastion_ip}/32"),
     var.allowed_ips
   )
+  default_node_pool = var.node_pools["main"]
+  additional_node_pools = length(var.node_pools) > 1 ? { for key, value in var.node_pools: key => value if key != "main" } : map({})
 }
 
 ########################################################
@@ -22,7 +20,6 @@ locals {
 ########################################################
 
 resource "azurerm_kubernetes_cluster" "aks" {
-  count               = length(var.node_pools) > 0 ? 1 : 0
   name                = var.cluster_name
   location            = var.location
   resource_group_name = var.resource_group
@@ -42,33 +39,29 @@ resource "azurerm_kubernetes_cluster" "aks" {
 
   lifecycle {
     ignore_changes = [
-      default_node_pool
+      default_node_pool[0].node_count
     ]
   }
 
-  dynamic "agent_pool_profile" {
-    for_each = var.node_pools
-    content {
-      type                = "VirtualMachineScaleSets"
-      enable_auto_scaling = true
+  default_node_pool {
+    name            = "main"
+    vm_size         = lookup(local.default_node_pool, "machine_type", "Standard_B2s")
+    os_disk_size_gb = lookup(local.default_node_pool, "disk_size_gb", "30")
+    vnet_subnet_id  = var.aks_subnet_id
 
-      name            = lookup(agent_pool_profile.value, "name", random_id.pool_name.dec)
-      vm_size         = lookup(agent_pool_profile.value.node_config, "machine_type", "Standard_B2s")
-      os_type         = "Linux"
-      os_disk_size_gb = lookup(agent_pool_profile.value.node_config, "disk_size_gb", "30")
-      vnet_subnet_id  = var.aks_subnet_id
+    type                = "VirtualMachineScaleSets"
+    enable_auto_scaling = true
 
-      # In AKS there's no option to create node pool with 0 nodes, minimum is 1
-      count     = lookup(agent_pool_profile.value, "initial_node_count", "1")
-      min_count = lookup(lookup(agent_pool_profile.value, "autoscaling", {}), "min_node_count", "1")
-      max_count = lookup(lookup(agent_pool_profile.value, "autoscaling", {}), "max_node_count", "2")
-      max_pods  = lookup(agent_pool_profile.value, "max_pods", "32")
+    # In AKS there's no option to create node pool with 0 nodes, minimum is 1
+    node_count = lookup(local.default_node_pool, "init_node_count", "1")
+    min_count  = lookup(local.default_node_pool, "min_node_count", "1")
+    max_count  = lookup(local.default_node_pool, "max_node_count", "2")
+    max_pods   = lookup(local.default_node_pool, "max_pods", "64")
 
-      node_taints = [
-        for taint in lookup(agent_pool_profile.value.node_config, "taint", []) :
-        "${taint.key}=${taint.value}:${taint.effect}"
-      ]
-    }
+    node_taints = [
+      for taint in lookup(local.default_node_pool, "taints", []) :
+      "${taint.key}=${taint.value}:${taint.effect}"
+    ]
   }
 
   # We have to provide Service Principal account credentials in order to create node resource group
@@ -120,4 +113,35 @@ resource "azurerm_kubernetes_cluster" "aks" {
         "$(az network public-ip show --resource-group ${self.resource_group_name} --name ${var.egress_ip_name} --query id -o tsv)"
     EOF
   }
+}
+
+resource "azurerm_kubernetes_cluster_node_pool" "aks" {
+  for_each = local.additional_node_pools
+
+  lifecycle {
+    ignore_changes = [
+      node_count
+    ]
+  }
+
+  kubernetes_cluster_id = azurerm_kubernetes_cluster.aks.id
+
+  # Pool name must start with a lowercase letter, have max length of 12, and only have characters a-z0-9
+  name            = substr(replace(each.key, "/[-_]/", ""), 0, 12)
+  vm_size         = lookup(each.value, "machine_type", "Standard_B2s")
+  os_disk_size_gb = lookup(each.value, "disk_size_gb", "30")
+  os_type         = "Linux"
+  vnet_subnet_id  = var.aks_subnet_id
+
+  enable_auto_scaling = true
+
+  node_count = lookup(each.value, "init_node_count", "1")
+  min_count  = lookup(each.value, "min_node_count", "1")
+  max_count  = lookup(each.value, "max_node_count", "2")
+  max_pods   = lookup(each.value, "max_pods", "64")
+
+  node_taints = [
+    for taint in lookup(each.value, "taints", []) :
+    "${taint.key}=${taint.value}:${taint.effect}"
+  ]
 }
