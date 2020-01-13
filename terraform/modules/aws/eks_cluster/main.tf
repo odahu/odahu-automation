@@ -179,6 +179,12 @@ resource "aws_autoscaling_group" "this" {
     propagate_at_launch = true
   }
 
+  tag {
+    key                 = "k8s.io/cluster-autoscaler/${var.cluster_name}"
+    value               = aws_eks_cluster.default.name
+    propagate_at_launch = false
+  }
+
   dynamic "tag" {
     for_each = lookup(each.value, "labels", {})
     iterator = tag
