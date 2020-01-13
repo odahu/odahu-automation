@@ -92,7 +92,7 @@ resource "null_resource" "setup_cluster_autoscaler" {
 # Node pools
 resource "aws_launch_template" "this" {
   for_each      = var.node_pools
-  name          = substr(replace(each.key, "/[_\\W]/", "-"), 0, 40)
+  name          = "tf-${var.cluster_name}-${substr(replace(each.key, "/[_\\W]/", "-"), 0, 40)}"
   image_id      = lookup(each.value, "image", "ami-038bd8d3a2345061f")
   instance_type = lookup(each.value, "machine_type", "m5.large")
   key_name      = var.cluster_name
@@ -153,7 +153,7 @@ resource "aws_autoscaling_group" "this" {
   desired_capacity    = lookup(each.value, "init_node_count", 0 )
   min_size            = lookup(each.value, "min_node_count", "0")
   max_size            = lookup(each.value, "max_node_count", "2")
-  name                = substr(replace(each.key, "/[_\\W]/", "-"), 0, 40)
+  name                = "tf-${var.cluster_name}-${substr(replace(each.key, "/[_\\W]/", "-"), 0, 40)}"
   vpc_zone_identifier = var.subnet_ids
 
   launch_template {
@@ -163,7 +163,7 @@ resource "aws_autoscaling_group" "this" {
 
   tag {
     key                 = "Name"
-    value               = "tf-${var.cluster_name}"
+    value               = substr(replace(each.key, "/[_\\W]/", "-"), 0, 40)
     propagate_at_launch = true
   }
 
