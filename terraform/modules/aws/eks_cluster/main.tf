@@ -105,6 +105,18 @@ resource "aws_launch_template" "this" {
     labels                = join(",", concat([ for k in keys(lookup(each.value, "labels", {})): "${k}=${lookup(each.value, "labels")[k]}" ], ["project=odahuflow"]))
   }))
 
+  dynamic "instance_market_options" {
+    for_each = [ for i in [lookup(each.value, "preemptible", "false")] : i if i == "true" ]
+    content {
+      market_type = "spot"
+      spot_options {
+        block_duration_minutes         = 60
+        spot_instance_type             = "one-time"
+        instance_interruption_behavior = "terminante"
+      }
+    }
+  }
+
   dynamic "block_device_mappings" {
     for_each = flatten([lookup(each.value, "disk_size_gb", [])])
     iterator = size
