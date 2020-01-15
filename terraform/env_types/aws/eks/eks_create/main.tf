@@ -30,6 +30,7 @@ module "eks" {
   k8s_version                = var.k8s_version
   cluster_name               = var.cluster_name
   vpc_id                     = module.vpc.vpc_id
+  node_pools                 = var.node_pools
   master_role_arn            = module.iam.master_role_arn
   master_sg_id               = module.firewall.master_sg_id
   node_role_arn              = module.iam.node_role_arn
