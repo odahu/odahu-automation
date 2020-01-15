@@ -106,7 +106,7 @@ resource "aws_launch_template" "this" {
   }))
 
   dynamic "instance_market_options" {
-    for_each = [ for i in [lookup(each.value, "preemptible", "false")] : i if i == "true" ]
+    for_each = [ for i in [lookup(each.value, "preemptible", "false")] : i if i != "false" ]
     content {
       market_type = "spot"
       spot_options {
