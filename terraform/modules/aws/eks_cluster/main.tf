@@ -112,7 +112,7 @@ resource "aws_launch_template" "this" {
       spot_options {
         block_duration_minutes         = 60
         spot_instance_type             = "one-time"
-        instance_interruption_behavior = "terminante"
+        instance_interruption_behavior = "terminate"
       }
     }
   }
