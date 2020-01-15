@@ -36,3 +36,13 @@ resource "google_dns_record_set" "this" {
   managed_zone = local.managed_zone
   rrdatas      = [lookup(each.value, "value")]
 }
+
+resource "null_resource" "wait_for_dns" {
+     build_number = timestamp()
+   }
+   provisioner "local-exec" {
+    command = "timeout 600 bash -c 'for NAME in ${local.records_str}; do until dig +short $NAME.${local.domain}; do sleep 5; done ; done'"
+   }
+   depends_on = [google_dns_record_set.this]
+ }
+
