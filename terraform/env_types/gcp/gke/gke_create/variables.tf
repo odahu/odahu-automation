@@ -124,7 +124,7 @@ variable "nodes_sa" {
 
 variable "node_pools" {
   default     = {}
-  description = "Service account for cluster nodes"
+  description = "Default node pools configuration"
 }
 
 ################
