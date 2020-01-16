@@ -9,7 +9,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
 # install system utilities
 RUN apt-get update && apt-get install -y \
     apt-transport-https bash curl tar openssh-client gnupg python3=3.6.7-1~18.04 python3-distutils\
-    sshpass git ca-certificates apt-utils locales wget jq unzip dnsutils
+    sshpass git ca-certificates apt-utils locales wget jq unzip
 
 # setup locale
 RUN locale-gen en_US.UTF-8 && update-locale LANG=en_US.UTF-8
