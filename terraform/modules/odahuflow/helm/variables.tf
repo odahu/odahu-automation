@@ -109,73 +109,7 @@ variable "connection_vault_configuration" {
   }
 }
 
-variable "model_training_nodes" {
-  type = object({
-    toleration = object({
-      Key      = string
-      Operator = string
-      Value    = string
-      Effect   = string
-    })
-    node_selector = map(string)
-  })
-  default = {
-    toleration = {
-      Key      = "dedicated"
-      Operator = "Equal"
-      Value    = "training"
-      Effect   = "NoSchedule"
-    }
-    node_selector = {
-      mode = "odahu-flow-training"
-    }
-  }
-}
-
-variable "model_packaging_nodes" {
-  type = object({
-    toleration = object({
-      Key      = string
-      Operator = string
-      Value    = string
-      Effect   = string
-    })
-    node_selector = map(string)
-  })
-  default = {
-    toleration = {
-      Key      = "dedicated"
-      Operator = "Equal"
-      Value    = "packaging"
-      Effect   = "NoSchedule"
-    }
-    node_selector = {
-      mode = "odahu-flow-packaging"
-    }
-  }
-}
-
-variable "model_deployment_nodes" {
-  type = object({
-    toleration = object({
-      Key      = string
-      Operator = string
-      Value    = string
-      Effect   = string
-    })
-    node_selector = map(string)
-  })
-  default = {
-    toleration = {
-      Key      = "dedicated"
-      Operator = "Equal"
-      Value    = "deployment"
-      Effect   = "NoSchedule"
-    }
-    node_selector = {
-      mode = "odahu-flow-deployment"
-    }
-  }
+variable "node_pools" {
 }
 
 variable "model_deployment_jws_configuration" {

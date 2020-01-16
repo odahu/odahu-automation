@@ -89,103 +89,44 @@ resource "null_resource" "setup_cluster_autoscaler" {
   depends_on = [null_resource.setup_calico]
 }
 
-resource "aws_launch_template" "main" {
-  name          = "tf-${var.cluster_name}-node"
-  image_id      = var.node_ami
-  instance_type = var.node_machine_type
-  key_name      = var.cluster_name
-  user_data = base64encode(templatefile("${path.module}/templates/node.tpl", {
-    endpoint              = aws_eks_cluster.default.endpoint,
-    certificate_authority = aws_eks_cluster.default.certificate_authority.0.data,
-    name                  = var.cluster_name,
-    taints                = "",
-    labels                = ""
-  }))
-  iam_instance_profile {
-    name = var.node_instance_profile_name
-  }
-
-  network_interfaces {
-    associate_public_ip_address = false
-    security_groups             = ["${var.node_sg_id}"]
-    delete_on_termination       = true
-  }
-
-  instance_initiated_shutdown_behavior = "terminate"
-
-  lifecycle {
-    create_before_destroy = true
-  }
-}
-
-resource "aws_autoscaling_group" "main" {
-  desired_capacity = 1
-  max_size         = var.num_nodes_max
-  min_size         = var.num_nodes_min
-  name             = "tf-${var.cluster_name}-node"
-
-  launch_template {
-    id      = aws_launch_template.main.id
-    version = "$Latest"
-  }
-
-  vpc_zone_identifier = var.subnet_ids
-
-  tag {
-    key                 = "Name"
-    value               = "tf-${var.cluster_name}"
-    propagate_at_launch = true
-  }
-
-  tag {
-    key                 = "kubernetes.io/cluster/${var.cluster_name}"
-    value               = "owned"
-    propagate_at_launch = true
-  }
-
-  tag {
-    key                 = "k8s.io/cluster-autoscaler/enabled"
-    value               = "true"
-    propagate_at_launch = true
-  }
-
-  tag {
-    key                 = "k8s.io/cluster-autoscaler/${var.cluster_name}"
-    value               = aws_eks_cluster.default.name
-    propagate_at_launch = false
-  }
-
-  depends_on = [null_resource.populate_auth_map]
-
-  lifecycle {
-    create_before_destroy = true
-    ignore_changes        = [desired_capacity]
-  }
-}
-
-# Training node pool
-resource "aws_launch_template" "training" {
-  name          = "tf-${var.cluster_name}-training"
-  image_id      = var.node_ami
-  instance_type = var.node_machine_type_highcpu
+# Node pools
+resource "aws_launch_template" "this" {
+  for_each      = var.node_pools
+  name          = "tf-${var.cluster_name}-${substr(replace(each.key, "/[_\\W]/", "-"), 0, 40)}"
+  image_id      = lookup(each.value, "image", "ami-038bd8d3a2345061f")
+  instance_type = lookup(each.value, "machine_type", "m5.large")
   key_name      = var.cluster_name
 
   user_data = base64encode(templatefile("${path.module}/templates/node.tpl", {
     endpoint              = aws_eks_cluster.default.endpoint,
     certificate_authority = aws_eks_cluster.default.certificate_authority.0.data,
     name                  = var.cluster_name,
-    taints                = "dedicated=training:NoSchedule",
-    labels                = "mode=odahu-flow-training"
+    taints                = join(",", [ for t in lookup(each.value, "taints", []): "${t.key}=${t.value}:${replace(title(lower(replace(t.effect, "_", " "))), " ", "")}" ]),
+    labels                = join(",", concat([ for k in keys(lookup(each.value, "labels", {})): "${k}=${lookup(each.value, "labels")[k]}" ], ["project=odahuflow"]))
   }))
 
+  dynamic "instance_market_options" {
+    for_each = [ for i in [lookup(each.value, "preemptible", "false")] : i if i != "false" ]
+    content {
+      market_type = "spot"
+      spot_options {
+        block_duration_minutes         = 60
+        spot_instance_type             = "one-time"
+        instance_interruption_behavior = "terminate"
+      }
+    }
+  }
 
-  block_device_mappings {
-    device_name = "/dev/xvda"
-
-    ebs {
-      volume_type           = "standard"
-      volume_size           = "50"
-      delete_on_termination = true
+  dynamic "block_device_mappings" {
+    for_each = flatten([lookup(each.value, "disk_size_gb", [])])
+    iterator = size
+    content {
+      device_name = "/dev/xvda"
+      ebs {
+        volume_type           = "standard"
+        volume_size           = size.value
+        delete_on_termination = true
+      }
     }
   }
 
@@ -206,21 +147,23 @@ resource "aws_launch_template" "training" {
   }
 }
 
-resource "aws_autoscaling_group" "training" {
-  desired_capacity    = 0
-  max_size            = var.num_nodes_highcpu_max
-  min_size            = 0
-  name                = "tf-${var.cluster_name}-training"
+resource "aws_autoscaling_group" "this" {
+  for_each      = var.node_pools
+
+  desired_capacity    = lookup(each.value, "init_node_count", 0 )
+  min_size            = lookup(each.value, "min_node_count", "0")
+  max_size            = lookup(each.value, "max_node_count", "2")
+  name                = "tf-${var.cluster_name}-${substr(replace(each.key, "/[_\\W]/", "-"), 0, 40)}"
   vpc_zone_identifier = var.subnet_ids
 
   launch_template {
-    id      = aws_launch_template.training.id
+    id      = aws_launch_template.this[each.key].id
     version = "$Latest"
   }
 
   tag {
     key                 = "Name"
-    value               = "tf-${var.cluster_name}"
+    value               = substr(replace(each.key, "/[_\\W]/", "-"), 0, 40)
     propagate_at_launch = true
   }
 
@@ -242,111 +185,24 @@ resource "aws_autoscaling_group" "training" {
     propagate_at_launch = false
   }
 
-  tag {
-    key                 = "k8s.io/cluster-autoscaler/node-template/label/mode"
-    value               = "odahu-flow-training"
-    propagate_at_launch = true
-  }
-
-  tag {
-    key                 = "k8s.io/cluster-autoscaler/node-template/taint/dedicated"
-    value               = "training:NO_SCHEDULE"
-    propagate_at_launch = true
-  }
-
-  lifecycle {
-    create_before_destroy = true
-    ignore_changes        = [desired_capacity]
-  }
-}
-
-# Packaging node pool
-resource "aws_launch_template" "packaging" {
-  name          = "tf-${var.cluster_name}-packaging"
-  image_id      = var.node_ami
-  instance_type = var.node_machine_type_highcpu
-  key_name      = var.cluster_name
-  user_data = base64encode(templatefile("${path.module}/templates/node.tpl", {
-    endpoint              = aws_eks_cluster.default.endpoint,
-    certificate_authority = aws_eks_cluster.default.certificate_authority.0.data,
-    name                  = var.cluster_name,
-    taints                = "dedicated=packaging:NoSchedule",
-    labels                = "mode=odahu-flow-packaging"
-  }))
-
-  iam_instance_profile {
-    name = var.node_instance_profile_name
-  }
-
-  block_device_mappings {
-    device_name = "/dev/xvda"
-
-    ebs {
-      volume_type           = "standard"
-      volume_size           = "100"
-      delete_on_termination = true
+  dynamic "tag" {
+    for_each = lookup(each.value, "labels", {})
+    iterator = tag
+    content {
+      key                 = "k8s.io/cluster-autoscaler/node-template/label/${tag.key}"
+      value               = tag.value
+      propagate_at_launch = false
     }
   }
 
-  network_interfaces {
-    associate_public_ip_address = false
-    security_groups             = ["${var.node_sg_id}"]
-    delete_on_termination       = true
-  }
-
-  instance_initiated_shutdown_behavior = "terminate"
-
-  lifecycle {
-    create_before_destroy = true
-  }
-}
-
-resource "aws_autoscaling_group" "packaging" {
-  desired_capacity    = 0
-  max_size            = var.num_nodes_highcpu_max
-  min_size            = 0
-  name                = "tf-${var.cluster_name}-packaging"
-  vpc_zone_identifier = var.subnet_ids
-
-  launch_template {
-    id      = aws_launch_template.packaging.id
-    version = "$Latest"
-  }
-
-  tag {
-    key                 = "Name"
-    value               = "tf-${var.cluster_name}"
-    propagate_at_launch = true
-  }
-
-  tag {
-    key                 = "kubernetes.io/cluster/${var.cluster_name}"
-    value               = "owned"
-    propagate_at_launch = true
-  }
-
-  tag {
-    key                 = "k8s.io/cluster-autoscaler/enabled"
-    value               = "true"
-    propagate_at_launch = true
-  }
-
-  tag {
-    key                 = "k8s.io/cluster-autoscaler/${var.cluster_name}"
-    value               = aws_eks_cluster.default.name
-    propagate_at_launch = false
-  }
-
-  tag {
-    key                 = "k8s.io/cluster-autoscaler/node-template/label/mode"
-    value               = "odahu-flow-packaging"
-    propagate_at_launch = true
-  }
-
-  tag {
-    key                 = "k8s.io/cluster-autoscaler/node-template/taint/dedicated"
-    value               = "packaging:NO_SCHEDULE"
-    propagate_at_launch = true
+  dynamic "tag" {
+    for_each = lookup(each.value, "taints", [])
+    iterator = taint
+    content {
+      key                 = "k8s.io/cluster-autoscaler/node-template/taint/${taint.value.key}"
+      value               = "${taint.value.value}:${taint.value.effect}"
+      propagate_at_launch = true
+    }
   }
 
   lifecycle {
@@ -354,95 +210,6 @@ resource "aws_autoscaling_group" "packaging" {
     ignore_changes        = [desired_capacity]
   }
 }
-
-#  Deployment node pool
-resource "aws_launch_template" "deployment" {
-  name          = "tf-${var.cluster_name}-deployment"
-  image_id      = var.node_ami
-  instance_type = var.node_machine_type_highcpu
-  key_name      = var.cluster_name
-  user_data = base64encode(templatefile("${path.module}/templates/node.tpl", {
-    endpoint              = aws_eks_cluster.default.endpoint,
-    certificate_authority = aws_eks_cluster.default.certificate_authority.0.data,
-    name                  = var.cluster_name,
-    taints                = "dedicated=deployment:NoSchedule",
-    labels                = "mode=odahu-flow-deployment"
-  }))
-
-  iam_instance_profile {
-    name = var.node_instance_profile_name
-  }
-
-  network_interfaces {
-    associate_public_ip_address = false
-    security_groups             = ["${var.node_sg_id}"]
-    delete_on_termination       = true
-  }
-
-  instance_initiated_shutdown_behavior = "terminate"
-
-  lifecycle {
-    create_before_destroy = true
-  }
-}
-
-resource "aws_autoscaling_group" "deployment" {
-  desired_capacity    = 0
-  max_size            = var.num_nodes_highcpu_max
-  min_size            = 0
-  name                = "tf-${var.cluster_name}-deployment"
-  vpc_zone_identifier = var.subnet_ids
-
-  launch_template {
-    id      = aws_launch_template.deployment.id
-    version = "$Latest"
-  }
-
-  tag {
-    key                 = "Name"
-    value               = "tf-${var.cluster_name}"
-    propagate_at_launch = true
-  }
-
-  tag {
-    key                 = "kubernetes.io/cluster/${var.cluster_name}"
-    value               = "owned"
-    propagate_at_launch = true
-  }
-
-  tag {
-    key                 = "k8s.io/cluster-autoscaler/enabled"
-    value               = "true"
-    propagate_at_launch = true
-  }
-
-  tag {
-    key                 = "k8s.io/cluster-autoscaler/${var.cluster_name}"
-    value               = aws_eks_cluster.default.name
-    propagate_at_launch = false
-  }
-
-  tag {
-    key                 = "k8s.io/cluster-autoscaler/node-template/label/mode"
-    value               = "odahu-flow-deployment"
-    propagate_at_launch = true
-  }
-
-  tag {
-    key                 = "k8s.io/cluster-autoscaler/node-template/taint/dedicated"
-    value               = "deployment:NO_SCHEDULE"
-    propagate_at_launch = true
-  }
-
-  lifecycle {
-    create_before_destroy = true
-    ignore_changes        = [desired_capacity]
-  }
-}
-
-########################################################
-#  DNS records
-########################################################
 
 # Wait for cluster startup
 resource "null_resource" "kubectl_config" {

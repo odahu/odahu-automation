@@ -45,6 +45,7 @@ module "odahuflow_helm" {
   odahuflow_version        = var.odahuflow_version
   packager_version         = var.packager_version
   mlflow_toolchain_version = var.mlflow_toolchain_version
+  node_pools               = var.node_pools
 
   odahuflow_connections              = concat(var.odahuflow_connections, module.odahuflow_prereqs.odahuflow_connections)
   extra_external_urls                = concat(module.jupyterhub.external_url, module.odahuflow_prereqs.extra_external_urls)
