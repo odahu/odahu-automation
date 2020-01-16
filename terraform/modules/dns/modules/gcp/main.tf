@@ -7,7 +7,7 @@ locals {
   managed_zone = length(var.managed_zone) == 0 ? google_dns_managed_zone.this[0].name : data.google_dns_managed_zone.this[0].name
   domain       = length(var.managed_zone) == 0 ? google_dns_managed_zone.this[0].dns_name : data.google_dns_managed_zone.this[0].dns_name
   records      = { for rec in var.records : md5("${rec.name}_${rec.value}") => rec }
-  records_str  = join(" ", [ for rec in var.records : rec.name ])
+  records_str  = join(" ", [ for rec in var.records : "${rec.name}:${rec.value}" ])
 }
 
 resource "google_dns_managed_zone" "this" {
@@ -36,3 +36,14 @@ resource "google_dns_record_set" "this" {
   managed_zone = local.managed_zone
   rrdatas      = [lookup(each.value, "value")]
 }
+
+resource "null_resource" "wait_for_dns" {
+   triggers = {
+     build_number = timestamp()
+   }
+   provisioner "local-exec" {
+    command = "timeout 600 bash -c 'for REC in ${local.records_str}; do NAME=$(echo $REC | cut -d':' -f1); VALUE=$(echo $REC | cut -d':' -f2); until [[ $(dig +short $NAME.${local.domain} | tr -d '\\n') == $VALUE ]]; do sleep 5; done ; done'"
+   }
+   depends_on = [google_dns_record_set.this]
+ }
+
