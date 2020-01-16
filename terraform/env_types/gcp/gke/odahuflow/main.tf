@@ -42,15 +42,12 @@ module "odahuflow_helm" {
   tls_secret_key = var.tls_key
   cluster_domain = "odahu.${var.cluster_name}.${var.root_domain}"
 
-  model_training_nodes   = contains(keys(var.node_pools), "training") ? { node_selector = { mode = var.node_pools["training"].labels["mode"] }, toleration = { Key = var.node_pools["training"].taints[0].key, Operator = "Equal", Value = var.node_pools["training"].taints[0].value, Effect = replace(title(lower(replace(var.node_pools["training"].taints[0].effect, "_", " "))), " ", "") }} : { node_selector = null, toleration = null }
-  model_packaging_nodes  = contains(keys(var.node_pools), "packaging") ? { node_selector = { mode = var.node_pools["packaging"].labels["mode"] }, toleration = { Key = var.node_pools["packaging"].taints[0].key, Operator = "Equal", Value = var.node_pools["packaging"].taints[0].value, Effect = replace(title(lower(replace(var.node_pools["packaging"].taints[0].effect, "_", " "))), " ", "") }} : { node_selector = null, toleration = null }
-  model_deployment_nodes = contains(keys(var.node_pools), "model_deployment") ? { node_selector = { mode = var.node_pools["model_deployment"].labels["mode"] }, toleration = { Key = var.node_pools["model_deployment"].taints[0].key, Operator = "Equal", Value = var.node_pools["model_deployment"].taints[0].value, Effect = replace(title(lower(replace(var.node_pools["model_deployment"].taints[0].effect, "_", " "))), " ", "") }} : { node_selector = null, toleration = null }
-
   helm_repo                = var.helm_repo
   docker_repo              = var.docker_repo
   odahuflow_version        = var.odahuflow_version
   packager_version         = var.packager_version
   mlflow_toolchain_version = var.mlflow_toolchain_version
+  node_pools               = var.node_pools
 
   odahuflow_connections              = concat(var.odahuflow_connections, module.odahuflow_prereqs.odahuflow_connections)
   extra_external_urls                = concat(module.jupyterhub.external_url, module.odahuflow_prereqs.extra_external_urls)
