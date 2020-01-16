@@ -116,3 +116,7 @@ variable "odahuflow_connections" {
   default     = []
   description = "TODO"
 }
+
+variable "node_pools" {
+  default = {}
+}

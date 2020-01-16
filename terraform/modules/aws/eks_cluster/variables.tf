@@ -43,16 +43,6 @@ variable "bastion_ami" {
   description = "AMI to use for bastion"
 }
 
-variable "node_ami" {
-  default     = "ami-038bd8d3a2345061f"
-  description = "AMI to use for EKS nodes"
-}
-
-variable "node_ami_gpu" {
-  default     = "ami-07b7cbb235789cc31"
-  description = "AMI to use for EKS GPU nodes"
-}
-
 variable "node_instance_profile_name" {
   description = "Instance profile for EKS nodes"
 }
@@ -105,41 +95,6 @@ variable "cluster_autoscaling_memory_min_limit" {
   description = "Minimum memory limit for autoscaling if it is enabled."
 }
 
-variable "node_machine_type" {
-  default     = "m5.large"
-  description = "Machine type of EKS nodes"
-}
-
-variable "node_machine_type_highcpu" {
-  default     = "c5.2xlarge"
-  description = "Machine type of EKS nodes with high CPU resource"
-}
-
-variable "node_machine_type_gpu" {
-  default     = "c5.2xlarge"
-  description = "Machine type of EKS nodes with GPU"
-}
-
-variable "num_nodes_min" {
-  default     = "1"
-  description = "Number of nodes in cluster"
-}
-
-variable "num_nodes_max" {
-  default     = "7"
-  description = "Max number of nodes in cluster"
-}
-
-variable "num_nodes_highcpu_max" {
-  default     = "2"
-  description = "Number of nodes in High CPU node pool"
-}
-
-variable "num_nodes_gpu_max" {
-  default     = "2"
-  description = "Number of nodes in GPU node pool"
-}
-
 ###############
 # Bastion host
 ###############
@@ -156,5 +111,16 @@ variable "bastion_hostname" {
 variable "bastion_tag" {
   default     = ""
   description = "Bastion network tags"
+}
+
+variable "node_pools" {
+  description = "Default node pools configurations"
+  default = {
+    main = {
+      init_node_count = 1
+      min_node_count  = 1
+      max_node_count  = 5
+    }
+  }
 }
 

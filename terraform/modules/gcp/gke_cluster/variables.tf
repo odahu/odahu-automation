@@ -113,92 +113,13 @@ variable "gke_node_tag" {
   description = "GKE cluster nodes tag"
 }
 
-variable "main_node_pool" {
-  description = "List of parameters for main node pool"
+variable "node_pools" {
+  description = "Default node pools configurations"
   default = {
-    initial_node_count = 1
-
-    autoscaling = {
-      min_node_count = "1"
-      max_node_count = "5"
-    }
-
-    node_config = {}
-  }
-}
-
-variable "training_node_pool" {
-  description = "List of parameters for training node pool"
-  default = {
-    node_config = {
-      machine_type = "n1-highcpu-8"
-      disk_size_gb = "100"
-      labels = {
-        "mode" = "odahu-flow-training"
-      }
-      taint = [{
-        key    = "dedicated"
-        value  = "training"
-        effect = "NO_SCHEDULE"
-      }]
-    }
-  }
-}
-
-variable "training_gpu_node_pool" {
-  description = "List of parameters for training gpu node pool"
-  default = {
-    node_config = {
-      machine_type = "n1-highcpu-8"
-      disk_size_gb = "100"
-      labels = {
-        "mode" = "odahu-flow-training-gpu"
-      }
-      guest_accelerator = [{
-        type  = "nvidia-tesla-p100"
-        count = "2"
-      }]
-    }
-  }
-}
-
-variable "packaging_node_pool" {
-  description = "List of parameters for packaging node pool"
-  default = {
-    autoscaling = {
-      max_node_count = "3"
-    }
-
-    node_config = {
-      disk_size_gb = "100"
-      labels = {
-        "mode" = "odahu-flow-packaging"
-      }
-      taint = [{
-        key    = "dedicated"
-        value  = "packaging"
-        effect = "NO_SCHEDULE"
-      }]
-    }
-  }
-}
-
-variable "model_deployment_node_pool" {
-  description = "List of parameters for model deployment node pool"
-  default = {
-    autoscaling = {
-      max_node_count = "3"
-    }
-
-    node_config = {
-      labels = {
-        "mode" = "odahu-flow-deployment"
-      }
-      taint = [{
-        key    = "dedicated"
-        value  = "deployment"
-        effect = "NO_SCHEDULE"
-      }]
+    main = {
+      init_node_count = 1
+      min_node_count  = 1
+      max_node_count  = 5
     }
   }
 }

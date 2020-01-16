@@ -100,27 +100,20 @@ resource "google_container_cluster" "cluster" {
 ########################################################
 # Node Pools
 ########################################################
-
 resource "google_container_node_pool" "cluster_node_pools" {
-  for_each = {
-    main             = var.main_node_pool,
-    training         = var.training_node_pool,
-    training-gpu     = var.training_gpu_node_pool,
-    packaging        = var.packaging_node_pool,
-    model-deployment = var.model_deployment_node_pool
-  }
+  for_each           = var.node_pools
   provider           = google-beta
   project            = var.project_id
-  name               = lookup(each.value, "name", "${var.cluster_name}-${each.key}")
+  name               = substr(replace(each.key, "/[_\\W]/", "-"), 0, 40)
   location           = var.location
   cluster            = var.cluster_name
-  initial_node_count = lookup(each.value, "initial_node_count", 0)
+  initial_node_count = lookup(each.value, "init_node_count", 0 )
   depends_on         = [google_container_cluster.cluster]
   version            = var.node_version
 
   autoscaling {
-    min_node_count = lookup(lookup(each.value, "autoscaling", {}), "min_node_count", "0")
-    max_node_count = lookup(lookup(each.value, "autoscaling", {}), "max_node_count", "2")
+    min_node_count = lookup(each.value, "min_node_count", "0")
+    max_node_count = lookup(each.value, "max_node_count", "2")
   }
 
   management {
@@ -129,23 +122,23 @@ resource "google_container_node_pool" "cluster_node_pools" {
   }
 
   node_config {
-    preemptible     = false
-    machine_type    = lookup(each.value.node_config, "machine_type", "n1-standard-2")
-    disk_size_gb    = lookup(each.value.node_config, "disk_size_gb", "20")
+    preemptible     = lookup(each.value, "preemptible", "false")
+    machine_type    = lookup(each.value, "machine_type", "n1-standard-2")
+    disk_size_gb    = lookup(each.value, "disk_size_gb", "20")
     service_account = var.nodes_sa
-    image_type      = "COS"
-    tags            = [var.gke_node_tag]
+    image_type      = lookup(each.value, "image", "COS")
+    tags            = concat([var.gke_node_tag],lookup(each.value, "tags", []))
 
     metadata = {
       disable-legacy-endpoints = "true"
     }
 
-    labels = merge(lookup(each.value.node_config, "labels", {}), {
+    labels = merge(lookup(each.value, "labels", {}), {
       "project" = "odahuflow"
     })
 
     dynamic taint {
-      for_each = lookup(each.value.node_config, "taint", [])
+      for_each = lookup(each.value, "taints", [])
       content {
         key    = taint.value.key
         value  = taint.value.value
@@ -154,7 +147,7 @@ resource "google_container_node_pool" "cluster_node_pools" {
     }
 
     dynamic guest_accelerator {
-      for_each = toset(lookup(each.value.node_config, "guest_accelerator", []))
+      for_each = toset(lookup(each.value, "gpu", []))
       content {
         count = guest_accelerator.value.count
         type  = guest_accelerator.value.type

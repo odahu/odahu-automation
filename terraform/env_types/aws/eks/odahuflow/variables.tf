@@ -90,3 +90,8 @@ variable "jupyterlab_version" {
 }
 
 variable "packager_version" {}
+
+variable "node_pools" {
+  default = {}
+}
+

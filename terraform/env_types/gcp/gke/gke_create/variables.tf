@@ -122,6 +122,11 @@ variable "nodes_sa" {
   description = "Service account for cluster nodes"
 }
 
+variable "node_pools" {
+  default     = {}
+  description = "Default node pools configuration"
+}
+
 ################
 # Bastion host
 ################

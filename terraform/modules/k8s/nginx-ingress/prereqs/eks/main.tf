@@ -20,7 +20,7 @@ data "aws_security_group" "lb" {
 data "aws_autoscaling_groups" "default" {
   filter {
     name   = "auto-scaling-group"
-    values = ["tf-${var.cluster_name}-node"]
+    values = ["tf-${var.cluster_name}-main"]
   }
 }
 
