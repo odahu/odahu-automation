@@ -1,8 +1,13 @@
 ########################################################
 # K8S setup
 ########################################################
-module "base_setup" {
-  source         = "../../../../modules/k8s/base_setup"
+
+module "gpu_drivers" {
+  source = "../../../../modules/k8s/gpu_drivers_setup"
+}
+
+module "nginx_ingress_tls" {
+  source         = "../../../../modules/k8s/nginx-ingress/tls"
   cluster_name   = var.cluster_name
   tls_secret_key = var.tls_key
   tls_secret_crt = var.tls_crt
