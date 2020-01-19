@@ -106,12 +106,12 @@ resource "aws_launch_template" "this" {
     endpoint              = aws_eks_cluster.default.endpoint,
     certificate_authority = aws_eks_cluster.default.certificate_authority.0.data,
     name                  = var.cluster_name,
-    taints                = join(",", [ for t in lookup(each.value, "taints", []): "${t.key}=${t.value}:${replace(title(lower(replace(t.effect, "_", " "))), " ", "")}" ]),
-    labels                = join(",", concat([ for k in keys(lookup(each.value, "labels", {})): "${k}=${lookup(each.value, "labels")[k]}" ], ["project=odahuflow"]))
+    taints                = join(",", [for t in lookup(each.value, "taints", []) : "${t.key}=${t.value}:${replace(title(lower(replace(t.effect, "_", " "))), " ", "")}"]),
+    labels                = join(",", concat([for k in keys(lookup(each.value, "labels", {})) : "${k}=${lookup(each.value, "labels")[k]}"], ["project=odahuflow"]))
   }))
 
   dynamic "instance_market_options" {
-    for_each = [ for i in [lookup(each.value, "preemptible", "false")] : i if i != "false" ]
+    for_each = [for i in [lookup(each.value, "preemptible", "false")] : i if i != "false"]
     content {
       market_type = "spot"
       spot_options {
@@ -153,9 +153,9 @@ resource "aws_launch_template" "this" {
 }
 
 resource "aws_autoscaling_group" "this" {
-  for_each      = var.node_pools
+  for_each = var.node_pools
 
-  desired_capacity    = lookup(each.value, "init_node_count", 0 )
+  desired_capacity    = lookup(each.value, "init_node_count", 0)
   min_size            = lookup(each.value, "min_node_count", "0")
   max_size            = lookup(each.value, "max_node_count", "2")
   name                = "tf-${var.cluster_name}-${substr(replace(each.key, "/[_\\W]/", "-"), 0, 40)}"

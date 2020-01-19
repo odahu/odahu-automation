@@ -6,7 +6,7 @@ dockerizeImage:
   repository: jwilder/dockerize
   tag: 0.6.1
 service:
-  name: vault
+  name: https-vault
   type: ClusterIP
   port: 8200
 persistence:

@@ -11,14 +11,14 @@ locals {
     list("${var.bastion_ip}/32"),
     var.allowed_ips
   )
-  default_node_pool = var.node_pools["main"]
-  additional_node_pools = length(var.node_pools) > 1 ? { for key, value in var.node_pools: key => value if key != "main" } : map({})
-  default_nodes_count = "1"
-  default_nodes_min = "1"
-  default_nodes_max = "2"
-  default_machine_type = "Standard_B2s"
-  default_disk_size_gb = "32"
-  default_pods_max = "64"
+  default_node_pool     = var.node_pools["main"]
+  additional_node_pools = length(var.node_pools) > 1 ? { for key, value in var.node_pools : key => value if key != "main" } : map({})
+  default_nodes_count   = "1"
+  default_nodes_min     = "1"
+  default_nodes_max     = "2"
+  default_machine_type  = "Standard_B2s"
+  default_disk_size_gb  = "32"
+  default_pods_max      = "64"
 }
 
 ########################################################

@@ -16,7 +16,7 @@ variable "tls_secret_key" {
 }
 
 variable "istio_version" {
-  default = "1.2.2"
+  default = "1.4.3"
 }
 
 variable "istio_namespace" {
@@ -32,6 +32,11 @@ variable "monitoring_namespace" {
 variable "knative_namespace" {
   default     = "knative-serving"
   description = "knative namespace"
+}
+
+variable "authorizaton_namespace" {
+  default     = "odahu-flow-authorization"
+  description = "authorization namespace"
 }
 
 variable "odahu_infra_version" {

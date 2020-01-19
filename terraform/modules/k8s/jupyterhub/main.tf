@@ -8,12 +8,12 @@ locals {
     annotations = {
       "kubernetes.io/ingress.class" = "nginx"
     }
-    hosts = [ var.cluster_domain ]
+    hosts = [var.cluster_domain]
   }
 
   ingress_tls = local.ingress_tls_enabled ? {
     tls = [
-      { secretName = local.ingress_tls_secret_name, hosts = [ var.cluster_domain ] }
+      { secretName = local.ingress_tls_secret_name, hosts = [var.cluster_domain] }
     ]
   } : {}
 
@@ -31,7 +31,7 @@ locals {
 ########################################################
 
 resource "null_resource" "add_helm_jupyterhub_repository" {
-  count    = var.jupyterhub_enabled ? 1 : 0
+  count = var.jupyterhub_enabled ? 1 : 0
   triggers = {
     build_number = timestamp()
   }
