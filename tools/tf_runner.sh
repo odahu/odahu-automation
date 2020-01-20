@@ -139,7 +139,7 @@ function TerragruntRun() {
 	TF_DATA_DIR="/tmp/.terraform/$(GetParam 'cluster_name')/$TF_MODULE"
 	export TF_DATA_DIR
 
-        terragrunt init
+        terragrunt init -no-color
         echo "INFO : Execute $TF_COMMAND on $TF_MODULE state"
         terragrunt apply -no-color -auto-approve
 }

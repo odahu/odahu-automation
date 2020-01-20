@@ -38,12 +38,12 @@ resource "google_dns_record_set" "this" {
 }
 
 resource "null_resource" "wait_for_dns" {
-   triggers = {
-     build_number = timestamp()
-   }
-   provisioner "local-exec" {
-    command = "timeout 600 bash -c 'for REC in ${local.records_str}; do NAME=$(echo $REC | cut -d':' -f1); VALUE=$(echo $REC | cut -d':' -f2); until [[ $(dig +short $NAME.${local.domain} | tr -d '\\n') == $VALUE ]]; do sleep 5; done ; done'"
-   }
-   depends_on = [google_dns_record_set.this]
- }
-
+  provisioner "local-exec" {
+    when    = destroy
+    command = "echo skipping"
+  }
+  provisioner "local-exec" {
+    command = "timeout 10m bash ${path.module}/scripts/check_dns.sh ${local.domain} ${local.records_str}"
+  }
+  depends_on = [google_dns_record_set.this]
+}
