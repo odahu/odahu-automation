@@ -1,5 +1,5 @@
 provider "azurerm" {
-  version = "1.39.0"
+  version = "1.41.0"
 }
 
 provider "helm" {
@@ -16,7 +16,7 @@ provider "helm" {
 }
 
 provider "kubernetes" {
-  version                  = "1.9.0"
+  version                  = "1.10.0"
   config_context_auth_info = local.config_context_auth_info
   config_context_cluster   = local.config_context_cluster
 }
