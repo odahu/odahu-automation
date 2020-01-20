@@ -349,7 +349,7 @@ function SuspendCluster() {
 					done
 
 					gcloud beta container clusters update "${cluster_name}" \
-						--node-pool "${cluster_name}-main" \
+						--node-pool "main" \
 						--min-nodes 0 --max-nodes $(( $(GetParam 'initial_node_count') / 2 )) \
 						--node-locations "$(GetParam 'node_locations | join(",")')" \
 						--region "$(GetParam 'region')" \
@@ -357,7 +357,7 @@ function SuspendCluster() {
 
 					gcloud beta container clusters update "${cluster_name}" \
 						--region "$(GetParam 'region')" \
-						--node-pool "${cluster_name}-main" \
+						--node-pool "main" \
 						--enable-autoscaling \
 						--max-nodes "$(echo "${k_nodes}" | wc -w)" \
 						--quiet
@@ -367,7 +367,7 @@ function SuspendCluster() {
 
 					gcloud beta container clusters resize "${cluster_name}" \
 						--region "$(GetParam 'region')" \
-						--node-pool "${cluster_name}-main" \
+						--node-pool "main" \
 						--num-nodes 0 \
 						--quiet
 
@@ -408,7 +408,7 @@ function ResumeCluster() {
 
 					gcloud beta container clusters resize "${cluster_name}" \
 						--region "$(GetParam 'region')" \
-						--node-pool "${cluster_name}-main" \
+						--node-pool "main" \
 						--num-nodes $(( $(GetParam 'initial_node_count') / 2 - 1 )) \
 						--quiet
 
