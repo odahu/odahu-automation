@@ -13,6 +13,12 @@ locals {
   )
   default_node_pool = var.node_pools["main"]
   additional_node_pools = length(var.node_pools) > 1 ? { for key, value in var.node_pools: key => value if key != "main" } : map({})
+  default_nodes_count = "1"
+  default_nodes_min = "1"
+  default_nodes_max = "2"
+  default_machine_type = "Standard_B2s"
+  default_disk_size_gb = "32"
+  default_pods_max = "64"
 }
 
 ########################################################
@@ -45,18 +51,18 @@ resource "azurerm_kubernetes_cluster" "aks" {
 
   default_node_pool {
     name            = "main"
-    vm_size         = lookup(local.default_node_pool, "machine_type", "Standard_B2s")
-    os_disk_size_gb = lookup(local.default_node_pool, "disk_size_gb", "30")
+    vm_size         = lookup(local.default_node_pool, "machine_type", local.default_machine_type)
+    os_disk_size_gb = lookup(local.default_node_pool, "disk_size_gb", local.default_disk_size_gb)
     vnet_subnet_id  = var.aks_subnet_id
 
     type                = "VirtualMachineScaleSets"
     enable_auto_scaling = true
 
     # In AKS there's no option to create node pool with 0 nodes, minimum is 1
-    node_count = lookup(local.default_node_pool, "init_node_count", "1")
-    min_count  = lookup(local.default_node_pool, "min_node_count", "1")
-    max_count  = lookup(local.default_node_pool, "max_node_count", "2")
-    max_pods   = lookup(local.default_node_pool, "max_pods", "64")
+    node_count = lookup(local.default_node_pool, "init_node_count", local.default_nodes_count)
+    min_count  = lookup(local.default_node_pool, "min_node_count", local.default_nodes_min)
+    max_count  = lookup(local.default_node_pool, "max_node_count", local.default_nodes_max)
+    max_pods   = lookup(local.default_node_pool, "max_pods", local.default_pods_max)
 
     node_taints = [
       for taint in lookup(local.default_node_pool, "taints", []) :
@@ -128,17 +134,17 @@ resource "azurerm_kubernetes_cluster_node_pool" "aks" {
 
   # Pool name must start with a lowercase letter, have max length of 12, and only have characters a-z0-9
   name            = substr(replace(each.key, "/[-_]/", ""), 0, 12)
-  vm_size         = lookup(each.value, "machine_type", "Standard_B2s")
-  os_disk_size_gb = lookup(each.value, "disk_size_gb", "30")
+  vm_size         = lookup(each.value, "machine_type", local.default_machine_type)
+  os_disk_size_gb = lookup(each.value, "disk_size_gb", local.default_disk_size_gb)
   os_type         = "Linux"
   vnet_subnet_id  = var.aks_subnet_id
 
   enable_auto_scaling = true
 
-  node_count = lookup(each.value, "init_node_count", "1")
-  min_count  = lookup(each.value, "min_node_count", "1")
-  max_count  = lookup(each.value, "max_node_count", "2")
-  max_pods   = lookup(each.value, "max_pods", "64")
+  node_count = lookup(each.value, "init_node_count", local.default_nodes_count)
+  min_count  = lookup(each.value, "min_node_count", local.default_nodes_min)
+  max_count  = lookup(each.value, "max_node_count", local.default_nodes_max)
+  max_pods   = lookup(each.value, "max_pods", local.default_pods_max)
 
   node_taints = [
     for taint in lookup(each.value, "taints", []) :
