@@ -30,7 +30,7 @@ if [[ $# -ge 1 ]]; then
             if [[ $Parameter =~ $ValidParameter ]]; then
                 DNS_Prefix=$(echo $Parameter | cut -d':' -f1)
                 DNS_Value=$(echo $Parameter | cut -d':' -f2)
-                until [[ $(dig +short $DNS_Prefix.$DNS_Zone | head -n1 | tr -d '\n') == $DNS_Value ]]; do
+                until [[ $(dig +short $DNS_Prefix.$DNS_Zone | head -n1 | tr -d '\n') == ${DNS_Value,,} ]]; do
                     sleep 5
                     echo "Ensuring that \"$DNS_Prefix.$DNS_Zone\" resolves as \"$DNS_Value\"..."
                 done
