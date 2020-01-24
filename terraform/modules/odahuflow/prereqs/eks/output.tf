@@ -1,8 +1,9 @@
 output "extra_external_urls" {
   value = [
     {
-      name = "Feedback storage"
-      url  = "https://s3.console.aws.amazon.com/s3/buckets/${var.data_bucket}/?region=${var.region}"
+      name      = "Feedback storage"
+      url       = "https://s3.console.aws.amazon.com/s3/buckets/${var.data_bucket}/?region=${var.region}"
+      image_url = "/img/logo/aws-s3.svg"
     }
   ]
 }

@@ -1,0 +1,12 @@
+odahuVersion: "${odahu_ui_version}"
+imagesRegistry: "${docker_repo}/"
+
+ingress:
+  enabled: true
+  globalDomain: "${cluster_domain}"
+  tlsEnabled: ${ingress_tls_enabled}
+  tlsSecretName: "${ingress_tls_secret_name}"
+
+security:
+  enabled: true
+  integration: oauth2_proxy

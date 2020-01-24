@@ -94,5 +94,6 @@ module "tekton" {
 }
 
 module "vault" {
-  source = "../../../../modules/k8s/vault"
+  source        = "../../../../modules/k8s/vault"
+  configuration = var.vault
 }

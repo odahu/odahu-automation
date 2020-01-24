@@ -17,19 +17,7 @@ security:
 feedback:
   enabled: true
 
-api:
-  replicas: 2
-  env:
-    VAULT_CACERT: /vault/tls/ca.crt
-
-  volumeMounts:
-    - name: vault-tls
-      mountPath: /vault/tls
-
-  volumes:
-    - name: vault-tls
-      secret:
-        secretName: vault-tls
+${api_configuration}
 
 metrics:
   enabled: true
