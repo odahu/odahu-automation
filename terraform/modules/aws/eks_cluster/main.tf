@@ -56,6 +56,11 @@ resource "aws_eks_cluster" "default" {
     security_group_ids = [var.master_sg_id]
     subnet_ids         = var.subnet_ids
   }
+
+  provisioner "local-exec" {
+    when    = "destroy"
+    command = "for iface in $(aws --region=${var.aws_region} ec2 describe-network-interfaces --filters=\"Name=group-name,Values=tf-${var.cluster_name}-node\" | jq '.NetworkInterfaces | .[] | .NetworkInterfaceId');do aws --region=${var.aws_region} ec2 delete-network-interface --network-interface-id $iface;done"
+  }
 }
 
 resource "null_resource" "setup_kubectl" {
