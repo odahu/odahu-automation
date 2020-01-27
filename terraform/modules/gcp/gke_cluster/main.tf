@@ -231,4 +231,3 @@ resource "null_resource" "kubectl_config" {
   }
   depends_on = [google_container_node_pool.cluster_node_pools]
 }
-
