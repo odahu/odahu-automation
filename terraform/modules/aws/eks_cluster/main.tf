@@ -56,6 +56,11 @@ resource "aws_eks_cluster" "default" {
     security_group_ids = [var.master_sg_id]
     subnet_ids         = var.subnet_ids
   }
+
+  provisioner "local-exec" {
+    when    = "destroy"
+    command = "bash ${path.module}/files/eni_cleanup.sh ${var.cluster_name} ${var.aws_region}"
+  }
 }
 
 resource "null_resource" "setup_kubectl" {
