@@ -59,7 +59,7 @@ resource "aws_eks_cluster" "default" {
 
   provisioner "local-exec" {
     when    = "destroy"
-    command = "for iface in $(aws --region=${var.aws_region} ec2 describe-network-interfaces --filters=\"Name=group-name,Values=tf-${var.cluster_name}-node\" | jq '.NetworkInterfaces | .[] | .NetworkInterfaceId');do aws --region=${var.aws_region} ec2 delete-network-interface --network-interface-id $iface;done"
+    command = "bash ${path.module}/files/eni_cleanup.sh ${var.cluster_name} ${var.aws_region}"
   }
 }
 
