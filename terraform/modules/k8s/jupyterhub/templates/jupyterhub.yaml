@@ -34,6 +34,7 @@ auth:
       username_key: preferred_username
 
 singleuser:
+  startTimeout: 900
   extraEnv:
     API_AUTH_ENABLED: "false"
     DEFAULT_API_ENDPOINT: "http://odahu-flow-api.odahu-flow.svc.cluster.local:80"
