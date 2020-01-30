@@ -125,6 +125,7 @@ resource "google_container_node_pool" "cluster_node_pools" {
     preemptible     = lookup(each.value, "preemptible", "false")
     machine_type    = lookup(each.value, "machine_type", "n1-standard-2")
     disk_size_gb    = lookup(each.value, "disk_size_gb", "20")
+    disk_type       = lookup(each.value, "disk_type", "pd-standard")
     service_account = var.nodes_sa
     image_type      = lookup(each.value, "image", "COS")
     tags            = concat([var.gke_node_tag],lookup(each.value, "tags", []))
