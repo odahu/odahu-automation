@@ -88,10 +88,12 @@ variable "allowed_ips" {
 }
 
 variable "grafana_admin" {
-  description = "Grafana admion username"
+  default     = "grafana_admin"
+  description = "Grafana admin username"
 }
 
 variable "grafana_pass" {
+  default     = "grafana_password"
   description = "Grafana admin password"
 }
 
