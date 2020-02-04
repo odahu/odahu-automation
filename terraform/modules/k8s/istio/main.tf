@@ -1,12 +1,12 @@
 locals {
   ingress_tls_secret_name = "odahu-flow-tls"
-  dockerconfigjson = (var.docker_username == "_json_key" && length(var.docker_password) != 0) ? {
+  dockerconfigjson = (length(var.docker_username) != 0 && length(var.docker_password) != 0) ? {
     "auths": {
       "${var.docker_repo}" = {
         email    = "admin@odahu.com"
         username = var.docker_username
         password = var.docker_password
-        auth     = base64encode(join(":",["_json_key", var.docker_password]))
+        auth     = base64encode(join(":",[var.docker_username, var.docker_password]))
       }
     }
   } : {}
