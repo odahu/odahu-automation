@@ -10,7 +10,7 @@ global:
         memory: 50Mi
       limits:
         cpu: 50m
-        memory: 50Mi
+        memory: 100Mi
 
   disablePolicyChecks: false
 

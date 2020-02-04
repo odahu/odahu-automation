@@ -107,7 +107,7 @@ resource "google_container_node_pool" "cluster_node_pools" {
   name               = substr(replace(each.key, "/[_\\W]/", "-"), 0, 40)
   location           = var.location
   cluster            = var.cluster_name
-  initial_node_count = lookup(each.value, "init_node_count", 0 )
+  initial_node_count = lookup(each.value, "init_node_count", 0)
   depends_on         = [google_container_cluster.cluster]
   version            = var.node_version
 
@@ -128,7 +128,7 @@ resource "google_container_node_pool" "cluster_node_pools" {
     disk_type       = lookup(each.value, "disk_type", "pd-standard")
     service_account = var.nodes_sa
     image_type      = lookup(each.value, "image", "COS")
-    tags            = concat([var.gke_node_tag],lookup(each.value, "tags", []))
+    tags            = concat([var.gke_node_tag], lookup(each.value, "tags", []))
 
     metadata = {
       disable-legacy-endpoints = "true"
