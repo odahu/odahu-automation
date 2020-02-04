@@ -1,3 +1,16 @@
+locals {
+  dockerconfigjson = (var.docker_username == "_json_key" && length(var.docker_password) != 0) ? {
+    "auths": {
+      "${var.docker_repo}" = {
+        email    = "admin@odahu.com"
+        username = var.docker_username
+        password = var.docker_password
+        auth     = base64encode(join(":",["_json_key", var.docker_password]))
+      }
+    }
+  } : {}
+}
+
 resource "kubernetes_namespace" "fluentd" {
   metadata {
     annotations = {
@@ -5,6 +18,26 @@ resource "kubernetes_namespace" "fluentd" {
     }
     name = var.namespace
   }
+}
+
+resource "kubernetes_secret" "docker_credentials" {
+  count = local.dockerconfigjson != {} ? 1 : 0
+  metadata {
+    name      = "repo-json-key"
+    namespace = var.namespace
+  }
+  data = {
+    ".dockerconfigjson" = jsonencode(local.dockerconfigjson)
+  }
+  type       = "kubernetes.io/dockerconfigjson"
+  depends_on = [kubernetes_namespace.fluentd]
+}
+
+resource "null_resource" "set_default_namespace_docker_secret" {
+  provisioner "local-exec" {
+    command = "kubectl patch serviceaccount -n ${var.namespace} default -p '{\"imagePullSecrets\": [{\"name\": \"repo-json-key\"}]}'"
+  }
+  depends_on = [kubernetes_namespace.fluentd, kubernetes_secret.docker_credentials]
 }
 
 resource "helm_release" "fluentd" {
@@ -23,6 +56,8 @@ resource "helm_release" "fluentd" {
   ]
 
   depends_on = [
-    kubernetes_namespace.fluentd
+    kubernetes_namespace.fluentd,
+    kubernetes_secret.docker_credentials,
+    null_resource.set_default_namespace_docker_secret
   ]
 }

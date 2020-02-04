@@ -42,7 +42,6 @@ module "monitoring" {
   grafana_admin         = var.grafana_admin
   grafana_pass          = var.grafana_pass
   grafana_storage_class = var.storage_class
-  docker_repo           = var.docker_repo
   monitoring_namespace  = var.monitoring_namespace
   tls_secret_key        = var.tls_key
   tls_secret_crt        = var.tls_crt

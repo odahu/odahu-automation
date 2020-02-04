@@ -10,6 +10,16 @@ variable "docker_repo" {
   description = "Odahuflow Docker repo url"
 }
 
+variable "docker_password" {
+  default     = ""
+  description = "Odahuflow Docker repo password"
+}
+
+variable "docker_username" {
+  default     = ""
+  description = "Odahuflow Docker repo username"
+}
+
 variable "odahuflow_version" {
   description = "Odahuflow release version"
 }
