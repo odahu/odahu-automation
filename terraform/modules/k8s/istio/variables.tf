@@ -49,16 +49,14 @@ variable "helm_repo" {
 
 variable "docker_repo" {
   default     = ""
-  description = "Odahuflow Docker repo url"
+  description = "Odahuflow docker repo URL"
 }
 
 variable "docker_username" {
   default     = ""
-  description = "Odahuflow Docker repo username"
+  description = "Odahuflow docker repo username"
 }
-
 variable "docker_password" {
   default     = ""
-  description = "Odahuflow Docker repo password"
+  description = "Odahuflow docker repo password"
 }
-

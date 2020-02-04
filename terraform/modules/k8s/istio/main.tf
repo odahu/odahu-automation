@@ -1,15 +1,5 @@
 locals {
   ingress_tls_secret_name = "odahu-flow-tls"
-  dockerconfigjson = (length(var.docker_username) != 0 && length(var.docker_password) != 0) ? {
-    "auths": {
-      "${var.docker_repo}" = {
-        email    = "admin@odahu.com"
-        username = var.docker_username
-        password = var.docker_password
-        auth     = base64encode(join(":",[var.docker_username, var.docker_password]))
-      }
-    }
-  } : {}
 }
 
 resource "kubernetes_namespace" "istio" {
@@ -28,19 +18,6 @@ resource "kubernetes_secret" "tls_istio" {
     "tls.crt" = var.tls_secret_crt
   }
   type       = "kubernetes.io/tls"
-  depends_on = [kubernetes_namespace.istio]
-}
-
-resource "kubernetes_secret" "docker_credentials" {
-  count = local.dockerconfigjson != {} ? 1 : 0
-  metadata {
-    name      = "repo-json-key"
-    namespace = var.istio_namespace
-  }
-  data = {
-    ".dockerconfigjson" = jsonencode(local.dockerconfigjson)
-  }
-  type       = "kubernetes.io/dockerconfigjson"
   depends_on = [kubernetes_namespace.istio]
 }
 
@@ -107,13 +84,6 @@ resource "kubernetes_secret" "tls_knative" {
   depends_on = [kubernetes_namespace.knative]
 }
 
-resource "null_resource" "set_default_namespace_docker_secret" {
-  provisioner "local-exec" {
-    command = "for i in istio-ingressgateway-service-account istio-citadel-service-account istio-init-service-account default; do kubectl patch serviceaccount -n ${var.istio_namespace} $i -p '{\"imagePullSecrets\": [{\"name\": \"repo-json-key\"}]}';done"
-  }
-  depends_on = [kubernetes_namespace.istio, kubernetes_secret.docker_credentials, helm_release.istio-init, helm_release.istio]
-}
-
 resource "helm_release" "knative" {
   name       = "knative"
   chart      = "odahu-flow-knative"
@@ -121,4 +91,13 @@ resource "helm_release" "knative" {
   namespace  = var.knative_namespace
   repository = "odahuflow"
   depends_on = [kubernetes_namespace.knative, helm_release.istio]
+}
+
+module "docker_credentials" {
+  source          = "../docker_auth"
+  docker_repo     = var.docker_repo
+  docker_username = var.docker_username
+  docker_password = var.docker_password
+  namespaces      = [helm_release.istio.namespace]
+  sa_list         = ["istio-ingressgateway-service-account", "istio-citadel-service-account", "istio-init-service-account", "default"]
 }

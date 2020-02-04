@@ -1,15 +1,4 @@
 locals {
-  dockerconfigjson = (length(var.docker_username) != 0 && length(var.docker_password) != 0) ? {
-    "auths": {
-      "${var.docker_repo}" = {
-        email = "youremail@example.com"
-        username = var.docker_username
-        password = var.docker_password
-        auth     = base64encode(join(":",[var.docker_username, var.docker_password]))
-      }
-    }
-  } : {}
-
   ingress_tls_enabled     = var.tls_secret_crt != "" && var.tls_secret_key != ""
   url_schema              = local.ingress_tls_enabled ? "https" : "http"
   ingress_tls_secret_name = "odahu-flow-tls"
@@ -119,84 +108,16 @@ resource "kubernetes_namespace" "odahuflow_deployment" {
 # Odahuflow secrets
 ########################################################
 
-resource "kubernetes_secret" "docker_credentials" {
-  count = local.dockerconfigjson != {} ? 1 : 0
-  metadata {
-    name      = "repo-json-key"
-    namespace = var.odahuflow_namespace
-  }
-  data = {
-    ".dockerconfigjson" = jsonencode(local.dockerconfigjson)
-  }
-  type       = "kubernetes.io/dockerconfigjson"
-  depends_on = [kubernetes_namespace.odahuflow]
-}
-
-resource "null_resource" "set_default_namespace_docker_secret" {
-  provisioner "local-exec" {
-    command = "kubectl patch serviceaccount -n ${var.odahuflow_namespace} default -p '{\"imagePullSecrets\": [{\"name\": \"repo-json-key\"}]}'"
-  }
-  depends_on = [kubernetes_namespace.odahuflow, kubernetes_secret.docker_credentials]
-}
-
-resource "kubernetes_secret" "docker_credentials_training" {
-  count = local.dockerconfigjson != {} ? 1 : 0
-  metadata {
-    name      = "repo-json-key"
-    namespace = var.odahuflow_training_namespace
-  }
-  data = {
-    ".dockerconfigjson" = jsonencode(local.dockerconfigjson)
-  }
-  type       = "kubernetes.io/dockerconfigjson"
-  depends_on = [kubernetes_namespace.odahuflow_training]
-}
-
-resource "null_resource" "set_default_namespace_docker_secret_training" {
-  provisioner "local-exec" {
-    command = "kubectl patch serviceaccount -n ${var.odahuflow_training_namespace} default -p '{\"imagePullSecrets\": [{\"name\": \"repo-json-key\"}]}'"
-  }
-  depends_on = [kubernetes_namespace.odahuflow_training, kubernetes_secret.docker_credentials_training]
-}
-
-resource "kubernetes_secret" "docker_credentials_packaging" {
-  count = local.dockerconfigjson != {} ? 1 : 0
-  metadata {
-    name      = "repo-json-key"
-    namespace = var.odahuflow_packaging_namespace
-  }
-  data = {
-    ".dockerconfigjson" = jsonencode(local.dockerconfigjson)
-  }
-  type       = "kubernetes.io/dockerconfigjson"
-  depends_on = [kubernetes_namespace.odahuflow_packaging]
-}
-
-resource "null_resource" "set_default_namespace_docker_secret_packaging" {
-  provisioner "local-exec" {
-    command = "kubectl patch serviceaccount -n ${var.odahuflow_packaging_namespace} default -p '{\"imagePullSecrets\": [{\"name\": \"repo-json-key\"}]}'"
-  }
-  depends_on = [kubernetes_namespace.odahuflow_packaging, kubernetes_secret.docker_credentials_packaging]
-}
-
-resource "kubernetes_secret" "docker_credentials_deployment" {
-  count = local.dockerconfigjson != {} ? 1 : 0
-  metadata {
-    name      = "repo-json-key"
-    namespace = var.odahuflow_deployment_namespace
-  }
-  data = {
-    ".dockerconfigjson" = jsonencode(local.dockerconfigjson)
-  }
-  type       = "kubernetes.io/dockerconfigjson"
-  depends_on = [kubernetes_namespace.odahuflow_deployment]
-}
-
-resource "null_resource" "set_default_namespace_docker_secret_deployment" {
-  provisioner "local-exec" {
-    command = "kubectl patch serviceaccount -n ${var.odahuflow_deployment_namespace} default -p '{\"imagePullSecrets\": [{\"name\": \"repo-json-key\"}]}'"
-  }
-  depends_on = [kubernetes_namespace.odahuflow_deployment, kubernetes_secret.docker_credentials_deployment]
+module "docker_credentials" {
+  source             = "../../k8s/docker_auth"
+  docker_repo        = var.docker_repo
+  docker_username    = var.docker_username
+  docker_password    = var.docker_password
+  docker_secret_name = var.docker_secret_name
+  namespaces         = [ kubernetes_namespace.odahuflow.metadata[0].annotations.name,
+                         kubernetes_namespace.odahuflow_training.metadata[0].annotations.name,
+                         kubernetes_namespace.odahuflow_packaging.metadata[0].annotations.name,
+                         kubernetes_namespace.odahuflow_deployment.metadata[0].annotations.name ]
 }
 
 resource "kubernetes_secret" "tls_odahuflow" {
@@ -255,7 +176,7 @@ resource "helm_release" "odahuflow" {
       ingress_tls_secret_name = local.ingress_tls_secret_name
 
       docker_repo       = var.docker_repo
-      docker_secret     = "repo-json-key"
+      docker_secret     = var.docker_secret_name
       odahuflow_version = var.odahuflow_version
 
       connections = yamlencode({ connections = var.odahuflow_connections })

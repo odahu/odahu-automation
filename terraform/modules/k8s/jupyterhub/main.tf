@@ -1,15 +1,4 @@
 locals {
-  dockerconfigjson = (length(var.docker_username) != 0 && length(var.docker_password) != 0) ? {
-    "auths": {
-      "${var.docker_repo}" = {
-        email    = "admin@odahu.com"
-        username = var.docker_username
-        password = var.docker_password
-        auth     = base64encode(join(":",[var.docker_username, var.docker_password]))
-      }
-    }
-  } : {}
-
   ingress_tls_enabled     = var.tls_secret_crt != "" && var.tls_secret_key != ""
   url_schema              = local.ingress_tls_enabled ? "https" : "http"
   ingress_tls_secret_name = "jupyterhub-tls"
@@ -75,24 +64,12 @@ resource "kubernetes_namespace" "jupyterhub" {
   depends_on = [null_resource.add_helm_jupyterhub_repository[0]]
 }
 
-resource "kubernetes_secret" "docker_credentials" {
-  count = local.dockerconfigjson != {} ? 1 : 0
-  metadata {
-    name      = "repo-json-key"
-    namespace = var.jupyterhub_namespace
-  }
-  data = {
-    ".dockerconfigjson" = jsonencode(local.dockerconfigjson)
-  }
-  type       = "kubernetes.io/dockerconfigjson"
-  depends_on = [kubernetes_namespace.jupyterhub]
-}
-
-resource "null_resource" "set_default_namespace_docker_secret" {
-  provisioner "local-exec" {
-    command = "kubectl patch serviceaccount -n ${var.jupyterhub_namespace} default -p '{\"imagePullSecrets\": [{\"name\": \"repo-json-key\"}]}'"
-  }
-  depends_on = [kubernetes_namespace.jupyterhub, kubernetes_secret.docker_credentials]
+module "docker_credentials" {
+  source          = "../docker_auth"
+  docker_repo     = var.docker_repo
+  docker_username = var.docker_username
+  docker_password = var.docker_password
+  namespaces      = [kubernetes_namespace.jupyterhub[0].metadata[0].annotations.name]
 }
 
 resource "kubernetes_secret" "jupyterhub_tls" {
