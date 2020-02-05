@@ -25,6 +25,7 @@ auth:
     className: oauthenticator.generic.GenericOAuthenticator
     config:
       login_service: "keycloak"
+      auto_login: true
       client_id: "${oauth_client_id}"
       client_secret: "${oauth_client_secret}"
       token_url: "${oauth_oidc_issuer_url}/protocol/openid-connect/token"
