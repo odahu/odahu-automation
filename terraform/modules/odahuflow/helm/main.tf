@@ -108,6 +108,18 @@ resource "kubernetes_namespace" "odahuflow_deployment" {
 # Odahuflow secrets
 ########################################################
 
+module "docker_credentials" {
+  source             = "../../k8s/docker_auth"
+  docker_repo        = var.docker_repo
+  docker_username    = var.docker_username
+  docker_password    = var.docker_password
+  docker_secret_name = var.docker_secret_name
+  namespaces         = [ kubernetes_namespace.odahuflow.metadata[0].annotations.name,
+                         kubernetes_namespace.odahuflow_training.metadata[0].annotations.name,
+                         kubernetes_namespace.odahuflow_packaging.metadata[0].annotations.name,
+                         kubernetes_namespace.odahuflow_deployment.metadata[0].annotations.name ]
+}
+
 resource "kubernetes_secret" "tls_odahuflow" {
   count = local.ingress_tls_enabled ? 1 : 0
   metadata {
@@ -164,6 +176,7 @@ resource "helm_release" "odahuflow" {
       ingress_tls_secret_name = local.ingress_tls_secret_name
 
       docker_repo       = var.docker_repo
+      docker_secret     = var.docker_secret_name
       odahuflow_version = var.odahuflow_version
 
       connections = yamlencode({ connections = var.odahuflow_connections })
@@ -177,7 +190,7 @@ resource "helm_release" "odahuflow" {
     kubernetes_namespace.odahuflow_deployment,
     kubernetes_namespace.odahuflow_packaging,
     kubernetes_secret.odahuflow_vault_tls,
-    data.helm_repository.odahuflow,
+    data.helm_repository.odahuflow
   ]
 }
 
