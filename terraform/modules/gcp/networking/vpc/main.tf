@@ -50,4 +50,3 @@ resource "google_compute_router_nat" "nat" {
   nat_ips                            = [data.google_compute_address.nat_gw_ip.self_link]
   source_subnetwork_ip_ranges_to_nat = "ALL_SUBNETWORKS_ALL_PRIMARY_IP_RANGES"
 }
-

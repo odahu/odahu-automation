@@ -144,37 +144,45 @@ function TerragruntRun() {
 	terragrunt apply -no-color -auto-approve
 }
 
-function SetupCloudAccess() {
-	echo "INFO : Activating service account"
-	case $(GetParam 'cluster_type') in
-		"aws/eks")
-			;;
-		"gcp/gke")
-			# Read GCP credentials path from env
-			if [[ -z $GOOGLE_CREDENTIALS || ! -f $GOOGLE_CREDENTIALS ]]; then
-				echo -e "ERROR:\tNo GCP credentials file found!"
-				echo -e "\tPass path to the credentials json file as GOOGLE_CREDENTIALS env var!"
-				exit 1
-			fi
-			gcloud auth activate-service-account "--key-file=${GOOGLE_CREDENTIALS}" "--project=$(GetParam 'project_id')"
-			;;
-		"azure/aks")
+function GetCloudCredentials() {
+	echo "INFO : Getting access to the cloud"
+	local env_creds_defined=false
+	case $(GetParam 'cloud_type') in
+		"aws")
 			if [[ $VERBOSE == true ]]; then set +x; fi
-			if [[ -z $ARM_CLIENT_ID || -z $ARM_CLIENT_SECRET || -z $ARM_TENANT_ID || -z $ARM_SUBSCRIPTION_ID ]]; then
-				echo -e "ERROR:\tNo Azure Cloud credentials provided!"
-				echo -e "\tDeclare ARM_CLIENT_ID, ARM_CLIENT_SECRET, ARM_TENANT_ID, ARM_SUBSCRIPTION_ID env vars!"
-				exit 1
+			if [[ -n $AWS_ACCESS_KEY_ID && -n $AWS_SECRET_ACCESS_KEY ]]; then
+				env_creds_defined=true
 			fi
-			az login --service-principal -u "${ARM_CLIENT_ID}" -p "${ARM_CLIENT_SECRET}" --tenant "${ARM_TENANT_ID}"
-			export TF_VAR_sp_client_id=${ARM_CLIENT_ID}
-			export TF_VAR_sp_secret=${ARM_CLIENT_SECRET}
+			if [[ $VERBOSE == true ]]; then set -x; fi
+			;;
+		"gcp")
+			if [[ -n $GOOGLE_CREDENTIALS || -f $GOOGLE_CREDENTIALS ]]; then
+				env_creds_defined=true
+			fi
+			#gcloud auth activate-service-account "--key-file=${GOOGLE_CREDENTIALS}" "--project=$(GetParam 'project_id')"
+			;;
+		"azure")
+			if [[ $VERBOSE == true ]]; then set +x; fi
+			if [[ -n $ARM_CLIENT_ID && -n $ARM_CLIENT_SECRET && -n $ARM_TENANT_ID && -n $ARM_SUBSCRIPTION_ID ]]; then
+				env_creds_defined=true
+				export TF_VAR_sp_client_id=${ARM_CLIENT_ID}
+				export TF_VAR_sp_secret=${ARM_CLIENT_SECRET}
+			fi
+			# az login --service-principal -u "${ARM_CLIENT_ID}" -p "${ARM_CLIENT_SECRET}" --tenant "${ARM_TENANT_ID}"
 			if [[ $VERBOSE == true ]]; then set -x; fi
 			;;
 		*)
-			echo "ERROR: 'cluster_type' is not defined or has wrong value"
+			echo "ERROR: 'cloud_type' is not defined or has wrong value"
 			exit 1
 			;;
 	esac
+
+	if $env_creds_defined; then
+		echo "Credentials vars are defined, we'll not parse the profile"
+	else
+		local CREDS
+		CREDS=$(GetParam "cloud_credentials.$(GetParam "cloud_type")") || (echo "ERROR: \"cloud_credentials.$(GetParam \"cloud_type\")\" parameter is missing in profile" && exit 1)
+	fi
 }
 
 # Create Odahuflow cluster
@@ -191,41 +199,41 @@ function TerraformCreate() {
 			TerraformRun aks_create apply
 			;;
 	esac
-	FetchKubeConfig
-	echo 'INFO : Init HELM'
-	TerraformRun helm_init apply
-	echo 'INFO : Setup K8S Odahuflow dependencies'
-	TerraformRun k8s_setup apply
-	echo 'INFO : Create Odahuflow DNS records'
-	TerraformOutput k8s_setup
-	case $(GetParam "cluster_type") in
-		"aws/eks")
-			TerraformOutput eks_create
-			LB_IP="$(jq -rc '.load_balancer_ip.value' $MODULES_ROOT/k8s_setup/$OUTPUT_FILE)."
-			K8S_API_IP="$(jq -rc '.k8s_api_address.value' $MODULES_ROOT/eks_create/$OUTPUT_FILE | sed -e 's/https:\/\///')."
-			BASTION_IP=$(jq -rc '.bastion_address.value' $MODULES_ROOT/eks_create/$OUTPUT_FILE)
-			export TF_VAR_records=$(jq -rn "[{name: \"bastion.$(GetParam 'cluster_name')\", value: \"$BASTION_IP\"}, {name: \"odahu.$(GetParam 'cluster_name')\", value: \"$LB_IP\", type: \"CNAME\"}, {name: \"api.$(GetParam 'cluster_name')\", value: \"$K8S_API_IP\", type: \"CNAME\"}]")
-			;;
-		"gcp/gke")
-			TerraformOutput gke_create
-			LB_IP=$(jq -rc '.helm_values.value["controller.service.loadBalancerIP"]' $MODULES_ROOT/k8s_setup/$OUTPUT_FILE)
-			K8S_API_IP=$(jq -rc '.k8s_api_address.value' $MODULES_ROOT/gke_create/$OUTPUT_FILE)
-			BASTION_IP=$(jq -rc '.bastion_address.value' $MODULES_ROOT/gke_create/$OUTPUT_FILE)
-			export TF_VAR_records=$(jq -rn "[{name: \"bastion.$(GetParam 'cluster_name')\", value: \"$BASTION_IP\"}, {name: \"odahu.$(GetParam 'cluster_name')\", value: \"$LB_IP\"}, {name: \"api.$(GetParam 'cluster_name')\", value: \"$K8S_API_IP\"}]")
-			;;
-		"azure/aks")
-			TerraformOutput aks_create
-			LB_IP=$(jq -rc '.helm_values.value["controller.service.loadBalancerIP"]' $MODULES_ROOT/k8s_setup/$OUTPUT_FILE)
-			K8S_API_IP="$(jq -rc '.k8s_api_address.value' $MODULES_ROOT/aks_create/$OUTPUT_FILE | sed -e 's/^https:\/\///'| sed -e 's/:443//')."
-			BASTION_IP=$(jq -rc '.bastion_address.value' $MODULES_ROOT/aks_create/$OUTPUT_FILE)
-			export TF_VAR_records=$(jq -rn "[{name: \"bastion.$(GetParam 'cluster_name')\", value: \"$BASTION_IP\"}, {name: \"odahu.$(GetParam 'cluster_name')\", value: \"$LB_IP\"}, {name: \"api.$(GetParam 'cluster_name')\", value: \"$K8S_API_IP\", type: \"CNAME\"}]")
-			;;
-	esac
-	TerragruntRun odahu_dns apply
-	echo 'INFO : Deploy Odahuflow components'
-	TerraformRun odahuflow apply
-	echo "INFO : Save cluster info to ${OUTPUT_FILE}"
-	TerraformOutput odahuflow
+	# FetchKubeConfig
+	# echo 'INFO : Init HELM'
+	# TerraformRun helm_init apply
+	# echo 'INFO : Setup K8S Odahuflow dependencies'
+	# TerraformRun k8s_setup apply
+	# echo 'INFO : Create Odahuflow DNS records'
+	# TerraformOutput k8s_setup
+	# case $(GetParam "cluster_type") in
+	# 	"aws/eks")
+	# 		TerraformOutput eks_create
+	# 		LB_IP="$(jq -rc '.load_balancer_ip.value' $MODULES_ROOT/k8s_setup/$OUTPUT_FILE)."
+	# 		K8S_API_IP="$(jq -rc '.k8s_api_address.value' $MODULES_ROOT/eks_create/$OUTPUT_FILE | sed -e 's/https:\/\///')."
+	# 		BASTION_IP=$(jq -rc '.bastion_address.value' $MODULES_ROOT/eks_create/$OUTPUT_FILE)
+	# 		export TF_VAR_records=$(jq -rn "[{name: \"bastion.$(GetParam 'cluster_name')\", value: \"$BASTION_IP\"}, {name: \"odahu.$(GetParam 'cluster_name')\", value: \"$LB_IP\", type: \"CNAME\"}, {name: \"api.$(GetParam 'cluster_name')\", value: \"$K8S_API_IP\", type: \"CNAME\"}]")
+	# 		;;
+	# 	"gcp/gke")
+	# 		TerraformOutput gke_create
+	# 		LB_IP=$(jq -rc '.helm_values.value["controller.service.loadBalancerIP"]' $MODULES_ROOT/k8s_setup/$OUTPUT_FILE)
+	# 		K8S_API_IP=$(jq -rc '.k8s_api_address.value' $MODULES_ROOT/gke_create/$OUTPUT_FILE)
+	# 		BASTION_IP=$(jq -rc '.bastion_address.value' $MODULES_ROOT/gke_create/$OUTPUT_FILE)
+	# 		export TF_VAR_records=$(jq -rn "[{name: \"bastion.$(GetParam 'cluster_name')\", value: \"$BASTION_IP\"}, {name: \"odahu.$(GetParam 'cluster_name')\", value: \"$LB_IP\"}, {name: \"api.$(GetParam 'cluster_name')\", value: \"$K8S_API_IP\"}]")
+	# 		;;
+	# 	"azure/aks")
+	# 		TerraformOutput aks_create
+	# 		LB_IP=$(jq -rc '.helm_values.value["controller.service.loadBalancerIP"]' $MODULES_ROOT/k8s_setup/$OUTPUT_FILE)
+	# 		K8S_API_IP="$(jq -rc '.k8s_api_address.value' $MODULES_ROOT/aks_create/$OUTPUT_FILE | sed -e 's/^https:\/\///'| sed -e 's/:443//')."
+	# 		BASTION_IP=$(jq -rc '.bastion_address.value' $MODULES_ROOT/aks_create/$OUTPUT_FILE)
+	# 		export TF_VAR_records=$(jq -rn "[{name: \"bastion.$(GetParam 'cluster_name')\", value: \"$BASTION_IP\"}, {name: \"odahu.$(GetParam 'cluster_name')\", value: \"$LB_IP\"}, {name: \"api.$(GetParam 'cluster_name')\", value: \"$K8S_API_IP\", type: \"CNAME\"}]")
+	# 		;;
+	# esac
+	# TerragruntRun odahu_dns apply
+	# echo 'INFO : Deploy Odahuflow components'
+	# TerraformRun odahuflow apply
+	# echo "INFO : Save cluster info to ${OUTPUT_FILE}"
+	# TerraformOutput odahuflow
 }
 
 # Create Odahuflow cluster
@@ -320,7 +328,7 @@ function FetchKubeConfig() {
 		"gcp/gke")
 			gcloud container clusters get-credentials "$(GetParam 'cluster_name')" \
 				--zone "$(GetParam 'location')" \
-				--project "$(GetParam 'project_id')"
+				--project "$(GetParam 'cloud_credentials.gcp.project_id')"
 			;;
 		"azure/aks")
 			az aks get-credentials --name "$(GetParam 'cluster_name')" \
@@ -434,19 +442,19 @@ function ResumeCluster() {
 ##################
 
 ReadArguments "$@"
-SetupCloudAccess
+GetCloudCredentials
 
-export TF_IN_AUTOMATION=true
-export TF_PLUGIN_CACHE_DIR=/tmp/.terraform/cache && mkdir -p $TF_PLUGIN_CACHE_DIR
-MODULES_ROOT="/opt/odahu-flow/terraform/env_types/$(GetParam 'cluster_type')"
-export MODULES_ROOT
+# export TF_IN_AUTOMATION=true
+# export TF_PLUGIN_CACHE_DIR=/tmp/.terraform/cache && mkdir -p $TF_PLUGIN_CACHE_DIR
+# MODULES_ROOT="/opt/odahu-flow/terraform/env_types/$(GetParam 'cluster_type')"
+# export MODULES_ROOT
 
-if [[ $COMMAND == 'create' ]]; then
-	TerraformCreate
-elif [[ $COMMAND == 'destroy' ]]; then
-	TerraformDestroy
-elif [[ $COMMAND == 'suspend' ]]; then
-	SuspendCluster
-elif [[ $COMMAND == 'resume' ]]; then
-	ResumeCluster
-fi
+# if [[ $COMMAND == 'create' ]]; then
+# 	TerraformCreate
+# elif [[ $COMMAND == 'destroy' ]]; then
+# 	TerraformDestroy
+# elif [[ $COMMAND == 'suspend' ]]; then
+# 	SuspendCluster
+# elif [[ $COMMAND == 'resume' ]]; then
+# 	ResumeCluster
+# fi
