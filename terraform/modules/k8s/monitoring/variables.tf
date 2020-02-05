@@ -29,10 +29,6 @@ variable "grafana_pass" {
   description = "Grafana admin password"
 }
 
-variable "docker_repo" {
-  description = "Odahuflow Docker repo url"
-}
-
 variable "grafana_storage_class" {
   default     = "standard"
   description = "Grafana storage class"

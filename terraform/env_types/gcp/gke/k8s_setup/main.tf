@@ -48,7 +48,6 @@ module "monitoring" {
   odahu_infra_version  = var.odahu_infra_version
   grafana_admin        = var.grafana_admin
   grafana_pass         = var.grafana_pass
-  docker_repo          = var.docker_repo
   monitoring_namespace = var.monitoring_namespace
   tls_secret_key       = var.tls_key
   tls_secret_crt       = var.tls_crt
@@ -60,6 +59,9 @@ module "istio" {
   cluster_name         = var.cluster_name
   monitoring_namespace = var.monitoring_namespace
   helm_repo            = var.helm_repo
+  docker_repo          = var.docker_repo
+  docker_username      = var.docker_username
+  docker_password      = var.docker_password
   odahu_infra_version  = var.odahu_infra_version
   tls_secret_key       = var.tls_key
   tls_secret_crt       = var.tls_crt

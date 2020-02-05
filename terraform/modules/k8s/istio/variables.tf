@@ -46,3 +46,17 @@ variable "odahu_infra_version" {
 variable "helm_repo" {
   description = "Odahuflow helm repo"
 }
+
+variable "docker_repo" {
+  default     = ""
+  description = "Odahuflow docker repo URL"
+}
+
+variable "docker_username" {
+  default     = ""
+  description = "Odahuflow docker repo username"
+}
+variable "docker_password" {
+  default     = ""
+  description = "Odahuflow docker repo password"
+}

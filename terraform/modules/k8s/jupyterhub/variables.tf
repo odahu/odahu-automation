@@ -2,6 +2,16 @@ variable "docker_repo" {
   description = "Odahuflow Docker repo url"
 }
 
+variable "docker_username" {
+  default     = ""
+  description = "Odahuflow Docker repo username"
+}
+
+variable "docker_password" {
+  default     = ""
+  description = "Odahuflow Docker repo password"
+}
+
 variable "docker_tag" {
   description = "Tag of Docker containers used as JupyterHub Notebooks"
 }

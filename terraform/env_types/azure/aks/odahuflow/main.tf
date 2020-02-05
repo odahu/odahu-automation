@@ -28,6 +28,8 @@ module "fluentd" {
   source = "../../../../modules/k8s/fluentd"
 
   docker_repo         = var.docker_repo
+  docker_username     = var.docker_username
+  docker_password     = var.docker_password
   odahu_infra_version = var.odahu_infra_version
 
   extra_helm_values = module.odahuflow_prereqs.fluent_helm_values
@@ -41,8 +43,10 @@ module "jupyterhub" {
   tls_secret_crt     = var.tls_crt
   tls_secret_key     = var.tls_key
 
-  docker_repo = var.docker_repo
-  docker_tag  = var.jupyterlab_version
+  docker_repo     = var.docker_repo
+  docker_tag      = var.jupyterlab_version
+  docker_username = var.docker_username
+  docker_password = var.docker_password
 
   oauth_client_id       = var.oauth_client_id
   oauth_client_secret   = var.oauth_client_secret
@@ -58,6 +62,8 @@ module "odahuflow_helm" {
 
   helm_repo                = var.helm_repo
   docker_repo              = var.docker_repo
+  docker_username          = var.docker_username
+  docker_password          = var.docker_password
   odahuflow_version        = var.odahuflow_version
   packager_version         = var.packager_version
   mlflow_toolchain_version = var.mlflow_toolchain_version
