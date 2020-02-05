@@ -14,12 +14,12 @@ module "nginx_ingress_tls" {
 }
 
 module "nginx_ingress_prereqs" {
-  source        = "../../../../modules/k8s/nginx-ingress/prereqs/gke"
-  region        = var.region
-  project_id    = var.project_id
-  cluster_name  = var.cluster_name
-  allowed_ips   = concat(var.allowed_ips, [var.pods_cidr])
-  network_name  = var.network_name
+  source       = "../../../../modules/k8s/nginx-ingress/prereqs/gke"
+  region       = var.region
+  project_id   = var.project_id
+  cluster_name = var.cluster_name
+  allowed_ips  = concat(var.allowed_ips, [var.pods_cidr])
+  network_name = var.network_name
 }
 
 module "nginx_ingress_helm" {
@@ -65,6 +65,24 @@ module "istio" {
   tls_secret_crt       = var.tls_crt
 }
 
+
+module "openpolicyagent" {
+  source                = "../../../../modules/k8s/openpolicyageent"
+  helm_repo             = var.helm_repo
+  odahu_infra_version   = var.odahu_infra_version
+  mesh_dependency       = module.istio.helm_chart
+  oauth_mesh_enabled    = var.oauth_mesh_enabled
+  oauth_oidc_jwks_url   = var.oauth_oidc_jwks_url
+  oauth_oidc_host       = var.oauth_oidc_host
+  oauth_oidc_port       = var.oauth_oidc_port
+  oauth_local_jwks      = var.oauth_local_jwks
+  oauth_oidc_issuer_url = var.oauth_oidc_issuer_url
+  authorization_enabled = var.authorization_enabled
+  authz_dry_run         = var.authz_dry_run
+  authz_uri             = var.authz_uri
+  opa_policies          = var.opa_policies
+}
+
 module "gke-saa" {
   source              = "../../../../modules/k8s/gke-saa"
   cluster_type        = var.cluster_type
@@ -77,6 +95,7 @@ module "tekton" {
   helm_repo           = var.helm_repo
   odahu_infra_version = var.odahu_infra_version
 }
+
 
 module "vault" {
   source = "../../../../modules/k8s/vault"
