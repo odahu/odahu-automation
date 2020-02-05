@@ -92,3 +92,12 @@ resource "helm_release" "knative" {
   repository = "odahuflow"
   depends_on = [kubernetes_namespace.knative, helm_release.istio]
 }
+
+module "docker_credentials" {
+  source          = "../docker_auth"
+  docker_repo     = var.docker_repo
+  docker_username = var.docker_username
+  docker_password = var.docker_password
+  namespaces      = [helm_release.istio.namespace]
+  sa_list         = ["istio-ingressgateway-service-account", "istio-citadel-service-account", "istio-init-service-account", "default"]
+}

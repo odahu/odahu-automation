@@ -64,6 +64,14 @@ resource "kubernetes_namespace" "jupyterhub" {
   depends_on = [null_resource.add_helm_jupyterhub_repository[0]]
 }
 
+module "docker_credentials" {
+  source          = "../docker_auth"
+  docker_repo     = var.docker_repo
+  docker_username = var.docker_username
+  docker_password = var.docker_password
+  namespaces      = [kubernetes_namespace.jupyterhub[0].metadata[0].annotations.name]
+}
+
 resource "kubernetes_secret" "jupyterhub_tls" {
   count = var.jupyterhub_enabled && local.ingress_tls_enabled ? 1 : 0
   metadata {

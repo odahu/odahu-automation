@@ -40,7 +40,6 @@ data "template_file" "monitoring_values" {
     monitoring_namespace    = var.monitoring_namespace
     odahu_infra_version     = var.odahu_infra_version
     cluster_domain          = var.cluster_domain
-    docker_repo             = var.docker_repo
     grafana_admin           = var.grafana_admin
     grafana_pass            = var.grafana_pass
     grafana_storage_class   = var.grafana_storage_class

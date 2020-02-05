@@ -7,6 +7,14 @@ resource "kubernetes_namespace" "fluentd" {
   }
 }
 
+module "docker_credentials" {
+  source          = "../docker_auth"
+  docker_repo     = var.docker_repo
+  docker_username = var.docker_username
+  docker_password = var.docker_password
+  namespaces      = [kubernetes_namespace.fluentd.metadata[0].annotations.name]
+}
+
 resource "helm_release" "fluentd" {
   name       = "fluentd"
   chart      = "odahu-flow-fluentd"
@@ -22,7 +30,5 @@ resource "helm_release" "fluentd" {
     var.extra_helm_values
   ]
 
-  depends_on = [
-    kubernetes_namespace.fluentd
-  ]
+  depends_on = [kubernetes_namespace.fluentd]
 }

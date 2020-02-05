@@ -53,6 +53,14 @@ variable "docker_repo" {
   description = "Odahuflow Docker repo url"
 }
 
+variable "docker_username" {
+  description = "Odahuflow Docker repo username"
+}
+
+variable "docker_password" {
+  description = "Odahuflow Docker repo password"
+}
+
 variable "dns_zone_name" {
   description = "Cluster root DNS zone name"
 }

@@ -1,5 +1,6 @@
 odahuFlowVersion: "${odahuflow_version}"
 imagesRegistry: "${docker_repo}/"
+dockerSecret: "${docker_secret}"
 logLevel: debug
 
 ingress:
