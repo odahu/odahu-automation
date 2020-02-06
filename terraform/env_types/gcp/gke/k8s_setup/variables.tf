@@ -56,7 +56,8 @@ variable "docker_password" {
   description = "Odahuflow Docker repo password"
 }
 
-variable "network_name" {
+variable "vpc_name" {
+  default     = ""
   description = "The VPC network to host the cluster in"
 }
 
@@ -125,7 +126,6 @@ variable "oauth_oidc_audience" {
 variable "oauth_oidc_scope" {
   description = "OAuth2 scope"
 }
-
 
 variable "oauth_mesh_enabled" {
   type        = bool

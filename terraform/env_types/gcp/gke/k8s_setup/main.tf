@@ -19,7 +19,7 @@ module "nginx_ingress_prereqs" {
   project_id   = var.project_id
   cluster_name = var.cluster_name
   allowed_ips  = concat(var.allowed_ips, [var.pods_cidr])
-  network_name = var.network_name
+  network_name = local.network_name
 }
 
 module "nginx_ingress_helm" {
@@ -97,7 +97,6 @@ module "tekton" {
   helm_repo           = var.helm_repo
   odahu_infra_version = var.odahu_infra_version
 }
-
 
 module "vault" {
   source = "../../../../modules/k8s/vault"

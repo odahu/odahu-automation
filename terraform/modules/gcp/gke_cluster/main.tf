@@ -1,5 +1,5 @@
 locals {
-  initial_node_count = length(var.node_locations) == 0 ? var.initial_node_count : floor(var.initial_node_count / length(var.node_locations))
+  initial_node_count = length(var.node_locations) == 0 ? lookup(var.node_pools.main, "init_node_count", 1) : floor(lookup(var.node_pools.main, "init_node_count", 2) / length(var.node_locations) + 1)
 
   default_labels = {
     "project" = "odahu-flow"

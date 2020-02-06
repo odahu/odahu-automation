@@ -32,7 +32,7 @@ variable "region" {
 
 variable "infra_vpc_name" {
   default     = "infra-vpc"
-  description = "Region of resources"
+  description = "GCP infra network name"
 }
 
 variable "infra_cidr" {
@@ -55,19 +55,9 @@ variable "service_cidr" {
 #############
 # GKE
 #############
-variable "location" {
-  default     = "us-east1-b"
-  description = "The location (region or zone) in which the cluster master will be created"
-}
-
 variable "node_locations" {
   default     = []
   description = "The list of zones in which nodes will be created, leave blank for zone cluster"
-}
-
-variable "initial_node_count" {
-  default     = "1"
-  description = "Initial node count"
 }
 
 variable "k8s_version" {
