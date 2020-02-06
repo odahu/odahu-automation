@@ -136,7 +136,7 @@ resource "google_container_node_pool" "cluster_node_pools" {
       disable-legacy-endpoints = "true"
     }
 
-    labels = merge(lookup(each.value, "labels", {}), {
+    labels = merge(lookup(each.value, "kube_labels", {}), {
       "project" = "odahu-flow"
     })
 
