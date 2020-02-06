@@ -4,7 +4,7 @@ data "azurerm_public_ip" "egress" {
 }
 
 locals {
-  bastion_ip = var.bastion_ip == "" ? [] : ["${var.bastion_ip}/32"]
+  bastion_ip = var.bastion_enabled ? ["${var.bastion_ip}/32"] : []
   allowed_nets = concat(
     list(var.aks_subnet_cidr),
     list(var.service_cidr),
