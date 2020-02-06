@@ -24,3 +24,9 @@ variable "tags" {
   default     = {}
   type        = map
 }
+
+variable "bastion_enabled" {
+  default     = false
+  type        = bool
+  description = "Flag to install bastion host or not"
+}

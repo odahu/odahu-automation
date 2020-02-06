@@ -40,10 +40,6 @@ variable "infra_cidr" {
   description = "GCP infra network CIDR"
 }
 
-variable "aws_vpc_id" {
-  description = "AWS VPC id to establish peering with"
-}
-
 variable "gcp_cidr" {
   description = "GCP network CIDR"
 }
@@ -54,22 +50,6 @@ variable "pods_cidr" {
 
 variable "service_cidr" {
   description = "GKE service CIDR"
-}
-
-variable "aws_sg" {
-  description = "AWS SG id for gcp access"
-}
-
-variable "aws_cidr" {
-  description = "AWS network CIDR"
-}
-
-variable "aws_route_table_id" {
-  description = "AWS Route table ID"
-}
-
-variable "gke_node_tag" {
-  description = "GKE cluster nodes tag"
 }
 
 #############
@@ -96,8 +76,8 @@ variable "k8s_version" {
 }
 
 variable "node_version" {
-  description = "K8s version for Nodes. If no value is provided, this defaults to the value of k8s_version."
-  default     = "1.13.6-gke.6"
+  default     = ""
+  description = "Kubernetes worker nodes version. If no value is provided, this defaults to the value of k8s_version."
 }
 
 variable "allowed_ips" {
@@ -127,19 +107,43 @@ variable "node_pools" {
   description = "Default node pools configuration"
 }
 
+variable "node_labels" {
+  default     = {}
+  description = "GKE nodes GCP labels"
+  type        = map
+}
+
+variable "node_gcp_tags" {
+  default     = []
+  description = "GKE cluster nodes GCP network tags"
+}
+
 ################
 # Bastion host
 ################
-variable "bastion_machine_type" {
-  default = "f1-micro"
+variable "bastion_enabled" {
+  default     = false
+  type        = bool
+  description = "Flag to install bastion host or not"
 }
 
-variable "bastion_tag" {
-  default     = ""
-  description = "Bastion network tags"
+variable "bastion_machine_type" {
+  default = "f1-micro"
 }
 
 variable "bastion_hostname" {
   default     = "bastion"
   description = "Bastion hostname"
+}
+
+variable "bastion_gcp_tags" {
+  default     = []
+  description = "Bastion host GCP network tags"
+  type        = list(string)
+}
+
+variable "bastion_labels" {
+  default     = {}
+  description = "Bastion host GCP labels"
+  type        = map
 }

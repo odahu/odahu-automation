@@ -166,8 +166,6 @@ function SetupCloudAccess() {
 				exit 1
 			fi
 			az login --service-principal -u "${ARM_CLIENT_ID}" -p "${ARM_CLIENT_SECRET}" --tenant "${ARM_TENANT_ID}"
-			export TF_VAR_sp_client_id=${ARM_CLIENT_ID}
-			export TF_VAR_sp_secret=${ARM_CLIENT_SECRET}
 			if [[ $VERBOSE == true ]]; then set -x; fi
 			;;
 		*)

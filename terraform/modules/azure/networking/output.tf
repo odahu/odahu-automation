@@ -14,16 +14,16 @@ output "subnet_name" {
 }
 
 output "bastion_ip_id" {
-  value       = azurerm_public_ip.bastion.id
+  value       = var.bastion_enabled ? azurerm_public_ip.bastion[0].id : ""
   description = "ID of Public IP for bastion host"
 }
 
 output "bastion_ip_name" {
-  value       = azurerm_public_ip.bastion.name
+  value       = var.bastion_enabled ? azurerm_public_ip.bastion[0].name : ""
   description = "Name of Public IP for bastion host"
 }
 
 output "bastion_ip" {
-  value       = azurerm_public_ip.bastion.ip_address
+  value       = var.bastion_enabled ? azurerm_public_ip.bastion[0].ip_address : ""
   description = "Public IP for bastion host"
 }

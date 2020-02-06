@@ -12,12 +12,22 @@ variable "allowed_ips" {
   description = "Subnet ranges to whitelist on cluster"
 }
 
-variable "bastion_tag" {
-  description = "Bastion network tag"
+variable "bastion_enabled" {
+  default     = false
+  type        = bool
+  description = "Flag to install bastion host or not"
 }
 
-variable "gke_node_tag" {
-  description = "GKE cluster nodes tag"
+variable "bastion_gcp_tags" {
+  default     = []
+  description = "Bastion host GCP network tags"
+  type        = list(string)
+}
+
+variable "node_gcp_tags" {
+  default     = []
+  description = "GKE cluster nodes GCP network tags"
+  type        = list(string)
 }
 
 variable "master_ipv4_cidr_block" {

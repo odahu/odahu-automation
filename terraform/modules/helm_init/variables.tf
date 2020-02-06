@@ -4,7 +4,6 @@ variable "helm_repo" {
 
 variable "istio_helm_repo" {
   description = "Istio helm repo"
-  default     = "https://storage.googleapis.com/istio-release/releases/1.4.3/charts"
 }
 
 variable "tiller_image" {

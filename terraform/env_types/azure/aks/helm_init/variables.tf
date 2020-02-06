@@ -21,5 +21,6 @@ variable "helm_repo" {
 }
 
 variable "istio_helm_repo" {
+  default     = "https://storage.googleapis.com/istio-release/releases/1.4.3/charts"
   description = "Istio helm repo"
 }

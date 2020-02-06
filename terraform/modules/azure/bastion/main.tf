@@ -5,16 +5,18 @@
 # We could't provide multiple SSH public keys during VM host creation.
 # So, we'll generate key for deployment and add one more key later.
 resource "tls_private_key" "bastion_deploy" {
+  count     = var.bastion_enabled ? 1 : 0
   algorithm = "RSA"
   rsa_bits  = "2048"
 }
 
 locals {
-  deploy_pubkey = tls_private_key.bastion_deploy.public_key_openssh
+  deploy_pubkey = var.bastion_enabled ? tls_private_key.bastion_deploy[0].public_key_openssh : null
 }
 
 # We going to create bastion host in AKS subnet
 resource "azurerm_network_interface" "aks_bastion_nic" {
+  count               = var.bastion_enabled ? 1 : 0
   name                = "${var.cluster_name}-${var.bastion_hostname}-nic"
   location            = var.location
   resource_group_name = var.resource_group
@@ -28,10 +30,11 @@ resource "azurerm_network_interface" "aks_bastion_nic" {
 }
 
 resource "azurerm_virtual_machine" "aks_bastion" {
+  count                 = var.bastion_enabled ? 1 : 0
   name                  = "${var.cluster_name}-${var.bastion_hostname}"
   location              = var.location
   resource_group_name   = var.resource_group
-  network_interface_ids = [azurerm_network_interface.aks_bastion_nic.id]
+  network_interface_ids = [azurerm_network_interface.aks_bastion_nic[0].id]
   vm_size               = var.bastion_machine_type
 
   delete_os_disk_on_termination    = true
@@ -64,5 +67,5 @@ resource "azurerm_virtual_machine" "aks_bastion" {
     }
   }
 
-  tags = var.bastion_tags
+  tags = var.bastion_labels
 }

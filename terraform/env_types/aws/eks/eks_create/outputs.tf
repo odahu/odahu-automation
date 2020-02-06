@@ -14,4 +14,3 @@ output "bastion_address" {
 output "k8s_api_address" {
   value = module.eks.k8s_api_address
 }
-

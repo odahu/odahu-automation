@@ -29,6 +29,7 @@ resource "local_file" "cluster_autoscaler" {
 # Bastion
 ########################################################
 resource "aws_instance" "bastion" {
+  count                       = var.bastion_enabled ? 1 : 0
   ami                         = var.bastion_ami
   instance_type               = var.bastion_machine_type
   key_name                    = var.cluster_name

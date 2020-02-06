@@ -7,5 +7,5 @@ output "kube_config" {
 }
 
 output "bastion_address" {
-  value = module.aks_networking.bastion_ip
+  value = module.aks_networking.bastion_ip == "" ? null : module.aks_networking.bastion_ip
 }

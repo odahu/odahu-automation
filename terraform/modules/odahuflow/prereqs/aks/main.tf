@@ -13,11 +13,6 @@ data "azurerm_public_ip" "egress" {
   resource_group_name = var.resource_group
 }
 
-data "azurerm_public_ip" "bastion" {
-  name                = "${var.cluster_name}-bastion"
-  resource_group_name = var.resource_group
-}
-
 locals {
   storage_tags = merge(
     { "purpose" = "Odahuflow models storage" },
@@ -68,8 +63,7 @@ resource "azurerm_storage_account" "odahuflow_data" {
       # Removing /32 networks masks just in case
       # https://docs.microsoft.com/en-us/azure/storage/common/storage-network-security#grant-access-from-an-internet-ip-range
       split(", ", replace(join(", ", var.allowed_ips), "/32", "")),
-      list(data.azurerm_public_ip.egress.ip_address),
-      list(data.azurerm_public_ip.bastion.ip_address)
+      list(data.azurerm_public_ip.egress.ip_address)
     )
   }
 

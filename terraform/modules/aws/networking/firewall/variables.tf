@@ -14,3 +14,9 @@ variable "vpc_sg_id" {
 variable "allowed_ips" {
   description = "Subnet ranges to whitelist on cluster"
 }
+
+variable "bastion_enabled" {
+  default     = false
+  type        = bool
+  description = "Flag to install bastion host or not"
+}
