@@ -52,13 +52,13 @@ module "istio" {
   root_domain          = var.root_domain
   cluster_name         = var.cluster_name
   monitoring_namespace = var.monitoring_namespace
-  tls_secret_key       = var.tls_key
-  tls_secret_crt       = var.tls_crt
   helm_repo            = var.helm_repo
   docker_repo          = var.docker_repo
   docker_username      = var.docker_username
   docker_password      = var.docker_password
   odahu_infra_version  = var.odahu_infra_version
+  tls_secret_key       = var.tls_key
+  tls_secret_crt       = var.tls_crt
 }
 
 module "openpolicyagent" {
@@ -66,6 +66,7 @@ module "openpolicyagent" {
   helm_repo             = var.helm_repo
   odahu_infra_version   = var.odahu_infra_version
   mesh_dependency       = module.istio.helm_chart
+  oauth_mesh_enabled    = var.oauth_mesh_enabled
   oauth_oidc_jwks_url   = var.oauth_oidc_jwks_url
   oauth_oidc_host       = var.oauth_oidc_host
   oauth_oidc_port       = var.oauth_oidc_port
@@ -74,6 +75,7 @@ module "openpolicyagent" {
   authorization_enabled = var.authorization_enabled
   authz_dry_run         = var.authz_dry_run
   authz_uri             = var.authz_uri
+  opa_policies          = var.opa_policies
 }
 
 module "gke-saa" {
