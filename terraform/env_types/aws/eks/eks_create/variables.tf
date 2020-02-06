@@ -19,13 +19,6 @@ variable "k8s_version" {
 variable "allowed_ips" {
   description = "CIDR to allow access from"
 }
-variable "agent_cidr" {
-  default     = "0.0.0.0/0"
-  description = "Jenkins agent CIDR to allow access for CI jobs or your WAN address in case of locla run"
-}
-variable "dns_zone_name" {
-  description = "Cluster root DNS zone name"
-}
 
 ##################
 # GCP

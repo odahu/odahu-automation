@@ -10,26 +10,19 @@ variable "cluster_name" {
   description = "Odahuflow cluster name"
 }
 
-variable "config_context_auth_info" {
-  description = "Odahuflow cluster context auth"
+variable "gcp_project_id" {
+  default     = ""
+  description = "Target Google Cloud project ID"
 }
 
-variable "config_context_cluster" {
-  description = "Odahuflow cluster context name"
-}
-
-variable "project_id" {
-  description = "Target project id"
-}
-
-variable "zone" {
+variable "gcp_zone" {
   default     = "us-east1-b"
-  description = "Default zone"
+  description = "Google Cloud zone"
 }
 
-variable "region" {
+variable "gcp_region" {
   default     = "us-east1"
-  description = "Region of resources"
+  description = "Google Cloud region"
 }
 
 variable "helm_repo" {

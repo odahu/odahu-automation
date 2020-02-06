@@ -5,31 +5,19 @@ variable "cluster_type" {
   description = "Cluster type"
 }
 
-variable "project_id" {
+variable "gcp_project_id" {
+  default     = ""
   description = "Target project id"
 }
 
-variable "zone" {
+variable "gcp_zone" {
   default     = "us-east1-b"
   description = "Default zone"
 }
 
-variable "region" {
+variable "gcp_region" {
   default     = "us-east1"
   description = "Region of resources"
-}
-
-variable "aws_region" {
-  default     = "us-east-1"
-  description = "Region of resources"
-}
-
-variable "config_context_auth_info" {
-  description = "Odahuflow cluster context auth"
-}
-
-variable "config_context_cluster" {
-  description = "Odahuflow cluster context name"
 }
 
 variable "cluster_name" {
@@ -61,10 +49,6 @@ variable "docker_password" {
   description = "Odahuflow Docker repo password"
 }
 
-variable "dns_zone_name" {
-  description = "Cluster root DNS zone name"
-}
-
 variable "network_name" {
   description = "The VPC network to host the cluster in"
 }
@@ -90,15 +74,13 @@ variable "pods_cidr" {
 }
 
 variable "grafana_admin" {
-  description = "Grafana admion username"
+  default     = "grafana_admin"
+  description = "Grafana admin username"
 }
 
 variable "grafana_pass" {
+  default     = "grafana_password"
   description = "Grafana admin password"
-}
-
-variable "cluster_context" {
-  description = "Kubectl cluster context"
 }
 
 variable "monitoring_namespace" {

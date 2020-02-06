@@ -1,15 +1,19 @@
 provider "google" {
   version = "2.20.1"
-  region  = var.region
-  zone    = var.zone
-  project = var.project_id
+  region  = var.gcp_region
+  zone    = var.gcp_zone
+  project = local.gcp_project_id
 }
 
 provider "google-beta" {
   version = "2.20.1"
-  region  = var.region
-  zone    = var.zone
-  project = var.project_id
+  region  = var.gcp_region
+  zone    = var.gcp_zone
+  project = local.gcp_project_id
+}
+
+provider "external" {
+  version = "~> 1.2"
 }
 
 provider "random" {
@@ -22,10 +26,6 @@ provider "local" {
 
 provider "null" {
   version = "~> 2.1.2"
-}
-
-provider "http" {
-  version = "~> 1.1.1"
 }
 
 provider "tls" {

@@ -21,8 +21,9 @@ locals {
       vault           = var.connection_vault_configuration
     }
     deployment = {
-      toleration                    = contains(keys(var.node_pools), "model_deployment") ? { Key = var.node_pools["model_deployment"].taints[0].key, Operator = "Equal", Value = var.node_pools["model_deployment"].taints[0].value, Effect = replace(var.node_pools["model_deployment"].taints[0].effect, "/(?i)no_?schedule/", "NoSchedule") } : null
-      node_selector                 = contains(keys(var.node_pools), "model_deployment") ? { for key, value in var.node_pools["model_deployment"].labels : key => value } : null
+      toleration    = contains(keys(var.node_pools), "model_deployment") ? { Key = var.node_pools["model_deployment"].taints[0].key, Operator = "Equal", Value = var.node_pools["model_deployment"].taints[0].value, Effect = replace(var.node_pools["model_deployment"].taints[0].effect, "/(?i)no_?schedule/", "NoSchedule") } : null
+      node_selector = contains(keys(var.node_pools), "model_deployment") ? { for key, value in var.node_pools["model_deployment"].kube_labels: key => value } : null
+
       default_docker_pull_conn_name = "docker-ci"
       edge = {
         host = "${local.url_schema}://${var.cluster_domain}"
@@ -34,16 +35,16 @@ locals {
     }
     training = {
       toleration        = contains(keys(var.node_pools), "training") ? { Key = var.node_pools["training"].taints[0].key, Operator = "Equal", Value = var.node_pools["training"].taints[0].value, Effect = replace(var.node_pools["training"].taints[0].effect, "/(?i)no_?schedule/", "NoSchedule") } : null
-      node_selector     = contains(keys(var.node_pools), "training") ? { for key, value in var.node_pools["training"].labels : key => value } : null
+      node_selector     = contains(keys(var.node_pools), "training") ? { for key, value in var.node_pools["training"].kube_labels: key => value } : null
       gpu_toleration    = contains(keys(var.node_pools), "training_gpu") ? { Key = var.node_pools["training_gpu"].taints[0].key, Operator = "Equal", Value = var.node_pools["training_gpu"].taints[0].value, Effect = replace(var.node_pools["training_gpu"].taints[0].effect, "/(?i)no_?schedule/", "NoSchedule") } : null
-      gpu_node_selector = contains(keys(var.node_pools), "training_gpu") ? { for key, value in var.node_pools["training_gpu"].labels : key => value } : null
+      gpu_node_selector = contains(keys(var.node_pools), "training_gpu") ? { for key, value in var.node_pools["training_gpu"].kube_labels: key => value } : null
       namespace         = var.odahuflow_training_namespace
       output_connection = "models-output"
       metric_url        = "${local.url_schema}://${var.cluster_domain}/mlflow"
     }
     packaging = {
       toleration        = contains(keys(var.node_pools), "packaging") ? { Key = var.node_pools["packaging"].taints[0].key, Operator = "Equal", Value = var.node_pools["packaging"].taints[0].value, Effect = replace(var.node_pools["packaging"].taints[0].effect, "/(?i)no_?schedule/", "NoSchedule") } : null
-      node_selector     = contains(keys(var.node_pools), "packaging") ? { for key, value in var.node_pools["packaging"].labels : key => value } : null
+      node_selector     = contains(keys(var.node_pools), "packaging") ? { for key, value in var.node_pools["packaging"].kube_labels: key => value } : null
       namespace         = var.odahuflow_packaging_namespace
       output_connection = "models-output"
     }

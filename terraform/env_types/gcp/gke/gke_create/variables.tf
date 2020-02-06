@@ -11,23 +11,24 @@ variable "subnet_name" {
   description = "Name of existing subnet to use"
 }
 
-variable "project_id" {
-  description = "Target project id"
-}
-
 variable "cluster_name" {
   default     = "odahuflow"
   description = "Odahuflow cluster name"
 }
 
-variable "zone" {
-  default     = "us-east1-b"
-  description = "Default zone"
+variable "gcp_project_id" {
+  default     = ""
+  description = "Target Google Cloud project ID"
 }
 
-variable "region" {
+variable "gcp_zone" {
+  default     = "us-east1-b"
+  description = "Google Cloud zone"
+}
+
+variable "gcp_region" {
   default     = "us-east1"
-  description = "Region of resources"
+  description = "Google Cloud region"
 }
 
 variable "infra_vpc_name" {
@@ -38,10 +39,6 @@ variable "infra_vpc_name" {
 variable "infra_cidr" {
   default     = ""
   description = "GCP infra network CIDR"
-}
-
-variable "aws_vpc_id" {
-  description = "AWS VPC id to establish peering with"
 }
 
 variable "gcp_cidr" {
@@ -56,30 +53,21 @@ variable "service_cidr" {
   description = "GKE service CIDR"
 }
 
-variable "aws_sg" {
-  description = "AWS SG id for gcp access"
+variable "gke_node_tags" {
+  default     = []
+  description = "GKE cluster nodes network tags"
+  type        = list(string)
 }
 
-variable "aws_cidr" {
-  description = "AWS network CIDR"
-}
-
-variable "aws_route_table_id" {
-  description = "AWS Route table ID"
-}
-
-variable "gke_node_tag" {
-  description = "GKE cluster nodes tag"
+variable "gke_node_labels" {
+  default     = {}
+  description = "GKE cluster nodes GCP labels"
+  type        = map
 }
 
 #############
 # GKE
 #############
-variable "location" {
-  default     = "us-east1-b"
-  description = "The location (region or zone) in which the cluster master will be created"
-}
-
 variable "node_locations" {
   default     = []
   description = "The list of zones in which nodes will be created, leave blank for zone cluster"
@@ -95,19 +83,9 @@ variable "k8s_version" {
   description = "Kubernetes master version"
 }
 
-variable "node_version" {
-  description = "K8s version for Nodes. If no value is provided, this defaults to the value of k8s_version."
-  default     = "1.13.6-gke.6"
-}
-
 variable "allowed_ips" {
   type        = list(string)
   description = "CIDR to allow access from"
-}
-
-variable "agent_cidr" {
-  description = "Jenkins agent CIDR to allow access for CI jobs or your WAN address in case of locla run"
-  default     = "0.0.0.0/0"
 }
 
 variable "ssh_key" {
@@ -127,19 +105,37 @@ variable "node_pools" {
   description = "Default node pools configuration"
 }
 
+variable "node_version" {
+  default     = ""
+  description = "Version of Kubernetes Worker nodes. If no value is provided, this defaults to the value of k8s_version."
+}
+
 ################
 # Bastion host
 ################
-variable "bastion_machine_type" {
-  default = "f1-micro"
+variable "bastion_enabled" {
+  default     = false
+  type        = bool
+  description = "Flag to install bastion host or not"
 }
 
-variable "bastion_tag" {
-  default     = ""
-  description = "Bastion network tags"
+variable "bastion_machine_type" {
+  default = "f1-micro"
 }
 
 variable "bastion_hostname" {
   default     = "bastion"
   description = "Bastion hostname"
+}
+
+variable "bastion_tags" {
+  default     = []
+  description = "Bastion host network tags"
+  type        = list(string)
+}
+
+variable "bastion_labels" {
+  default     = {}
+  description = "Bastion host GCP labels"
+  type        = map
 }

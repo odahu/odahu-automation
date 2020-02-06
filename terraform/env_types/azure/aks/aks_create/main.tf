@@ -1,11 +1,3 @@
-locals {
-  common_tags = merge(
-    { "cluster" = var.cluster_name },
-    var.aks_common_tags
-  )
-  aks_dns_prefix = var.aks_dns_prefix == "" ? var.cluster_name : var.aks_dns_prefix
-}
-
 module "azure_monitoring" {
   source         = "../../../../modules/azure/monitoring"
   enabled        = var.aks_analytics_deploy
@@ -33,7 +25,8 @@ module "aks_bastion" {
   aks_subnet_id    = module.aks_networking.subnet_id
   bastion_ip_id    = module.aks_networking.bastion_ip_id
   bastion_ssh_user = "ubuntu"
-  bastion_tags     = local.common_tags
+  bastion_tags     = local.bastion_tags
+  bastion_machine_type = var.bastion_machine_type
 }
 
 module "aks_cluster" {
@@ -48,8 +41,8 @@ module "aks_cluster" {
   egress_ip_name             = var.aks_egress_ip_name
   bastion_ip                 = module.aks_networking.bastion_ip
   allowed_ips                = var.allowed_ips
-  sp_client_id               = var.sp_client_id
-  sp_secret                  = var.sp_secret
+  sp_client_id               = local.sp_client_id
+  sp_secret                  = local.sp_secret
   k8s_version                = var.k8s_version
   ssh_user                   = "ubuntu"
   ssh_public_key             = var.ssh_key

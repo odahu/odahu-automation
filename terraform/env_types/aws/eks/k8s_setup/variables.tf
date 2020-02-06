@@ -13,19 +13,6 @@ variable "tls_crt" {
   description = "TLS certificate file for Odahuflow cluster"
 }
 
-variable "project_id" {
-  description = "Target project id"
-}
-
-variable "zone" {
-  default     = "us-east1-b"
-  description = "Default zone"
-}
-
-variable "region" {
-  default     = "us-east1"
-  description = "Region of resources"
-}
 variable "public_subnet_cidrs" {
   default = []
 }
@@ -75,10 +62,6 @@ variable "docker_password" {
   description = "Odahuflow Docker repo password"
 }
 
-variable "dns_zone_name" {
-  description = "Cluster root DNS zone name"
-}
-
 ########################
 # Prometheus monitoring
 ########################
@@ -88,10 +71,12 @@ variable "allowed_ips" {
 }
 
 variable "grafana_admin" {
-  description = "Grafana admion username"
+  default     = "grafana_admin"
+  description = "Grafana admin username"
 }
 
 variable "grafana_pass" {
+  default     = "grafana_password"
   description = "Grafana admin password"
 }
 
@@ -199,4 +184,3 @@ variable "istio_namespace" {
   default     = "istio-system"
   description = "istio namespace"
 }
-
