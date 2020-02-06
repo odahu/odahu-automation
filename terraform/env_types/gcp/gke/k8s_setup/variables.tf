@@ -86,7 +86,6 @@ variable "grafana_admin" {
 }
 
 variable "grafana_pass" {
-  default     = "grafana_password"
   description = "Grafana admin password"
 }
 
