@@ -106,8 +106,8 @@ resource "aws_launch_template" "this" {
     endpoint              = aws_eks_cluster.default.endpoint,
     certificate_authority = aws_eks_cluster.default.certificate_authority.0.data,
     name                  = var.cluster_name,
-    taints                = join(",", [for t in lookup(each.value, "taints", []) : "${t.key}=${t.value}:${replace(title(lower(replace(t.effect, "_", " "))), " ", "")}"]),
-    labels                = join(",", concat([for k in keys(lookup(each.value, "labels", {})) : "${k}=${lookup(each.value, "labels")[k]}"], ["project=odahuflow"]))
+    taints                = join(",", [ for t in lookup(each.value, "taints", []): "${t.key}=${t.value}:${replace(title(lower(replace(t.effect, "_", " "))), " ", "")}" ]),
+    labels                = join(",", concat([ for k in keys(lookup(each.value, "kube_labels", {})): "${k}=${lookup(each.value, "kube_labels")[k]}" ], ["project=odahu-flow"]))
   }))
 
   dynamic "instance_market_options" {
@@ -191,7 +191,7 @@ resource "aws_autoscaling_group" "this" {
   }
 
   dynamic "tag" {
-    for_each = lookup(each.value, "labels", {})
+    for_each = lookup(each.value, "kube_labels", {})
     iterator = tag
     content {
       key                 = "k8s.io/cluster-autoscaler/node-template/label/${tag.key}"

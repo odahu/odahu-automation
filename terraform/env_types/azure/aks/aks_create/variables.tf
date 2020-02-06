@@ -56,16 +56,6 @@ variable "allowed_ips" {
   description = "CIDRs to allow access from"
 }
 
-# Next two variables are ID and secret of Service Principal account.
-# These should be defined as TF_VAR_sp_client_id and TF_VAR_sp_secret environment variables
-variable "sp_client_id" {
-  description = "Service Principal account ID"
-}
-
-variable "sp_secret" {
-  description = "Service Principal account secret"
-}
-
 variable "ssh_key" {
   description = "SSH public key for Odahuflow cluster nodes and bastion host"
 }
@@ -77,7 +67,7 @@ variable "bastion_machine_type" {
   default = "Standard_B1ls"
 }
 
-variable "bastion_tags" {
+variable "bastion_labels" {
   default     = {}
   description = "Bastion host tags"
   type        = map

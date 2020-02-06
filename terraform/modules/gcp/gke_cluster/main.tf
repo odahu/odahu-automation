@@ -1,10 +1,13 @@
-data "http" "external_ip" {
-  url = "http://ipv4.icanhazip.com"
-}
-
 locals {
-  allowed_subnets    = concat(list("${chomp(data.http.external_ip.body)}/32"), var.allowed_ips)
-  initial_node_count = length(var.node_locations) == 0 ? var.initial_node_count : floor(var.initial_node_count / length(var.node_locations))
+  initial_node_count = length(var.node_locations) == 0 ? lookup(var.node_pools.main, "init_node_count", 2) : floor(lookup(var.node_pools.main, "init_node_count", 2) / length(var.node_locations) + 1)
+
+  default_labels = {
+    "project" = "odahu-flow"
+    "cluster" = var.cluster_name
+  }
+
+  bastion_labels  = length(var.bastion_labels) == 0 ? local.default_labels : var.bastion_labels
+  gke_node_labels = length(var.gke_node_labels) == 0 ? local.default_labels : var.gke_node_labels
 }
 
 ########################################################
@@ -13,9 +16,9 @@ locals {
 
 resource "google_container_cluster" "cluster" {
   provider           = google-beta
-  project            = var.project_id
   name               = var.cluster_name
-  location           = var.location
+  project            = var.gcp_project_id
+  location           = var.gcp_region
   network            = var.network
   subnetwork         = var.subnetwork
   min_master_version = var.k8s_version
@@ -66,7 +69,7 @@ resource "google_container_cluster" "cluster" {
   master_authorized_networks_config {
     dynamic "cidr_blocks" {
       iterator = cidr_block
-      for_each = local.allowed_subnets
+      for_each = var.allowed_ips
       content {
         cidr_block = cidr_block.value
       }
@@ -91,10 +94,7 @@ resource "google_container_cluster" "cluster" {
     }
   }
 
-  resource_labels = {
-    "project"      = "odahuflow"
-    "cluster_name" = var.cluster_name
-  }
+  resource_labels = local.gke_node_labels
 }
 
 ########################################################
@@ -103,9 +103,9 @@ resource "google_container_cluster" "cluster" {
 resource "google_container_node_pool" "cluster_node_pools" {
   for_each           = var.node_pools
   provider           = google-beta
-  project            = var.project_id
+  project            = var.gcp_project_id
   name               = substr(replace(each.key, "/[_\\W]/", "-"), 0, 40)
-  location           = var.location
+  location           = var.gcp_region
   cluster            = var.cluster_name
   initial_node_count = lookup(each.value, "init_node_count", 0)
   depends_on         = [google_container_cluster.cluster]
@@ -128,14 +128,14 @@ resource "google_container_node_pool" "cluster_node_pools" {
     disk_type       = lookup(each.value, "disk_type", "pd-standard")
     service_account = var.nodes_sa
     image_type      = lookup(each.value, "image", "COS")
-    tags            = concat([var.gke_node_tag], lookup(each.value, "tags", []))
+    tags            = concat(var.gke_node_tags, lookup(each.value, "tags", []))
 
     metadata = {
       disable-legacy-endpoints = "true"
     }
 
-    labels = merge(lookup(each.value, "labels", {}), {
-      "project" = "odahuflow"
+    labels = merge(lookup(each.value, "kube_labels", {}), {
+      "project" = "odahu-flow"
     })
 
     dynamic taint {
@@ -170,8 +170,9 @@ resource "google_container_node_pool" "cluster_node_pools" {
 ########################################################
 
 resource "google_compute_project_metadata_item" "ssh_public_keys" {
+  count    = var.bastion_enabled ? 1 : 0
   provider = google-beta
-  project  = var.project_id
+  project  = var.gcp_project_id
   key      = "ssh-keys"
   value    = "${var.ssh_user}:${var.ssh_public_key}"
 }
@@ -180,10 +181,11 @@ resource "google_compute_project_metadata_item" "ssh_public_keys" {
 # Bastion Host
 ########################################################
 resource "google_compute_instance" "gke_bastion" {
+  count                     = var.bastion_enabled ? 1 : 0
   name                      = "${var.bastion_hostname}-${var.cluster_name}"
   machine_type              = var.bastion_machine_type
-  zone                      = var.zone
-  project                   = var.project_id
+  zone                      = var.gcp_zone
+  project                   = var.gcp_project_id
   allow_stopping_for_update = true
   depends_on                = [google_container_cluster.cluster]
 
@@ -194,17 +196,13 @@ resource "google_compute_instance" "gke_bastion" {
     }
   }
 
-  tags = [var.bastion_tag]
-
-  labels = {
-    "project"      = "odahuflow"
-    "cluster_name" = var.cluster_name
-  }
+  tags   = var.bastion_tags
+  labels = local.bastion_labels
 
   // Define a network interface in the correct subnet.
   network_interface {
     subnetwork         = var.subnetwork
-    subnetwork_project = var.project_id
+    subnetwork_project = var.gcp_project_id
     access_config {
       // Implicit ephemeral IP
     }

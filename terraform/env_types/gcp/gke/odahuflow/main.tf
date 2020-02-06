@@ -4,8 +4,8 @@
 
 module "odahuflow_prereqs" {
   source       = "../../../../modules/odahuflow/prereqs/gke"
-  project_id   = var.project_id
-  region       = var.region
+  project_id   = local.gcp_project_id
+  region       = var.gcp_region
   cluster_name = var.cluster_name
   data_bucket  = var.data_bucket
 }

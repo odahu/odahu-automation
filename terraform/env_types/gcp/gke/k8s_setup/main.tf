@@ -14,12 +14,12 @@ module "nginx_ingress_tls" {
 }
 
 module "nginx_ingress_prereqs" {
-  source       = "../../../../modules/k8s/nginx-ingress/prereqs/gke"
-  region       = var.region
-  project_id   = var.project_id
-  cluster_name = var.cluster_name
-  allowed_ips  = concat(var.allowed_ips, [var.pods_cidr])
-  network_name = var.network_name
+  source        = "../../../../modules/k8s/nginx-ingress/prereqs/gke"
+  region        = var.gcp_region
+  project_id    = local.gcp_project_id
+  cluster_name  = var.cluster_name
+  allowed_ips   = concat(var.allowed_ips, [var.pods_cidr])
+  network_name  = var.network_name
 }
 
 module "nginx_ingress_helm" {

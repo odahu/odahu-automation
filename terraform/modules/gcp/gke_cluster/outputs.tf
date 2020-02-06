@@ -1,25 +1,13 @@
-# output "client_certificate" {
-#   value = "${google_container_cluster.cluster.master_auth.0.client_certificate}"
-# }
-
-# output "client_key" {
-#   value = "${google_container_cluster.cluster.master_auth.0.client_key}"
-# }
-
-# output "cluster_ca_certificate" {
-#   value = "${google_container_cluster.cluster.master_auth.0.cluster_ca_certificate}"
-# }
-
 output "cluster_endpoint" {
   value = google_container_cluster.cluster.endpoint
 }
 
 output "kubectl_setup_command" {
-  value = "gcloud container clusters get-credentials ${var.cluster_name} --zone ${var.zone} --project ${var.project_id}"
+  value = "gcloud container clusters get-credentials ${var.cluster_name} --zone ${var.gcp_zone} --project ${var.gcp_project_id}"
 }
 
 output "bastion_address" {
-  value = google_compute_instance.gke_bastion.network_interface[0].access_config[0].nat_ip
+  value = var.bastion_enabled ? google_compute_instance.gke_bastion[0].network_interface[0].access_config[0].nat_ip : null
 }
 
 output "k8s_api_address" {
@@ -29,4 +17,3 @@ output "k8s_api_address" {
 output "k8s_pods_cidr" {
   value = var.pods_cidr
 }
-

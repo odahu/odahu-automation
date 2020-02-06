@@ -1,8 +1,16 @@
 ##################
 # Common
 ##################
-variable "project_id" {
+variable "gcp_project_id" {
   description = "Target project id"
+}
+
+variable "gcp_zone" {
+  description = "Default GCP zone"
+}
+
+variable "gcp_region" {
+  description = "The location (region or zone) in which the cluster master will be created"
 }
 
 variable "cluster_name" {
@@ -10,22 +18,9 @@ variable "cluster_name" {
   description = "Odahuflow cluster name"
 }
 
-variable "zone" {
-  description = "Default zone"
-}
-
 ################
 # GKE variables
 ################
-variable "location" {
-  description = "The location (region or zone) in which the cluster master will be created"
-}
-
-variable "initial_node_count" {
-  type        = string
-  description = "Initial node count, use it to warm up master"
-}
-
 variable "node_locations" {
   type        = list(string)
   description = "The list of zones in which nodes will be created"
@@ -40,22 +35,18 @@ variable "subnetwork" {
 }
 
 variable "k8s_version" {
-  default     = "1.13.6 "
+  default     = "1.13.6"
   description = "Kubernetes master version"
 }
 
 variable "node_version" {
+  default     = "1.13.6-gke.6"
   description = "K8s version for Nodes. If no value is provided, this defaults to the value of k8s_version."
-  default     = "1.13.6-gke.6 "
 }
 
 variable "allowed_ips" {
   type        = list(string)
   description = "CIDR to allow access from"
-}
-
-variable "agent_cidr" {
-  description = "Jenkins agent CIDR to allow access for CI jobs or your WAN address in case of locla run"
 }
 
 variable "ssh_user" {
@@ -109,8 +100,16 @@ variable "nodes_sa" {
   description = "Service account for cluster nodes"
 }
 
-variable "gke_node_tag" {
-  description = "GKE cluster nodes tag"
+variable "gke_node_tags" {
+  default     = []
+  description = "GKE cluster nodes network tags"
+  type        = list(string)
+}
+
+variable "gke_node_labels" {
+  default     = {}
+  description = "GKE cluster nodes GCP labels"
+  type        = map
 }
 
 variable "node_pools" {
@@ -127,6 +126,11 @@ variable "node_pools" {
 ###############
 # Bastion host
 ###############
+variable "bastion_enabled" {
+  default     = false
+  type        = bool
+  description = "Flag to install bastion host or not"
+}
 
 variable "bastion_machine_type" {
   default = "f1-micro"
@@ -137,8 +141,14 @@ variable "bastion_hostname" {
   description = "bastion hostname"
 }
 
-variable "bastion_tag" {
-  default     = ""
-  description = "Bastion network tags"
+variable "bastion_tags" {
+  default     = []
+  description = "Bastion host network tags"
+  type        = list(string)
 }
 
+variable "bastion_labels" {
+  default     = {}
+  description = "Bastion host GCP labels"
+  type        = map
+}
