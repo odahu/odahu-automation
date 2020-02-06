@@ -117,7 +117,7 @@ variable "node_gcp_tags" {
 variable "node_labels" {
   default     = {}
   description = "GKE cluster nodes GCP labels"
-  type        = map
+  type        = map(string)
 }
 
 variable "node_pools" {
@@ -158,5 +158,5 @@ variable "bastion_gcp_tags" {
 variable "bastion_labels" {
   default     = {}
   description = "Bastion host GCP labels"
-  type        = map
+  type        = map(string)
 }
