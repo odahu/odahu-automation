@@ -81,6 +81,7 @@ module "openpolicyagent" {
   authorization_enabled = var.authorization_enabled
   authz_dry_run         = var.authz_dry_run
   authz_uri             = var.authz_uri
+  opa_policies          = var.opa_policies
 }
 
 module "tekton" {
