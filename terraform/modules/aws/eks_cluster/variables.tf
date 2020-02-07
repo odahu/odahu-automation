@@ -38,6 +38,12 @@ variable "cluster_name" {
   description = "Odahuflow cluster name"
 }
 
+variable "bastion_enabled" {
+  default     = false
+  type        = bool
+  description = "Flag to install bastion host or not"
+}
+
 variable "bastion_ami" {
   default     = "ami-0cdab515472ca0bac"
   description = "AMI to use for bastion"

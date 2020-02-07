@@ -1,3 +1,3 @@
 output "deploy_privkey" {
-  value = tls_private_key.bastion_deploy.private_key_pem
+  value = var.bastion_enabled ? tls_private_key.bastion_deploy[0].private_key_pem : ""
 }

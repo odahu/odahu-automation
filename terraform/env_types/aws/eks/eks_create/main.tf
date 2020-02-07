@@ -12,11 +12,12 @@ module "vpc" {
 }
 
 module "firewall" {
-  source       = "../../../../modules/aws/networking/firewall"
-  allowed_ips  = var.allowed_ips
-  cluster_name = var.cluster_name
-  vpc_id       = module.vpc.vpc_id
-  vpc_sg_id    = module.vpc.vpc_sg_id
+  source          = "../../../../modules/aws/networking/firewall"
+  allowed_ips     = var.allowed_ips
+  cluster_name    = var.cluster_name
+  vpc_id          = module.vpc.vpc_id
+  vpc_sg_id       = module.vpc.vpc_sg_id
+  bastion_enabled = var.bastion_enabled
 }
 
 module "iam" {
@@ -36,6 +37,7 @@ module "eks" {
   node_role_arn              = module.iam.node_role_arn
   node_sg_id                 = module.firewall.node_sg_id
   node_instance_profile_name = module.iam.node_instance_profile_name
+  bastion_enabled            = var.bastion_enabled
   bastion_sg_id              = module.firewall.bastion_sg_id
   subnet_ids                 = module.vpc.private_subnet_ids
   nat_subnet_id              = module.vpc.nat_subnet_id

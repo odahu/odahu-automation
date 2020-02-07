@@ -32,7 +32,7 @@ variable "region" {
 
 variable "infra_vpc_name" {
   default     = "infra-vpc"
-  description = "Region of resources"
+  description = "GCP infra network name"
 }
 
 variable "infra_cidr" {
@@ -40,11 +40,8 @@ variable "infra_cidr" {
   description = "GCP infra network CIDR"
 }
 
-variable "aws_vpc_id" {
-  description = "AWS VPC id to establish peering with"
-}
-
 variable "gcp_cidr" {
+  default     = ""
   description = "GCP network CIDR"
 }
 
@@ -56,38 +53,12 @@ variable "service_cidr" {
   description = "GKE service CIDR"
 }
 
-variable "aws_sg" {
-  description = "AWS SG id for gcp access"
-}
-
-variable "aws_cidr" {
-  description = "AWS network CIDR"
-}
-
-variable "aws_route_table_id" {
-  description = "AWS Route table ID"
-}
-
-variable "gke_node_tag" {
-  description = "GKE cluster nodes tag"
-}
-
 #############
 # GKE
 #############
-variable "location" {
-  default     = "us-east1-b"
-  description = "The location (region or zone) in which the cluster master will be created"
-}
-
 variable "node_locations" {
   default     = []
   description = "The list of zones in which nodes will be created, leave blank for zone cluster"
-}
-
-variable "initial_node_count" {
-  default     = "1"
-  description = "Initial node count"
 }
 
 variable "k8s_version" {
@@ -96,8 +67,8 @@ variable "k8s_version" {
 }
 
 variable "node_version" {
-  description = "K8s version for Nodes. If no value is provided, this defaults to the value of k8s_version."
-  default     = "1.13.6-gke.6"
+  default     = ""
+  description = "Kubernetes worker nodes version. If no value is provided, this defaults to the value of k8s_version."
 }
 
 variable "allowed_ips" {
@@ -127,19 +98,43 @@ variable "node_pools" {
   description = "Default node pools configuration"
 }
 
+variable "node_labels" {
+  default     = {}
+  description = "GKE nodes GCP labels"
+  type        = map(string)
+}
+
+variable "node_gcp_tags" {
+  default     = []
+  description = "GKE cluster nodes GCP network tags"
+}
+
 ################
 # Bastion host
 ################
-variable "bastion_machine_type" {
-  default = "f1-micro"
+variable "bastion_enabled" {
+  default     = false
+  type        = bool
+  description = "Flag to install bastion host or not"
 }
 
-variable "bastion_tag" {
-  default     = ""
-  description = "Bastion network tags"
+variable "bastion_machine_type" {
+  default = "f1-micro"
 }
 
 variable "bastion_hostname" {
   default     = "bastion"
   description = "Bastion hostname"
+}
+
+variable "bastion_gcp_tags" {
+  default     = []
+  description = "Bastion host GCP network tags"
+  type        = list(string)
+}
+
+variable "bastion_labels" {
+  default     = {}
+  description = "Bastion host GCP labels"
+  type        = map(string)
 }

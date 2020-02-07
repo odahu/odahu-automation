@@ -12,12 +12,14 @@ module "vpc" {
 }
 
 module "firewall" {
-  source       = "../../../../modules/gcp/networking/firewall"
-  allowed_ips  = var.allowed_ips
-  cluster_name = var.cluster_name
-  network_name = module.vpc.network_name
-  bastion_tag  = var.bastion_tag
-  gke_node_tag = var.gke_node_tag
+  source        = "../../../../modules/gcp/networking/firewall"
+  allowed_ips   = var.allowed_ips
+  cluster_name  = var.cluster_name
+  network_name  = module.vpc.network_name
+  node_gcp_tags = local.node_gcp_tags
+
+  bastion_enabled  = var.bastion_enabled
+  bastion_gcp_tags = local.bastion_gcp_tags
 }
 
 module "vpc_peering_gcp" {
@@ -26,7 +28,7 @@ module "vpc_peering_gcp" {
   gcp_network_1_name  = module.vpc.network_name
   gcp_network_1_range = [var.gcp_cidr, module.gke_cluster.k8s_pods_cidr]
   gcp_network_2_name  = var.infra_vpc_name
-  gcp_network_2_range = [var.infra_cidr]
+  gcp_network_2_range = var.infra_cidr == "" ? [] : [var.infra_cidr]
 }
 
 ########################################################
@@ -52,14 +54,19 @@ module "gke_cluster" {
   node_pools         = var.node_pools
   pods_cidr          = var.pods_cidr
   service_cidr       = var.service_cidr
-  location           = var.location
+  location           = var.region
   node_locations     = var.node_locations
-  initial_node_count = var.initial_node_count
   network            = module.vpc.network_name
   subnetwork         = module.vpc.subnet_name
   k8s_version        = var.k8s_version
   node_version       = var.node_version
-  bastion_tag        = var.bastion_tag
-  gke_node_tag       = var.gke_node_tag
+  node_gcp_tags      = local.node_gcp_tags
+  node_labels        = var.node_labels
   ssh_public_key     = var.ssh_key
+
+  bastion_enabled      = var.bastion_enabled
+  bastion_hostname     = var.bastion_hostname
+  bastion_machine_type = var.bastion_machine_type
+  bastion_gcp_tags     = local.bastion_gcp_tags
+  bastion_labels       = var.bastion_labels
 }

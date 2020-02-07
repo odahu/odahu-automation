@@ -12,11 +12,10 @@ output "self_link" {
 # network subnet output
 output "ip_cidr_range" {
   value       = local.subnet.ip_cidr_range
-  description = "Export created CICDR range"
+  description = "Export created CIDR range"
 }
 
 output "subnet_name" {
   value       = local.subnet.name
   description = "Export created CICDR range"
 }
-

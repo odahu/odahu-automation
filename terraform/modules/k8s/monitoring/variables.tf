@@ -22,7 +22,7 @@ variable "odahu_infra_version" {
 }
 
 variable "grafana_admin" {
-  description = "Grafana admion username"
+  description = "Grafana admin username"
 }
 
 variable "grafana_pass" {

@@ -47,7 +47,7 @@ variable "allowed_ips" {
 }
 
 variable "aks_tags" {
-  description = "Tags used for Azure Kubernetes cluster definition"
+  description = "Tags used for Azure Kubernetes cluster resources labeling"
   default     = {}
   type        = map
 }
