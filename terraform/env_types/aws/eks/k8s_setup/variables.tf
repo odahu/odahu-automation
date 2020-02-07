@@ -188,6 +188,11 @@ variable "authz_uri" {
   description = "External authorization service uri"
 }
 
+variable "opa_policies" {
+  type        = map(string)
+  default     = {}
+  description = "Opa .rego policies"
+}
 
 ########################
 # Istio
