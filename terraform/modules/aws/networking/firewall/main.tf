@@ -84,11 +84,12 @@ resource "aws_security_group_rule" "node-ingress-dns-ephemeral" {
 }
 
 resource "aws_security_group_rule" "node-ingress-bastion" {
+  count                    = var.bastion_enabled ? 1 : 0
   description              = "Allow node to communicate with each other"
   from_port                = 0
   protocol                 = "-1"
   security_group_id        = aws_security_group.node.id
-  source_security_group_id = aws_security_group.bastion.id
+  source_security_group_id = aws_security_group.bastion[0].id
   to_port                  = 65535
   type                     = "ingress"
 }
@@ -126,6 +127,7 @@ resource "aws_security_group_rule" "ingress-node-https" {
 # Bastion
 
 resource "aws_security_group" "bastion" {
+  count       = var.bastion_enabled ? 1 : 0
   name        = "tf-${var.cluster_name}-bastion"
   description = "Bastion connection"
   vpc_id      = var.vpc_id
@@ -143,11 +145,12 @@ resource "aws_security_group" "bastion" {
 }
 
 resource "aws_security_group_rule" "bastion-ssh" {
+  count             = var.bastion_enabled ? 1 : 0
   cidr_blocks       = var.allowed_ips
   description       = "Allow EPAM networks to connect bastion via SSH"
   from_port         = 22
   protocol          = "tcp"
-  security_group_id = aws_security_group.bastion.id
+  security_group_id = aws_security_group.bastion[0].id
   to_port           = 22
   type              = "ingress"
 }
@@ -189,4 +192,3 @@ resource "aws_security_group_rule" "lb-http" {
   security_group_id = aws_security_group.lb.id
   type              = "ingress"
 }
-

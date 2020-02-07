@@ -4,11 +4,12 @@ data "azurerm_public_ip" "egress" {
 }
 
 locals {
+  bastion_ip = var.bastion_enabled ? ["${var.bastion_ip}/32"] : []
   allowed_nets = concat(
     list(var.aks_subnet_cidr),
     list(var.service_cidr),
     list("${data.azurerm_public_ip.egress.ip_address}/32"),
-    list("${var.bastion_ip}/32"),
+    local.bastion_ip,
     var.allowed_ips
   )
   default_node_pool     = var.node_pools["main"]

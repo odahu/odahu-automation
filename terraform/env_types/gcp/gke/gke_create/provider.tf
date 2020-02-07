@@ -24,10 +24,6 @@ provider "null" {
   version = "~> 2.1.2"
 }
 
-provider "http" {
-  version = "~> 1.1.1"
-}
-
 provider "tls" {
   version = "~> 2.1.0"
 }

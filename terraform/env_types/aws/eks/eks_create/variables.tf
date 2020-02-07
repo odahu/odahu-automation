@@ -23,9 +23,6 @@ variable "agent_cidr" {
   default     = "0.0.0.0/0"
   description = "Jenkins agent CIDR to allow access for CI jobs or your WAN address in case of locla run"
 }
-variable "dns_zone_name" {
-  description = "Cluster root DNS zone name"
-}
 
 ##################
 # GCP
@@ -87,13 +84,16 @@ variable "node_pools" {
 ################
 # Bastion host
 ################
+variable "bastion_enabled" {
+  default     = false
+  type        = bool
+  description = "Flag to install bastion host or not"
+}
+
 variable "bastion_machine_type" {
   default = "f1-micro"
 }
-variable "bastion_tag" {
-  default     = ""
-  description = "Bastion network tags"
-}
+
 variable "bastion_hostname" {
   default     = "bastion"
   description = "bastion hostname"

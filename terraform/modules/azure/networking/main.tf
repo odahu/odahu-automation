@@ -1,12 +1,14 @@
 locals {
   ingress_tags = {
-    cluster     = var.cluster_name
-    environment = "Development"
-    purpose     = "Kubernetes cluster ingress"
+    cluster = var.cluster_name
+    env     = "Development"
+    purpose = "Kubernetes cluster ingress"
   }
+  bastion_ip = var.bastion_enabled ? [azurerm_public_ip.bastion[0].ip_address] : []
 }
 
 resource "azurerm_public_ip" "bastion" {
+  count               = var.bastion_enabled ? 1 : 0
   name                = "${var.cluster_name}-bastion"
   location            = var.location
   resource_group_name = var.resource_group
@@ -67,7 +69,7 @@ resource "azurerm_network_security_group" "aks_nsg" {
     source_port_range            = "*"
     destination_port_ranges      = ["22"]
     source_address_prefixes      = var.allowed_ips
-    destination_address_prefixes = [azurerm_public_ip.bastion.ip_address, var.subnet_cidr]
+    destination_address_prefixes = concat(local.bastion_ip, list(var.subnet_cidr))
   }
   security_rule {
     name                         = "allow-ingress"
@@ -78,7 +80,7 @@ resource "azurerm_network_security_group" "aks_nsg" {
     protocol                     = "Tcp"
     source_port_range            = "*"
     destination_port_ranges      = ["80", "443"]
-    source_address_prefixes      = concat(list(azurerm_public_ip.bastion.ip_address), var.allowed_ips)
+    source_address_prefixes      = concat(local.bastion_ip, var.allowed_ips)
     destination_address_prefixes = [azurerm_public_ip.ingress.ip_address, var.subnet_cidr]
   }
   security_rule {

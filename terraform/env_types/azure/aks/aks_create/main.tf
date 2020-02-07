@@ -1,11 +1,3 @@
-locals {
-  common_tags = merge(
-    { "cluster" = var.cluster_name },
-    var.aks_common_tags
-  )
-  aks_dns_prefix = var.aks_dns_prefix == "" ? var.cluster_name : var.aks_dns_prefix
-}
-
 module "azure_monitoring" {
   source         = "../../../../modules/azure/monitoring"
   enabled        = var.aks_analytics_deploy
@@ -16,13 +8,14 @@ module "azure_monitoring" {
 }
 
 module "aks_networking" {
-  source         = "../../../../modules/azure/networking"
-  cluster_name   = var.cluster_name
-  tags           = local.common_tags
-  location       = var.azure_location
-  resource_group = var.azure_resource_group
-  subnet_cidr    = var.aks_cidr
-  allowed_ips    = var.allowed_ips
+  source          = "../../../../modules/azure/networking"
+  cluster_name    = var.cluster_name
+  tags            = local.common_tags
+  location        = var.azure_location
+  resource_group  = var.azure_resource_group
+  subnet_cidr     = var.aks_cidr
+  allowed_ips     = var.allowed_ips
+  bastion_enabled = var.bastion_enabled
 }
 
 module "aks_bastion" {
@@ -31,9 +24,10 @@ module "aks_bastion" {
   location         = var.azure_location
   resource_group   = var.azure_resource_group
   aks_subnet_id    = module.aks_networking.subnet_id
+  bastion_enabled  = var.bastion_enabled
   bastion_ip_id    = module.aks_networking.bastion_ip_id
   bastion_ssh_user = "ubuntu"
-  bastion_tags     = local.common_tags
+  bastion_labels   = merge({ "cluster" = var.cluster_name }, var.aks_common_tags, var.bastion_labels)
 }
 
 module "aks_cluster" {
@@ -48,8 +42,8 @@ module "aks_cluster" {
   egress_ip_name             = var.aks_egress_ip_name
   bastion_ip                 = module.aks_networking.bastion_ip
   allowed_ips                = var.allowed_ips
-  sp_client_id               = var.sp_client_id
-  sp_secret                  = var.sp_secret
+  sp_client_id               = local.sp_client_id
+  sp_secret                  = local.sp_secret
   k8s_version                = var.k8s_version
   ssh_user                   = "ubuntu"
   ssh_public_key             = var.ssh_key
@@ -58,6 +52,7 @@ module "aks_cluster" {
 }
 
 resource "null_resource" "bastion_kubeconfig" {
+  count = var.bastion_enabled ? 1 : 0
   connection {
     host        = module.aks_networking.bastion_ip
     user        = "ubuntu"

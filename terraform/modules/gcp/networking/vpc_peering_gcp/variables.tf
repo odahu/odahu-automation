@@ -1,8 +1,3 @@
-variable "infra_vpc_peering" {
-  default     = 1
-  description = "If VPC peering is required"
-}
-
 variable "project_id" {
   description = "Target project id"
 }
@@ -24,4 +19,3 @@ variable "gcp_network_2_range" {
   type        = list(string)
   description = "VPC Network 2 range to allow"
 }
-
