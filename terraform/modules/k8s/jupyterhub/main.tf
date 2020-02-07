@@ -69,7 +69,7 @@ module "docker_credentials" {
   docker_repo     = var.docker_repo
   docker_username = var.docker_username
   docker_password = var.docker_password
-  namespaces      = [kubernetes_namespace.jupyterhub[0].metadata[0].annotations.name]
+  namespaces      = var.jupyterhub_enabled ? [kubernetes_namespace.jupyterhub[0].metadata[0].annotations.name] : []
 }
 
 resource "kubernetes_secret" "jupyterhub_tls" {
