@@ -30,9 +30,10 @@ if [[ $# -ge 1 ]]; then
             if [[ $Parameter =~ $ValidParameter ]]; then
                 DNS_Prefix=$(echo $Parameter | cut -d':' -f1)
                 DNS_Value=$(echo $Parameter | cut -d':' -f2)
+                if [[ "$DNS_Value" == "null" ]]; then continue; fi
                 until [[ $(dig +short $DNS_Prefix.$DNS_Zone | head -n1 | tr -d '\n') == ${DNS_Value,,} ]]; do
                     sleep 5
-                    echo "Ensuring that \"$DNS_Prefix.$DNS_Zone\" resolves as \"$DNS_Value\"..."
+                    echo "Check that \"$DNS_Prefix.$DNS_Zone\" resolves as \"$DNS_Value\"..."
                 done
             else
                 echo -e "ERROR:\tParameters must be in '<host.prefix>:<value>' format"

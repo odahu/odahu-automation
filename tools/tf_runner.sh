@@ -166,8 +166,6 @@ function SetupCloudAccess() {
 				exit 1
 			fi
 			az login --service-principal -u "${ARM_CLIENT_ID}" -p "${ARM_CLIENT_SECRET}" --tenant "${ARM_TENANT_ID}"
-			export TF_VAR_sp_client_id=${ARM_CLIENT_ID}
-			export TF_VAR_sp_secret=${ARM_CLIENT_SECRET}
 			if [[ $VERBOSE == true ]]; then set -x; fi
 			;;
 		*)
@@ -291,7 +289,7 @@ function CheckCluster() {
 			;;
 		"gcp/gke")
 			if gcloud container clusters list \
-				--zone "$(GetParam 'location')" | grep -E "^$(GetParam 'cluster_name') .*"; then
+				--zone "$(GetParam 'region')" | grep -E "^$(GetParam 'cluster_name') .*"; then
 				true
 			else
 				false
@@ -319,7 +317,7 @@ function FetchKubeConfig() {
 			;;
 		"gcp/gke")
 			gcloud container clusters get-credentials "$(GetParam 'cluster_name')" \
-				--zone "$(GetParam 'location')" \
+				--zone "$(GetParam 'region')" \
 				--project "$(GetParam 'project_id')"
 			;;
 		"azure/aks")
@@ -350,7 +348,7 @@ function SuspendCluster() {
 
 					gcloud beta container clusters update "${cluster_name}" \
 						--node-pool "main" \
-						--min-nodes 0 --max-nodes $(( $(GetParam 'initial_node_count') / 2 )) \
+						--min-nodes 0 --max-nodes $(( $(GetParam 'node_pools.main.init_node_count') / 2 )) \
 						--node-locations "$(GetParam 'node_locations | join(",")')" \
 						--region "$(GetParam 'region')" \
 						--quiet
@@ -409,7 +407,7 @@ function ResumeCluster() {
 					gcloud beta container clusters resize "${cluster_name}" \
 						--region "$(GetParam 'region')" \
 						--node-pool "main" \
-						--num-nodes $(( $(GetParam 'initial_node_count') / 2 - 1 )) \
+						--num-nodes $(( $(GetParam 'node_pools.main.init_node_count') / 2 - 1 )) \
 						--quiet
 
 					until [[ -z "$(kubectl get pods --no-headers=true --all-namespaces --field-selector=status.phase==Pending 2>/dev/null)" ]]; do

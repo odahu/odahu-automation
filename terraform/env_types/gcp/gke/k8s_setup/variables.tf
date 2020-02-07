@@ -19,11 +19,6 @@ variable "region" {
   description = "Region of resources"
 }
 
-variable "aws_region" {
-  default     = "us-east-1"
-  description = "Region of resources"
-}
-
 variable "config_context_auth_info" {
   description = "Odahuflow cluster context auth"
 }
@@ -61,11 +56,8 @@ variable "docker_password" {
   description = "Odahuflow Docker repo password"
 }
 
-variable "dns_zone_name" {
-  description = "Cluster root DNS zone name"
-}
-
-variable "network_name" {
+variable "vpc_name" {
+  default     = ""
   description = "The VPC network to host the cluster in"
 }
 
@@ -90,7 +82,8 @@ variable "pods_cidr" {
 }
 
 variable "grafana_admin" {
-  description = "Grafana admion username"
+  default     = "grafana_admin"
+  description = "Grafana admin username"
 }
 
 variable "grafana_pass" {
@@ -133,7 +126,6 @@ variable "oauth_oidc_audience" {
 variable "oauth_oidc_scope" {
   description = "OAuth2 scope"
 }
-
 
 variable "oauth_mesh_enabled" {
   type        = bool

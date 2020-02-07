@@ -75,10 +75,6 @@ variable "docker_password" {
   description = "Odahuflow Docker repo password"
 }
 
-variable "dns_zone_name" {
-  description = "Cluster root DNS zone name"
-}
-
 ########################
 # Prometheus monitoring
 ########################
@@ -88,7 +84,8 @@ variable "allowed_ips" {
 }
 
 variable "grafana_admin" {
-  description = "Grafana admion username"
+  default     = "grafana_admin"
+  description = "Grafana admin username"
 }
 
 variable "grafana_pass" {

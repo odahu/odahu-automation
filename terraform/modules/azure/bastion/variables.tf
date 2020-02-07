@@ -16,6 +16,12 @@ variable "aks_subnet_id" {
   description = "ID of subnet for the cluster nodes to run"
 }
 
+variable "bastion_enabled" {
+  default     = false
+  type        = bool
+  description = "Flag to install bastion host or not"
+}
+
 variable "bastion_ip_id" {
   description = "ID of Public IP address that will be used for bastion SSH access"
 }
@@ -24,9 +30,9 @@ variable "bastion_machine_type" {
   default = "Standard_B1ls"
 }
 
-variable "bastion_tags" {
+variable "bastion_labels" {
   default     = {}
-  description = "Bastion host tags"
+  description = "Bastion host Azure resource tags"
   type        = map
 }
 
