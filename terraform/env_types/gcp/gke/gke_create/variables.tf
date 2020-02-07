@@ -41,6 +41,7 @@ variable "infra_cidr" {
 }
 
 variable "gcp_cidr" {
+  default     = ""
   description = "GCP network CIDR"
 }
 
