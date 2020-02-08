@@ -80,6 +80,12 @@ variable "egress_ip_name" {
   description = "Name of public IP-address used for AKS cluster egress"
 }
 
+variable "bastion_enabled" {
+  default     = false
+  type        = bool
+  description = "Flag to install bastion host or not"
+}
+
 variable "bastion_ip" {
   description = "Bastion host IP-address"
 }
