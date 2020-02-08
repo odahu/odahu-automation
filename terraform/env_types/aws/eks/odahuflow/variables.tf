@@ -1,6 +1,14 @@
 ###################################################################################
 # Common required
 ###################################################################################
+variable "config_context_auth_info" {
+  description = "Odahuflow cluster context auth"
+}
+
+variable "config_context_cluster" {
+  description = "Odahuflow cluster context name"
+}
+
 variable "tls_crt" {
   description = "TLS certificate to use for SSL termination"
 }
