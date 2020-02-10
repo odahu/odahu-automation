@@ -40,6 +40,7 @@ module "aks_cluster" {
   aks_subnet_id              = module.aks_networking.subnet_id
   aks_subnet_cidr            = var.aks_cidr
   egress_ip_name             = var.aks_egress_ip_name
+  bastion_enabled            = var.bastion_enabled
   bastion_ip                 = module.aks_networking.bastion_ip
   allowed_ips                = var.allowed_ips
   sp_client_id               = local.sp_client_id
