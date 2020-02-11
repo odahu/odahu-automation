@@ -44,25 +44,25 @@ module "iam" {
 # GKE Cluster
 ########################################################
 module "gke_cluster" {
-  source             = "../../../../modules/gcp/gke_cluster"
-  project_id         = var.project_id
-  cluster_name       = var.cluster_name
-  zone               = var.zone
-  allowed_ips        = var.allowed_ips
-  agent_cidr         = var.agent_cidr
-  nodes_sa           = module.iam.service_account
-  node_pools         = var.node_pools
-  pods_cidr          = var.pods_cidr
-  service_cidr       = var.service_cidr
-  location           = var.region
-  node_locations     = var.node_locations
-  network            = module.vpc.network_name
-  subnetwork         = module.vpc.subnet_name
-  k8s_version        = var.k8s_version
-  node_version       = var.node_version
-  node_gcp_tags      = local.node_gcp_tags
-  node_labels        = var.node_labels
-  ssh_public_key     = var.ssh_key
+  source         = "../../../../modules/gcp/gke_cluster"
+  project_id     = var.project_id
+  cluster_name   = var.cluster_name
+  zone           = var.zone
+  allowed_ips    = var.allowed_ips
+  agent_cidr     = var.agent_cidr
+  nodes_sa       = module.iam.service_account
+  node_pools     = var.node_pools
+  pods_cidr      = var.pods_cidr
+  service_cidr   = var.service_cidr
+  location       = var.region
+  node_locations = var.node_locations
+  network        = module.vpc.network_name
+  subnetwork     = module.vpc.subnet_name
+  k8s_version    = var.k8s_version
+  node_version   = var.node_version
+  node_gcp_tags  = local.node_gcp_tags
+  node_labels    = var.node_labels
+  ssh_public_key = var.ssh_key
 
   bastion_enabled      = var.bastion_enabled
   bastion_hostname     = var.bastion_hostname

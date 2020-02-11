@@ -1,0 +1,37 @@
+image: "ubuntu:18.04"
+
+stages:
+  - lint
+#  - build
+
+# TODO: discuss image building with EPAM support
+#docker_images:
+#  image: docker:19.03.4
+#  stage: lint
+#  services:
+#    - docker:dind
+#  before_script:
+#    - apk add -U bash make
+#  script:
+#    - make docker-build-terraform
+
+shellcheck:
+  image: koalaman/shellcheck-alpine:v0.7.0
+  stage: lint
+  before_script:
+    - apk add -U make bash
+  script:
+    - make shellcheck
+
+terraform:
+  image: hashicorp/terraform:0.12.19
+  stage: lint
+  variables:
+    AWS_DEFAULT_REGION: test_region
+    TF_PLUGIN_CACHE_DIR: /.terraform.d/plugin-cache
+  before_script:
+    - apk add -U make bash findutils
+    - mkdir -p "${TF_PLUGIN_CACHE_DIR}"
+  script:
+    - make terraform-fmt-check
+    - make terraform-validate
