@@ -4,8 +4,8 @@ provider "aws" {
 }
 
 provider "helm" {
-  version         = "0.10.4"
-  install_tiller  = false
+  version        = "0.10.4"
+  install_tiller = false
 
   kubernetes {
     config_context = var.config_context_auth_info

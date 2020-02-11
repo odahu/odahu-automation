@@ -114,10 +114,10 @@ module "docker_credentials" {
   docker_username    = var.docker_username
   docker_password    = var.docker_password
   docker_secret_name = var.docker_secret_name
-  namespaces         = [ kubernetes_namespace.odahuflow.metadata[0].annotations.name,
-                         kubernetes_namespace.odahuflow_training.metadata[0].annotations.name,
-                         kubernetes_namespace.odahuflow_packaging.metadata[0].annotations.name,
-                         kubernetes_namespace.odahuflow_deployment.metadata[0].annotations.name ]
+  namespaces = [kubernetes_namespace.odahuflow.metadata[0].annotations.name,
+    kubernetes_namespace.odahuflow_training.metadata[0].annotations.name,
+    kubernetes_namespace.odahuflow_packaging.metadata[0].annotations.name,
+  kubernetes_namespace.odahuflow_deployment.metadata[0].annotations.name]
 }
 
 resource "kubernetes_secret" "tls_odahuflow" {
