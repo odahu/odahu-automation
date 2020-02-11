@@ -7,7 +7,7 @@ locals {
   sp_secret    = data.external.env.result.ARM_CLIENT_SECRET
 
   common_tags = merge(
-    { 
+    {
       "cluster" = var.cluster_name,
       "project" = "odahu-flow"
     },

@@ -1,0 +1,38 @@
+image: "ubuntu:18.04"
+
+stages:
+  - lint
+  - build
+
+docker_build_master:
+  image: docker:latest
+  stage: build
+  services:
+    - docker:dind
+  script:
+    - make docker-build-terraform
+
+shellcheck:
+  image: koalaman/shellcheck-alpine:v0.7.0
+  stage: lint
+  before_script:
+    - apk add -U make bash
+  script:
+    - make shellcheck
+
+terraform:
+  stage: lint
+  variables:
+    AWS_DEFAULT_REGION: test
+    TERRAFORM_VERSION: 0.12.19
+    TF_PLUGIN_CACHE_DIR: /.terraform.d/plugin-cache
+  before_script:
+    - apt-get update && apt-get install -y wget unzip make
+    - wget -qO /tmp/terraform.zip "https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip"
+    - unzip /tmp/terraform.zip -d /tmp
+    - ls -al /tmp
+    - mv /tmp/terraform /usr/local/bin/terraform
+    - mkdir -p "${TF_PLUGIN_CACHE_DIR}"
+  script:
+    - make terraform-fmt-check
+    - make terraform-validate
