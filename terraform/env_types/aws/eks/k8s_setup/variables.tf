@@ -68,10 +68,12 @@ variable "docker_repo" {
 }
 
 variable "docker_username" {
+  default     = ""
   description = "Odahuflow Docker repo username"
 }
 
 variable "docker_password" {
+  default     = ""
   description = "Odahuflow Docker repo password"
 }
 
