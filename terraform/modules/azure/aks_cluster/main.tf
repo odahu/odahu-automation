@@ -106,7 +106,7 @@ resource "azurerm_kubernetes_cluster" "aks" {
     load_balancer_sku = "standard"
 
     load_balancer_profile {
-      outbound_ip_address_ids = [ data.external.egress_ip.result.id ]
+      outbound_ip_address_ids = [data.external.egress_ip.result.id]
     }
   }
 

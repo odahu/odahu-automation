@@ -1,5 +1,5 @@
 locals {
-  initial_node_count = length(var.node_locations) == 0 ? lookup(var.node_pools.main, "init_node_count", 1) : floor(lookup(var.node_pools.main, "init_node_count", 2) / length(var.node_locations)+1)
+  initial_node_count = length(var.node_locations) == 0 ? lookup(var.node_pools.main, "init_node_count", 1) : floor(lookup(var.node_pools.main, "init_node_count", 2) / length(var.node_locations) + 1)
 
   default_labels = {
     "project" = "odahu-flow"
@@ -30,7 +30,7 @@ resource "google_container_cluster" "cluster" {
   # separately managed node pools. So we create the default node pool with double
   # initial number of nodes (minimum 4 per location) and immediately delete it.
   remove_default_node_pool = true
-  initial_node_count       = local.initial_node_count*2 >= 4 ? local.initial_node_count*2 : 4
+  initial_node_count       = local.initial_node_count * 2 >= 4 ? local.initial_node_count * 2 : 4
 
   # Setting an empty username and password explicitly disables basic auth
   master_auth {
