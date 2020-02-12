@@ -17,7 +17,7 @@ output "syncer_helm_values" {
   value = templatefile("${path.module}/templates/syncer.yaml", {
     data_bucket_name   = var.dags_bucket
     data_bucket_region = var.region
-    subpath            = "/dags"
+    subpath            = "/wpm_matching/deploy/dags"
     syncer_sa          = google_service_account.syncer_sa.email
   })
 }

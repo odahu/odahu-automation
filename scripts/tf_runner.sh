@@ -357,7 +357,7 @@ function SuspendCluster() {
 						--quiet
 
 					gcloud compute instances list --format="csv[no-heading](name,zone)" \
-						--filter="labels.cluster_name:${cluster_name} AND name ~ ^bastion" | \
+						--filter="labels.cluster_name:${cluster_name} AND name ~ bastion" | \
 						sed -r 's/(\S+),(\S+).*/gcloud compute instances stop \1 --zone \2/e'
 				else
 					echo "ERROR: List of cluster nodes is empty - there's nothing to suspend"
@@ -388,7 +388,7 @@ function ResumeCluster() {
 				k_nodes=$(kubectl get nodes --no-headers=true 2>/dev/null | awk '{print $1}')
 				if [[ -z "${k_nodes}" ]]; then
 					gcloud compute instances list --format="csv[no-heading](name,zone)" \
-						--filter="labels.cluster_name:${cluster_name} AND name ~ ^bastion" | \
+						--filter="labels.cluster_name:${cluster_name} AND name ~ bastion" | \
 						sed -r 's/(\S+),(\S+).*/gcloud compute instances start \1 --zone \2/e'
 
 					gcloud beta container clusters resize "${cluster_name}" \

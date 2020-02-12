@@ -70,3 +70,22 @@ module "gke_cluster" {
   bastion_gcp_tags     = local.bastion_gcp_tags
   bastion_labels       = var.bastion_labels
 }
+
+module "gke_dmz_natbox" {
+  dmz_natbox_enabled = true
+
+  source         = "../../../../modules/gcp/networking/natbox"
+  cluster_name   = var.cluster_name
+  gcp_project_id = var.project_id
+  gcp_zone       = var.zone
+  ssh_public_key = var.ssh_key
+
+  pods_cidr     = var.pods_cidr
+  gke_subnet    = module.vpc.subnet_name
+  dmz_subnet    = "epm-wpm-01-dlab-odahu-vpn-to-epam-subnet-01"
+  dmz_dest_cidr = "10.0.0.0/8"
+
+  gke_gcp_tags      = local.node_gcp_tags
+  bastion_gcp_tags  = local.bastion_gcp_tags
+  dmz_natbox_labels = var.node_labels
+}

@@ -1,5 +1,5 @@
 locals {
-  airflow_helm_version = "6.3.0"
+  airflow_helm_version = "6.5.0"
   airflow_helm_repo    = "stable"
   debug_log_level      = "true"
 
