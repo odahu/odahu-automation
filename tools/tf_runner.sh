@@ -195,38 +195,38 @@ function TerraformCreate() {
 	echo 'INFO : Setup K8S Odahuflow dependencies'
 	TerraformRun k8s_setup apply
 	echo 'INFO : Create Odahuflow DNS records'
-        TerraformOutput k8s_setup
+	TerraformOutput k8s_setup
 	case $(GetParam "cluster_type") in
 		"aws/eks")
-                        TerraformOutput eks_create
-                        LB_IP="$(jq -rc '.load_balancer_ip.value' "$MODULES_ROOT/k8s_setup/$OUTPUT_FILE")."
-                        K8S_API_IP="$(jq -rc '.k8s_api_address.value' "$MODULES_ROOT/eks_create/$OUTPUT_FILE" | sed -e 's/https:\/\///')."
-                        BASTION_IP=$(jq -rc '.bastion_address.value' "$MODULES_ROOT/eks_create/$OUTPUT_FILE")
-                        TF_VAR_records=$(jq -rn "[{name: \"bastion.$(GetParam 'cluster_name')\", value: \"$BASTION_IP\"}, {name: \"odahu.$(GetParam 'cluster_name')\", value: \"$LB_IP\", type: \"CNAME\"}, {name: \"api.$(GetParam 'cluster_name')\", value: \"$K8S_API_IP\", type: \"CNAME\"}]")
-                        export TF_VAR_records
+			TerraformOutput eks_create
+			LB_IP="$(jq -rc '.load_balancer_ip.value' "$MODULES_ROOT/k8s_setup/$OUTPUT_FILE")."
+			K8S_API_IP="$(jq -rc '.k8s_api_address.value' "$MODULES_ROOT/eks_create/$OUTPUT_FILE" | sed -e 's/https:\/\///')."
+			BASTION_IP=$(jq -rc '.bastion_address.value' "$MODULES_ROOT/eks_create/$OUTPUT_FILE")
+			TF_VAR_records=$(jq -rn "[{name: \"bastion.$(GetParam 'cluster_name')\", value: \"$BASTION_IP\"}, {name: \"odahu.$(GetParam 'cluster_name')\", value: \"$LB_IP\", type: \"CNAME\"}, {name: \"api.$(GetParam 'cluster_name')\", value: \"$K8S_API_IP\", type: \"CNAME\"}]")
+			export TF_VAR_records
 			;;
 		"gcp/gke")
-                        TerraformOutput gke_create
-                        LB_IP=$(jq -rc '.helm_values.value["controller.service.loadBalancerIP"]' "$MODULES_ROOT/k8s_setup/$OUTPUT_FILE")
-                        K8S_API_IP=$(jq -rc '.k8s_api_address.value' "$MODULES_ROOT/gke_create/$OUTPUT_FILE")
-                        BASTION_IP=$(jq -rc '.bastion_address.value' "$MODULES_ROOT/gke_create/$OUTPUT_FILE")
-                        TF_VAR_records=$(jq -rn "[{name: \"bastion.$(GetParam 'cluster_name')\", value: \"$BASTION_IP\"}, {name: \"odahu.$(GetParam 'cluster_name')\", value: \"$LB_IP\"}, {name: \"api.$(GetParam 'cluster_name')\", value: \"$K8S_API_IP\"}]")
-                        export TF_VAR_records
+			TerraformOutput gke_create
+			LB_IP=$(jq -rc '.helm_values.value["controller.service.loadBalancerIP"]' "$MODULES_ROOT/k8s_setup/$OUTPUT_FILE")
+			K8S_API_IP=$(jq -rc '.k8s_api_address.value' "$MODULES_ROOT/gke_create/$OUTPUT_FILE")
+			BASTION_IP=$(jq -rc '.bastion_address.value' "$MODULES_ROOT/gke_create/$OUTPUT_FILE")
+			TF_VAR_records=$(jq -rn "[{name: \"bastion.$(GetParam 'cluster_name')\", value: \"$BASTION_IP\"}, {name: \"odahu.$(GetParam 'cluster_name')\", value: \"$LB_IP\"}, {name: \"api.$(GetParam 'cluster_name')\", value: \"$K8S_API_IP\"}]")
+			export TF_VAR_records
 			;;
 		"azure/aks")
 			TerraformOutput aks_create
-                        LB_IP=$(jq -rc '.helm_values.value["controller.service.loadBalancerIP"]' "$MODULES_ROOT/k8s_setup/$OUTPUT_FILE")
-                        K8S_API_IP="$(jq -rc '.k8s_api_address.value' "$MODULES_ROOT/aks_create/$OUTPUT_FILE" | sed -e 's/^https:\/\///'| sed -e 's/:443//')."
-                        BASTION_IP=$(jq -rc '.bastion_address.value' "$MODULES_ROOT/aks_create/$OUTPUT_FILE")
-                        TF_VAR_records=$(jq -rn "[{name: \"bastion.$(GetParam 'cluster_name')\", value: \"$BASTION_IP\"}, {name: \"odahu.$(GetParam 'cluster_name')\", value: \"$LB_IP\"}, {name: \"api.$(GetParam 'cluster_name')\", value: \"$K8S_API_IP\", type: \"CNAME\"}]")
-                        export TF_VAR_records
+			LB_IP=$(jq -rc '.helm_values.value["controller.service.loadBalancerIP"]' "$MODULES_ROOT/k8s_setup/$OUTPUT_FILE")
+			K8S_API_IP="$(jq -rc '.k8s_api_address.value' "$MODULES_ROOT/aks_create/$OUTPUT_FILE" | sed -e 's/^https:\/\///'| sed -e 's/:443//')."
+			BASTION_IP=$(jq -rc '.bastion_address.value' "$MODULES_ROOT/aks_create/$OUTPUT_FILE")
+			TF_VAR_records=$(jq -rn "[{name: \"bastion.$(GetParam 'cluster_name')\", value: \"$BASTION_IP\"}, {name: \"odahu.$(GetParam 'cluster_name')\", value: \"$LB_IP\"}, {name: \"api.$(GetParam 'cluster_name')\", value: \"$K8S_API_IP\", type: \"CNAME\"}]")
+			export TF_VAR_records
 			;;
 	esac
-        TerragruntRun odahu_dns apply
+    TerragruntRun odahu_dns apply
 	echo 'INFO : Deploy Odahuflow components'
 	TerraformRun odahuflow apply
 	echo "INFO : Save cluster info to ${OUTPUT_FILE}"
-        TerraformOutput odahuflow
+    TerraformOutput odahuflow
 }
 
 # Create Odahuflow cluster
@@ -240,8 +240,8 @@ function TerraformOutput() {
 function TerraformDestroy() {
 	if CheckCluster; then
 		echo 'Destroy DNS records'
-                export TF_VAR_records='[]'
-                TerragruntRun odahu_dns destroy
+		export TF_VAR_records='[]'
+		TerragruntRun odahu_dns destroy
 
 		FetchKubeConfig
 
@@ -451,4 +451,3 @@ elif [[ $COMMAND == 'suspend' ]]; then
 elif [[ $COMMAND == 'resume' ]]; then
 	ResumeCluster
 fi
-

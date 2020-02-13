@@ -11,11 +11,13 @@ variable "cluster_name" {
 }
 
 variable "config_context_auth_info" {
-  description = "Odahuflow cluster context auth"
+  default     = ""
+  description = "Kubernetes cluster context auth"
 }
 
 variable "config_context_cluster" {
-  description = "Odahuflow cluster context name"
+  default     = ""
+  description = "Kubernetes cluster context name"
 }
 
 variable "project_id" {

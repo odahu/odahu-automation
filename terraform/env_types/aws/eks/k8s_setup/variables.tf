@@ -26,15 +26,9 @@ variable "region" {
   default     = "us-east1"
   description = "Region of resources"
 }
+
 variable "public_subnet_cidrs" {
   default = []
-}
-variable "config_context_auth_info" {
-  description = "Odahuflow cluster context auth"
-}
-
-variable "config_context_cluster" {
-  description = "Odahuflow cluster context name"
 }
 
 variable "aws_region" {
@@ -49,6 +43,16 @@ variable "az_list" {
 variable "cluster_name" {
   default     = "odahuflow"
   description = "Odahuflow cluster name"
+}
+
+variable "config_context_auth_info" {
+  default     = ""
+  description = "Kubernetes cluster context auth"
+}
+
+variable "config_context_cluster" {
+  default     = ""
+  description = "Kubernetes cluster context name"
 }
 
 variable "helm_repo" {
@@ -142,7 +146,6 @@ variable "oauth_mesh_enabled" {
   description = "OAuth2 inside service mesh via Envoy filter"
 }
 
-
 variable "oauth_oidc_jwks_url" {
   type        = string
   default     = ""
@@ -203,4 +206,3 @@ variable "istio_namespace" {
   default     = "istio-system"
   description = "istio namespace"
 }
-
