@@ -16,7 +16,7 @@ variable "tls_secret_key" {
 }
 
 variable "istio_version" {
-  default = "1.4.3"
+  default = "1.4.4"
 }
 
 variable "istio_namespace" {
