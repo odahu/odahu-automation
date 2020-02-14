@@ -26,3 +26,9 @@ tracking_server:
 
 toolchain_integration:
   enabled: true
+
+resource_uploader_sa:
+  client_id: ${resource_uploader_sa.client_id}
+  client_secret: ${resource_uploader_sa.client_secret}
+
+oauth_oidc_issuer_url: ${oauth_oidc_issuer_url}

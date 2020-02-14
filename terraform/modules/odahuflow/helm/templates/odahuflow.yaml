@@ -37,3 +37,9 @@ metrics:
 ${connections}
 
 ${config}
+
+resource_uploader_sa:
+  client_id: ${resource_uploader_sa.client_id}
+  client_secret: ${resource_uploader_sa.client_secret}
+
+oauth_oidc_issuer_url: ${oauth_oidc_issuer_url}

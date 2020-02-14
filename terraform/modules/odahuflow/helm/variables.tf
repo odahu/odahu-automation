@@ -144,3 +144,28 @@ variable "model_deployment_jws_configuration" {
 variable "odahuflow_connection_decrypt_token" {
   description = "Token for getting a decrypted connection"
 }
+
+variable "resource_uploader_sa" {
+  type = object({
+    client_id : string
+    client_secret : string
+  })
+}
+
+
+variable "operator_sa" {
+  type = object({
+    client_id : string
+    client_secret : string
+  })
+}
+
+variable "oauth_oidc_issuer_url" {
+  type        = string
+  description = "OpenID Provider URL"
+}
+
+variable "oauth_oidc_token_endpoint" {
+  type        = string
+  description = "OpenID Provider Token URL"
+}

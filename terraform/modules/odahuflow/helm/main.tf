@@ -20,6 +20,11 @@ locals {
       decrypt_token   = var.odahuflow_connection_decrypt_token
       vault           = var.connection_vault_configuration
     }
+    operator = {
+      oauth_oidc_token_endpoint = var.oauth_oidc_token_endpoint
+      client_id                 = var.operator_sa.client_id
+      client_secret             = var.operator_sa.client_secret
+    }
     deployment = {
       toleration                    = contains(keys(var.node_pools), "model_deployment") ? { Key = var.node_pools["model_deployment"].taints[0].key, Operator = "Equal", Value = var.node_pools["model_deployment"].taints[0].value, Effect = replace(var.node_pools["model_deployment"].taints[0].effect, "/(?i)no_?schedule/", "NoSchedule") } : null
       node_selector                 = contains(keys(var.node_pools), "model_deployment") ? { for key, value in var.node_pools["model_deployment"].labels : key => value } : null
@@ -40,6 +45,16 @@ locals {
       namespace         = var.odahuflow_training_namespace
       output_connection = "models-output"
       metric_url        = "${local.url_schema}://${var.cluster_domain}/mlflow"
+    }
+    trainer = {
+      oauth_oidc_token_endpoint = var.oauth_oidc_token_endpoint
+      client_id                 = var.operator_sa.client_id
+      client_secret             = var.operator_sa.client_secret
+    }
+    packager = {
+      oauth_oidc_token_endpoint = var.oauth_oidc_token_endpoint
+      client_id                 = var.operator_sa.client_id
+      client_secret             = var.operator_sa.client_secret
     }
     packaging = {
       toleration        = contains(keys(var.node_pools), "packaging") ? { Key = var.node_pools["packaging"].taints[0].key, Operator = "Equal", Value = var.node_pools["packaging"].taints[0].value, Effect = replace(var.node_pools["packaging"].taints[0].effect, "/(?i)no_?schedule/", "NoSchedule") } : null
@@ -179,8 +194,10 @@ resource "helm_release" "odahuflow" {
       docker_secret     = var.docker_secret_name
       odahuflow_version = var.odahuflow_version
 
-      connections = yamlencode({ connections = var.odahuflow_connections })
-      config      = yamlencode({ config = local.odahuflow_config })
+      connections           = yamlencode({ connections = var.odahuflow_connections })
+      config                = yamlencode({ config = local.odahuflow_config })
+      resource_uploader_sa  = var.resource_uploader_sa
+      oauth_oidc_issuer_url = var.oauth_oidc_issuer_url
     }),
   ]
 
@@ -214,7 +231,9 @@ resource "helm_release" "mlflow" {
       docker_repo              = var.docker_repo
       mlflow_toolchain_version = var.mlflow_toolchain_version
 
-      odahuflow_version = var.odahuflow_version
+      odahuflow_version     = var.odahuflow_version
+      resource_uploader_sa  = var.resource_uploader_sa
+      oauth_oidc_issuer_url = var.oauth_oidc_issuer_url
     }),
   ]
 
@@ -237,9 +256,11 @@ resource "helm_release" "rest_packagers" {
 
   values = [
     templatefile("${path.module}/templates/packagers.yaml", {
-      docker_repo       = var.docker_repo
-      packager_version  = var.packager_version
-      odahuflow_version = var.odahuflow_version
+      docker_repo           = var.docker_repo
+      packager_version      = var.packager_version
+      odahuflow_version     = var.odahuflow_version
+      resource_uploader_sa  = var.resource_uploader_sa
+      oauth_oidc_issuer_url = var.oauth_oidc_issuer_url
     }),
   ]
 
