@@ -23,7 +23,7 @@ module "jupyterhub" {
   source = "../../../../modules/k8s/jupyterhub"
 
   jupyterhub_enabled = var.jupyterhub_enabled
-  cluster_domain     = "odahu.${var.cluster_name}.${var.root_domain}"
+  cluster_domain     = "odahu.${local.cluster_domain_name}"
   tls_secret_crt     = var.tls_crt
   tls_secret_key     = var.tls_key
 
@@ -42,7 +42,7 @@ module "odahuflow_helm" {
 
   tls_secret_crt = var.tls_crt
   tls_secret_key = var.tls_key
-  cluster_domain = "odahu.${var.cluster_name}.${var.root_domain}"
+  cluster_domain = "odahu.${local.cluster_domain_name}"
 
   helm_repo                = var.helm_repo
   docker_repo              = var.docker_repo

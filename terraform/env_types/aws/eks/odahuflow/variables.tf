@@ -38,8 +38,8 @@ variable "odahuflow_version" {
   description = "Odahuflow release version"
 }
 
-variable "root_domain" {
-  description = "Odahuflow cluster root domain"
+variable "dns" {
+  description = "Odahuflow cluster DNS settings"
 }
 
 variable "helm_repo" {
@@ -114,4 +114,3 @@ variable "packager_version" {}
 variable "node_pools" {
   default = {}
 }
-

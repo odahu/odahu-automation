@@ -6,36 +6,22 @@ variable "cluster_name" {
   description = "Odahuflow cluster name"
 }
 
-variable "root_domain" {
-  description = "Odahuflow cluster root domain"
-}
 variable "infra_cidr" {
   description = "Infrastructure network CIDR to peering with"
 }
+
 variable "k8s_version" {
   default     = "1.13.10"
   description = "Kubernetes master version"
 }
+
 variable "allowed_ips" {
   description = "CIDR to allow access from"
 }
+
 variable "agent_cidr" {
   default     = "0.0.0.0/0"
   description = "Jenkins agent CIDR to allow access for CI jobs or your WAN address in case of locla run"
-}
-
-##################
-# GCP
-##################
-variable "project_id" {
-  description = "GCP project ID"
-}
-variable "region" {
-  description = "GCP region"
-}
-variable "zone" {
-  default     = ""
-  description = "GCP zone"
 }
 
 ##################

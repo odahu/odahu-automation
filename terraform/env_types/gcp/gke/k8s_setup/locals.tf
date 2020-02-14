@@ -4,4 +4,6 @@ locals {
   config_context_cluster   = var.config_context_cluster == "" ? local.kubeconfig.contexts[0].context.user : var.config_context_cluster
 
   network_name = var.vpc_name == "" ? "${var.cluster_name}-vpc" : var.vpc_name
+
+  cluster_domain_name = lookup(var.dns, "domain", null)
 }

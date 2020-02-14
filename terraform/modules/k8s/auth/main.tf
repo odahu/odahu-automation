@@ -10,8 +10,7 @@ locals {
 data "template_file" "oauth2-proxy_values" {
   template = file("${path.module}/templates/oauth2-proxy.yaml")
   vars = {
-    cluster_name            = var.cluster_name
-    root_domain             = var.root_domain
+    domain_name             = var.domain_name
     oauth_image_repository  = var.oauth_image_repository
     oauth_image_tag         = var.oauth_image_tag
     oauth_client_id         = var.oauth_client_id
@@ -37,4 +36,4 @@ resource "helm_release" "oauth2-proxy" {
   values = [
     data.template_file.oauth2-proxy_values.rendered
   ]
-} 
+}

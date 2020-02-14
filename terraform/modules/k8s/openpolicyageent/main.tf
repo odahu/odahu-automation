@@ -16,7 +16,8 @@ resource "helm_release" "opa" {
   timeout    = "600"
   depends_on = [
     kubernetes_namespace.opa,
-  var.mesh_dependency]
+    var.mesh_dependency
+  ]
   values = [
     templatefile("${path.module}/templates/values.yaml", {
       authorization_enabled = var.authorization_enabled

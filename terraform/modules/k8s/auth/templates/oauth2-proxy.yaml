@@ -12,13 +12,13 @@ config:
     provider = "iodc"
     redirect_url = "${oauth_redirect_url}"
     oidc_issuer_url = "${oauth_oidc_issuer_url}"
-    whitelist_domains = ".${cluster_name}.${root_domain}"
+    whitelist_domains = ".${domain_name}"
     email_domains = "*"
     skip_provider_button = true
     scope = "${oauth_oidc_scope}"
     http_address = "0.0.0.0:4180"
  
-    cookie_domain = ".${cluster_name}.${root_domain}"
+    cookie_domain = ".${domain_name}"
     cookie_expire = "${oauth_cookie_expire}"
     cookie_secure = true
  
@@ -34,11 +34,11 @@ ingress:
   path: /oauth2
   enabled: true
   hosts:
-    - odahu.${cluster_name}.${root_domain}
+    - odahu.${domain_name}
   tls:
     - secretName: ${ingress_tls_secret_name}
       hosts:
-        - odahu.${cluster_name}.${root_domain}
+        - odahu.${domain_name}
  
 service:
   port: 4180

@@ -42,8 +42,8 @@ variable "tiller_image" {
   default = "gcr.io/kubernetes-helm/tiller:v2.14.3"
 }
 
-variable "root_domain" {
-  description = "Odahuflow cluster root domain"
+variable "dns" {
+  description = "Odahuflow cluster DNS settings"
 }
 
 variable "tls_key" {

@@ -40,8 +40,6 @@ resource "null_resource" "delay" {
 data "template_file" "istio_values" {
   template = file("${path.module}/templates/istio.yaml")
   vars = {
-    cluster_name            = var.cluster_name
-    root_domain             = var.root_domain
     monitoring_namespace    = var.monitoring_namespace
     ingress_tls_secret_name = local.ingress_tls_secret_name
   }
