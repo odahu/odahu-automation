@@ -59,7 +59,7 @@ resource "aws_eks_cluster" "default" {
   }
 
   provisioner "local-exec" {
-    when    = "destroy"
+    when    = destroy
     command = "bash ${path.module}/files/eni_cleanup.sh ${var.cluster_name} ${var.aws_region}"
   }
 }

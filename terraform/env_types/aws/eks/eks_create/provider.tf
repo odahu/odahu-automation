@@ -4,13 +4,13 @@ provider "aws" {
 }
 
 provider "local" {
-  version = "~> 1.4"
+  version = "1.4.0"
 }
 
 provider "null" {
-  version = "~> 2.1"
+  version = "2.1.2"
 }
 
 provider "template" {
-  version = "~> 2.1"
+  version = "2.1.2"
 }

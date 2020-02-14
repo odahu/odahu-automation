@@ -11,19 +11,19 @@ variable "cluster_type" {
   description = "Odahuflow cluster cloud provider type"
 }
 
+variable "cluster_name" {
+  default     = "odahuflow"
+  description = "Odahuflow cluster name"
+}
+
 variable "config_context_auth_info" {
   default     = ""
-  description = "Odahuflow cluster context auth"
+  description = "Kubernetes cluster context auth"
 }
 
 variable "config_context_cluster" {
   default     = ""
-  description = "Odahuflow cluster context name"
-}
-
-variable "cluster_name" {
-  default     = "odahuflow"
-  description = "Odahuflow cluster name"
+  description = "Kubernetes cluster context name"
 }
 
 variable "helm_repo" {

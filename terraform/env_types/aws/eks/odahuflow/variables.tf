@@ -1,14 +1,6 @@
 ###################################################################################
 # Common required
 ###################################################################################
-variable "config_context_auth_info" {
-  description = "Odahuflow cluster context auth"
-}
-
-variable "config_context_cluster" {
-  description = "Odahuflow cluster context name"
-}
-
 variable "tls_crt" {
   description = "TLS certificate to use for SSL termination"
 }
@@ -27,6 +19,16 @@ variable "aws_region" {
 variable "cluster_name" {
   default     = "odahuflow"
   description = "Odahuflow cluster name"
+}
+
+variable "config_context_auth_info" {
+  default     = ""
+  description = "Kubernetes cluster context auth"
+}
+
+variable "config_context_cluster" {
+  default     = ""
+  description = "Kubernetes cluster context name"
 }
 
 ###################################################################################

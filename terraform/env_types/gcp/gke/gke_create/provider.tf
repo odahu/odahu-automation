@@ -13,17 +13,17 @@ provider "google-beta" {
 }
 
 provider "random" {
-  version = "~> 2.2.0"
+  version = "2.2.1"
 }
 
 provider "local" {
-  version = "~> 1.3.0"
+  version = "1.4.0"
 }
 
 provider "null" {
-  version = "~> 2.1.2"
+  version = "2.1.2"
 }
 
 provider "tls" {
-  version = "~> 2.1.0"
+  version = "2.1.1"
 }
