@@ -3,25 +3,21 @@ provider "azurerm" {
 }
 
 provider "random" {
-  version = "~> 2.2.0"
+  version = "2.2.1"
 }
 
 provider "local" {
-  version = "~> 1.3.0"
+  version = "1.4.0"
 }
 
 provider "null" {
-  version = "~> 2.1.2"
-}
-
-provider "http" {
-  version = "~> 1.1.1"
+  version = "2.1.2"
 }
 
 provider "tls" {
-  version = "~> 2.1.0"
+  version = "2.1.1"
 }
 
 provider "external" {
-  version = "~> 1.2"
+  version = "1.2.0"
 }

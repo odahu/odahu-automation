@@ -19,17 +19,19 @@ variable "region" {
   description = "Region of resources"
 }
 
-variable "config_context_auth_info" {
-  description = "Odahuflow cluster context auth"
-}
-
-variable "config_context_cluster" {
-  description = "Odahuflow cluster context name"
-}
-
 variable "cluster_name" {
   default     = "odahuflow"
   description = "Odahuflow cluster name"
+}
+
+variable "config_context_auth_info" {
+  default     = ""
+  description = "Kubernetes cluster context auth"
+}
+
+variable "config_context_cluster" {
+  default     = ""
+  description = "Kubernetes cluster context name"
 }
 
 variable "helm_repo" {
