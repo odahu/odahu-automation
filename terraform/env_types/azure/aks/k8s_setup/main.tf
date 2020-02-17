@@ -24,7 +24,6 @@ module "auth" {
   domain_name           = local.cluster_domain_name
   oauth_client_id       = var.oauth_client_id
   oauth_client_secret   = var.oauth_client_secret
-  oauth_redirect_url    = "https://odahu.${local.cluster_domain_name}/oauth2/callback"
   oauth_oidc_issuer_url = var.oauth_oidc_issuer_url
   oauth_oidc_audience   = var.oauth_oidc_audience
   oauth_cookie_expire   = "168h0m0s"
@@ -34,7 +33,7 @@ module "auth" {
 
 module "monitoring" {
   source                = "../../../../modules/k8s/monitoring"
-  cluster_domain        = "odahu.${local.cluster_domain_name}"
+  cluster_domain        = local.cluster_domain_name
   helm_repo             = var.helm_repo
   odahu_infra_version   = var.odahu_infra_version
   grafana_admin         = var.grafana_admin

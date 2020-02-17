@@ -1,6 +1,11 @@
 locals {
+  # In this case, we assume that if the domain name has the prefix "odahu.", then the rest
+  # of it consists of a subdomain (zone_name) and a base domain (root_domain), otherwise the
+  # domain name is transferred without a prefix.
+  domain_prefix = length(regexall("^(odahu\\.).*", local.domain)) > 0 ? "odahu." : ""
+
   # split `domain` variable to zone_name and root_domain parts, e.x.: mydomain.test.com will split to zone_name="mydomain" & root_domain="test.com"
-  parsed = length(var.domain) == 0 ? {} : regex("^(?P<zone_name>[a-zA-Z0-9]+)?.(?P<root_domain>.*)", var.domain)
+  parsed = length(var.domain) == 0 ? {} : regex("^${local.domain_prefix}(?P<zone_name>[a-zA-Z0-9-]+)?.(?P<root_domain>.*)", var.domain)
 
   zone_name    = lookup(local.parsed, "zone_name", "")
   root_domain  = lookup(local.parsed, "root_domain", "")

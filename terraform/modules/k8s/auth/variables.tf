@@ -18,6 +18,7 @@ variable "oauth_client_secret" {
   description = "OAuth 2 Client Secret"
 }
 variable "oauth_redirect_url" {
+  default     = ""
   description = "OAuth 2 Redirect URL"
 }
 variable "oauth_oidc_issuer_url" {

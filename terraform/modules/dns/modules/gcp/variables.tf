@@ -8,6 +8,11 @@ variable "managed_zone" {
   type    = string
 }
 
+variable "aws_region" {
+  default = ""
+  type    = string
+}
+
 variable "gcp_project_id" {
   default = ""
   type    = string
