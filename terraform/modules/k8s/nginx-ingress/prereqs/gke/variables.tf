@@ -3,11 +3,6 @@ variable "cluster_name" {
   description = "Odahuflow cluster name"
 }
 
-variable "root_domain" {
-  default     = ""
-  description = "Odahuflow cluster root domain"
-}
-
 variable "allowed_ips" {
   type        = list(string)
   description = "CIDR to allow access from"

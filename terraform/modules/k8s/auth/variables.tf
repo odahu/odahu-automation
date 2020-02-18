@@ -1,14 +1,10 @@
 ################## 
 # Common 
 ################## 
-variable "cluster_name" {
-  default     = "odahuflow"
-  description = "Odahuflow cluster name"
+variable "domain_name" {
+  default     = "odahu-flow.example.com"
+  description = "ODAHU cluster endpoint FQDN"
 }
-variable "root_domain" {
-  description = "Odahuflow cluster root domain"
-}
-
 
 ##################
 # Auth setup
@@ -22,6 +18,7 @@ variable "oauth_client_secret" {
   description = "OAuth 2 Client Secret"
 }
 variable "oauth_redirect_url" {
+  default     = ""
   description = "OAuth 2 Redirect URL"
 }
 variable "oauth_oidc_issuer_url" {

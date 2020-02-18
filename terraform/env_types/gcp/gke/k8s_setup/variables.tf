@@ -42,8 +42,8 @@ variable "odahu_infra_version" {
   description = "Odahuflow infra release version"
 }
 
-variable "root_domain" {
-  description = "Odahuflow cluster root domain"
+variable "dns" {
+  description = "Odahuflow cluster DNS settings"
 }
 
 variable "docker_repo" {
@@ -92,10 +92,6 @@ variable "grafana_admin" {
 
 variable "grafana_pass" {
   description = "Grafana admin password"
-}
-
-variable "cluster_context" {
-  description = "Kubectl cluster context"
 }
 
 variable "monitoring_namespace" {
