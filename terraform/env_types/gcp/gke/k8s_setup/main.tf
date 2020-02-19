@@ -29,11 +29,9 @@ module "nginx_ingress_helm" {
 
 module "auth" {
   source                = "../../../../modules/k8s/auth"
-  cluster_name          = var.cluster_name
-  root_domain           = var.root_domain
+  domain_name           = local.cluster_domain_name
   oauth_client_id       = var.oauth_client_id
   oauth_client_secret   = var.oauth_client_secret
-  oauth_redirect_url    = "https://odahu.${var.cluster_name}.${var.root_domain}/oauth2/callback"
   oauth_oidc_issuer_url = var.oauth_oidc_issuer_url
   oauth_oidc_audience   = var.oauth_oidc_audience
   oauth_cookie_expire   = "168h0m0s"
@@ -43,7 +41,7 @@ module "auth" {
 
 module "monitoring" {
   source               = "../../../../modules/k8s/monitoring"
-  cluster_domain       = "odahu.${var.cluster_name}.${var.root_domain}"
+  cluster_domain       = local.cluster_domain_name
   helm_repo            = var.helm_repo
   odahu_infra_version  = var.odahu_infra_version
   grafana_admin        = var.grafana_admin
@@ -55,8 +53,6 @@ module "monitoring" {
 
 module "istio" {
   source               = "../../../../modules/k8s/istio"
-  root_domain          = var.root_domain
-  cluster_name         = var.cluster_name
   monitoring_namespace = var.monitoring_namespace
   helm_repo            = var.helm_repo
   docker_repo          = var.docker_repo
@@ -66,7 +62,6 @@ module "istio" {
   tls_secret_key       = var.tls_key
   tls_secret_crt       = var.tls_crt
 }
-
 
 module "openpolicyagent" {
   source                = "../../../../modules/k8s/openpolicyageent"

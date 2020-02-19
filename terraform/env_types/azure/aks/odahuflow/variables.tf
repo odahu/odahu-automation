@@ -56,8 +56,8 @@ variable "helm_repo" {
   description = "Odahuflow helm repo"
 }
 
-variable "root_domain" {
-  description = "Odahuflow cluster root domain"
+variable "dns" {
+  description = "Odahuflow cluster DNS settings"
 }
 
 variable "tiller_image" {

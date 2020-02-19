@@ -34,8 +34,8 @@ variable "odahu_infra_version" {
   description = "Odahuflow infra release version"
 }
 
-variable "root_domain" {
-  description = "Odahuflow cluster root domain"
+variable "dns" {
+  description = "Odahuflow cluster DNS settings"
 }
 
 variable "docker_repo" {
