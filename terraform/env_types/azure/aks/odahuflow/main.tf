@@ -58,4 +58,9 @@ module "odahuflow_helm" {
   odahuflow_connections              = concat(var.odahuflow_connections, module.odahuflow_prereqs.odahuflow_connections)
   extra_external_urls                = concat(module.jupyterhub.external_url, module.odahuflow_prereqs.extra_external_urls)
   odahuflow_connection_decrypt_token = var.odahuflow_connection_decrypt_token
+  resource_uploader_sa               = var.service_accounts.resource_uploader
+  operator_sa                        = var.service_accounts.operator
+  oauth_oidc_token_endpoint          = var.oauth_oidc_token_endpoint
+  oauth_oidc_issuer_url              = var.oauth_oidc_issuer_url
+  oauth_mesh_enabled                 = var.oauth_mesh_enabled
 }
