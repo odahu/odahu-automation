@@ -109,6 +109,12 @@ variable "oauth_oidc_issuer_url" {
   description = "OAuth2/OIDC provider Issuer URL"
 }
 
+variable "oauth_oidc_token_endpoint" {
+  type        = string
+  description = "OpenID Provider Token URL"
+}
+
+
 variable "oauth_client_id" {
   description = "OAuth2 Client ID"
 }
@@ -147,3 +153,26 @@ variable "jupyterlab_version" {
 }
 
 variable "packager_version" {}
+
+variable "service_accounts" {
+  type = object({
+    test : object({
+      client_id : string
+      client_secret : string
+    })
+    resource_uploader : object({
+      client_id : string
+      client_secret : string
+    })
+    operator : object({
+      client_id : string
+      client_secret : string
+    })
+  })
+  description = "Service accounts credentials"
+}
+
+variable "oauth_mesh_enabled" {
+  type        = bool
+  description = "OAuth2 inside service mesh via Envoy filter"
+}
