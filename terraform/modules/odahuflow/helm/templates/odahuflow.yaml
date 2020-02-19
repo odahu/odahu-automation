@@ -12,6 +12,7 @@ ingress:
 security:
   enabled: true
   integration: oauth2_proxy
+  mesh_authn: "${oauth_mesh_enabled}"
 
 feedback:
   enabled: true

@@ -169,3 +169,8 @@ variable "oauth_oidc_token_endpoint" {
   type        = string
   description = "OpenID Provider Token URL"
 }
+
+variable "oauth_mesh_enabled" {
+  type        = bool
+  description = "OAuth2 inside service mesh via Envoy filter"
+}
