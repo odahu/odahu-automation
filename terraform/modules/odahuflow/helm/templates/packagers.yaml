@@ -9,3 +9,6 @@ resource_uploader_sa:
   client_secret: ${resource_uploader_sa.client_secret}
 
 oauth_oidc_issuer_url: ${oauth_oidc_issuer_url}
+
+security:
+  mesh_authn: "${oauth_mesh_enabled}"

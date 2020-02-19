@@ -9,6 +9,7 @@ ingress:
 security:
   enabled: true
   integration: oauth2_proxy
+  mesh_authn: "${oauth_mesh_enabled}"
 
 odahuflowctl:
   image: "${docker_repo}/odahu-flow-cli:${odahuflow_version}"

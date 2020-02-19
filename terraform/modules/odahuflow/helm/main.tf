@@ -235,6 +235,7 @@ resource "helm_release" "mlflow" {
       odahuflow_version     = var.odahuflow_version
       resource_uploader_sa  = var.resource_uploader_sa
       oauth_oidc_issuer_url = var.oauth_oidc_issuer_url
+      oauth_mesh_enabled = var.oauth_mesh_enabled
     }),
   ]
 
@@ -262,6 +263,7 @@ resource "helm_release" "rest_packagers" {
       odahuflow_version     = var.odahuflow_version
       resource_uploader_sa  = var.resource_uploader_sa
       oauth_oidc_issuer_url = var.oauth_oidc_issuer_url
+      oauth_mesh_enabled = var.oauth_mesh_enabled
     }),
   ]
 
