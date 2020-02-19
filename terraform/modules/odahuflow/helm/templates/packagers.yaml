@@ -3,3 +3,12 @@ imagesRegistry: "${docker_repo}/"
 
 odahuflowctl:
   image: "${docker_repo}/odahu-flow-cli:${odahuflow_version}"
+
+resource_uploader_sa:
+  client_id: ${resource_uploader_sa.client_id}
+  client_secret: ${resource_uploader_sa.client_secret}
+
+oauth_oidc_issuer_url: ${oauth_oidc_issuer_url}
+
+security:
+  mesh_authn: "${oauth_mesh_enabled}"

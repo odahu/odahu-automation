@@ -9,6 +9,7 @@ ingress:
 security:
   enabled: true
   integration: oauth2_proxy
+  mesh_authn: "${oauth_mesh_enabled}"
 
 odahuflowctl:
   image: "${docker_repo}/odahu-flow-cli:${odahuflow_version}"
@@ -26,3 +27,9 @@ tracking_server:
 
 toolchain_integration:
   enabled: true
+
+resource_uploader_sa:
+  client_id: ${resource_uploader_sa.client_id}
+  client_secret: ${resource_uploader_sa.client_secret}
+
+oauth_oidc_issuer_url: ${oauth_oidc_issuer_url}
