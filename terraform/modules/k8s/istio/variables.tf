@@ -1,12 +1,3 @@
-variable "cluster_name" {
-  default     = "odahuflow"
-  description = "Odahuflow cluster name"
-}
-
-variable "root_domain" {
-  description = "Odahuflow cluster root domain"
-}
-
 variable "tls_secret_crt" {
   description = "Odahuflow cluster TLS certificate"
 }

@@ -13,20 +13,6 @@ variable "tls_crt" {
   description = "TLS certificate file for Odahuflow cluster"
 }
 
-variable "project_id" {
-  description = "Target project id"
-}
-
-variable "zone" {
-  default     = "us-east1-b"
-  description = "Default zone"
-}
-
-variable "region" {
-  default     = "us-east1"
-  description = "Region of resources"
-}
-
 variable "public_subnet_cidrs" {
   default = []
 }
@@ -63,8 +49,8 @@ variable "odahu_infra_version" {
   description = "Odahuflow infra release version"
 }
 
-variable "root_domain" {
-  description = "Odahuflow cluster root domain"
+variable "dns" {
+  description = "Odahuflow cluster DNS settings"
 }
 
 variable "docker_repo" {
@@ -101,10 +87,6 @@ variable "grafana_pass" {
 variable "storage_class" {
   default     = "gp2"
   description = "Grafana storage class"
-}
-
-variable "cluster_context" {
-  description = "Kubectl cluster context"
 }
 
 variable "monitoring_namespace" {
