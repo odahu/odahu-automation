@@ -62,4 +62,5 @@ module "odahuflow_helm" {
   operator_sa                        = var.service_accounts.operator
   oauth_oidc_token_endpoint          = var.oauth_oidc_token_endpoint
   oauth_oidc_issuer_url              = var.oauth_oidc_issuer_url
+  oauth_mesh_enabled                 = var.oauth_mesh_enabled
 }
