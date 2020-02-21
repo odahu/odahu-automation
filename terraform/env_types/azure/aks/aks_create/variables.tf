@@ -1,11 +1,17 @@
 variable "azure_location" {
-  default     = ""
   description = "Azure location in which the resource group will be created"
 }
 
 variable "azure_resource_group" {
-  default     = ""
   description = "Azure base resource group name"
+}
+
+variable "aks_sp_client_id" {
+  description = "Service Principal account ID"
+}
+
+variable "aks_sp_secret" {
+  description = "Service Principal account secret"
 }
 
 variable "aks_analytics_deploy" {

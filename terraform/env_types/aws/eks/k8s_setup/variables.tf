@@ -23,6 +23,7 @@ variable "aws_region" {
 }
 
 variable "az_list" {
+  type        = list(string)
   description = "AWS AZ list to use"
 }
 
@@ -32,12 +33,10 @@ variable "cluster_name" {
 }
 
 variable "config_context_auth_info" {
-  default     = ""
   description = "Kubernetes cluster context auth"
 }
 
 variable "config_context_cluster" {
-  default     = ""
   description = "Kubernetes cluster context name"
 }
 
@@ -49,8 +48,8 @@ variable "odahu_infra_version" {
   description = "Odahuflow infra release version"
 }
 
-variable "dns" {
-  description = "Odahuflow cluster DNS settings"
+variable "cluster_domain_name" {
+  description = "Odahuflow cluster FQDN"
 }
 
 variable "docker_repo" {

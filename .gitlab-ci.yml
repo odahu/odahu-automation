@@ -24,7 +24,7 @@ shellcheck:
     - make shellcheck
 
 terraform:
-  image: hashicorp/terraform:0.12.19
+  image: alpine/terragrunt:0.12.21
   stage: lint
   variables:
     AWS_DEFAULT_REGION: test_region
@@ -35,3 +35,4 @@ terraform:
   script:
     - make terraform-fmt-check
     - make terraform-validate
+    - make terragrunt-fmt-check
