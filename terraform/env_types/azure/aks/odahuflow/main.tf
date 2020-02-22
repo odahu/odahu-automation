@@ -53,7 +53,9 @@ module "odahuflow_helm" {
   odahuflow_version        = var.odahuflow_version
   packager_version         = var.packager_version
   mlflow_toolchain_version = var.mlflow_toolchain_version
-  node_pools               = var.node_pools
+  odahu_ui_version         = var.odahu_ui_version
+
+  node_pools = var.node_pools
 
   odahuflow_connections              = concat(var.odahuflow_connections, module.odahuflow_prereqs.odahuflow_connections)
   extra_external_urls                = concat(module.jupyterhub.external_url, module.odahuflow_prereqs.extra_external_urls)
@@ -63,4 +65,5 @@ module "odahuflow_helm" {
   oauth_oidc_token_endpoint          = var.oauth_oidc_token_endpoint
   oauth_oidc_issuer_url              = var.oauth_oidc_issuer_url
   oauth_mesh_enabled                 = var.oauth_mesh_enabled
+  vault_enabled                      = var.vault.enabled
 }

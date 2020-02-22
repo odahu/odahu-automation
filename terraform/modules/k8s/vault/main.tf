@@ -1,4 +1,5 @@
 resource "kubernetes_namespace" "vault" {
+  count = var.configuration.enabled ? 1 : 0
   metadata {
     annotations = {
       name = var.namespace
@@ -17,6 +18,7 @@ locals {
 }
 
 resource "helm_release" "vault" {
+  count      = var.configuration.enabled ? 1 : 0
   name       = "vault"
   chart      = "${local.vault_helm_repo}/vault"
   version    = local.vault_helm_version

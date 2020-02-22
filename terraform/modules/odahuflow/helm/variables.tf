@@ -37,6 +37,10 @@ variable "mlflow_toolchain_version" {
   description = "Version of odahu-flow-mlflow helm chart"
 }
 
+variable "odahu_ui_version" {
+  description = "Version of odahu-ui helm chart"
+}
+
 ###############
 ### Ingress ###
 ###############
@@ -104,11 +108,11 @@ variable "odahuflow_connections" {
 
 variable "extra_external_urls" {
   default = []
-  type    = list(object({ name = string, url = string }))
-}
-
-variable "connection_repository_type" {
-  default = "vault"
+  type = list(object({
+    name      = string,
+    url       = string,
+    image_url = string,
+  }))
 }
 
 variable "connection_vault_configuration" {
@@ -173,4 +177,9 @@ variable "oauth_oidc_token_endpoint" {
 variable "oauth_mesh_enabled" {
   type        = bool
   description = "OAuth2 inside service mesh via Envoy filter"
+}
+
+variable "vault_enabled" {
+  type        = bool
+  description = "Enabled vault deployment or not"
 }

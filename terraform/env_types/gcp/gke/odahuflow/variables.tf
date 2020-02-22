@@ -79,6 +79,10 @@ variable "odahu_infra_version" {
   description = "Odahuflow infra release version"
 }
 
+variable "odahu_ui_version" {
+  description = "Version of odahu-ui helm chart"
+}
+
 variable "data_bucket" {
   description = "Odahuflow data storage bucket"
 }
@@ -159,4 +163,14 @@ variable "service_accounts" {
 variable "oauth_mesh_enabled" {
   type        = bool
   description = "OAuth2 inside service mesh via Envoy filter"
+}
+
+variable "vault" {
+  default = {
+    enabled : false
+  }
+  type = object({
+    enabled : bool
+  })
+  description = "Vault configuration"
 }
