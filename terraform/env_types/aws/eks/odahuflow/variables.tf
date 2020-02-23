@@ -38,6 +38,10 @@ variable "odahuflow_version" {
   description = "Odahuflow release version"
 }
 
+variable "odahu_ui_version" {
+  description = "Version of odahu-ui helm chart"
+}
+
 variable "dns" {
   description = "Odahuflow cluster DNS settings"
 }
@@ -141,4 +145,14 @@ variable "service_accounts" {
 variable "oauth_mesh_enabled" {
   type        = bool
   description = "OAuth2 inside service mesh via Envoy filter"
+}
+
+variable "vault" {
+  default = {
+    enabled : false
+  }
+  type = object({
+    enabled : bool
+  })
+  description = "Vault configuration"
 }

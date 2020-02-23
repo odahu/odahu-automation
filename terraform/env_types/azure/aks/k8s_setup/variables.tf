@@ -180,3 +180,16 @@ variable "istio_namespace" {
   default     = "istio-system"
   description = "istio namespace"
 }
+
+########################
+# Vault
+########################
+variable "vault" {
+  default = {
+    enabled : false
+  }
+  type = object({
+    enabled : bool
+  })
+  description = "Vault configuration"
+}
