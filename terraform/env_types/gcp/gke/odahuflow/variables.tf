@@ -92,7 +92,7 @@ variable "mlflow_toolchain_version" {
 }
 
 variable "mlflow_storage_class" {
-  default     = null
+  default     = "gp2"
   description = "Storage class for data volume"
 }
 
