@@ -317,6 +317,8 @@ resource "helm_release" "mlflow" {
 
       docker_repo              = var.docker_repo
       mlflow_toolchain_version = var.mlflow_toolchain_version
+      mlflow_storage_class     = var.mlflow_storage_class
+      mlflow_storage_size      = var.mlflow_storage_size
 
       odahuflow_version     = var.odahuflow_version
       resource_uploader_sa  = var.resource_uploader_sa

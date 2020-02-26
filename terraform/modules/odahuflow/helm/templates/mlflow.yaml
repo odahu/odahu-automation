@@ -24,6 +24,8 @@ tracking_server:
     limits:
       cpu: "250m"
       memory: "512Mi"
+  storage_class: ${mlflow_storage_class}
+  storage_size: ${mlflow_storage_size}
 
 toolchain_integration:
   enabled: true

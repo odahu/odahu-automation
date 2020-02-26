@@ -91,6 +91,16 @@ variable "mlflow_toolchain_version" {
   description = "Version of odahuflow-mlflow helm chart"
 }
 
+variable "mlflow_storage_class" {
+  default     = null
+  description = "Storage class for data volume"
+}
+
+variable "mlflow_storage_size" {
+  default     = "30Gi"
+  description = "Data volume storage size"
+}
+
 variable "oauth_oidc_issuer_url" {
   description = "OAuth2/OIDC provider Issuer URL"
 }
