@@ -4,7 +4,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
     KUBECTL_VERSION=v1.13.12 \
     TERRAFORM_VERSION=0.12.19 \
     TERRAGRUNT_VERSION=v0.21.10 \
-    HELM_VERSION=v2.14.3
+    HELM_VERSION=v3.1.1
 
 # install system utilities
 RUN apt-get update && apt-get install -y \

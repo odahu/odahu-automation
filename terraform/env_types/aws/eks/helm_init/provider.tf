@@ -1,10 +1,5 @@
 provider "helm" {
-  version         = "0.10.4"
-  namespace       = "kube-system"
-  service_account = "tiller"
-  install_tiller  = true
-  tiller_image    = var.tiller_image
-  init_helm_home  = true
+  version         = "1.0.0"
 
   kubernetes {
     config_context = local.config_context_auth_info
