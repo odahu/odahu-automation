@@ -4,7 +4,8 @@ ROOT_DIR := terraform/env_types
 SECRET_DIR := $(CURDIR)/.secrets
 SECRET_FILE_NAME := cluster_profile.json
 ENV_TYPE := gcp/gke
-FIND_ALL_TER_MODULES_COMMAND := find terraform -name '*.tf' -printf "%h\n" | uniq | tr '\n' ' '
+FIND_ALL_TF_MODULES_COMMAND := find terraform -name '*.tf' -printf "%h\n" | uniq | tr '\n' ' '
+FIND_TOPLEVEL_TF_MODULES_COMMAND := find terraform/env_types -name '*.tf' -printf "%h\n" | uniq | tr '\n' ' '
 
 GKE_PROJECT :=
 GKE_ZONE :=
@@ -67,19 +68,19 @@ cleanup-all-crds: cleanup-infra-crds cleanup-odahu-crds
 
 ## terraform-fmt: Rewrites all odahu terraform modules to canonical format
 terraform-fmt:
-	for module_path in $$(${FIND_ALL_TER_MODULES_COMMAND}) ; do \
+	for module_path in $$(${FIND_ALL_TF_MODULES_COMMAND}) ; do \
         terraform fmt $$module_path ; \
     done
 
 ## terraform-fmt-check: Check that terraform modules are formatted
 terraform-fmt-check:
-	set -e; for module_path in $$(${FIND_ALL_TER_MODULES_COMMAND}) ; do \
+	set -e; for module_path in $$(${FIND_ALL_TF_MODULES_COMMAND}) ; do \
         terraform fmt -check $$module_path ; \
     done
 
 ## terraform-validate: Validate all odahu terraform modules
 terraform-validate:
-	set -e; for module_path in $$(${FIND_ALL_TER_MODULES_COMMAND}) ; do \
+	set -e; for module_path in $$(${FIND_TOPLEVEL_TF_MODULES_COMMAND}) ; do \
 	    cd $$module_path && \
 	    echo Current module: $$module_path && \
 	    terraform init -backend=false && \
