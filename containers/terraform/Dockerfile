@@ -32,7 +32,7 @@ RUN wget -qO /tmp/terragrunt "https://github.com/gruntwork-io/terragrunt/release
     chmod a+x /usr/local/bin/terragrunt
 
 # Install Helm
-RUN curl -fsSLO https://kubernetes-helm.storage.googleapis.com/helm-${HELM_VERSION}-linux-amd64.tar.gz && \
+RUN curl -fsSLO https://get.helm.sh/helm-${HELM_VERSION}-linux-amd64.tar.gz && \
     mkdir -p /tmp/helm && mv helm-${HELM_VERSION}-linux-amd64.tar.gz /tmp/helm && \
     tar xzf /tmp/helm/helm-${HELM_VERSION}-linux-amd64.tar.gz -C /tmp/helm && \
     mv /tmp/helm/linux-amd64/helm /usr/local/bin/helm && rm -rf /tmp/helm
