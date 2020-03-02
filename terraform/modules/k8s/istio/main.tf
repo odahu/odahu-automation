@@ -32,7 +32,7 @@ resource "helm_release" "istio-init" {
 
 resource "null_resource" "delay" {
   provisioner "local-exec" {
-    command = "timeout 200 bash -c 'until $(kubectl get crds gateways.networking.istio.io && kubectl get crds envoyfilters.networking.istio.io && kubectl get crds policies.authentication.istio.io && kubectl get crds destinationrules.networking.istio.io && kubectl get crds virtualservices.networking.istio.io && kubectl get crds envoyfilters.networking.istio.io && kubectl get crds attributemanifests.config.istio.io && kubectl get crds handlers.config.istio.io && kubectl get crds meshpolicies.authentication.istio.io); do sleep 5; done'"
+    command = "timeout 200 bash -c 'until kubectl get crds gateways.networking.istio.io && kubectl get crds envoyfilters.networking.istio.io && kubectl get crds policies.authentication.istio.io && kubectl get crds destinationrules.networking.istio.io && kubectl get crds virtualservices.networking.istio.io && kubectl get crds envoyfilters.networking.istio.io && kubectl get crds attributemanifests.config.istio.io && kubectl get crds handlers.config.istio.io && kubectl get crds meshpolicies.authentication.istio.io; do sleep 5; done'"
   }
   depends_on = [helm_release.istio-init]
 }
