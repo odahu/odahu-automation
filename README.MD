@@ -68,3 +68,49 @@ Hiera allows you to store hierarchical data in yaml format and request required 
 For ODAHU CI/CD purposes we use separate profiles repository (as you may want to do as well) with yaml files describing clusters setup.
 Place `private_key.pkcs7.pem` and `public_key.pkcs7.pem` keys to expected location (`/etc/puppetlabs/puppet/eyaml/` by default) and trigger [`hiera_exporter`](tools/hiera_exporter) script from hieradata directory with proper arguments.
 This will generate Terraform compatible variables json file which should be used with Terraform modules for clusters setup.
+
+# Cluster profile parameters for the Security system
+
+In order to activate security system that provides authentication and authorization cluster profile parameters below should be filled.
+
+(For more information see docs about [security](https://docs.odahu.org/gen_security.html) and docs about [odahu helm charts configuration](https://docs.odahu.org/odahu/odahu-docs/out/tutorials_installation.html#install-open-policy-agent-optional))
+
+
+Security subsystem activation parameters:
+
+```yaml
+authorization_enabled: true
+authz_dry_run: false
+```
+
+Service accounts client credentials (every account should be OAuth2 client with Client Credentials Grant):
+
+```yaml
+service_accounts:
+  airflow:
+    client_id: <your-client-id-here>
+    client_secret: <your-client-secret-here>
+  operator:
+    client_id: <your-client-id-here>
+    client_secret: <your-client-secret-here>
+  resource_uploader:
+    client_id: <your-client-id-here>
+    client_secret: <your-client-secret-here>
+  test:
+    client_id: <your-client-id-here>
+    client_secret: <your-client-secret-here>
+```
+
+OpenID Connect Provider settings. (For more information about OpenID see [specification docs](https://openid.net/specs/openid-connect-core-1_0.html))
+
+```yaml
+oauth_local_jwks: <base64 encoded local JWKS>
+oauth_mesh_enabled: true  # enable mesh 
+oauth_oidc_audience: legion
+oauth_oidc_host: <oidc hostname>
+oauth_oidc_issuer_url: <OpenID Issuer url>
+oauth_oidc_jwks_url: <OpenID Remote JWKS url>
+oauth_oidc_port: 443
+oauth_oidc_scope: openid profile email offline_access groups  
+oauth_oidc_token_endpoint: <OpenID Token endpoint>
+```
