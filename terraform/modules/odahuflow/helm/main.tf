@@ -32,6 +32,8 @@ locals {
     },
   ]
 
+  default_docker_connection = "docker-ci"
+
   odahuflow_config = {
     common = {
       external_urls = concat(local.default_external_urls, var.extra_external_urls)
@@ -49,7 +51,7 @@ locals {
     deployment = {
       toleration                    = contains(keys(var.node_pools), "model_deployment") ? { Key = var.node_pools["model_deployment"].taints[0].key, Operator = "Equal", Value = var.node_pools["model_deployment"].taints[0].value, Effect = replace(var.node_pools["model_deployment"].taints[0].effect, "/(?i)no_?schedule/", "NoSchedule") } : null
       node_selector                 = contains(keys(var.node_pools), "model_deployment") ? { for key, value in var.node_pools["model_deployment"].labels : key => value } : null
-      default_docker_pull_conn_name = "docker-ci"
+      default_docker_pull_conn_name = local.default_docker_connection
       edge = {
         host = "${local.url_schema}://${var.cluster_domain}"
       }
@@ -306,12 +308,13 @@ resource "helm_release" "rest_packagers" {
 
   values = [
     templatefile("${path.module}/templates/packagers.yaml", {
-      docker_repo           = var.docker_repo
-      packager_version      = var.packager_version
-      odahuflow_version     = var.odahuflow_version
-      resource_uploader_sa  = var.resource_uploader_sa
-      oauth_oidc_issuer_url = var.oauth_oidc_issuer_url
-      oauth_mesh_enabled    = var.oauth_mesh_enabled
+      docker_repo               = var.docker_repo
+      packager_version          = var.packager_version
+      odahuflow_version         = var.odahuflow_version
+      resource_uploader_sa      = var.resource_uploader_sa
+      oauth_oidc_issuer_url     = var.oauth_oidc_issuer_url
+      oauth_mesh_enabled        = var.oauth_mesh_enabled
+      default_docker_connection = local.default_docker_connection
     }),
   ]
 

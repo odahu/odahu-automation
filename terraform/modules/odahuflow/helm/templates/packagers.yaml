@@ -12,3 +12,5 @@ oauth_oidc_issuer_url: ${oauth_oidc_issuer_url}
 
 security:
   mesh_authn: "${oauth_mesh_enabled}"
+
+default_docker_connection: "${default_docker_connection}"
