@@ -32,7 +32,7 @@ locals {
     },
   ]
 
-  default_docker_connection = "docker-ci"
+  default_model_docker_connection_id = "docker-ci"
 
   odahuflow_config = {
     common = {
@@ -51,7 +51,7 @@ locals {
     deployment = {
       toleration                    = contains(keys(var.node_pools), "model_deployment") ? { Key = var.node_pools["model_deployment"].taints[0].key, Operator = "Equal", Value = var.node_pools["model_deployment"].taints[0].value, Effect = replace(var.node_pools["model_deployment"].taints[0].effect, "/(?i)no_?schedule/", "NoSchedule") } : null
       node_selector                 = contains(keys(var.node_pools), "model_deployment") ? { for key, value in var.node_pools["model_deployment"].labels : key => value } : null
-      default_docker_pull_conn_name = local.default_docker_connection
+      default_docker_pull_conn_name = local.default_model_docker_connection_id
       edge = {
         host = "${local.url_schema}://${var.cluster_domain}"
       }
@@ -109,6 +109,40 @@ locals {
         }
       }
     ] : [],
+  }
+
+  odahu_docker_creds_present = length(var.docker_username) != 0 && length(var.docker_password) != 0
+  odahu_docker_creds_connection = {
+    id = "odahuflow-docker-repository"
+    spec = {
+      type        = "docker"
+      username    = var.docker_username
+      password    = var.docker_password
+      uri         = var.docker_repo
+      description = "Docker repository for ODAHU services"
+    }
+  }
+  packagers = {
+    rest = {
+      targets = {
+        docker_pull = {
+          default = local.odahu_docker_creds_present ? local.odahu_docker_creds_connection.id : ""
+        }
+        docker_push = {
+          default = local.default_model_docker_connection_id
+        }
+      }
+    }
+    cli = {
+      targets = {
+        docker_pull = {
+          default = local.odahu_docker_creds_present ? local.odahu_docker_creds_connection.id : ""
+        }
+        docker_push = {
+          default = local.default_model_docker_connection_id
+        }
+      }
+    }
   }
 }
 
@@ -176,10 +210,12 @@ module "docker_credentials" {
   docker_username    = var.docker_username
   docker_password    = var.docker_password
   docker_secret_name = var.docker_secret_name
-  namespaces = [kubernetes_namespace.odahuflow.metadata[0].annotations.name,
+  namespaces = [
+    kubernetes_namespace.odahuflow.metadata[0].annotations.name,
     kubernetes_namespace.odahuflow_training.metadata[0].annotations.name,
     kubernetes_namespace.odahuflow_packaging.metadata[0].annotations.name,
-  kubernetes_namespace.odahuflow_deployment.metadata[0].annotations.name]
+    kubernetes_namespace.odahuflow_deployment.metadata[0].annotations.name,
+  ]
 }
 
 resource "kubernetes_secret" "tls_odahuflow" {
@@ -243,7 +279,7 @@ resource "helm_release" "odahuflow" {
       docker_secret     = var.docker_secret_name
       odahuflow_version = var.odahuflow_version
 
-      connections           = yamlencode({ connections = var.odahuflow_connections })
+      connections           = yamlencode({ connections = concat(var.odahuflow_connections, [local.odahu_docker_creds_connection]) })
       api_configuration     = yamlencode({ api = local.api_config })
       config                = yamlencode({ config = local.odahuflow_config })
       resource_uploader_sa  = var.resource_uploader_sa
@@ -308,13 +344,13 @@ resource "helm_release" "rest_packagers" {
 
   values = [
     templatefile("${path.module}/templates/packagers.yaml", {
-      docker_repo               = var.docker_repo
-      packager_version          = var.packager_version
-      odahuflow_version         = var.odahuflow_version
-      resource_uploader_sa      = var.resource_uploader_sa
-      oauth_oidc_issuer_url     = var.oauth_oidc_issuer_url
-      oauth_mesh_enabled        = var.oauth_mesh_enabled
-      default_docker_connection = local.default_docker_connection
+      docker_repo           = var.docker_repo
+      packager_version      = var.packager_version
+      odahuflow_version     = var.odahuflow_version
+      resource_uploader_sa  = var.resource_uploader_sa
+      oauth_oidc_issuer_url = var.oauth_oidc_issuer_url
+      oauth_mesh_enabled    = var.oauth_mesh_enabled
+      packagers             = yamlencode({ packagers = local.packagers })
     }),
   ]
 
