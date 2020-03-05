@@ -6,8 +6,7 @@ provider "helm" {
   version         = "1.0.0"
 
   kubernetes {
-    config_path = "/root/.kube/config"
-    config_context = local.config_context_auth_info
+    config_context = local.config_context_cluster
   }
 }
 
