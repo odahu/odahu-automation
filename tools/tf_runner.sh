@@ -253,9 +253,6 @@ function TerraformDestroy() {
 
 		FetchKubeConfig
 
-		echo 'INFO : Init HELM'
-		helm init --client-only
-
 		echo 'INFO : Destroy Odahuflow components'
 		TerraformRun odahuflow destroy
 		echo 'INFO : Destroy K8S Odahuflow dependencies'

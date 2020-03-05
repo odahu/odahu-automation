@@ -58,4 +58,6 @@ resource "helm_release" "monitoring" {
   values = [
     data.template_file.monitoring_values.rendered
   ]
+
+  depends_on = [kubernetes_namespace.monitoring]
 }

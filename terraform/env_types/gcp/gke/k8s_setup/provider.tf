@@ -3,10 +3,11 @@ provider "google" {
 }
 
 provider "helm" {
-  version         = "0.10.4"
-  namespace       = "kube-system"
-  service_account = "tiller"
-  insecure        = "true"
+  version = "1.0.0"
+
+  kubernetes {
+    config_context = local.config_context_auth_info
+  }
 }
 
 provider "kubernetes" {

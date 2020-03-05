@@ -1,6 +1,5 @@
 provider "helm" {
-  version        = "0.10.4"
-  install_tiller = false
+  version = "1.0.0"
 
   kubernetes {
     config_context = local.config_context_auth_info
