@@ -43,7 +43,7 @@ variable "mlflow_storage_class" {
 }
 
 variable "mlflow_storage_size" {
-  default     = "30Gi"
+  default     = "1Gi"
   description = "Storage size for mlflow data volume"
 }
 
