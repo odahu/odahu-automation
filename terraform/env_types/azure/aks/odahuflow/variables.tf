@@ -35,29 +35,19 @@ variable "cluster_name" {
 }
 
 variable "config_context_auth_info" {
-  default     = ""
   description = "Kubernetes cluster context auth"
 }
 
 variable "config_context_cluster" {
-  default     = ""
   description = "Kubernetes cluster context name"
-}
-
-variable "cloud_type" {
-  default = "azure"
-}
-
-variable "cluster_type" {
-  default = "azure/aks"
 }
 
 variable "helm_repo" {
   description = "Odahuflow helm repo"
 }
 
-variable "dns" {
-  description = "Odahuflow cluster DNS settings"
+variable "cluster_domain_name" {
+  description = "Odahuflow cluster FQDN"
 }
 
 variable "tiller_image" {

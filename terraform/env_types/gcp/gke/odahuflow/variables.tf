@@ -1,22 +1,16 @@
 ##################
 # Common
 ##################
-variable "cloud_type" {}
-
-variable "cluster_type" {}
-
 variable "cluster_name" {
   default     = "odahuflow"
   description = "Odahuflow cluster name"
 }
 
 variable "config_context_auth_info" {
-  default     = ""
   description = "Kubernetes cluster context auth"
 }
 
 variable "config_context_cluster" {
-  default     = ""
   description = "Kubernetes cluster context name"
 }
 
@@ -25,12 +19,10 @@ variable "project_id" {
 }
 
 variable "zone" {
-  default     = "us-east1-b"
   description = "Default zone"
 }
 
 variable "region" {
-  default     = "us-east1"
   description = "Region of resources"
 }
 
@@ -42,8 +34,8 @@ variable "tiller_image" {
   default = "gcr.io/kubernetes-helm/tiller:v2.14.3"
 }
 
-variable "dns" {
-  description = "Odahuflow cluster DNS settings"
+variable "cluster_domain_name" {
+  description = "Odahuflow cluster FQDN"
 }
 
 variable "tls_key" {

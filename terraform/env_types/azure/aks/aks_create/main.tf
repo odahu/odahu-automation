@@ -43,8 +43,8 @@ module "aks_cluster" {
   bastion_enabled            = var.bastion_enabled
   bastion_ip                 = module.aks_networking.bastion_ip
   allowed_ips                = var.allowed_ips
-  sp_client_id               = local.sp_client_id
-  sp_secret                  = local.sp_secret
+  sp_client_id               = var.aks_sp_client_id
+  sp_secret                  = var.aks_sp_secret
   k8s_version                = var.k8s_version
   ssh_user                   = "ubuntu"
   ssh_public_key             = var.ssh_key

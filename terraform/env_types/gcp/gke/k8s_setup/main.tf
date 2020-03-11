@@ -19,7 +19,7 @@ module "nginx_ingress_prereqs" {
   project_id   = var.project_id
   cluster_name = var.cluster_name
   allowed_ips  = concat(var.allowed_ips, [var.pods_cidr])
-  network_name = local.network_name
+  network_name = var.vpc_name
 }
 
 module "nginx_ingress_helm" {
@@ -29,7 +29,7 @@ module "nginx_ingress_helm" {
 
 module "auth" {
   source                = "../../../../modules/k8s/auth"
-  domain_name           = local.cluster_domain_name
+  domain_name           = var.cluster_domain_name
   oauth_client_id       = var.oauth_client_id
   oauth_client_secret   = var.oauth_client_secret
   oauth_oidc_issuer_url = var.oauth_oidc_issuer_url
@@ -41,7 +41,7 @@ module "auth" {
 
 module "monitoring" {
   source               = "../../../../modules/k8s/monitoring"
-  cluster_domain       = local.cluster_domain_name
+  cluster_domain       = var.cluster_domain_name
   helm_repo            = var.helm_repo
   odahu_infra_version  = var.odahu_infra_version
   grafana_admin        = var.grafana_admin
@@ -64,7 +64,7 @@ module "istio" {
 }
 
 module "openpolicyagent" {
-  source                = "../../../../modules/k8s/openpolicyageent"
+  source                = "../../../../modules/k8s/openpolicyagent"
   helm_repo             = var.helm_repo
   odahu_infra_version   = var.odahu_infra_version
   mesh_dependency       = module.istio.helm_chart
