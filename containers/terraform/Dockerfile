@@ -2,8 +2,8 @@ FROM ubuntu:18.04
 
 ENV DEBIAN_FRONTEND=noninteractive \
     KUBECTL_VERSION=v1.13.12 \
-    TERRAFORM_VERSION=0.12.20 \
-    TERRAGRUNT_VERSION=v0.21.10 \
+    TERRAFORM_VERSION=0.12.21 \
+    TERRAGRUNT_VERSION=v0.22.3 \
     HELM_VERSION=v3.1.1
 
 # install system utilities
@@ -38,26 +38,25 @@ RUN curl -fsSLO https://get.helm.sh/helm-${HELM_VERSION}-linux-amd64.tar.gz && \
     mv /tmp/helm/linux-amd64/helm /usr/local/bin/helm && rm -rf /tmp/helm
 
 # Install gcloud
-RUN CLOUD_SDK_REPO="cloud-sdk-$(grep VERSION_CODENAME /etc/os-release | cut -d '=' -f 2)" && \
+RUN CLOUD_SDK_REPO="cloud-sdk-$(awk -F= '/VERSION_CODENAME/ {print $2}' /etc/os-release)" && \
     echo "deb http://packages.cloud.google.com/apt $CLOUD_SDK_REPO main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list && \
     curl -sL https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add - && \
     apt-get update -y && apt-get install google-cloud-sdk -y
 
 # Install Azure CLI
 RUN curl -sL https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && \
-    echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ $(grep VERSION_CODENAME /etc/os-release | cut -d '=' -f 2) main" | tee /etc/apt/sources.list.d/azure-cli.list && \
+    echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ $(awk -F= '/VERSION_CODENAME/ {print $2}' /etc/os-release) main" | tee /etc/apt/sources.list.d/azure-cli.list && \
     apt-get update -y && apt-get install azure-cli -y && apt-get clean && apt-get autoclean && rm -rf /var/lib/apt/lists/*
-
 
 # Install AWS CLI
 RUN curl -sL https://bootstrap.pypa.io/get-pip.py | python3 && \
     pip3 install awscli
 
-COPY tools/tf_runner.sh /usr/bin/tf_runner
-RUN chmod a+x /usr/bin/tf_runner
-
-# Deploy odahuflow
 COPY terraform /opt/odahu-flow/terraform
+COPY scripts /opt/odahu-flow/scripts
 COPY version.info /opt/odahu-flow/version.info
+
+RUN mv /opt/odahu-flow/scripts/tf_runner.sh /usr/bin/tf_runner && \
+    chmod a+x /usr/bin/tf_runner
 
 WORKDIR /opt/odahu-flow

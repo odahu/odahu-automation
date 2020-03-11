@@ -2,6 +2,6 @@
 !Makefile
 !containers/**
 !terraform/**
-!tools/**
+!scripts/**
 !version.info
 **/.terraform

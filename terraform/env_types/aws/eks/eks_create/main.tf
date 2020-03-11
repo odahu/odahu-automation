@@ -41,5 +41,5 @@ module "eks" {
   bastion_sg_id              = module.firewall.bastion_sg_id
   subnet_ids                 = module.vpc.private_subnet_ids
   nat_subnet_id              = module.vpc.nat_subnet_id
-  aws_region                 = var.region_aws
+  aws_region                 = var.aws_region
 }

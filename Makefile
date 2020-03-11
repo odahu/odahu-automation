@@ -88,21 +88,25 @@ terraform-validate:
 	    cd - &> /dev/null ; \
 	done
 
+## terragrunt-fmt-check: Validates all terragrunt files
+terragrunt-fmt-check:
+	terragrunt hclfmt --terragrunt-check
+
 ## docker-build-terraform: Build terraform docker image
 docker-build-terraform:
 	docker build -t odahu/odahu-flow-automation:${BUILD_TAG} -f containers/terraform/Dockerfile .
 
 ## shellcheck: Lint the bash scripts
 shellcheck:
-	shellcheck tools/*.sh
+	shellcheck scripts/*.sh
 
 ## install-vulnerabilities-checker: Install the vulnerabilities-checker
 install-vulnerabilities-checker:
-	./install-git-secrets-hook.sh install_binaries
+	./scripts/install-git-secrets-hook.sh install_binaries
 
 ## check-vulnerabilities: Сheck vulnerabilities in the source code
 check-vulnerabilities:
-	./install-git-secrets-hook.sh install_hooks
+	./scripts/install-git-secrets-hook.sh install_hooks
 	git secrets --scan -r
 
 ## help: Show the help message

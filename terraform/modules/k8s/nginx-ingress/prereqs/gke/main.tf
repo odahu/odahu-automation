@@ -38,13 +38,3 @@ resource "google_compute_firewall" "auth_loop_access" {
   }
   depends_on = [google_compute_address.ingress_lb_address]
 }
-
-# Remove default nginx-ingress fw rules created by controller
-resource "null_resource" "ingress_fw_cleanup" {
-  triggers = {
-    build_number = timestamp()
-  }
-  provisioner "local-exec" {
-    command = "gcloud compute firewall-rules list --filter='name:k8s-fw- AND network:${var.network_name}' --format='value(name)' --project='${var.project_id}'| while read i; do if (gcloud compute firewall-rules describe --project='${var.project_id}' $i |grep -q 'kube-system/nginx-ingress'); then gcloud compute firewall-rules delete $i --quiet; fi; done"
-  }
-}

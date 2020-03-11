@@ -10,12 +10,10 @@ variable "project_id" {
 }
 
 variable "zone" {
-  default     = "us-east1-b"
   description = "Default zone"
 }
 
 variable "region" {
-  default     = "us-east1"
   description = "Region of resources"
 }
 
@@ -25,12 +23,10 @@ variable "cluster_name" {
 }
 
 variable "config_context_auth_info" {
-  default     = ""
   description = "Kubernetes cluster context auth"
 }
 
 variable "config_context_cluster" {
-  default     = ""
   description = "Kubernetes cluster context name"
 }
 
@@ -42,8 +38,8 @@ variable "odahu_infra_version" {
   description = "Odahuflow infra release version"
 }
 
-variable "dns" {
-  description = "Odahuflow cluster DNS settings"
+variable "cluster_domain_name" {
+  description = "Odahuflow cluster FQDN"
 }
 
 variable "docker_repo" {
@@ -61,7 +57,6 @@ variable "docker_password" {
 }
 
 variable "vpc_name" {
-  default     = ""
   description = "The VPC network to host the cluster in"
 }
 

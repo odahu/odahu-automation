@@ -22,12 +22,10 @@ variable "cluster_name" {
 }
 
 variable "config_context_auth_info" {
-  default     = ""
   description = "Kubernetes cluster context auth"
 }
 
 variable "config_context_cluster" {
-  default     = ""
   description = "Kubernetes cluster context name"
 }
 
@@ -42,8 +40,8 @@ variable "odahu_ui_version" {
   description = "Version of odahu-ui helm chart"
 }
 
-variable "dns" {
-  description = "Odahuflow cluster DNS settings"
+variable "cluster_domain_name" {
+  description = "Odahuflow cluster FQDN"
 }
 
 variable "helm_repo" {

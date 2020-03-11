@@ -1,3 +1,5 @@
+terraform_version_constraint = ">= 0.12.21"
+
 include {
   path = "../../../../modules/dns/terragrunt.hcl"
 }
@@ -11,6 +13,6 @@ remote_state {
   backend = "gcs"
   config = {
     bucket = local.config.tfstate_bucket
-    prefix = "odahu_dns"
+    prefix = basename(get_terragrunt_dir())
   }
 }
