@@ -136,6 +136,10 @@ variable "node_pools" {
 
 variable "service_accounts" {
   type = object({
+    airflow : object({
+      client_id : string
+      client_secret : string
+    })
     test : object({
       client_id : string
       client_secret : string
@@ -166,3 +170,48 @@ variable "vault" {
   })
   description = "Vault configuration"
 }
+
+########################
+# NFS
+########################
+variable "nfs" {
+  default = {
+    enabled : false,
+    storage_size : "10Gi"
+  }
+  type = object({
+    enabled : bool,
+    storage_size : string
+  })
+  description = "NFS configuration"
+}
+
+########################
+# Airflow
+########################
+variable "airflow" {
+  default = {
+    enabled : false,
+    storage_size : "1Gi",
+    log_storage_size : "1Gi",
+    fernet_key: "changeme"
+  }
+  type = object({
+    enabled : bool,
+    storage_size : string,
+    log_storage_size : string,
+    fernet_key : string
+  })
+  description = "Airflow configuration"
+}
+
+variable "postgres_password" {}
+
+##################
+# Test
+##################
+
+variable "wine_data_url" {
+  description = "Wine example data URL"
+}
+

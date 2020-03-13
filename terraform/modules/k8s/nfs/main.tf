@@ -1,0 +1,23 @@
+locals {
+  nfs_provisioner_version = "v2.3.0"
+  nfs_helm_version        = "1.0.0"
+  nfs_helm_repo           = "stable"
+  deploy_helm_timeout     = "300"
+}
+
+resource "helm_release" "nfs" {
+  count      = var.configuration.enabled ? 1 : 0
+  name       = "nfs-server"
+  chart      = "nfs-server-provisioner"
+  version    = local.nfs_helm_version
+  namespace  = "kube-system"
+  repository = local.nfs_helm_repo
+  timeout    = local.deploy_helm_timeout
+
+  values = [
+    templatefile("${path.module}/templates/nfs.yaml", {
+      version      = local.nfs_provisioner_version
+      storage_size = var.configuration.storage_size
+    }),
+  ]
+}

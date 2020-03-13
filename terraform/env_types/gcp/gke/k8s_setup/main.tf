@@ -97,3 +97,11 @@ module "vault" {
   source        = "../../../../modules/k8s/vault"
   configuration = var.vault
 }
+
+module "postgresql" {
+  source                = "../../../../modules/k8s/postgresql"
+  password              = var.postgres_password
+  allowed_networks      = var.pods_cidr
+  configuration         = var.postgres
+  monitoring_dependency = module.monitoring.helm_chart
+}
