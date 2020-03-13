@@ -23,7 +23,7 @@ module "airflow" {
   configuration             = var.airflow
   cluster_name              = var.cluster_name
   postgres_password         = var.postgres_password
-  domain                    = var.dns.domain
+  cluster_domain            = var.cluster_domain_name
   project_id                = var.project_id
   oauth_oidc_token_endpoint = var.oauth_oidc_token_endpoint
   service_account           = var.service_accounts.airflow
