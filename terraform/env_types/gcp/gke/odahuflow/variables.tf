@@ -194,7 +194,7 @@ variable "airflow" {
     enabled : false,
     storage_size : "1Gi",
     log_storage_size : "1Gi",
-    fernet_key: "changeme"
+    fernet_key : "changeme"
   }
   type = object({
     enabled : bool,
