@@ -129,4 +129,3 @@ variable "node_pools" {
     }
   }
 }
-
