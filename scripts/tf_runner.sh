@@ -181,7 +181,6 @@ function SetupCloudAccess() {
 				echo -e "\tTrying to proceed with GCP instance metadata service account..."
 			fi
 			;;
-		*)
 		"openshift")
 			local creds_gcp
 			creds_gcp=$(GetParam 'cloud.gcp.credentials.GOOGLE_CREDENTIALS')
