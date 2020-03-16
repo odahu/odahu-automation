@@ -44,7 +44,7 @@ terraform {
 
   before_hook "setup_oc" {
     commands = ["plan", "apply", "destroy"]
-    execute  = ["bash", "-c", "oc login ${local.oc_url} --password=${local.oc_password} --username=${local.oc_username}"]
+    execute  = ["bash", "-c", "oc login ${local.oc_url} --password=${local.oc_password} --username=${local.oc_username} --insecure-skip-tls-verify=true"]
   }
 }
 
