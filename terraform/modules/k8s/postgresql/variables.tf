@@ -13,7 +13,7 @@ variable "configuration" {
     enabled : bool,
     storage_size : string,
     replica_count : number,
-    password: string
+    password : string
   })
   description = "Postgres configuration"
 }
