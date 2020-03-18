@@ -20,11 +20,9 @@ locals {
     "scope"         = "openid profile offline_access groups"
   }
 
-  google_sa_key = google_service_account_key.airflow.private_key
-
   gcp_wine_conn = {
     "extra__google_cloud_platform__project"      = var.project_id,
-    "extra__google_cloud_platform__keyfile_dict" = replace(base64decode(google_service_account_key.airflow.private_key), "/\n/", ""),
+    "extra__google_cloud_platform__keyfile_dict" = replace(base64decode(var.wine_conn_private_key), "/\n/", ""),
     "extra__google_cloud_platform__scope"        = "https://www.googleapis.com/auth/cloud-platform"
   }
 }
@@ -53,7 +51,7 @@ resource "kubernetes_secret" "postgres" {
 }
 
 module "docker_credentials" {
-  source          = "../docker_auth"
+  source          = "../../docker_auth"
   docker_repo     = var.docker_repo
   docker_username = var.docker_username
   docker_password = var.docker_password

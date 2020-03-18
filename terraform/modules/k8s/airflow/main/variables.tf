@@ -35,6 +35,10 @@ variable "docker_password" {
 }
 
 # Airflow configuration
+variable "wine_conn_private_key" {
+  description = "GCP wine connection service account private key"
+}
+
 variable "postgres_password" {
   description = "Postgres password"
 }
