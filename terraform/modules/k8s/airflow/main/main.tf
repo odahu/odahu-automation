@@ -6,6 +6,8 @@ locals {
   airflow_helm_repo    = "stable"
   debug_log_level      = "true"
 
+  url_schema = var.ingress_tls_enabled ? "https" : "http"
+
   deploy_helm_timeout = "300"
 
   airflow_variables = {

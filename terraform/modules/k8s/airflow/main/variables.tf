@@ -19,6 +19,8 @@ variable "cluster_name" {
 
 variable "nfs_dependency" {}
 
+variable "ingress_tls_enabled" {}
+
 # Docker
 variable "docker_repo" {
   description = "Odahuflow Docker repo url"
@@ -35,6 +37,10 @@ variable "docker_password" {
 }
 
 # Airflow configuration
+variable "wine_bucket" {
+  description = "Wine bucket name"
+}
+
 variable "wine_conn_private_key" {
   description = "GCP wine connection service account private key"
 }
@@ -59,17 +65,4 @@ variable "configuration" {
     fernet_key : string
   })
   description = "Airflow configuration"
-}
-
-# Test data
-variable "wine_bucket" {
-  description = "Wine bucket name"
-}
-
-variable "wine_data_url" {
-  description = "Wine example data URL"
-}
-
-variable "examples_version" {
-  description = "Examples version"
 }

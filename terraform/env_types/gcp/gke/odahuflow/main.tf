@@ -1,6 +1,9 @@
 ########################################################
 # Odahuflow setup
 ########################################################
+locals {
+  ingress_tls_enabled = var.tls_crt != "" && var.tls_key != ""
+}
 
 module "odahuflow_prereqs" {
   source       = "../../../../modules/odahuflow/prereqs/gke"
@@ -16,9 +19,17 @@ module "nfs" {
   configuration = var.nfs
 }
 
-module "airflow" {
-  source = "../../../../modules/k8s/airflow"
+module "airflow_prereqs" {
+  source = "../../../../modules/k8s/airflow/prereqs/gke"
 
+  project_id  = var.project_id
+  wine_bucket = module.odahuflow_prereqs.odahu_bucket_name
+}
+
+module "airflow" {
+  source = "../../../../modules/k8s/airflow/main"
+
+  ingress_tls_enabled       = local.ingress_tls_enabled
   nfs_dependency            = module.nfs.helm_chart
   configuration             = var.airflow
   cluster_name              = var.cluster_name
@@ -26,10 +37,9 @@ module "airflow" {
   domain                    = var.cluster_domain_name
   project_id                = var.project_id
   oauth_oidc_token_endpoint = var.oauth_oidc_token_endpoint
-  service_account           = var.service_accounts.airflow
   wine_bucket               = module.odahuflow_prereqs.odahu_bucket_name
-  wine_data_url             = var.wine_data_url
-  examples_version          = var.odahuflow_connections[0].spec.reference
+  wine_conn_private_key     = module.airflow_prereqs.wine_conn_private_key
+  service_account           = var.service_accounts.airflow
   docker_repo               = var.docker_repo
   docker_username           = var.docker_username
   docker_password           = var.docker_password
@@ -83,7 +93,7 @@ module "odahuflow_helm" {
   node_pools = var.node_pools
 
   odahuflow_connections              = concat(var.odahuflow_connections, module.odahuflow_prereqs.odahuflow_connections)
-  extra_external_urls                = concat(module.jupyterhub.external_url, module.odahuflow_prereqs.extra_external_urls)
+  extra_external_urls                = concat(module.jupyterhub.external_url, module.odahuflow_prereqs.extra_external_urls, module.airflow.external_url)
   odahuflow_connection_decrypt_token = var.odahuflow_connection_decrypt_token
   resource_uploader_sa               = var.service_accounts.resource_uploader
   operator_sa                        = var.service_accounts.operator
@@ -91,4 +101,5 @@ module "odahuflow_helm" {
   oauth_oidc_issuer_url              = var.oauth_oidc_issuer_url
   oauth_mesh_enabled                 = var.oauth_mesh_enabled
   vault_enabled                      = var.vault.enabled
+  airflow_enabled                    = var.airflow.enabled
 }
