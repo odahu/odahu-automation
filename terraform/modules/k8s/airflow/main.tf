@@ -74,6 +74,7 @@ resource "helm_release" "airflow" {
       airflow_version              = local.airflow_version
       airflow_variables            = jsonencode(local.airflow_variables)
       domain                       = var.domain
+      docker_repo                  = var.docker_repo
       fernet_key                   = var.configuration.fernet_key
       gcp_wine_conn                = jsonencode(local.gcp_wine_conn)
       log_storage_size             = var.configuration.log_storage_size
