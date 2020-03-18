@@ -210,13 +210,13 @@ variable "postgres" {
     enabled : true,
     storage_size : "8Gi",
     replica_count : 1,
-    password: "odahu"
+    password : "odahu"
   }
   type = object({
     enabled : bool,
     storage_size : string,
     replica_count : number,
-    password: string
+    password : string
   })
   description = "PostgreSQL configuration"
 }
