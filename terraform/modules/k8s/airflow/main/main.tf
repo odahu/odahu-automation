@@ -1,5 +1,5 @@
 locals {
-  odahu_airflow_plugin_version = "1.1.0-rc13"
+  odahu_airflow_plugin_version = "1.1.0-rc14"
 
   airflow_version      = "1.10.9"
   airflow_helm_version = "6.3.0"

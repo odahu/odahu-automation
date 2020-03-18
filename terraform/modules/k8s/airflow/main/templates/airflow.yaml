@@ -37,11 +37,12 @@ airflow:
   webReplicas: 1
   config:
     AIRFLOW__CORE__LOGGING_LEVEL: DEBUG
-    AIRFLOW__CORE__LOAD_EXAMPLES: False
+    AIRFLOW__CORE__LOAD_EXAMPLES: True
+    AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: False
     AIRFLOW__CORE__FERNET_KEY: ${fernet_key}
     AIRFLOW__KUBERNETES__DAGS_VOLUME_CLAIM: airflow
     AIRFLOW__KUBERNETES__LOGS_VOLUME_CLAIM: airflow-logs
-    AIRFLOW__KUBERNETES__WORKER_CONTAINER_IMAGE_PULL_POLICY: Always
+    AIRFLOW__KUBERNETES__WORKER_CONTAINER_IMAGE_PULL_POLICY: IfNotPresent
     AIRFLOW__KUBERNETES__WORKER_SERVICE_ACCOUNT_NAME: airflow
     AIRFLOW__KUBERNETES__NAMESPACE: ${namespace}
     AIRFLOW__KUBERNETES__ENV_FROM_CONFIGMAP_REF: airflow-env
@@ -57,7 +58,7 @@ airflow:
   image:
     repository: "${docker_repo}/airflow_${airflow_version}"
     tag: ${odahu_airflow_plugin_version}
-    pullPolicy: Always
+    pullPolicy: IfNotPresent
 
 ingress:
   enabled: true
