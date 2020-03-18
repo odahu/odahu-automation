@@ -8,16 +8,12 @@ variable "allowed_networks" {
   description = "Postgres pg_hba allowed networks"
 }
 
-variable "password" {
-  default     = "postgres"
-  description = "Postgres admin user password"
-}
-
 variable "configuration" {
   type = object({
     enabled : bool,
     storage_size : string,
-    replica_count : number
+    replica_count : number,
+    password: string
   })
   description = "Postgres configuration"
 }

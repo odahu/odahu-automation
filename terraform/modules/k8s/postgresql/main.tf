@@ -27,7 +27,7 @@ resource "helm_release" "this" {
 
   values = [
     templatefile("${path.module}/templates/values.yaml", {
-      password         = var.password
+      password         = var.configuration.password
       storage_size     = var.configuration.storage_size
       debug            = local.debug_log_level
       pg_version       = local.pg_version

@@ -205,18 +205,18 @@ variable "vault" {
 ########################
 # PostgreSQL
 ########################
-variable "postgres_password" {}
-
 variable "postgres" {
   default = {
     enabled : true,
     storage_size : "8Gi",
-    replica_count : 1
+    replica_count : 1,
+    password: "odahu"
   }
   type = object({
     enabled : bool,
     storage_size : string,
-    replica_count : number
+    replica_count : number,
+    password: string
   })
   description = "PostgreSQL configuration"
 }
