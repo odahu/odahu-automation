@@ -1,7 +1,4 @@
 locals {
-  odahu_airflow_plugin_version = "1.1.0-rc14"
-
-  airflow_version      = "1.10.9"
   airflow_helm_version = "6.3.0"
   airflow_helm_repo    = "stable"
   debug_log_level      = "true"
@@ -71,7 +68,6 @@ resource "helm_release" "airflow" {
 
   values = [
     templatefile("${path.module}/templates/airflow.yaml", {
-      airflow_version              = local.airflow_version
       airflow_variables            = jsonencode(local.airflow_variables)
       domain                       = var.domain
       docker_repo                  = var.docker_repo
@@ -80,7 +76,7 @@ resource "helm_release" "airflow" {
       log_storage_size             = var.configuration.log_storage_size
       namespace                    = var.namespace
       odahu_conn                   = jsonencode(local.odahu_conn)
-      odahu_airflow_plugin_version = local.odahu_airflow_plugin_version
+      odahu_airflow_plugin_version = var.odahu_airflow_plugin_version
       storage_size                 = var.configuration.storage_size
     }),
   ]

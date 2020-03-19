@@ -29,20 +29,21 @@ module "airflow_prereqs" {
 module "airflow" {
   source = "../../../../modules/k8s/airflow/main"
 
-  ingress_tls_enabled       = local.ingress_tls_enabled
-  nfs_dependency            = module.nfs.helm_chart
-  configuration             = var.airflow
-  cluster_name              = var.cluster_name
-  postgres_password         = var.postgres_password
-  domain                    = var.cluster_domain_name
-  project_id                = var.project_id
-  oauth_oidc_token_endpoint = var.oauth_oidc_token_endpoint
-  wine_bucket               = module.odahuflow_prereqs.odahu_bucket_name
-  wine_conn_private_key     = module.airflow_prereqs.wine_conn_private_key
-  service_account           = var.service_accounts.airflow
-  docker_repo               = var.docker_repo
-  docker_username           = var.docker_username
-  docker_password           = var.docker_password
+  ingress_tls_enabled          = local.ingress_tls_enabled
+  nfs_dependency               = module.nfs.helm_chart
+  configuration                = var.airflow
+  cluster_name                 = var.cluster_name
+  postgres_password            = var.postgres_password
+  domain                       = var.cluster_domain_name
+  project_id                   = var.project_id
+  oauth_oidc_token_endpoint    = var.oauth_oidc_token_endpoint
+  wine_bucket                  = module.odahuflow_prereqs.odahu_bucket_name
+  wine_conn_private_key        = module.airflow_prereqs.wine_conn_private_key
+  service_account              = var.service_accounts.airflow
+  docker_repo                  = var.docker_repo
+  docker_username              = var.docker_username
+  docker_password              = var.docker_password
+  odahu_airflow_plugin_version = var.odahu_airflow_plugin_version
 }
 
 module "fluentd" {

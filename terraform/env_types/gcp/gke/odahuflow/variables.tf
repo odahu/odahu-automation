@@ -53,6 +53,10 @@ variable "odahuflow_version" {
   description = "Odahuflow release version"
 }
 
+variable "odahu_airflow_plugin_version" {
+  description = "Odahuflow Airflow plugn version"
+}
+
 variable "docker_repo" {
   description = "Odahuflow Docker repo url"
 }

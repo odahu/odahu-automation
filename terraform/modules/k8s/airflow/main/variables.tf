@@ -21,6 +21,10 @@ variable "nfs_dependency" {}
 
 variable "ingress_tls_enabled" {}
 
+variable "odahu_airflow_plugin_version" {
+  description = "ODAHU Airflow plugin version to use"
+}
+
 # Docker
 variable "docker_repo" {
   description = "Odahuflow Docker repo url"
