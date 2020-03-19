@@ -22,8 +22,9 @@ module "nfs" {
 module "airflow_prereqs" {
   source = "../../../../modules/k8s/airflow/prereqs/gke"
 
-  project_id  = var.project_id
-  wine_bucket = module.odahuflow_prereqs.odahu_bucket_name
+  project_id   = var.project_id
+  wine_bucket  = module.odahuflow_prereqs.odahu_bucket_name
+  cluster_name = var.cluster_name
 }
 
 module "airflow" {
