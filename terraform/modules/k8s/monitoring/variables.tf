@@ -12,9 +12,9 @@ variable "cluster_domain" {
 ########################
 # Prometheus monitoring
 ########################
-variable "monitoring_namespace" {
-  default     = "kube-monitoring"
-  description = "clusterwide monitoring namespace"
+variable "namespace" {
+  default     = "odahu-flow-monitoring"
+  description = "ODAHU flow monitoring namespace"
 }
 
 variable "odahu_infra_version" {
@@ -32,12 +32,4 @@ variable "grafana_pass" {
 variable "grafana_storage_class" {
   default     = "standard"
   description = "Grafana storage class"
-}
-
-variable "tls_secret_crt" {
-  description = "Odahuflow cluster TLS certificate"
-}
-
-variable "tls_secret_key" {
-  description = "Odahuflow cluster TLS key"
 }

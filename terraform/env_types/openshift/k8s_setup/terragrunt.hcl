@@ -5,22 +5,20 @@ locals {
   config  = jsondecode(file(local.profile))
 
   cluster_name   = lookup(local.config, "cluster_name", "")
-  context_name   = lookup(local.config, "config_context_cluster", "")
+  context_name   = lookup(local.config, "config_context", "")
   gcp_project_id = lookup(lookup(local.config.cloud, "gcp", {}), "project_id", "")
   gcp_region     = lookup(lookup(local.config.cloud, "gcp", {}), "region", "us-east1")
   gcp_zone       = lookup(lookup(local.config.cloud, "gcp", {}), "zone", "us-east1-b")
-  oc_url         = lookup(lookup(local.config.cloud, "openshift", {}), "oc_url", "")
-  oc_username    = lookup(lookup(local.config.cloud, "openshift", {}), "oc_username", "")
-  oc_password    = lookup(lookup(local.config.cloud, "openshift", {}), "oc_password", "")
  
   # If "config_context_auth_info", "config_context_cluster" variables are defined in $PROFILE, then we should use it,
   # otherwise we should parse kubeconfig (if exists)
-  kubefile                 = fileexists("~/.kube/config") ? file("~/.kube/config") : "{}"
-  kubecontexts             = {for context in lookup(yamldecode(local.kubefile), "contexts", []): lookup(context, "name") => context}
-  kube_context_name        = length(local.kubecontexts) > 0 ? lookup(local.kubecontexts[local.context_name], "cluster", "") : ""
-  config_context_auth_info = lookup(local.config, "config_context_auth_info", local.kube_context_name)
-  cluster_domain_name      = lookup(local.config.dns, "domain", null)
-  scripts_dir              = "${get_terragrunt_dir()}/../../../../../scripts"
+  kubefile         = fileexists("kubeconfig") ? file("kubeconfig") : "{}"
+  kube_ctx_name    = local.context_name == "" ? lookup(yamldecode(local.kubefile), "current-context", "") : local.context_name
+  kube_ctx_map     = {for context in lookup(yamldecode(local.kubefile), "contexts", []): lookup(context, "name") => context}
+  kube_ctx_cluster = length(local.kube_ctx_map) > 0 ? lookup(lookup(local.kube_ctx_map[local.kube_ctx_name], "context", ""), "cluster", "") : ""
+  kube_ctx_user    = length(local.kube_ctx_map) > 0 ? lookup(lookup(local.kube_ctx_map[local.kube_ctx_name], "context", ""), "user", "") : ""
+  
+  cluster_domain_name = lookup(local.config.dns, "domain", null)
 }
 
 remote_state {
@@ -41,11 +39,6 @@ terraform {
     ]
     arguments = ["-no-color", "-compact-warnings"]
   }
-
-  before_hook "setup_oc" {
-    commands = ["plan", "apply", "destroy"]
-    execute  = ["bash", "-c", "oc login ${local.oc_url} --password=${local.oc_password} --username=${local.oc_username} --insecure-skip-tls-verify=true"]
-  }
 }
 
 inputs = {
@@ -53,7 +46,9 @@ inputs = {
   region     = local.gcp_region
   zone       = local.gcp_zone
 
-  config_context_auth_info = local.config_context_auth_info
+  config_context           = local.kube_ctx_name
+  config_context_auth_info = local.kube_ctx_user
+  config_context_cluster   = local.kube_ctx_cluster
 
   cluster_domain_name = local.cluster_domain_name
 }

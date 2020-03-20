@@ -7,12 +7,8 @@ locals {
   oauth_redirect_url_suffix = "oauth2/callback"
 
   oauth_redirect_url = var.oauth_redirect_url == "" ? "https://${var.domain_name}/${local.oauth_redirect_url_suffix}" : var.oauth_redirect_url
-}
-
-# Oauth2 proxy
-data "template_file" "oauth2-proxy_values" {
-  template = file("${path.module}/templates/oauth2-proxy.yaml")
-  vars = {
+  
+  oauth_proxy_values = {
     domain_name             = var.domain_name
     oauth_image_repository  = var.oauth_image_repository
     oauth_image_tag         = var.oauth_image_tag
@@ -32,11 +28,11 @@ resource "helm_release" "oauth2-proxy" {
   name          = "oauth2-proxy"
   chart         = "stable/oauth2-proxy"
   version       = var.oauth_helm_chart_version
-  namespace     = "kube-system"
+  namespace     = var.namespace
   recreate_pods = "true"
   timeout       = "600"
 
   values = [
-    data.template_file.oauth2-proxy_values.rendered
+    templatefile("${path.module}/templates/oauth2-proxy.yaml", local.oauth_proxy_values)
   ]
 }

@@ -22,12 +22,21 @@ variable "cluster_name" {
   description = "Odahuflow cluster name"
 }
 
+variable "config_context" {
+  description = "Kubeconfig context name"
+}
+
 variable "config_context_auth_info" {
-  description = "Kubernetes cluster context auth"
+  description = "Kubeconfig context user"
 }
 
 variable "config_context_cluster" {
-  description = "Kubernetes cluster context name"
+  description = "Kubeconfig context cluster name"
+}
+
+variable "services_namespace" {
+  default     = "odahu-flow-services"
+  description = "clusterwide monitoring namespace"
 }
 
 variable "helm_repo" {
@@ -56,13 +65,13 @@ variable "docker_password" {
   description = "Odahuflow Docker repo password"
 }
 
-#variable "tls_key" {
-#  description = "TLS key for Odahuflow cluster"
-#}
+variable "tls_key" {
+ description = "TLS key for Odahuflow cluster"
+}
 
-#variable "tls_crt" {
-#  description = "TLS certificate file for Odahuflow cluster"
-#}
+variable "tls_crt" {
+ description = "TLS certificate file for Odahuflow cluster"
+}
 
 ##################
 # OAuth2
@@ -149,11 +158,20 @@ variable "opa_policies" {
 }
 
 ########################
-# Istio
+# Prometheus monitoring
 ########################
-variable "istio_namespace" {
-  default     = "istio-system"
-  description = "istio namespace"
+variable "allowed_ips" {
+  type        = list(string)
+  description = "CIDR to allow access from"
+}
+
+variable "grafana_admin" {
+  default     = "grafana_admin"
+  description = "Grafana admin username"
+}
+
+variable "grafana_pass" {
+  description = "Grafana admin password"
 }
 
 ########################
