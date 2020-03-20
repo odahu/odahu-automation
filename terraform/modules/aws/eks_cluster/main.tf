@@ -60,7 +60,7 @@ resource "aws_eks_cluster" "default" {
 
   provisioner "local-exec" {
     when    = destroy
-    command = "bash ../../../../../scripts/aws_eni_cleanup.sh \"${self.name}\""
+    command = "bash ../../../../../scripts/aws_eni_cleanup.sh \"${self.name}\" \"${var.aws_region}\""
   }
 }
 
