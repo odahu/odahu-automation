@@ -3,7 +3,7 @@ variable "project_id" {
   description = "Google Cloud Project ID"
 }
 
-variable "domain" {
+variable "cluster_domain" {
   description = "Odahuflow FQDN"
 }
 
@@ -17,7 +17,15 @@ variable "cluster_name" {
   description = "Odahuflow cluster name"
 }
 
-variable "ingress_tls_enabled" {}
+variable "tls_secret_crt" {
+  description = "Ingress TLS certificate"
+  default     = ""
+}
+
+variable "tls_secret_key" {
+  description = "Ingress TLS key"
+  default     = ""
+}
 
 variable "odahu_airflow_plugin_version" {
   description = "ODAHU Airflow plugin version to use"
