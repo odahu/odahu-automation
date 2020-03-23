@@ -22,3 +22,7 @@ variable "nat_subnet_cidr" {
 variable "az_list" {
   description = "AWS AZ list to use"
 }
+
+variable "aws_region" {
+  description = "AWS region"
+}
