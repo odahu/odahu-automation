@@ -8,6 +8,11 @@ resource "aws_vpc" "default" {
     Name                                        = var.cluster_name,
     "kubernetes.io/cluster/${var.cluster_name}" = "shared",
   }
+
+  provisioner "local-exec" {
+    when    = destroy
+    command = "bash ../../../../../scripts/aws_sg_cleanup.sh \"${var.cluster_name}\" \"${var.aws_region}\""
+  }
 }
 
 resource "aws_subnet" "nat" {
