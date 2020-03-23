@@ -176,21 +176,6 @@ variable "vault" {
 }
 
 ########################
-# NFS
-########################
-variable "nfs" {
-  default = {
-    enabled : false,
-    storage_size : "10Gi"
-  }
-  type = object({
-    enabled : bool,
-    storage_size : string
-  })
-  description = "NFS configuration"
-}
-
-########################
 # Airflow
 ########################
 variable "airflow" {

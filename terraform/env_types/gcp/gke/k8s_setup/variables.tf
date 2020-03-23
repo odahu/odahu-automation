@@ -220,3 +220,19 @@ variable "postgres" {
   })
   description = "PostgreSQL configuration"
 }
+
+########################
+# NFS
+########################
+variable "nfs" {
+  default = {
+    enabled : false,
+    storage_size : "10Gi"
+  }
+  type = object({
+    enabled : bool,
+    storage_size : string
+  })
+  description = "NFS configuration"
+}
+

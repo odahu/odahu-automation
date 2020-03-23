@@ -17,8 +17,6 @@ variable "cluster_name" {
   description = "Odahuflow cluster name"
 }
 
-variable "nfs_dependency" {}
-
 variable "ingress_tls_enabled" {}
 
 variable "odahu_airflow_plugin_version" {

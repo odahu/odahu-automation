@@ -13,12 +13,6 @@ module "odahuflow_prereqs" {
   data_bucket  = var.data_bucket
 }
 
-module "nfs" {
-  source = "../../../../modules/k8s/nfs"
-
-  configuration = var.nfs
-}
-
 module "airflow_prereqs" {
   source = "../../../../modules/k8s/airflow/prereqs/gke"
 
@@ -31,7 +25,6 @@ module "airflow" {
   source = "../../../../modules/k8s/airflow/main"
 
   ingress_tls_enabled          = local.ingress_tls_enabled
-  nfs_dependency               = module.nfs.helm_chart
   configuration                = var.airflow
   cluster_name                 = var.cluster_name
   postgres_password            = var.postgres_password

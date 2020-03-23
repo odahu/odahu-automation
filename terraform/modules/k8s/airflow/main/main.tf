@@ -81,5 +81,5 @@ resource "helm_release" "airflow" {
     }),
   ]
 
-  depends_on = [kubernetes_namespace.this, kubernetes_secret.postgres, var.nfs_dependency]
+  depends_on = [kubernetes_namespace.this, kubernetes_secret.postgres]
 }

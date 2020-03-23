@@ -6,6 +6,12 @@ module "gpu_drivers" {
   source = "../../../../modules/k8s/gpu_drivers_setup"
 }
 
+module "nfs" {
+  source = "../../../../modules/k8s/nfs"
+
+  configuration = var.nfs
+}
+
 module "nginx_ingress_tls" {
   source         = "../../../../modules/k8s/nginx-ingress/tls"
   cluster_name   = var.cluster_name
