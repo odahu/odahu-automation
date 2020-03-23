@@ -6,6 +6,7 @@ module "vpc" {
   cluster_name         = var.cluster_name
   cidr                 = var.cidr
   az_list              = var.az_list
+  aws_region           = var.aws_region
   nat_subnet_cidr      = var.nat_subnet_cidr
   public_subnet_cidrs  = var.public_subnet_cidrs
   private_subnet_cidrs = var.private_subnet_cidrs
