@@ -5,8 +5,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
     TERRAFORM_VERSION=0.12.21 \
     TERRAGRUNT_VERSION=v0.22.3 \
     HELM_VERSION=v3.1.1 \
-    OC_VERSION=v3.11.0 \
-    OC_COMMIT_HASH=0cbc58b
+    OC_VERSION=4.3
 
 # install system utilities
 RUN apt-get update && apt-get install -y \
@@ -20,10 +19,10 @@ RUN chmod 0755 /etc/default/locale
 ENV LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 LANGUAGE=en_US.UTF-8
 
 # Install oc
-RUN wget -qO /tmp/oc.tgz https://github.com/openshift/origin/releases/download/${OC_VERSION}/openshift-origin-client-tools-${OC_VERSION}-${OC_COMMIT_HASH}-linux-64bit.tar.gz && \
+RUN wget -qO /tmp/oc.tgz https://mirror.openshift.com/pub/openshift-v4/clients/oc/${OC_VERSION}/linux/oc.tar.gz && \
     mkdir -p /tmp/oc && \
     tar xzf /tmp/oc.tgz -C /tmp/oc && \
-    mv /tmp/oc/openshift-origin-client-tools-${OC_VERSION}-${OC_COMMIT_HASH}-linux-64bit/oc /usr/local/bin/oc && rm -rf /tmp/oc
+    mv /tmp/oc/oc /usr/local/bin/oc && rm -rf /tmp/oc
 
 # Install kubectl
 RUN wget -qO /usr/local/bin/kubectl "https://storage.googleapis.com/kubernetes-release/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl" && \
