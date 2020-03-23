@@ -53,6 +53,8 @@ module "odahuflow_helm" {
   odahuflow_version        = var.odahuflow_version
   packager_version         = var.packager_version
   mlflow_toolchain_version = var.mlflow_toolchain_version
+  mlflow_storage_class     = var.mlflow_storage_class
+  mlflow_storage_size      = var.mlflow_storage_size
   odahu_ui_version         = var.odahu_ui_version
 
   node_pools = var.node_pools

@@ -37,6 +37,16 @@ variable "mlflow_toolchain_version" {
   description = "Version of odahu-flow-mlflow helm chart"
 }
 
+variable "mlflow_storage_class" {
+  default     = null
+  description = "Storage class for mlflow data volume"
+}
+
+variable "mlflow_storage_size" {
+  default     = "1Gi"
+  description = "Storage size for mlflow data volume"
+}
+
 variable "odahu_ui_version" {
   description = "Version of odahu-ui helm chart"
 }
