@@ -9,10 +9,12 @@ locals {
       }
     }
   } : {}
+
+  ns_list = [for namespace in var.namespaces : namespace if length(local.dockerconfigjson) > 0]
 }
 
 resource "kubernetes_secret" "docker_credentials" {
-  for_each = toset(var.namespaces)
+  for_each = toset(local.ns_list)
   metadata {
     name      = var.docker_secret_name
     namespace = each.value
@@ -24,10 +26,10 @@ resource "kubernetes_secret" "docker_credentials" {
 }
 
 resource "null_resource" "set_default_secret" {
-  for_each = toset(var.namespaces)
+  for_each = toset(local.ns_list)
 
   provisioner "local-exec" {
-    command = "${path.module}/files/set_default_secret.sh \"${var.docker_secret_name}\" \"${each.value}\" \"${tostring(join(" ", var.sa_list))}\" "
+    command = "../../../../scripts/set_default_secret.sh \"${var.docker_secret_name}\" \"${each.value}\" \"${tostring(join(" ", var.sa_list))}\" "
   }
   depends_on = [kubernetes_secret.docker_credentials]
 }
