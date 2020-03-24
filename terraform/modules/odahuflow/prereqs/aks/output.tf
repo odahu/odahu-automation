@@ -1,9 +1,9 @@
 output "extra_external_urls" {
   value = [
     {
-      name      = "Feedback storage"
-      url       = "${azurerm_storage_container.odahuflow_bucket.id}/model_log"
-      image_url = "/img/logo/azure-blob.png"
+      name     = "Feedback storage"
+      url      = "${azurerm_storage_container.odahuflow_bucket.id}/model_log"
+      imageUrl = "/img/logo/azure-blob.png"
     }
   ]
 }

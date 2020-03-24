@@ -1,9 +1,9 @@
 output "extra_external_urls" {
   value = [
     {
-      name      = "Feedback storage"
-      url       = "https://console.cloud.google.com/storage/browser/${google_storage_bucket.this.name}/model_log?project=${var.project_id}"
-      image_url = "/img/logo/gcs.png"
+      name     = "Feedback storage"
+      url      = "https://console.cloud.google.com/storage/browser/${google_storage_bucket.this.name}/model_log?project=${var.project_id}"
+      imageUrl = "/img/logo/gcs.png"
     }
   ]
 }

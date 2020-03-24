@@ -6,29 +6,29 @@ locals {
 
   default_external_urls = [
     {
-      name      = "Documentation",
-      url       = "https://docs.odahu.org",
-      image_url = "/img/logo/documentation.png"
+      name     = "Documentation",
+      url      = "https://docs.odahu.org",
+      imageUrl = "/img/logo/documentation.png"
     },
     {
-      name      = "API Gateway",
-      url       = "${local.url_schema}://${var.cluster_domain}/swagger/index.html",
-      image_url = "/img/logo/swagger.png"
+      name     = "API Gateway",
+      url      = "${local.url_schema}://${var.cluster_domain}/swagger/index.html",
+      imageUrl = "/img/logo/swagger.png"
     },
     {
-      name      = "ML Metrics",
-      url       = "${local.url_schema}://${var.cluster_domain}/mlflow",
-      image_url = "/img/logo/mlflow.png"
+      name     = "ML Metrics",
+      url      = "${local.url_schema}://${var.cluster_domain}/mlflow",
+      imageUrl = "/img/logo/mlflow.png"
     },
     {
-      name      = "Service Catalog",
-      url       = "${local.url_schema}://${var.cluster_domain}/service-catalog/swagger/index.html",
-      image_url = "/img/logo/swagger.png"
+      name     = "Service Catalog",
+      url      = "${local.url_schema}://${var.cluster_domain}/service-catalog/swagger/index.html",
+      imageUrl = "/img/logo/swagger.png"
     },
     {
-      name      = "Cluster Monitoring",
-      url       = "${local.url_schema}://${var.cluster_domain}/grafana",
-      image_url = "/img/logo/grafana.png"
+      name     = "Cluster Monitoring",
+      url      = "${local.url_schema}://${var.cluster_domain}/grafana",
+      imageUrl = "/img/logo/grafana.png"
     },
   ]
 
@@ -36,22 +36,23 @@ locals {
 
   odahuflow_config = {
     common = {
-      external_urls = concat(local.default_external_urls, var.extra_external_urls)
+      externalUrls = concat(local.default_external_urls, var.extra_external_urls)
     }
     connection = {
-      repository_type = var.vault_enabled ? "vault" : "kubernetes"
-      decrypt_token   = var.odahuflow_connection_decrypt_token
-      vault           = var.connection_vault_configuration
+      repositoryType = var.vault_enabled ? "vault" : "kubernetes"
+      vault          = var.connection_vault_configuration
     }
     operator = {
-      oauth_oidc_token_endpoint = var.oauth_oidc_token_endpoint
-      client_id                 = var.operator_sa.client_id
-      client_secret             = var.operator_sa.client_secret
+      auth = {
+        oauthOidcTokenEndpoint = var.oauth_oidc_token_endpoint
+        clientId               = var.operator_sa.client_id
+        clientSecret           = var.operator_sa.client_secret
+      }
     }
     deployment = {
-      toleration                    = contains(keys(var.node_pools), "model_deployment") ? { Key = var.node_pools["model_deployment"].taints[0].key, Operator = "Equal", Value = var.node_pools["model_deployment"].taints[0].value, Effect = replace(var.node_pools["model_deployment"].taints[0].effect, "/(?i)no_?schedule/", "NoSchedule") } : null
-      node_selector                 = contains(keys(var.node_pools), "model_deployment") ? { for key, value in var.node_pools["model_deployment"].labels : key => value } : null
-      default_docker_pull_conn_name = local.default_model_docker_connection_id
+      toleration                = contains(keys(var.node_pools), "model_deployment") ? { Key = var.node_pools["model_deployment"].taints[0].key, Operator = "Equal", Value = var.node_pools["model_deployment"].taints[0].value, Effect = replace(var.node_pools["model_deployment"].taints[0].effect, "/(?i)no_?schedule/", "NoSchedule") } : null
+      nodeSelector              = contains(keys(var.node_pools), "model_deployment") ? { for key, value in var.node_pools["model_deployment"].labels : key => value } : null
+      defaultDockerPullConnName = local.default_model_docker_connection_id
       edge = {
         host = "${local.url_schema}://${var.cluster_domain}"
       }
@@ -61,29 +62,33 @@ locals {
       }
     }
     training = {
-      toleration        = contains(keys(var.node_pools), "training") ? { Key = var.node_pools["training"].taints[0].key, Operator = "Equal", Value = var.node_pools["training"].taints[0].value, Effect = replace(var.node_pools["training"].taints[0].effect, "/(?i)no_?schedule/", "NoSchedule") } : null
-      node_selector     = contains(keys(var.node_pools), "training") ? { for key, value in var.node_pools["training"].labels : key => value } : null
-      gpu_toleration    = contains(keys(var.node_pools), "training_gpu") ? { Key = var.node_pools["training_gpu"].taints[0].key, Operator = "Equal", Value = var.node_pools["training_gpu"].taints[0].value, Effect = replace(var.node_pools["training_gpu"].taints[0].effect, "/(?i)no_?schedule/", "NoSchedule") } : null
-      gpu_node_selector = contains(keys(var.node_pools), "training_gpu") ? { for key, value in var.node_pools["training_gpu"].labels : key => value } : null
-      namespace         = var.odahuflow_training_namespace
-      output_connection = "models-output"
-      metric_url        = "${local.url_schema}://${var.cluster_domain}/mlflow"
+      toleration         = contains(keys(var.node_pools), "training") ? { Key = var.node_pools["training"].taints[0].key, Operator = "Equal", Value = var.node_pools["training"].taints[0].value, Effect = replace(var.node_pools["training"].taints[0].effect, "/(?i)no_?schedule/", "NoSchedule") } : null
+      nodeSelector       = contains(keys(var.node_pools), "training") ? { for key, value in var.node_pools["training"].labels : key => value } : null
+      gpuToleration      = contains(keys(var.node_pools), "training_gpu") ? { Key = var.node_pools["training_gpu"].taints[0].key, Operator = "Equal", Value = var.node_pools["training_gpu"].taints[0].value, Effect = replace(var.node_pools["training_gpu"].taints[0].effect, "/(?i)no_?schedule/", "NoSchedule") } : null
+      gpuNodeSelector    = contains(keys(var.node_pools), "training_gpu") ? { for key, value in var.node_pools["training_gpu"].labels : key => value } : null
+      namespace          = var.odahuflow_training_namespace
+      outputConnectionID = "models-output"
+      metricUrl          = "${local.url_schema}://${var.cluster_domain}/mlflow"
     }
     trainer = {
-      oauth_oidc_token_endpoint = var.oauth_oidc_token_endpoint
-      client_id                 = var.operator_sa.client_id
-      client_secret             = var.operator_sa.client_secret
+      auth = {
+        oauthOidcTokenEndpoint = var.oauth_oidc_token_endpoint
+        clientId               = var.operator_sa.client_id
+        clientSecret           = var.operator_sa.client_secret
+      }
     }
     packager = {
-      oauth_oidc_token_endpoint = var.oauth_oidc_token_endpoint
-      client_id                 = var.operator_sa.client_id
-      client_secret             = var.operator_sa.client_secret
+      auth = {
+        oauthOidcTokenEndpoint = var.oauth_oidc_token_endpoint
+        clientId               = var.operator_sa.client_id
+        clientSecret           = var.operator_sa.client_secret
+      }
     }
     packaging = {
-      toleration        = contains(keys(var.node_pools), "packaging") ? { Key = var.node_pools["packaging"].taints[0].key, Operator = "Equal", Value = var.node_pools["packaging"].taints[0].value, Effect = replace(var.node_pools["packaging"].taints[0].effect, "/(?i)no_?schedule/", "NoSchedule") } : null
-      node_selector     = contains(keys(var.node_pools), "packaging") ? { for key, value in var.node_pools["packaging"].labels : key => value } : null
-      namespace         = var.odahuflow_packaging_namespace
-      output_connection = "models-output"
+      toleration         = contains(keys(var.node_pools), "packaging") ? { Key = var.node_pools["packaging"].taints[0].key, Operator = "Equal", Value = var.node_pools["packaging"].taints[0].value, Effect = replace(var.node_pools["packaging"].taints[0].effect, "/(?i)no_?schedule/", "NoSchedule") } : null
+      nodeSelector       = contains(keys(var.node_pools), "packaging") ? { for key, value in var.node_pools["packaging"].labels : key => value } : null
+      namespace          = var.odahuflow_packaging_namespace
+      outputConnectionID = "models-output"
     }
   }
   api_vault_volume = {
