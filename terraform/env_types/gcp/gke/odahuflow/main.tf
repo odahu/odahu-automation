@@ -22,12 +22,11 @@ module "airflow" {
 
   configuration                = var.airflow
   cluster_name                 = var.cluster_name
-  postgres_password            = var.postgres_password
+  postgres_password            = var.postgres.password
   cluster_domain               = var.cluster_domain_name
-  project_id                   = var.project_id
+  airflow_variables            = module.airflow_prereqs.airflow_variables
   oauth_oidc_token_endpoint    = var.oauth_oidc_token_endpoint
-  wine_bucket                  = module.odahuflow_prereqs.odahu_bucket_name
-  wine_conn_private_key        = module.airflow_prereqs.wine_conn_private_key
+  wine_connection              = module.airflow_prereqs.wine_connection
   service_account              = var.service_accounts.airflow
   docker_repo                  = var.docker_repo
   docker_username              = var.docker_username

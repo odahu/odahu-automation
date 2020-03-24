@@ -1,7 +1,7 @@
 terraform_version_constraint = ">= 0.12.21"
 
 locals {
-  profile = get_env("PROFILE", "${get_terragrunt_dir()}//profile_dev04.json")
+  profile = get_env("PROFILE", "${get_terragrunt_dir()}//profile.json")
   config  = jsondecode(file(local.profile))
 
   cluster_name      = lookup(local.config, "cluster_name", "")

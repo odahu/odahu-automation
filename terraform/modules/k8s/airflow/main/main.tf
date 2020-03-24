@@ -8,20 +8,20 @@ locals {
   ingress_tls_secret_name = "odahu-flow-tls"
 
   ingress_common = {
-      enabled = true
+    enabled = true
   }
 
   ingress_web = {
-      path  = "/airflow"
-      host  = var.cluster_domain
-      hosts = [var.cluster_domain]
+    path  = "/airflow"
+    host  = var.cluster_domain
+    hosts = [var.cluster_domain]
 
-      annotations = {
-        "kubernetes.io/ingress.class"                       = "nginx"
-        "nginx.ingress.kubernetes.io/force-ssl-redirect"    = "true"
-        "nginx.ingress.kubernetes.io/auth-signin"           = format("https://%s/oauth2/start?rd=https://$host$escaped_request_uri", var.cluster_domain)
-        "nginx.ingress.kubernetes.io/auth-url"              = "http://oauth2-proxy.kube-system.svc.cluster.local:4180/oauth2/auth"
-        "nginx.ingress.kubernetes.io/configuration-snippet" = <<-EOT
+    annotations = {
+      "kubernetes.io/ingress.class"                       = "nginx"
+      "nginx.ingress.kubernetes.io/force-ssl-redirect"    = "true"
+      "nginx.ingress.kubernetes.io/auth-signin"           = format("https://%s/oauth2/start?rd=https://$host$escaped_request_uri", var.cluster_domain)
+      "nginx.ingress.kubernetes.io/auth-url"              = "http://oauth2-proxy.kube-system.svc.cluster.local:4180/oauth2/auth"
+      "nginx.ingress.kubernetes.io/configuration-snippet" = <<-EOT
           set_escape_uri $escaped_request_uri $request_uri;
           auth_request_set $user   $upstream_http_x_auth_request_user;
           auth_request_set $email  $upstream_http_x_auth_request_email;
@@ -39,21 +39,16 @@ locals {
             end
           }
         EOT
-      }
+    }
   }
 
   ingress_tls = local.ingress_tls_enabled ? {
-    tls = { enabled = true, secretName = local.ingress_tls_secret_name}
+    tls = { enabled = true, secretName = local.ingress_tls_secret_name }
   } : {}
 
-  ingress_config = merge(local.ingress_common, {web = merge(local.ingress_web, local.ingress_tls)})
+  ingress_config = merge(local.ingress_common, { web = merge(local.ingress_web, local.ingress_tls) })
 
   deploy_helm_timeout = "300"
-
-  airflow_variables = {
-    "WINE_BUCKET" = var.wine_bucket,
-    "GCP_PROJECT" = var.project_id
-  }
 
   odahu_conn = {
     "auth_url"      = var.oauth_oidc_token_endpoint,
@@ -62,11 +57,6 @@ locals {
     "scope"         = "openid profile offline_access groups"
   }
 
-  gcp_wine_conn = {
-    "extra__google_cloud_platform__project"      = var.project_id,
-    "extra__google_cloud_platform__keyfile_dict" = replace(base64decode(var.wine_conn_private_key), "/\n/", ""),
-    "extra__google_cloud_platform__scope"        = "https://www.googleapis.com/auth/cloud-platform"
-  }
 }
 
 resource "kubernetes_namespace" "this" {
@@ -112,6 +102,7 @@ module "docker_credentials" {
   docker_repo     = var.docker_repo
   docker_username = var.docker_username
   docker_password = var.docker_password
+  sa_list         = ["default", "airflow"]
   namespaces      = [kubernetes_namespace.this.metadata[0].annotations.name]
 }
 
@@ -126,12 +117,12 @@ resource "helm_release" "airflow" {
 
   values = [
     templatefile("${path.module}/templates/airflow.yaml", {
-      airflow_variables            = jsonencode(local.airflow_variables)
+      airflow_variables            = jsonencode(var.airflow_variables)
       cluster_domain               = var.cluster_domain
       ingress                      = yamlencode({ ingress = local.ingress_config })
       docker_repo                  = var.docker_repo
       fernet_key                   = var.configuration.fernet_key
-      gcp_wine_conn                = jsonencode(local.gcp_wine_conn)
+      wine_conn                    = jsonencode(var.wine_connection)
       log_storage_size             = var.configuration.log_storage_size
       namespace                    = var.namespace
       odahu_conn                   = jsonencode(local.odahu_conn)

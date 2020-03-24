@@ -8,6 +8,25 @@ module "odahuflow_prereqs" {
   data_bucket  = var.data_bucket
 }
 
+module "airflow" {
+  source = "../../../../modules/k8s/airflow/main"
+
+  configuration                = var.airflow
+  cluster_name                 = var.cluster_name
+  postgres_password            = var.postgres.password
+  cluster_domain               = var.cluster_domain_name
+  oauth_oidc_token_endpoint    = var.oauth_oidc_token_endpoint
+  airflow_variables            = {}
+  wine_connection              = {}
+  service_account              = var.service_accounts.airflow
+  docker_repo                  = var.docker_repo
+  docker_username              = var.docker_username
+  docker_password              = var.docker_password
+  odahu_airflow_plugin_version = var.odahu_airflow_plugin_version
+  tls_secret_crt               = var.tls_crt
+  tls_secret_key               = var.tls_key
+}
+
 module "fluentd" {
   source = "../../../../modules/k8s/fluentd"
 
@@ -64,4 +83,5 @@ module "odahuflow_helm" {
   oauth_oidc_issuer_url              = var.oauth_oidc_issuer_url
   oauth_mesh_enabled                 = var.oauth_mesh_enabled
   vault_enabled                      = var.vault.enabled
+  airflow_enabled                    = var.airflow.enabled
 }

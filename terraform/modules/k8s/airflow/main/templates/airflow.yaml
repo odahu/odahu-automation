@@ -16,6 +16,7 @@ airflow:
     repository: ${docker_repo}/odahu-airflow
     tag: ${odahu_airflow_plugin_version}
     pullPolicy: IfNotPresent
+    pullSecret: repo-json-key
 
   fernetKey: ${fernet_key}
 
@@ -32,7 +33,7 @@ airflow:
     host: ${cluster_domain}/service-catalog
   - id: wine_input
     type: google_cloud_platform
-    extra: '${gcp_wine_conn}'
+    extra: '${wine_conn}'
 
   webReplicas: 1
   config:
@@ -54,11 +55,6 @@ airflow:
     port: 80
 
   executor: Kubernetes
-
-  image:
-    repository: ${docker_repo}/odahu-airflow
-    tag: ${odahu_airflow_plugin_version}
-    pullPolicy: IfNotPresent
 
 ${ingress}
 

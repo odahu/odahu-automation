@@ -97,3 +97,17 @@ module "vault" {
   vault_pvc_storage_class = var.storage_class
   configuration           = var.vault
 }
+
+module "nfs" {
+  source = "../../../../modules/k8s/nfs"
+
+  configuration = var.nfs
+}
+
+module "postgresql" {
+  source                = "../../../../modules/k8s/postgresql"
+  allowed_networks      = "0.0.0.0/0"
+  configuration         = var.postgres
+  monitoring_dependency = module.monitoring.helm_chart
+}
+
