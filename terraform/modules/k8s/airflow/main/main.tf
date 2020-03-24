@@ -102,7 +102,6 @@ module "docker_credentials" {
   docker_repo     = var.docker_repo
   docker_username = var.docker_username
   docker_password = var.docker_password
-  sa_list         = ["default", "airflow"]
   namespaces      = [kubernetes_namespace.this.metadata[0].annotations.name]
 }
 
