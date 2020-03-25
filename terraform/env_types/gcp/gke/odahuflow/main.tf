@@ -1,13 +1,39 @@
 ########################################################
 # Odahuflow setup
 ########################################################
-
 module "odahuflow_prereqs" {
   source       = "../../../../modules/odahuflow/prereqs/gke"
   project_id   = var.project_id
   region       = var.region
   cluster_name = var.cluster_name
   data_bucket  = var.data_bucket
+}
+
+module "airflow_prereqs" {
+  source = "../../../../modules/k8s/airflow/prereqs/gke"
+
+  project_id   = var.project_id
+  wine_bucket  = module.odahuflow_prereqs.odahu_bucket_name
+  cluster_name = var.cluster_name
+}
+
+module "airflow" {
+  source = "../../../../modules/k8s/airflow/main"
+
+  configuration                = var.airflow
+  cluster_name                 = var.cluster_name
+  postgres_password            = var.postgres.password
+  cluster_domain               = var.cluster_domain_name
+  airflow_variables            = module.airflow_prereqs.airflow_variables
+  oauth_oidc_token_endpoint    = var.oauth_oidc_token_endpoint
+  wine_connection              = module.airflow_prereqs.wine_connection
+  service_account              = var.service_accounts.airflow
+  docker_repo                  = var.docker_repo
+  docker_username              = var.docker_username
+  docker_password              = var.docker_password
+  odahu_airflow_plugin_version = var.odahu_airflow_plugin_version
+  tls_secret_crt               = var.tls_crt
+  tls_secret_key               = var.tls_key
 }
 
 module "fluentd" {
@@ -58,7 +84,7 @@ module "odahuflow_helm" {
   node_pools = var.node_pools
 
   odahuflow_connections              = concat(var.odahuflow_connections, module.odahuflow_prereqs.odahuflow_connections)
-  extra_external_urls                = concat(module.jupyterhub.external_url, module.odahuflow_prereqs.extra_external_urls)
+  extra_external_urls                = concat(module.jupyterhub.external_url, module.odahuflow_prereqs.extra_external_urls, module.airflow.external_url)
   odahuflow_connection_decrypt_token = var.odahuflow_connection_decrypt_token
   resource_uploader_sa               = var.service_accounts.resource_uploader
   operator_sa                        = var.service_accounts.operator
@@ -66,4 +92,5 @@ module "odahuflow_helm" {
   oauth_oidc_issuer_url              = var.oauth_oidc_issuer_url
   oauth_mesh_enabled                 = var.oauth_mesh_enabled
   vault_enabled                      = var.vault.enabled
+  airflow_enabled                    = var.airflow.enabled
 }

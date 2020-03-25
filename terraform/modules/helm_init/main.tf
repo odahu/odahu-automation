@@ -43,3 +43,13 @@ resource "null_resource" "add_helm_vault_repository" {
   }
   depends_on = [null_resource.add_helm_repository_istio]
 }
+
+resource "null_resource" "add_helm_bitnami_repository" {
+  triggers = {
+    build_number = timestamp()
+  }
+  provisioner "local-exec" {
+    command = "helm repo add bitnami https://charts.bitnami.com/bitnami"
+  }
+  depends_on = [null_resource.add_helm_vault_repository]
+}

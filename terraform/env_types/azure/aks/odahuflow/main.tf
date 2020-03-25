@@ -66,4 +66,5 @@ module "odahuflow_helm" {
   oauth_oidc_issuer_url              = var.oauth_oidc_issuer_url
   oauth_mesh_enabled                 = var.oauth_mesh_enabled
   vault_enabled                      = var.vault.enabled
+  airflow_enabled                    = false
 }

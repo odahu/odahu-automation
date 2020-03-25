@@ -8,6 +8,10 @@ output "extra_external_urls" {
   ]
 }
 
+output "odahu_bucket_name" {
+  value = google_storage_bucket.this.name
+}
+
 output "odahuflow_connections" {
   value = [
     {

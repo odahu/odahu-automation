@@ -1,0 +1,46 @@
+fullnameOverride: postgres
+
+global:
+  postgresql:
+    password: ${password}
+    database: airflow
+  pgpool:
+    adminPassword: ${password}
+
+postgresqlImage:
+  tag: ${pg_version}
+  debug: ${debug}
+
+pgpoolImage:
+  debug: ${debug}
+
+metricsImage:
+  debug: ${debug}
+
+postgresql:
+  replicaCount: ${replica_count}
+  pgHbaConfiguration: |-
+    local all all trust
+    host  all all localhost trust
+    host  repmgr all ${allowed_networks} trust
+    host  all all ${allowed_networks} md5
+
+pgpool:
+  replicaCount: 1
+
+metrics:
+  enabled: true
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "9187"
+  serviceMonitor:
+    enabled: true
+    selector:
+      prometheus: kube-prometheus
+
+persistence:
+  enabled: true
+  mountPath: /bitnami/postgresql
+  accessModes:
+    - ReadWriteOnce
+  size: ${storage_size}
