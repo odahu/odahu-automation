@@ -6,6 +6,12 @@ module "gpu_drivers" {
   source = "../../../../modules/k8s/gpu_drivers_setup"
 }
 
+module "nfs" {
+  source = "../../../../modules/k8s/nfs"
+
+  configuration = var.nfs
+}
+
 module "nginx_ingress_tls" {
   source         = "../../../../modules/k8s/nginx-ingress/tls"
   cluster_name   = var.cluster_name
@@ -96,4 +102,11 @@ module "tekton" {
 module "vault" {
   source        = "../../../../modules/k8s/vault"
   configuration = var.vault
+}
+
+module "postgresql" {
+  source                = "../../../../modules/k8s/postgresql"
+  allowed_networks      = var.pods_cidr
+  configuration         = var.postgres
+  monitoring_dependency = module.monitoring.helm_chart
 }

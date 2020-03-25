@@ -4,17 +4,19 @@ locals {
   profile = get_env("PROFILE", "${get_terragrunt_dir()}//profile.json")
   config  = jsondecode(file(local.profile))
 
-  cluster_name   = lookup(local.config, "cluster_name", "")
-  gcp_project_id = lookup(lookup(local.config.cloud, "gcp", {}), "project_id", "")
-  gcp_region     = lookup(lookup(local.config.cloud, "gcp", {}), "region", "us-east1")
-  gcp_zone       = lookup(lookup(local.config.cloud, "gcp", {}), "zone", "us-east1-b")
+  cluster_name      = lookup(local.config, "cluster_name", "")
+  gcp_project_id    = lookup(lookup(local.config.cloud, "gcp", {}), "project_id", "")
+  gcp_region        = lookup(lookup(local.config.cloud, "gcp", {}), "region", "us-east1")
+  gcp_zone          = lookup(lookup(local.config.cloud, "gcp", {}), "zone", "us-east1-b")
+  gcp_context_name  = "gke_${local.gcp_project_id}_${local.gcp_region}_${local.cluster_name}"
+  postgres_password = lookup(local.config.postgres, "password", "")
 
   # If "config_context_auth_info", "config_context_cluster" variables are defined in $PROFILE, then we should use it,
   # otherwise we should parse kubeconfig (if exists)
   kubefile                 = fileexists("~/.kube/config") ? file("~/.kube/config") : "{}"
-  kubecontexts             = lookup(yamldecode(local.kubefile), "contexts", [])
-  kube_context_name        = length(local.kubecontexts) > 0 ? lookup(local.kubecontexts[0], "name", "") : ""
-  kube_context_user        = length(local.kubecontexts) > 0 ? lookup(lookup(local.kubecontexts[0], "context", {}), "user", "") : ""
+  kubecontexts             = { for context in lookup(yamldecode(local.kubefile), "contexts", []) : lookup(context, "name") => context }
+  kube_context_name        = length(local.kubecontexts) > 0 ? lookup(local.kubecontexts[local.gcp_context_name], "name", "") : ""
+  kube_context_user        = length(local.kubecontexts) > 0 ? lookup(lookup(local.kubecontexts[local.gcp_context_name], "context", {}), "user", "") : ""
   config_context_auth_info = lookup(local.config, "config_context_auth_info", local.kube_context_name)
   config_context_cluster   = lookup(local.config, "config_context_cluster", local.kube_context_user)
   cluster_domain_name      = lookup(local.config.dns, "domain", null)
@@ -57,4 +59,5 @@ inputs = {
   config_context_cluster   = local.config_context_cluster
 
   cluster_domain_name = local.cluster_domain_name
+  postgres_password   = local.postgres_password
 }

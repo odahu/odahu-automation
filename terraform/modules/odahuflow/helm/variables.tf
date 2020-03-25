@@ -183,3 +183,8 @@ variable "vault_enabled" {
   type        = bool
   description = "Enabled vault deployment or not"
 }
+
+variable "airflow_enabled" {
+  type        = bool
+  description = "Is Airflow deployment enabled"
+}
