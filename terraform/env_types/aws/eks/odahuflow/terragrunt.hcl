@@ -13,7 +13,7 @@ locals {
   # If "config_context_auth_info", "config_context_cluster" variables are defined in $PROFILE, then we should use it,
   # otherwise we should parse kubeconfig (if exists)
   kubefile                 = fileexists("~/.kube/config") ? file("~/.kube/config") : "{}"
-  kubecontexts             = {for context in lookup(yamldecode(local.kubefile), "contexts", []): lookup(context, "name") => context}
+  kubecontexts             = { for context in lookup(yamldecode(local.kubefile), "contexts", []) : lookup(context, "name") => context }
   kube_context_name        = length(local.kubecontexts) > 0 ? lookup(local.kubecontexts[local.context_name], "name", "") : ""
   kube_context_user        = length(local.kubecontexts) > 0 ? lookup(lookup(local.kubecontexts[local.context_name], "context", {}), "user", "") : ""
   config_context_auth_info = lookup(local.config, "config_context_auth_info", local.kube_context_name)
