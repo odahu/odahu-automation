@@ -29,7 +29,7 @@ resource "null_resource" "set_default_secret" {
   for_each = toset(local.ns_list)
 
   provisioner "local-exec" {
-    command = "../../../../scripts/set_default_secret.sh \"${var.docker_secret_name}\" \"${each.value}\" \"${tostring(join(" ", var.sa_list))}\" "
+    command = "${path.module}/../../../../scripts/set_default_secret.sh \"${var.docker_secret_name}\" \"${each.value}\" \"${tostring(join(" ", var.sa_list))}\" "
   }
   depends_on = [kubernetes_secret.docker_credentials]
 }
