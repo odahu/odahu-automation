@@ -124,6 +124,10 @@ variable "node_pools" {
 
 variable "service_accounts" {
   type = object({
+    airflow : object({
+      client_id : string
+      client_secret : string
+    })
     test : object({
       client_id : string
       client_secret : string
@@ -154,3 +158,46 @@ variable "vault" {
   })
   description = "Vault configuration"
 }
+
+########################
+# PostgreSQL
+########################
+variable "postgres" {
+  default = {
+    enabled : true,
+    storage_size : "8Gi",
+    replica_count : 1,
+    password : "odahu"
+  }
+  type = object({
+    enabled : bool,
+    storage_size : string,
+    replica_count : number,
+    password : string
+  })
+  description = "PostgreSQL configuration"
+}
+
+########################
+# Airflow
+########################
+variable "airflow" {
+  default = {
+    enabled : false,
+    storage_size : "1Gi",
+    log_storage_size : "1Gi",
+    fernet_key : "changeme"
+  }
+  type = object({
+    enabled : bool,
+    storage_size : string,
+    log_storage_size : string,
+    fernet_key : string
+  })
+  description = "Airflow configuration"
+}
+
+variable "odahu_airflow_plugin_version" {
+  description = "Odahuflow Airflow plugn version"
+}
+

@@ -1,0 +1,22 @@
+replicaCount: 1
+
+image:
+  repository: quay.io/kubernetes_incubator/nfs-provisioner
+  tag: ${version}
+  pullPolicy: IfNotPresent
+
+storageClass:
+  create: true
+  defaultClass: false
+  name: nfs
+  allowVolumeExpansion: null
+  reclaimPolicy: Delete
+
+rbac:
+  create: true
+
+persistence:
+  enabled: true
+  accessMode: ReadWriteOnce
+  size: ${storage_size}
+
