@@ -100,11 +100,6 @@ variable "odahuflow_connections" {
 # Odahuflow optional
 ###################################################################################
 
-# TODO: Remove after implementation of the issue https://github.com/odahuflow-platform/odahuflow/issues/1008
-variable "odahuflow_connection_decrypt_token" {
-  default = "Token for getting a decrypted connection"
-}
-
 variable "jupyterhub_enabled" {
   default     = false
   type        = bool
