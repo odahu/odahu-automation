@@ -74,14 +74,13 @@ module "odahuflow_helm" {
 
   node_pools = var.node_pools
 
-  odahuflow_connections              = concat(var.odahuflow_connections, module.odahuflow_prereqs.odahuflow_connections)
-  extra_external_urls                = concat(module.jupyterhub.external_url, module.odahuflow_prereqs.extra_external_urls)
-  odahuflow_connection_decrypt_token = var.odahuflow_connection_decrypt_token
-  resource_uploader_sa               = var.service_accounts.resource_uploader
-  operator_sa                        = var.service_accounts.operator
-  oauth_oidc_token_endpoint          = var.oauth_oidc_token_endpoint
-  oauth_oidc_issuer_url              = var.oauth_oidc_issuer_url
-  oauth_mesh_enabled                 = var.oauth_mesh_enabled
-  vault_enabled                      = var.vault.enabled
-  airflow_enabled                    = var.airflow.enabled
+  odahuflow_connections     = concat(var.odahuflow_connections, module.odahuflow_prereqs.odahuflow_connections)
+  extra_external_urls       = concat(module.jupyterhub.external_url, module.odahuflow_prereqs.extra_external_urls)
+  resource_uploader_sa      = var.service_accounts.resource_uploader
+  operator_sa               = var.service_accounts.operator
+  oauth_oidc_token_endpoint = var.oauth_oidc_token_endpoint
+  oauth_oidc_issuer_url     = var.oauth_oidc_issuer_url
+  oauth_mesh_enabled        = var.oauth_mesh_enabled
+  vault_enabled             = var.vault.enabled
+  airflow_enabled           = var.airflow.enabled
 }

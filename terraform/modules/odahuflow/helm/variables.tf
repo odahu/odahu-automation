@@ -109,22 +109,22 @@ variable "odahuflow_connections" {
 variable "extra_external_urls" {
   default = []
   type = list(object({
-    name      = string,
-    url       = string,
-    image_url = string,
+    name     = string,
+    url      = string,
+    imageUrl = string,
   }))
 }
 
 variable "connection_vault_configuration" {
   type = object({
-    secret_engine_path = string
-    role               = string
-    url                = string
+    secretEnginePath = string
+    role             = string
+    url              = string
   })
   default = {
-    secret_engine_path = "odahu-flow/connections"
-    role               = "odahu-flow"
-    url                = "https://vault.vault:8200"
+    secretEnginePath = "odahu-flow/connections"
+    role             = "odahu-flow"
+    url              = "https://vault.vault:8200"
   }
 }
 
@@ -142,11 +142,6 @@ variable "model_deployment_jws_configuration" {
     url     = ""
     issuer  = ""
   }
-}
-
-# TODO: Remove after implementation of the issue https://github.com/legion-platform/legion/issues/1008
-variable "odahuflow_connection_decrypt_token" {
-  description = "Token for getting a decrypted connection"
 }
 
 variable "resource_uploader_sa" {

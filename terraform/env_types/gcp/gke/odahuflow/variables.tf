@@ -109,11 +109,6 @@ variable "model_authorization_enabled" {
   default     = "false"
 }
 
-# TODO: Remove after implementation of the issue https://github.com/legion-platform/legion/issues/1008
-variable "odahuflow_connection_decrypt_token" {
-  default = "Token for getting a decrypted connection"
-}
-
 variable "jupyterhub_enabled" {
   default     = false
   type        = bool
