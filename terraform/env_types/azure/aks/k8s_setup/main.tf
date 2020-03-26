@@ -93,7 +93,7 @@ module "vault" {
 
 module "postgresql" {
   source                = "../../../../modules/k8s/postgresql"
-  allowed_networks      = var.pods_cidr
+  allowed_networks      = "0.0.0.0/0"
   configuration         = var.postgres
   monitoring_dependency = module.monitoring.helm_chart
 }
