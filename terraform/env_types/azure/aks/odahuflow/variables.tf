@@ -145,6 +145,10 @@ variable "packager_version" {}
 
 variable "service_accounts" {
   type = object({
+    airflow : object({
+      client_id : string
+      client_secret : string
+    })
     test : object({
       client_id : string
       client_secret : string
