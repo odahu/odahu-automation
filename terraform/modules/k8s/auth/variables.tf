@@ -6,6 +6,13 @@ variable "domain_name" {
   description = "ODAHU cluster endpoint FQDN"
 }
 
+variable "namespace" {
+  type        = string
+  default     = "kube-system"
+  description = "Kubernetes namespace where chart will be installed"
+}
+
+
 ##################
 # Auth setup
 ##################

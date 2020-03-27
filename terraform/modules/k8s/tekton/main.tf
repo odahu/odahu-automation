@@ -5,6 +5,12 @@ resource "kubernetes_namespace" "tekton" {
     }
     name = var.namespace
   }
+
+  lifecycle {
+    ignore_changes = [
+      metadata
+    ]
+  }
 }
 
 resource "helm_release" "tekton" {

@@ -2,6 +2,21 @@ locals {
   ingress_tls_secret_name = "odahu-flow-tls"
 }
 
+resource "kubernetes_namespace" "services" {
+  metadata {
+    annotations = {
+      name = var.services_namespace
+    }
+    labels = {
+      project = "odahu-flow"
+    }
+    name = var.services_namespace
+  }
+  timeouts {
+    delete = "30m"
+  }
+}
+
 resource "kubernetes_secret" "tls_default" {
   count = length(var.tls_namespaces)
   metadata {

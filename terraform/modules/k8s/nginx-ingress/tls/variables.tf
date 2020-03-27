@@ -6,9 +6,13 @@ variable "cluster_name" {
   description = "Odahuflow cluster name"
 }
 
+variable "services_namespace" {
+  default = "odahu-flow-services"
+}
+
 variable "tls_namespaces" {
-  default     = ["default", "kube-system"]
-  description = "Default namespaces with TLS secret"
+  default     = ["default"]
+  description = "List of namespaces with TLS secret"
 }
 
 variable "tls_secret_crt" {

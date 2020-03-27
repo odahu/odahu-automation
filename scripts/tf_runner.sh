@@ -181,6 +181,33 @@ function SetupCloudAccess() {
 				echo -e "\tTrying to proceed with GCP instance metadata service account..."
 			fi
 			;;
+		"openshift")
+			local creds_gcp
+			creds_gcp=$(GetParam 'cloud.gcp.credentials.GOOGLE_CREDENTIALS')
+			if [[ "${creds_gcp}" != "null" ]]; then
+				echo -e "INFO :\tUsing GCP cloud credentials from cluster profile"
+				GOOGLE_CREDENTIALS="${creds_gcp}"
+				export GOOGLE_CREDENTIALS
+			fi
+
+			if [[ -n $GOOGLE_CREDENTIALS ]]; then
+				echo -e "INFO :\tUsing GCP cloud credentials from GOOGLE_CREDENTIALS env var"
+				if [[ -f $GOOGLE_CREDENTIALS ]]; then
+					gcloud auth activate-service-account \
+						"--key-file=${GOOGLE_CREDENTIALS}" \
+						"--project=$(GetParam 'cloud.gcp.project_id')"
+				else
+					gcloud auth activate-service-account \
+						"--key-file=/dev/fd/3" \
+						"--project=$(GetParam 'cloud.gcp.project_id')" \
+						3<<<"${GOOGLE_CREDENTIALS}"
+				fi
+			else
+				echo -e "ERROR:\tGCP cloud credentials are not defined not as GOOGLE_CREDENTIALS env var"
+				echo -e "\tnor as credentials string in JSON profile 'cloud' section."
+				echo -e "\tTrying to proceed with GCP instance metadata service account..."
+			fi
+			;;
 		*)
 			echo -e "ERROR:\t'cloud_type' is not defined or has wrong value"
 			exit 1
