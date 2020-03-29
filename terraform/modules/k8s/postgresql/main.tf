@@ -9,7 +9,6 @@ locals {
 }
 
 resource "kubernetes_namespace" "this" {
-  count = var.configuration.enabled ? 1 : 0
   metadata {
     annotations = {
       name = var.namespace
@@ -23,7 +22,7 @@ module "docker_credentials" {
   docker_repo     = var.docker_repo
   docker_username = var.docker_username
   docker_password = var.docker_password
-  namespaces      = [kubernetes_namespace.this[0].metadata[0].annotations.name]
+  namespaces      = [kubernetes_namespace.this.metadata[0].annotations.name]
 }
 
 resource "helm_release" "this" {
@@ -31,7 +30,7 @@ resource "helm_release" "this" {
   name       = "db"
   chart      = "postgresql-ha"
   version    = local.helm_version
-  namespace  = kubernetes_namespace.this[0].metadata[0].annotations.name
+  namespace  = kubernetes_namespace.this.metadata[0].annotations.name
   repository = local.helm_repo
   timeout    = local.deploy_helm_timeout
 
