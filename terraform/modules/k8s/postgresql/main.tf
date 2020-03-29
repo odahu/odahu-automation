@@ -1,9 +1,11 @@
 locals {
-  pg_version          = "11.7.0-debian-10-r13"
+  pg_version          = "11.7.0-debian-10-r51"
+  pg_registry         = "gcr.io"
+  pg_repository       = "or2-msq-epmd-legn-t1iylu/postgresql-repmgr"
   debug_log_level     = "true"
   helm_repo           = "bitnami"
-  helm_version        = "1.4.6"
-  deploy_helm_timeout = "600"
+  helm_version        = "2.0.1"
+  deploy_helm_timeout = "150"
 }
 
 resource "kubernetes_namespace" "this" {
@@ -16,17 +18,27 @@ resource "kubernetes_namespace" "this" {
   }
 }
 
+module "docker_credentials" {
+  source          = "../docker_auth"
+  docker_repo     = var.docker_repo
+  docker_username = var.docker_username
+  docker_password = var.docker_password
+  namespaces      = [kubernetes_namespace.this[0].metadata[0].annotations.name]
+}
+
 resource "helm_release" "this" {
   count      = var.configuration.enabled ? 1 : 0
   name       = "db"
   chart      = "postgresql-ha"
   version    = local.helm_version
-  namespace  = var.namespace
+  namespace  = kubernetes_namespace.this[0].metadata[0].annotations.name
   repository = local.helm_repo
   timeout    = local.deploy_helm_timeout
 
   values = [
     templatefile("${path.module}/templates/values.yaml", {
+      pg_registry      = local.pg_registry
+      pg_repository    = local.pg_repository
       password         = var.configuration.password
       storage_size     = var.configuration.storage_size
       debug            = local.debug_log_level
@@ -36,5 +48,5 @@ resource "helm_release" "this" {
     }),
   ]
 
-  depends_on = [kubernetes_namespace.this, var.monitoring_dependency]
+  depends_on = [kubernetes_namespace.this, var.monitoring_dependency, module.docker_credentials]
 }

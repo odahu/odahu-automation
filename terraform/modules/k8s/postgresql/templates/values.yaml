@@ -1,6 +1,8 @@
 fullnameOverride: postgres
 
 global:
+  imagePullSecrets:
+    - repo-json-key
   postgresql:
     password: ${password}
     database: airflow
@@ -8,6 +10,8 @@ global:
     adminPassword: ${password}
 
 postgresqlImage:
+  registry: ${pg_registry}
+  repository: ${pg_repository}
   tag: ${pg_version}
   debug: ${debug}
 
@@ -19,14 +23,19 @@ metricsImage:
 
 postgresql:
   replicaCount: ${replica_count}
+  pdb:
+    create: false
   pgHbaConfiguration: |-
-    local all all trust
-    host  all all localhost trust
+    local all    all trust
+    host  all    all localhost trust
+    host  repmgr all localhost trust
     host  repmgr all ${allowed_networks} trust
-    host  all all ${allowed_networks} md5
+    host  all    all ${allowed_networks} md5
 
 pgpool:
   replicaCount: 1
+  pdb:
+    create: false
 
 metrics:
   enabled: true
