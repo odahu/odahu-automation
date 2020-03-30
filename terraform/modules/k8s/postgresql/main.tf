@@ -5,7 +5,7 @@ locals {
   debug_log_level     = "true"
   helm_repo           = "bitnami"
   helm_version        = "2.0.1"
-  deploy_helm_timeout = "150"
+  deploy_helm_timeout = "600"
 }
 
 resource "kubernetes_namespace" "this" {
