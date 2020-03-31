@@ -95,8 +95,5 @@ module "postgresql" {
   source                = "../../../../modules/k8s/postgresql"
   allowed_networks      = "0.0.0.0/0"
   configuration         = var.postgres
-  docker_repo           = var.docker_repo
-  docker_username       = var.docker_username
-  docker_password       = var.docker_password
   monitoring_dependency = module.monitoring.helm_chart
 }
