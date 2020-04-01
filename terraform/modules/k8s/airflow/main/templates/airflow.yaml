@@ -41,7 +41,6 @@ airflow:
     AIRFLOW__CORE__LOAD_EXAMPLES: True
     AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: False
     AIRFLOW__CORE__FERNET_KEY: ${fernet_key}
-    AIRFLOW__KUBERNETES__DAGS_VOLUME_CLAIM: airflow
     AIRFLOW__KUBERNETES__LOGS_VOLUME_CLAIM: airflow-logs
     AIRFLOW__KUBERNETES__WORKER_CONTAINER_IMAGE_PULL_POLICY: IfNotPresent
     AIRFLOW__KUBERNETES__WORKER_SERVICE_ACCOUNT_NAME: airflow
@@ -49,6 +48,16 @@ airflow:
     AIRFLOW__KUBERNETES__ENV_FROM_CONFIGMAP_REF: airflow-env
     AIRFLOW__KUBERNETES__WORKER_CONTAINER_REPOSITORY: ${docker_repo}/odahu-airflow
     AIRFLOW__KUBERNETES__WORKER_CONTAINER_TAG: ${odahu_airflow_plugin_version}
+    AIRFLOW__KUBERNETES__DELETE_WORKER_PODS: False
+    AIRFLOW__KUBERNETES__GIT_REPO: "${dag_repo}"
+    AIRFLOW__KUBERNETES__GIT_BRANCH: "${dag_rev}"
+    AIRFLOW__KUBERNETES__GIT_DAGS_FOLDER_MOUNT_POINT: "/usr/local/airflow/dags"
+    AIRFLOW__KUBERNETES__GIT_SYNC_BRANCH: "${dag_rev}"
+    AIRFLOW__KUBERNETES__GIT_SYNC_ROOT: "/usr/local/airflow/dags"
+    AIRFLOW__KUBERNETES__GIT_SYNC_DEST: "/usr/local/airflow/dags"
+    AIRFLOW__KUBERNETES__GIT_SYNC_CONTAINER_REPOSITORY: gcr.io/or2-msq-epmd-legn-t1iylu/odahu/git-sync
+    AIRFLOW__KUBERNETES__GIT_SYNC_CONTAINER_TAG: 0.0.3
+    AIRFLOW__KUBERNETES__GIT_SYNC_INIT_CONTAINER_NAME: git-sync-clone
 
   service:
     type: ClusterIP
@@ -59,7 +68,7 @@ airflow:
 ${ingress}
 
 persistence:
-  enabled: true
+  enabled: false
   storageClass: nfs
   accessMode: ReadWriteMany
   size: ${storage_size}
@@ -72,6 +81,26 @@ logsPersistence:
 
 dags:
   path: /usr/local/airflow/dags
+  git:
+    url: "${dag_repo}"
+    ref: "${dag_rev}"
+    repoHost: ""
+    gitSync:
+      enabled: true
+      image:
+        repository: alpine/git
+        tag: v2.24.1
+        pullPolicy: IfNotPresent
+      refreshTime: 30
+  initContainer:
+    enabled: true
+    image:
+      repository: alpine/git
+      tag: v2.24.1
+      pullPolicy: IfNotPresent
+    installRequirements: true
+    mountPath: "/dags"
+    syncSubPath: ""
 
 postgresql:
   enabled: false

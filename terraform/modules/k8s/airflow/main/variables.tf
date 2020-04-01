@@ -72,7 +72,9 @@ variable "configuration" {
     enabled : bool,
     storage_size : string,
     log_storage_size : string,
-    fernet_key : string
+    fernet_key : string,
+    dag_repo : string,
+    dag_rev : string
   })
   description = "Airflow configuration"
 }
