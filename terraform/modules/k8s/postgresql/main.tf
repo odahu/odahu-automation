@@ -39,5 +39,5 @@ resource "helm_release" "this" {
     }),
   ]
 
-  depends_on = [kubernetes_namespace.this, var.monitoring_dependency, module.docker_credentials]
+  depends_on = [kubernetes_namespace.this, var.monitoring_dependency]
 }
