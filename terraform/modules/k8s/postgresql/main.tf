@@ -17,14 +17,6 @@ resource "kubernetes_namespace" "this" {
   }
 }
 
-module "docker_credentials" {
-  source          = "../docker_auth"
-  docker_repo     = var.docker_repo
-  docker_username = var.docker_username
-  docker_password = var.docker_password
-  namespaces      = [kubernetes_namespace.this.metadata[0].annotations.name]
-}
-
 resource "helm_release" "this" {
   count      = var.configuration.enabled ? 1 : 0
   name       = "db"
