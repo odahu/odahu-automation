@@ -2,9 +2,9 @@ FROM ubuntu:18.04
 
 ENV DEBIAN_FRONTEND=noninteractive \
     KUBECTL_VERSION=v1.14.10 \
-    TERRAFORM_VERSION=0.12.21 \
-    TERRAGRUNT_VERSION=v0.22.3 \
-    HELM_VERSION=v3.1.1
+    TERRAFORM_VERSION=0.12.24 \
+    TERRAGRUNT_VERSION=v0.23.4 \
+    HELM_VERSION=v3.1.2
 
 # install system utilities
 RUN apt-get update && apt-get install -y \
