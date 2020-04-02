@@ -39,8 +39,11 @@ resource "azurerm_kubernetes_cluster" "aks" {
   # There's additional resource group created, that used to represent and hold the lifecycle of 
   # k8s cluster resources. We only can set a name for it.
   node_resource_group = "${var.resource_group}-k8s"
-  dns_prefix          = var.aks_dns_prefix
   kubernetes_version  = var.k8s_version
+
+  private_link_enabled       = false
+  enable_pod_security_policy = false
+  dns_prefix                 = var.aks_dns_prefix
 
   linux_profile {
     admin_username = var.ssh_user
@@ -62,8 +65,9 @@ resource "azurerm_kubernetes_cluster" "aks" {
     os_disk_size_gb = lookup(local.default_node_pool, "disk_size_gb", local.default_disk_size_gb)
     vnet_subnet_id  = var.aks_subnet_id
 
-    type                = "VirtualMachineScaleSets"
-    enable_auto_scaling = true
+    type                  = "VirtualMachineScaleSets"
+    enable_auto_scaling   = true
+    enable_node_public_ip = false
 
     # In AKS there's no option to create node pool with 0 nodes, minimum is 1
     node_count = lookup(local.default_node_pool, "init_node_count", local.default_nodes_count)
@@ -75,6 +79,9 @@ resource "azurerm_kubernetes_cluster" "aks" {
       for taint in lookup(local.default_node_pool, "taints", []) :
       "${taint.key}=${taint.value}:${taint.effect}"
     ]
+
+    #node_labels = {}
+    tags = var.aks_tags
   }
 
   # We have to provide Service Principal account credentials in order to create node resource group
@@ -123,6 +130,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "aks" {
     ]
   }
 
+  enable_node_public_ip = false
   kubernetes_cluster_id = azurerm_kubernetes_cluster.aks.id
 
   # Pool name must start with a lowercase letter, have max length of 12, and only have characters a-z0-9
@@ -143,4 +151,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "aks" {
     for taint in lookup(each.value, "taints", []) :
     "${taint.key}=${taint.value}:${taint.effect}"
   ]
+
+  #node_labels = {}
+  tags = var.aks_tags
 }
