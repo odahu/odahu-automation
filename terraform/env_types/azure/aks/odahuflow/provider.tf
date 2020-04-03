@@ -1,10 +1,10 @@
 provider "azurerm" {
-  version = "2.3.0"
+  version = "2.0.0"
   features {}
 }
 
 provider "helm" {
-  version = "1.1.1"
+  version = "1.0.0"
 
   kubernetes {
     config_context = local.config_context_cluster

@@ -6,7 +6,7 @@ provider "google" {
 }
 
 provider "helm" {
-  version = "1.1.1"
+  version = "1.0.0"
 
   kubernetes {
     config_context = var.config_context_auth_info

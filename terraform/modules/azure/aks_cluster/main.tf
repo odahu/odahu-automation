@@ -81,7 +81,7 @@ resource "azurerm_kubernetes_cluster" "aks" {
     ]
 
     #node_labels = {}
-    tags = var.aks_tags
+    #tags = var.aks_tags
   }
 
   # We have to provide Service Principal account credentials in order to create node resource group
@@ -153,5 +153,5 @@ resource "azurerm_kubernetes_cluster_node_pool" "aks" {
   ]
 
   #node_labels = {}
-  tags = var.aks_tags
+  #tags = var.aks_tags
 }
