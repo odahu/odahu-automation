@@ -12,7 +12,7 @@ locals {
   location        = lookup(lookup(local.config.cloud, "azure", {}), "location", "")
   storage_account = lookup(lookup(local.config.cloud, "azure", {}), "storage_account", "")
 
-  cmd_k8s_config_fetch = "az aks get-credentials --name \"${local.cluster_name}\" --resource-group \"${local.resource_group}\""
+  cmd_k8s_config_fetch = "az aks get-credentials --overwrite-existing --name \"${local.cluster_name}\" --resource-group \"${local.resource_group}\""
 }
 
 remote_state {

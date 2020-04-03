@@ -24,7 +24,7 @@ shellcheck:
     - make shellcheck
 
 terraform:
-  image: alpine/terragrunt:0.12.21
+  image: alpine/terragrunt:0.12.24
   stage: lint
   variables:
     AWS_DEFAULT_REGION: test_region

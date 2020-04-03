@@ -54,7 +54,6 @@ resource "azurerm_storage_account" "odahuflow_data" {
   account_kind             = "StorageV2"
   account_tier             = "Standard"
   account_replication_type = "LRS"
-  enable_blob_encryption   = "true"
 
   network_rules {
     default_action = "Allow"
