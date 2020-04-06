@@ -1,5 +1,5 @@
 serviceAccount:
-  create: true
+  create: false
 
 rbac:
   create: true
