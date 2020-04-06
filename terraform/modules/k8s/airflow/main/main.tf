@@ -48,7 +48,7 @@ locals {
 
   ingress_config = merge(local.ingress_common, { web = merge(local.ingress_web, local.ingress_tls) })
 
-  deploy_helm_timeout = "300"
+  deploy_helm_timeout = "500"
 
   odahu_conn = {
     "auth_url"      = var.oauth_oidc_token_endpoint,
