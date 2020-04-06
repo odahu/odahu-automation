@@ -13,7 +13,7 @@ locals {
   cluster_name             = lookup(local.config, "cluster_name", "odahuflow")
   cluster_domain_name      = lookup(local.config.dns, "domain", null)
 
-  cmd_k8s_config_fetch = "az aks get-credentials --name \"${local.cluster_name}\" --resource-group \"${local.resource_group}\""
+  cmd_k8s_config_fetch = "az aks get-credentials --overwrite-existing --name \"${local.cluster_name}\" --resource-group \"${local.resource_group}\""
 }
 
 remote_state {
