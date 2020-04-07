@@ -17,6 +17,14 @@ module "airflow_prereqs" {
   cluster_name = var.cluster_name
 }
 
+module "airflow_test_data" {
+  source = "../../../../modules/k8s/airflow/test_data/gke"
+
+  wine_bucket      = module.odahuflow_prereqs.odahu_bucket_name
+  examples_version = var.examples_version
+  wine_data_url    = var.wine_data_url
+}
+
 module "airflow" {
   source = "../../../../modules/k8s/airflow/main"
 

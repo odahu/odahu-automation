@@ -220,3 +220,6 @@ variable "wine_data_url" {
   description = "Wine example data URL"
 }
 
+variable "examples_version" {
+  description = "Wine examples version"
+}
