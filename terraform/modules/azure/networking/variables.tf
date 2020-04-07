@@ -4,7 +4,7 @@ variable "cluster_name" {
 }
 
 variable "location" {
-  description = "Azure location where the resource group is created"
+  description = "Azure location"
 }
 
 variable "resource_group" {
@@ -15,18 +15,8 @@ variable "subnet_cidr" {
   description = "AKS worker nodes subnet range"
 }
 
-variable "allowed_ips" {
-  description = "CIDRs list to allow access from"
-}
-
 variable "tags" {
   description = "Tags used for virtual network"
   default     = {}
   type        = map
-}
-
-variable "bastion_enabled" {
-  default     = false
-  type        = bool
-  description = "Flag to install bastion host or not"
 }
