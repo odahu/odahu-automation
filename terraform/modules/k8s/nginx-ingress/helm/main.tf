@@ -18,4 +18,6 @@ resource "helm_release" "nginx-ingress" {
       value = elem.value
     }
   }
+
+  depends_on = [var.dependencies]
 }

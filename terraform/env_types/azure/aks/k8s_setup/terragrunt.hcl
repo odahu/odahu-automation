@@ -4,7 +4,12 @@ locals {
   profile = get_env("PROFILE", "${get_terragrunt_dir()}//profile.json")
   config  = jsondecode(file(local.profile))
 
+  cluster_name = lookup(local.config, "cluster_name", "")
+  vpc_name     = lookup(local.config, "vpc_name", "${local.cluster_name}-vpc")
+  subnet_name  = lookup(local.config, "subnet_name", "${local.cluster_name}-subnet")
+
   resource_group  = lookup(lookup(local.config.cloud, "azure", {}), "resource_group", "")
+  location        = lookup(lookup(local.config.cloud, "azure", {}), "location", "")
   storage_account = lookup(lookup(local.config.cloud, "azure", {}), "storage_account", "")
 
   config_context_auth_info = lookup(local.config, "config_context_auth_info", "")
@@ -36,8 +41,12 @@ terraform {
 
 inputs = {
   azure_resource_group = local.resource_group
+  azure_location       = local.location
   cluster_domain_name  = local.cluster_domain_name
 
   config_context_auth_info = local.config_context_auth_info
   config_context_cluster   = local.config_context_cluster
+
+  vpc_name    = local.vpc_name
+  subnet_name = local.subnet_name
 }

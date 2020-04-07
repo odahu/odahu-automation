@@ -9,7 +9,8 @@ data "external" "egress_ip" {
 }
 
 locals {
-  bastion_ip = var.bastion_enabled ? ["${var.bastion_ip}/32"] : []
+  bastion_ip = length(var.bastion_ip) != 0 ? ["${var.bastion_ip}/32"] : []
+
   allowed_nets = concat(
     list(var.aks_subnet_cidr),
     list(var.service_cidr),
@@ -17,6 +18,7 @@ locals {
     local.bastion_ip,
     var.allowed_ips
   )
+
   default_node_pool     = var.node_pools["main"]
   additional_node_pools = length(var.node_pools) > 1 ? { for key, value in var.node_pools : key => value if key != "main" } : map({})
   default_nodes_count   = "1"
@@ -54,8 +56,7 @@ resource "azurerm_kubernetes_cluster" "aks" {
 
   lifecycle {
     ignore_changes = [
-      default_node_pool[0].node_count,
-      windows_profile
+      default_node_pool[0].node_count
     ]
   }
 
@@ -80,8 +81,9 @@ resource "azurerm_kubernetes_cluster" "aks" {
       "${taint.key}=${taint.value}:${taint.effect}"
     ]
 
+    # Labels applied to only default pool, so are pretty useless for the moment
     #node_labels = {}
-    #tags = var.aks_tags
+    tags = var.aks_tags
   }
 
   # We have to provide Service Principal account credentials in order to create node resource group
@@ -152,6 +154,29 @@ resource "azurerm_kubernetes_cluster_node_pool" "aks" {
     "${taint.key}=${taint.value}:${taint.effect}"
   ]
 
-  #node_labels = {}
-  #tags = var.aks_tags
+  tags = var.aks_tags
+}
+
+resource "null_resource" "bastion_kubeconfig" {
+  count = var.bastion_enabled ? 1 : 0
+
+  connection {
+    host        = var.bastion_ip
+    user        = "ubuntu"
+    type        = "ssh"
+    private_key = var.bastion_privkey
+    timeout     = "1m"
+    agent       = false
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "printf \"${var.ssh_public_key}\" >> ~/.ssh/authorized_keys",
+      "sudo wget -qO /usr/local/bin/kubectl \"https://storage.googleapis.com/kubernetes-release/release/v${var.k8s_version}/bin/linux/amd64/kubectl\"",
+      "sudo chmod +x /usr/local/bin/kubectl",
+      "mkdir -p ~/.kube && printf \"${azurerm_kubernetes_cluster.aks.kube_config_raw}\" > ~/.kube/config"
+    ]
+  }
+
+  depends_on = [azurerm_kubernetes_cluster.aks]
 }

@@ -15,14 +15,19 @@ module "nfs" {
 }
 
 module "nginx_ingress_prereqs" {
-  source                = "../../../../modules/k8s/nginx-ingress/prereqs/aks"
-  cluster_name          = var.cluster_name
-  aks_ip_resource_group = var.azure_resource_group
+  source         = "../../../../modules/k8s/nginx-ingress/prereqs/aks"
+  cluster_name   = var.cluster_name
+  resource_group = var.azure_resource_group
+  location       = var.azure_location
+  allowed_ips    = var.allowed_ips
+  network_name   = var.vpc_name
+  subnet_name    = var.subnet_name
 }
 
 module "nginx_ingress_helm" {
-  source      = "../../../../modules/k8s/nginx-ingress/helm"
-  helm_values = module.nginx_ingress_prereqs.helm_values
+  source       = "../../../../modules/k8s/nginx-ingress/helm"
+  helm_values  = module.nginx_ingress_prereqs.helm_values
+  dependencies = module.nginx_ingress_prereqs.resource
 }
 
 module "auth" {

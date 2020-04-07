@@ -39,7 +39,7 @@ resource "null_resource" "add_helm_vault_repository" {
     build_number = timestamp()
   }
   provisioner "local-exec" {
-    command = "helm repo add banzaicloud-stable http://kubernetes-charts.banzaicloud.com/branch/master"
+    command = "helm repo add banzaicloud-stable https://kubernetes-charts.banzaicloud.com"
   }
   depends_on = [null_resource.add_helm_repository_istio]
 }
