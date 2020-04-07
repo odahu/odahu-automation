@@ -198,3 +198,7 @@ variable "odahu_airflow_plugin_version" {
   description = "Odahuflow Airflow plugn version"
 }
 
+variable "examples_version" {
+  description = "Wine examples version"
+}
+
