@@ -121,7 +121,7 @@ resource "helm_release" "airflow" {
       ingress                      = yamlencode({ ingress = local.ingress_config })
       docker_repo                  = var.docker_repo
       dag_repo                     = var.configuration.dag_repo
-      dag_rev                      = var.configuration.dag_rev
+      dag_rev                      = var.examples_version
       fernet_key                   = var.configuration.fernet_key
       wine_conn                    = jsonencode(var.wine_connection)
       log_storage_size             = var.configuration.log_storage_size

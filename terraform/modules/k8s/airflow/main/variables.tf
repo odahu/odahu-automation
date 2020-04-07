@@ -73,8 +73,11 @@ variable "configuration" {
     storage_size : string,
     log_storage_size : string,
     fernet_key : string,
-    dag_repo : string,
-    dag_rev : string
+    dag_repo : string
   })
   description = "Airflow configuration"
+}
+
+variable "examples_version" {
+  description = "Version of test data to upload"
 }

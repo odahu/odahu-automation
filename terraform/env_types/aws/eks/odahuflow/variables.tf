@@ -182,16 +182,14 @@ variable "airflow" {
     storage_size : "1Gi",
     log_storage_size : "1Gi",
     fernet_key : "changeme",
-    dag_repo : "https://github.com/odahu/odahu-examples.git",
-    dag_rev : "master"
+    dag_repo : "https://github.com/odahu/odahu-examples.git"
   }
   type = object({
     enabled : bool,
     storage_size : string,
     log_storage_size : string,
     fernet_key : string,
-    dag_repo : string,
-    dag_rev : string
+    dag_repo : string
   })
   description = "Airflow configuration"
 }

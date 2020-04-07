@@ -33,6 +33,7 @@ module "airflow" {
   postgres_password            = var.postgres.password
   cluster_domain               = var.cluster_domain_name
   airflow_variables            = module.airflow_prereqs.airflow_variables
+  examples_version             = var.examples_version
   oauth_oidc_token_endpoint    = var.oauth_oidc_token_endpoint
   wine_connection              = module.airflow_prereqs.wine_connection
   service_account              = var.service_accounts.airflow
