@@ -72,7 +72,12 @@ variable "configuration" {
     enabled : bool,
     storage_size : string,
     log_storage_size : string,
-    fernet_key : string
+    fernet_key : string,
+    dag_repo : string
   })
   description = "Airflow configuration"
+}
+
+variable "examples_version" {
+  description = "Version of test data to upload"
 }
