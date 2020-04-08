@@ -48,7 +48,7 @@ locals {
 
   ingress_config = merge(local.ingress_common, { web = merge(local.ingress_web, local.ingress_tls) })
 
-  deploy_helm_timeout = "300"
+  deploy_helm_timeout = "500"
 
   odahu_conn = {
     "auth_url"      = var.oauth_oidc_token_endpoint,
@@ -120,6 +120,8 @@ resource "helm_release" "airflow" {
       cluster_domain               = var.cluster_domain
       ingress                      = yamlencode({ ingress = local.ingress_config })
       docker_repo                  = var.docker_repo
+      dag_repo                     = var.configuration.dag_repo
+      dag_rev                      = var.examples_version
       fernet_key                   = var.configuration.fernet_key
       wine_conn                    = jsonencode(var.wine_connection)
       log_storage_size             = var.configuration.log_storage_size

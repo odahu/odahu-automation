@@ -17,6 +17,14 @@ module "airflow_prereqs" {
   cluster_name = var.cluster_name
 }
 
+module "airflow_test_data" {
+  source = "../../../../modules/k8s/airflow/test_data/gke"
+
+  wine_bucket      = module.odahuflow_prereqs.odahu_bucket_name
+  examples_version = var.examples_version
+  wine_data_url    = var.wine_data_url
+}
+
 module "airflow" {
   source = "../../../../modules/k8s/airflow/main"
 
@@ -25,6 +33,7 @@ module "airflow" {
   postgres_password            = var.postgres.password
   cluster_domain               = var.cluster_domain_name
   airflow_variables            = module.airflow_prereqs.airflow_variables
+  examples_version             = var.examples_version
   oauth_oidc_token_endpoint    = var.oauth_oidc_token_endpoint
   wine_connection              = module.airflow_prereqs.wine_connection
   service_account              = var.service_accounts.airflow
