@@ -8,6 +8,12 @@ module "nginx_ingress_tls" {
   tls_secret_crt = var.tls_crt
 }
 
+module "nfs" {
+  source = "../../../../modules/k8s/nfs"
+
+  configuration = var.nfs
+}
+
 module "nginx_ingress_prereqs" {
   source                = "../../../../modules/k8s/nginx-ingress/prereqs/aks"
   cluster_name          = var.cluster_name
@@ -83,4 +89,11 @@ module "vault" {
   source                  = "../../../../modules/k8s/vault"
   vault_pvc_storage_class = var.storage_class
   configuration           = var.vault
+}
+
+module "postgresql" {
+  source                = "../../../../modules/k8s/postgresql"
+  allowed_networks      = "0.0.0.0/0"
+  configuration         = var.postgres
+  monitoring_dependency = module.monitoring.helm_chart
 }
