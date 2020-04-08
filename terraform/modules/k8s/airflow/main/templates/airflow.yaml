@@ -36,6 +36,16 @@ airflow:
     extra: '${wine_conn}'
 
   webReplicas: 1
+
+  extraEnv:
+    - name: POSTGRES_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: airflow-postgres
+          key: postgresql-password
+    - name: AIRFLOW__CORE__SQL_ALCHEMY_CONN
+      value: postgresql://postgres:$(POSTGRES_PASSWORD)@postgres-pgpool.postgres/airflow
+
   config:
     AIRFLOW__CORE__LOGGING_LEVEL: DEBUG
     AIRFLOW__CORE__LOAD_EXAMPLES: True
@@ -86,5 +96,3 @@ redis:
 
 flower:
   enabled: false
-
-
