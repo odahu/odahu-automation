@@ -10,6 +10,26 @@ module "odahuflow_prereqs" {
   allowed_ips    = var.allowed_ips
 }
 
+module "airflow" {
+  source = "../../../../modules/k8s/airflow/main"
+
+  configuration                = var.airflow
+  cluster_name                 = var.cluster_name
+  postgres_password            = var.postgres.password
+  cluster_domain               = var.cluster_domain_name
+  oauth_oidc_token_endpoint    = var.oauth_oidc_token_endpoint
+  airflow_variables            = {}
+  examples_version             = var.examples_version
+  wine_connection              = {}
+  service_account              = var.service_accounts.airflow
+  docker_repo                  = var.docker_repo
+  docker_username              = var.docker_username
+  docker_password              = var.docker_password
+  odahu_airflow_plugin_version = var.odahu_airflow_plugin_version
+  tls_secret_crt               = var.tls_crt
+  tls_secret_key               = var.tls_key
+}
+
 module "fluentd" {
   source = "../../../../modules/k8s/fluentd"
 
