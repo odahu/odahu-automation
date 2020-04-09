@@ -1,6 +1,8 @@
 fullnameOverride: postgres
 
 global:
+  imagePullSecrets:
+    - repo-json-key
   postgresql:
     password: ${password}
     database: airflow
@@ -8,6 +10,8 @@ global:
     adminPassword: ${password}
 
 postgresqlImage:
+  registry: ${pg_registry}
+  repository: ${pg_repository}
   tag: ${pg_version}
   debug: ${debug}
 
