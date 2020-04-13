@@ -5,6 +5,10 @@ variable "azure_resource_group" {
   description = "Azure base resource group name"
 }
 
+variable "azure_location" {
+  description = "Azure location"
+}
+
 variable "cluster_type" {
   default     = "azure/aks"
   description = "Odahuflow cluster cloud provider type"
@@ -37,6 +41,16 @@ variable "cluster_domain_name" {
 
 variable "docker_repo" {
   description = "Odahuflow Docker repo url"
+}
+
+variable "vpc_name" {
+  type        = string
+  description = "Name of existing VPC to use"
+}
+
+variable "subnet_name" {
+  type        = string
+  description = "Name of existing subnet to use"
 }
 
 variable "docker_username" {
@@ -144,8 +158,6 @@ variable "oauth_local_jwks" {
 ##########################
 #  Authorization
 ##########################
-
-
 variable "authorization_enabled" {
   type        = bool
   default     = true
