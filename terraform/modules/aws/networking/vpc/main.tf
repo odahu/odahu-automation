@@ -1,5 +1,13 @@
+locals {
+  vpc                = length(var.vpc_name) == 0 ? aws_vpc.default[0] : data.aws_vpc.default[0]
+  aws_route_table_id = length(var.vpc_name) == 0 ? aws_route_table.default[0].id : ""
+  public_subnet_ids  = length(var.public_subnet_ids) == 0 ? aws_subnet.public.*.id : data.aws_subnet_ids.public[0].ids
+  private_subnet_ids = length(var.private_subnet_ids) == 0 ? aws_subnet.private.*.id : data.aws_subnet_ids.private[0].ids
+}
+
 # Create VPC
 resource "aws_vpc" "default" {
+  count                = length(var.vpc_name) == 0 ? 1 : 0
   cidr_block           = var.cidr
   enable_dns_support   = true
   enable_dns_hostnames = true
@@ -15,26 +23,20 @@ resource "aws_vpc" "default" {
   }
 }
 
-resource "aws_subnet" "nat" {
-  vpc_id                  = aws_vpc.default.id
-  cidr_block              = var.nat_subnet_cidr
-  map_public_ip_on_launch = "false"
-  availability_zone       = element(var.az_list, 0)
+data "aws_vpc" "default" {
+  count = length(var.vpc_name) == 0 ? 0 : 1
 
-  tags = {
-    Name = "tf-${var.cluster_name}-nat"
+  filter {
+    name   = "tag:Name"
+    values = [var.cluster_name]
   }
 }
 
-resource "aws_route" "nat" {
-  route_table_id         = aws_vpc.default.main_route_table_id
-  destination_cidr_block = "0.0.0.0/0"
-  gateway_id             = aws_internet_gateway.default.id
-}
-
+# Create public subnets
 resource "aws_subnet" "public" {
-  count                   = length(var.az_list)
-  vpc_id                  = aws_vpc.default.id
+  count = length(var.public_subnet_ids) == 0 ? length(var.az_list) : 0
+
+  vpc_id                  = local.vpc.id
   cidr_block              = element(var.public_subnet_cidrs, count.index)
   map_public_ip_on_launch = "false"
   availability_zone       = element(var.az_list, count.index)
@@ -45,9 +47,22 @@ resource "aws_subnet" "public" {
   }
 }
 
+data "aws_subnet_ids" "public" {
+  count = length(var.public_subnet_ids) == 0 ? 0 : 1
+
+  vpc_id = local.vpc.id
+
+  filter {
+    name   = "subnet-id"
+    values = var.public_subnet_ids
+  }
+}
+
+# Create public subnets
 resource "aws_subnet" "private" {
-  count                   = length(var.az_list)
-  vpc_id                  = aws_vpc.default.id
+  count = length(var.private_subnet_ids) == 0 ? length(var.az_list) : 0
+
+  vpc_id                  = aws_vpc.default[0].id
   cidr_block              = element(var.private_subnet_cidrs, count.index)
   map_public_ip_on_launch = "false"
   availability_zone       = element(var.az_list, count.index)
@@ -59,25 +74,73 @@ resource "aws_subnet" "private" {
   }
 }
 
+data "aws_subnet_ids" "private" {
+  count = length(var.private_subnet_ids) == 0 ? 0 : 1
+
+  vpc_id = local.vpc.id
+
+  filter {
+    name   = "subnet-id"
+    values = var.private_subnet_ids
+  }
+}
+
 data "aws_eip" "nat" {
+  count = length(var.vpc_name) == 0 ? 1 : 0
+
   filter {
     name   = "tag:Name"
     values = [var.cluster_name]
   }
 }
 
+resource "aws_subnet" "nat" {
+  count = length(var.vpc_name) == 0 ? 1 : 0
+
+  vpc_id                  = local.vpc.id
+  cidr_block              = var.nat_subnet_cidr
+  map_public_ip_on_launch = "false"
+  availability_zone       = element(var.az_list, 0)
+
+  tags = {
+    Name = "tf-${var.cluster_name}-nat"
+  }
+}
+
+resource "aws_route" "nat" {
+  count = length(var.vpc_name) == 0 ? 1 : 0
+
+  route_table_id         = aws_vpc.default[0].main_route_table_id
+  destination_cidr_block = "0.0.0.0/0"
+  gateway_id             = aws_internet_gateway.default[0].id
+}
+
 resource "aws_internet_gateway" "default" {
-  vpc_id = aws_vpc.default.id
+  count = length(var.vpc_name) == 0 ? 1 : 0
+
+  vpc_id = aws_vpc.default[0].id
+
   tags = {
     Name = var.cluster_name
   }
 }
 
+resource "aws_nat_gateway" "default" {
+  count = length(var.vpc_name) == 0 ? 1 : 0
+
+  subnet_id     = aws_subnet.nat[0].id
+  allocation_id = data.aws_eip.nat[0].id
+  depends_on    = [aws_internet_gateway.default[0]]
+}
+
 resource "aws_route_table" "default" {
-  vpc_id = aws_vpc.default.id
+  count = length(var.vpc_name) == 0 ? 1 : 0
+
+  vpc_id = aws_vpc.default[0].id
+
   route {
     cidr_block     = "0.0.0.0/0"
-    nat_gateway_id = aws_nat_gateway.default.id
+    nat_gateway_id = aws_nat_gateway.default[0].id
   }
 
   tags = {
@@ -86,13 +149,7 @@ resource "aws_route_table" "default" {
 }
 
 resource "aws_route_table_association" "default" {
-  count          = length(var.az_list)
+  count = length(var.vpc_name) == 0 ? length(var.az_list) : 0
   subnet_id      = aws_subnet.private.*.id[count.index]
-  route_table_id = aws_route_table.default.id
-}
-
-resource "aws_nat_gateway" "default" {
-  subnet_id     = aws_subnet.nat.id
-  allocation_id = data.aws_eip.nat.id
-  depends_on    = [aws_internet_gateway.default]
+  route_table_id = aws_route_table.default[0].id
 }

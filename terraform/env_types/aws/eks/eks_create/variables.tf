@@ -47,16 +47,33 @@ variable "cidr" {
   description = "network CIDR"
 }
 
+variable "vpc_name" {
+  default     = ""
+  description = "Name of existing VPC to use"
+}
+
 variable "private_subnet_cidrs" {
   type        = list(string)
   default     = []
   description = "network CIDR"
 }
 
+variable "private_subnet_ids" {
+  type        = list(string)
+  default     = []
+  description = "Private Subnet ID list, will be used to create eks nodes in"
+}
+
 variable "public_subnet_cidrs" {
   type        = list(string)
   default     = []
   description = "AWS public network CIDR, will be used to place ELB"
+}
+
+variable "public_subnet_ids" {
+  type        = list(string)
+  default     = []
+  description = "Public Subnet ID list, will be used to create eks nodes in"
 }
 
 variable "nat_subnet_cidr" {

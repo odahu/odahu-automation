@@ -6,10 +6,13 @@ module "vpc" {
   cluster_name         = var.cluster_name
   cidr                 = var.cidr
   az_list              = var.az_list
+  vpc_name             = var.vpc_name
   aws_region           = var.aws_region
   nat_subnet_cidr      = var.nat_subnet_cidr
   public_subnet_cidrs  = var.public_subnet_cidrs
+  public_subnet_ids    = var.public_subnet_ids
   private_subnet_cidrs = var.private_subnet_cidrs
+  private_subnet_ids   = var.private_subnet_ids
 }
 
 module "firewall" {
