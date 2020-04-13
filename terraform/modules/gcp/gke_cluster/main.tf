@@ -165,6 +165,12 @@ resource "google_container_node_pool" "cluster_node_pools" {
       "https://www.googleapis.com/auth/monitoring",
     ]
   }
+
+  lifecycle {
+    ignore_changes = [
+      version,
+    ]
+  }
 }
 
 ########################################################
