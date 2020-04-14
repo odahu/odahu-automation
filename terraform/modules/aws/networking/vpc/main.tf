@@ -149,7 +149,7 @@ resource "aws_route_table" "default" {
 }
 
 resource "aws_route_table_association" "default" {
-  count = length(var.vpc_name) == 0 ? length(var.az_list) : 0
+  count          = length(var.vpc_name) == 0 ? length(var.az_list) : 0
   subnet_id      = aws_subnet.private.*.id[count.index]
   route_table_id = aws_route_table.default[0].id
 }
