@@ -334,16 +334,17 @@ function SuspendCluster() {
 
 					gcloud beta container clusters update "${cluster_name}" \
 						--node-pool "main" \
-						--min-nodes 0 --max-nodes $(( $(GetParam 'node_pools.main.init_node_count') / 2 )) \
+						--min-nodes 0 --max-nodes "$(GetParam 'node_pools.main.max_node_count')" \
 						--node-locations "$(GetParam 'cloud.gcp.node_locations | join(",")')" \
 						--region "$(GetParam 'cloud.gcp.region')" \
 						--quiet
 
+					# Here we limit the maximum node pool count to existing nodes count (divided by locations count)
 					gcloud beta container clusters update "${cluster_name}" \
 						--region "$(GetParam 'cloud.gcp.region')" \
 						--node-pool "main" \
 						--enable-autoscaling \
-						--max-nodes "$(echo "${k_nodes}" | wc -w)" \
+						--max-nodes $(( "$(echo "${k_nodes}" | wc -w)" / $(GetParam 'cloud.gcp.node_locations | length') )) \
 						--quiet
 
 					kubectl get pods --no-headers=true --all-namespaces | \
@@ -393,12 +394,21 @@ function ResumeCluster() {
 					gcloud beta container clusters resize "${cluster_name}" \
 						--region "$(GetParam 'cloud.gcp.region')" \
 						--node-pool "main" \
-						--num-nodes $(( $(GetParam 'node_pools.main.init_node_count') / 2 - 1 )) \
+						--num-nodes "$(GetParam 'node_pools.main.init_node_count')" \
 						--quiet
 
 					until [[ -z "$(kubectl get pods --no-headers=true --all-namespaces --field-selector=status.phase==Pending 2>/dev/null)" ]]; do
 						sleep 5
 					done
+
+					gcloud beta container clusters update "${cluster_name}" \
+						--region "$(GetParam 'cloud.gcp.region')" \
+						--node-pool "main" \
+						--enable-autoscaling \
+						--min-nodes "$(GetParam 'node_pools.main.min_node_count')" \
+						--max-nodes "$(GetParam 'node_pools.main.max_node_count')" \
+						--quiet
+
 				else
 					echo "ERROR: List of cluster nodes is not empty - it seems that cluster is already resumed"
 					exit 1
