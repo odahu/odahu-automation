@@ -1,0 +1,9 @@
+sync:
+  volume: "airflow"
+  subPath: "${subpath}"   
+  target: "s3"
+  s3:
+    bucket: "${data_bucket_name}"
+    region: "${data_bucket_region}"
+    customIAMRole: "${syncer_iam_role}"
+

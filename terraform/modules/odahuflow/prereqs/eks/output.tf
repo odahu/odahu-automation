@@ -8,6 +8,10 @@ output "extra_external_urls" {
   ]
 }
 
+output "odahu_bucket_name" {
+  value = aws_s3_bucket.this.bucket
+}
+
 output "odahuflow_connections" {
   value = [
     {

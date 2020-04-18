@@ -1,0 +1,8 @@
+sync:
+  volume: "airflow"
+  subPath: "${subpath}"   
+  target: "gcs"
+  gcs:
+    bucket: "${data_bucket_name}"
+    region: "${data_bucket_region}"
+    customSA: "${syncer_sa}"
