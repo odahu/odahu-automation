@@ -36,6 +36,7 @@ locals {
 
   odahuflow_config = {
     common = {
+      version      = var.odahuflow_version
       externalUrls = concat(local.default_external_urls, var.extra_external_urls)
     }
     connection = {
