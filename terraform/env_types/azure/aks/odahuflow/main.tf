@@ -10,6 +10,17 @@ module "odahuflow_prereqs" {
   allowed_ips    = var.allowed_ips
 }
 
+module "airflow_prereqs" {
+  source = "../../../../modules/k8s/airflow/prereqs/aks"
+
+  wine_bucket    = module.odahuflow_prereqs.odahu_bucket_name
+  cluster_name   = var.cluster_name
+  dags_bucket    = module.odahuflow_prereqs.odahu_bucket_name
+  sa_name        = yamldecode(module.odahuflow_prereqs.fluent_helm_values).output.azureblob.AzureStorageAccount
+  sas_token      = yamldecode(module.odahuflow_prereqs.fluent_helm_values).output.azureblob.AzureStorageSasToken
+  resource_group = var.azure_resource_group
+}
+
 module "airflow" {
   source = "../../../../modules/k8s/airflow/main"
 
@@ -28,6 +39,14 @@ module "airflow" {
   odahu_airflow_plugin_version = var.odahu_airflow_plugin_version
   tls_secret_crt               = var.tls_crt
   tls_secret_key               = var.tls_key
+}
+
+module "storage-syncer" {
+  source = "../../../../modules/k8s/syncer"
+
+  namespace           = "airflow"
+  extra_helm_values   = module.airflow_prereqs.syncer_helm_values
+  odahu_infra_version = var.odahu_infra_version
 }
 
 module "fluentd" {
