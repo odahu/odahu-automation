@@ -34,10 +34,18 @@ locals {
 
   default_model_docker_connection_id = "docker-ci"
 
+
+  # Endpoint documentation https://oauth2-proxy.github.io/oauth2-proxy/endpoints#sign-out
+  signout_url_redirect = "${local.url_schema}://${var.cluster_domain}/oauth2/sign_out?rd=${urlencode("${local.url_schema}://${var.cluster_domain}/dashboard")}"
+
   odahuflow_config = {
     common = {
       version      = var.odahuflow_version
       externalUrls = concat(local.default_external_urls, var.extra_external_urls)
+    }
+    users = {
+      # Keycloak end_session_endpoint redirect
+      signOutUrl = "${var.oauth_oidc_signout_endpoint}?redirect_uri=${urlencode(local.signout_url_redirect)}"
     }
     connection = {
       repositoryType = var.vault_enabled ? "vault" : "kubernetes"
