@@ -164,6 +164,11 @@ variable "oauth_oidc_issuer_url" {
   description = "OpenID Provider URL"
 }
 
+variable "oauth_oidc_signout_endpoint" {
+  type        = string
+  description = "OpenID end_session_endpoint URL"
+}
+
 variable "oauth_oidc_token_endpoint" {
   type        = string
   description = "OpenID Provider Token URL"
