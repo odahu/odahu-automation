@@ -15,6 +15,8 @@ module "airflow_prereqs" {
   project_id   = var.project_id
   wine_bucket  = module.odahuflow_prereqs.odahu_bucket_name
   cluster_name = var.cluster_name
+  dags_bucket  = module.odahuflow_prereqs.odahu_bucket_name
+  region       = var.region
 }
 
 module "airflow_test_data" {
@@ -54,6 +56,14 @@ module "fluentd" {
   odahu_infra_version = var.odahu_infra_version
 
   extra_helm_values = module.odahuflow_prereqs.fluent_helm_values
+}
+
+module "storage-syncer" {
+  source = "../../../../modules/k8s/syncer"
+
+  namespace           = "airflow"
+  extra_helm_values   = module.airflow_prereqs.syncer_helm_values
+  odahu_infra_version = var.odahu_infra_version
 }
 
 module "jupyterhub" {
