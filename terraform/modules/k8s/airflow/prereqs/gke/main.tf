@@ -1,3 +1,7 @@
+locals {
+  gsa_syncer_name = "${var.cluster_name}-syncer"
+}
+
 resource "google_service_account" "airflow" {
   account_id   = "${var.cluster_name}-airflow-sa"
   display_name = "${var.cluster_name}-airflow-sa"
@@ -28,3 +32,23 @@ resource "google_storage_bucket_iam_member" "odahu_store" {
   role       = "roles/storage.objectAdmin"
   depends_on = [google_service_account.airflow]
 }
+
+########################################################
+# Dag syncer Google Cloud Service Account
+########################################################
+resource "google_service_account" "syncer_sa" {
+  account_id   = local.gsa_syncer_name
+  display_name = local.gsa_syncer_name
+  project      = var.project_id
+}
+
+resource "google_service_account_key" "syncer_sa_key" {
+  service_account_id = google_service_account.syncer_sa.name
+}
+
+resource "google_storage_bucket_iam_member" "odahuflow_store_reader" {
+  bucket = var.dags_bucket
+  member = "serviceAccount:${google_service_account.syncer_sa.email}"
+  role   = "roles/storage.objectViewer"
+}
+
