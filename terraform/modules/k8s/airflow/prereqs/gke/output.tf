@@ -12,3 +12,13 @@ output "airflow_variables" {
     "GCP_PROJECT" = var.project_id
   }
 }
+
+output "syncer_helm_values" {
+  value = templatefile("${path.module}/templates/syncer.yaml", {
+    data_bucket_name   = var.dags_bucket
+    data_bucket_region = var.region
+    subpath            = "/dags"
+    syncer_sa          = google_service_account.syncer_sa.email
+  })
+}
+

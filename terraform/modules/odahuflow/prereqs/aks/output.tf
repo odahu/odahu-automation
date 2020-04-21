@@ -8,6 +8,10 @@ output "extra_external_urls" {
   ]
 }
 
+output "odahu_bucket_name" {
+  value = azurerm_storage_container.odahuflow_bucket.name
+}
+
 output "odahuflow_connections" {
   sensitive = true
   value = [
