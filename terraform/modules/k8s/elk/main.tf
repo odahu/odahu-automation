@@ -7,9 +7,9 @@ locals {
   ingress_tls_secret_name = "odahu-flow-tls"
 
   ingress_common = {
-    enabled     = true
-    hosts       = [var.cluster_domain]
-    path        = "/kibana"
+    enabled = true
+    hosts   = [var.cluster_domain]
+    path    = "/kibana"
     annotations = {
       "kubernetes.io/ingress.class"                       = "nginx"
       "nginx.ingress.kubernetes.io/force-ssl-redirect"    = "true"
@@ -29,7 +29,7 @@ locals {
           end
         }
       EOT
-      "nginx.ingress.kubernetes.io/auth-snippet" = <<-EOT
+      "nginx.ingress.kubernetes.io/auth-snippet"          = <<-EOT
         proxy_set_header X-User        $user;
         proxy_set_header X-Email       $email;
         proxy_set_header X-JWT         $jwt;
@@ -45,6 +45,14 @@ locals {
   } : {}
 
   ingress_config = merge(local.ingress_common, local.ingress_tls)
+}
+
+module "docker_credentials" {
+  source          = "../docker_auth"
+  docker_repo     = var.docker_repo
+  docker_username = var.docker_username
+  docker_password = var.docker_password
+  namespaces      = [kubernetes_namespace.elasticsearch[0].metadata[0].annotations.name]
 }
 
 resource "null_resource" "add_elastic_helm_repo" {
@@ -83,6 +91,18 @@ resource "kubernetes_secret" "ingress_tls" {
   }
   type = "kubernetes.io/tls"
 
+  depends_on = [kubernetes_namespace.elasticsearch[0]]
+}
+
+resource "kubernetes_secret" "sa" {
+  metadata {
+    name      = "logstash-gke-sa"
+    namespace = var.elasticsearch_namespace
+  }
+  data = {
+    "logstash-gke-sa" = var.sa_key
+  }
+  type       = "opaque"
   depends_on = [kubernetes_namespace.elasticsearch[0]]
 }
 
@@ -150,7 +170,8 @@ resource "helm_release" "logstash" {
   values = [
     templatefile("${path.module}/templates/logstash.yaml", {
       logstash_replicas = var.logstash_replicas
-
+      version           = var.odahu_infra_version
+      bucket            = var.bucket
       es_service_url = format("%s-%s.%s.svc.cluster.local:9200",
         local.es_cluster_name,
         local.es_node_group,

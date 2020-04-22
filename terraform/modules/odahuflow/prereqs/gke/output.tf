@@ -12,6 +12,10 @@ output "odahu_bucket_name" {
   value = google_storage_bucket.this.name
 }
 
+output "odahu_collector_sa_key" {
+  value = local.collector_sa_key_one_line
+}
+
 output "odahuflow_connections" {
   value = [
     {
