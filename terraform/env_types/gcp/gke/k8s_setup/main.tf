@@ -113,3 +113,10 @@ module "postgresql" {
   docker_username       = var.docker_username
   docker_password       = var.docker_password
 }
+
+module "elasticsearch" {
+  source         = "../../../../modules/k8s/elk"
+  cluster_domain = var.cluster_domain_name
+  tls_secret_key = var.tls_key
+  tls_secret_crt = var.tls_crt
+}
