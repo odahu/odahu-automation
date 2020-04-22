@@ -23,18 +23,13 @@ locals {
         auth_request_set $jwt    $upstream_http_x_auth_request_access_token;
         auth_request_set $_oauth2_proxy_1 $upstream_cookie__oauth2_proxy_1;
 
-        proxy_set_header X-User        $user;
-        proxy_set_header X-Email       $email;
-        proxy_set_header X-JWT         $jwt;
-        proxy_set_header Authorization "Bearer $jwt";
-
         access_by_lua_block {
           if ngx.var._oauth2_proxy_1 ~= "" then
             ngx.header["Set-Cookie"] = "_oauth2_proxy_1=" .. ngx.var._oauth2_proxy_1 .. ngx.var.auth_cookie:match("(; .*)")
           end
         }
       EOT
-      "nginx.ingress.kubernetes.io/auth-snippet"          = <<-EOT
+      "nginx.ingress.kubernetes.io/auth-snippet" = <<-EOT
         proxy_set_header X-User        $user;
         proxy_set_header X-Email       $email;
         proxy_set_header X-JWT         $jwt;
@@ -175,8 +170,12 @@ resource "helm_release" "logstash" {
   values = [
     templatefile("${path.module}/templates/logstash.yaml", {
       logstash_replicas = var.logstash_replicas
+<<<<<<< HEAD
       version           = var.odahu_infra_version
       bucket            = var.bucket
+=======
+
+>>>>>>> [legion-cicd#153] Dummy Logstash deployment
       es_service_url = format("%s-%s.%s.svc.cluster.local:9200",
         local.es_cluster_name,
         local.es_node_group,
