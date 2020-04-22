@@ -7,9 +7,9 @@ locals {
   ingress_tls_secret_name = "odahu-flow-tls"
 
   ingress_common = {
-    enabled = true
-    hosts   = [var.cluster_domain]
-    path    = "/kibana"
+    enabled     = true
+    hosts       = [var.cluster_domain]
+    path        = "/kibana"
     annotations = {
       "kubernetes.io/ingress.class"                       = "nginx"
       "nginx.ingress.kubernetes.io/force-ssl-redirect"    = "true"
@@ -22,6 +22,11 @@ locals {
         auth_request_set $email  $upstream_http_x_auth_request_email;
         auth_request_set $jwt    $upstream_http_x_auth_request_access_token;
         auth_request_set $_oauth2_proxy_1 $upstream_cookie__oauth2_proxy_1;
+
+        proxy_set_header X-User        $user;
+        proxy_set_header X-Email       $email;
+        proxy_set_header X-JWT         $jwt;
+        proxy_set_header Authorization "Bearer $jwt";
 
         access_by_lua_block {
           if ngx.var._oauth2_proxy_1 ~= "" then

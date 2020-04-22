@@ -28,12 +28,6 @@ variable "logstash_chart_version" {
   type        = string
 }
 
-variable "kibana_chart_version" {
-  default     = "7.6.2"
-  description = "Kibana helm chart version"
-  type        = string
-}
-
 variable "elasticsearch_replicas" {
   default     = "1"
   description = "Replica count for the Elasticsearch StatefulSet"
@@ -43,6 +37,10 @@ variable "elasticsearch_replicas" {
 variable "logstash_replicas" {
   default     = "1"
   description = "Replica count for the Logstash StatefulSet"
+
+variable "kibana_chart_version" {
+  default     = "7.6.2"
+  description = "Kibana helm chart version"
   type        = string
 }
 
@@ -94,4 +92,3 @@ variable "odahu_infra_version" {
 variable "bucket" {
   description = "Bucket to get logs from"
 }
-
