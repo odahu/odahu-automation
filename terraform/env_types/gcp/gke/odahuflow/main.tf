@@ -147,3 +147,15 @@ module "odahuflow_helm" {
   vault_enabled               = var.vault.enabled
   airflow_enabled             = var.airflow.enabled
 }
+
+module "elasticsearch" {
+  source         = "../../../../modules/k8s/elk"
+  cluster_domain = var.cluster_domain_name
+  tls_secret_key = var.tls_key
+  tls_secret_crt = var.tls_crt
+  sa_key               = module.odahuflow_prereqs.odahu_collector_sa_key
+  docker_repo          = var.docker_repo
+  docker_username      = var.docker_username
+  docker_password      = var.docker_password
+}
+
