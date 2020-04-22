@@ -1,0 +1,65 @@
+---
+# https://github.com/elastic/helm-charts/blob/master/logstash/values.yaml
+
+fullnameOverride: "logstash"
+
+replicas: ${logstash_replicas}
+
+# Allows you to add any config files in /usr/share/logstash/config/
+# such as logstash.yml and log4j2.properties
+logstashConfig: {}
+#  logstash.yml: |
+#    key:
+#      nestedkey: value
+#  log4j2.properties: |
+#    key = value
+
+# Allows you to add any pipeline files in /usr/share/logstash/pipeline/
+### ***warn*** there is a hardcoded logstash.conf in the image, override it first
+logstashPipeline: {}
+# logstash.conf: |
+#   input {
+#     exec {
+#       command => "uptime"
+#       interval => 30
+#     }
+#   }
+#   output {
+#     elasticsearch { hosts => ["${es_service_url}"] }
+#     stdout { codec => rubydebug }
+#   }
+
+logstashJavaOpts: "-Xmx1g -Xms1g"
+
+resources:
+  requests:
+    cpu: "100m"
+    memory: "1536Mi"
+  limits:
+    cpu: "1000m"
+    memory: "1536Mi"
+
+volumeClaimTemplate:
+  accessModes: [ "ReadWriteOnce" ]
+  resources:
+    requests:
+      storage: 1Gi
+
+rbac:
+  create: true
+
+updateStrategy: OnDelete
+
+httpPort: 9600
+
+service:
+  type: ClusterIP
+  ports:
+  - name: beats
+    port: 5044
+    protocol: TCP
+    targetPort: 5044
+  - name: http
+    port: 8080
+    protocol: TCP
+    targetPort: 8080

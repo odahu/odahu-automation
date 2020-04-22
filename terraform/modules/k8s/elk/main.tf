@@ -23,16 +23,17 @@ locals {
         auth_request_set $jwt    $upstream_http_x_auth_request_access_token;
         auth_request_set $_oauth2_proxy_1 $upstream_cookie__oauth2_proxy_1;
 
-        proxy_set_header X-User        $user;
-        proxy_set_header X-Email       $email;
-        proxy_set_header X-JWT         $jwt;
-        proxy_set_header Authorization "Bearer $jwt";
-
         access_by_lua_block {
           if ngx.var._oauth2_proxy_1 ~= "" then
             ngx.header["Set-Cookie"] = "_oauth2_proxy_1=" .. ngx.var._oauth2_proxy_1 .. ngx.var.auth_cookie:match("(; .*)")
           end
         }
+      EOT
+      "nginx.ingress.kubernetes.io/auth-snippet" = <<-EOT
+        proxy_set_header X-User        $user;
+        proxy_set_header X-Email       $email;
+        proxy_set_header X-JWT         $jwt;
+        proxy_set_header Authorization "Bearer $jwt";
       EOT
     }
   }
@@ -128,6 +129,33 @@ resource "helm_release" "kibana" {
       kibana_image     = "docker.elastic.co/kibana/kibana"
       kibana_image_tag = var.kibana_chart_version
       ingress_config   = yamlencode({ ingress = local.ingress_config })
+    })
+  ]
+
+  depends_on = [
+    null_resource.add_elastic_helm_repo[0],
+    kubernetes_namespace.elasticsearch[0],
+    helm_release.elasticsearch[0]
+  ]
+}
+
+resource "helm_release" "logstash" {
+  count      = var.elasticsearch_enabled ? 1 : 0
+  name       = "logstash"
+  repository = "elastic"
+  chart      = "logstash"
+  version    = var.logstash_chart_version
+  namespace  = kubernetes_namespace.elasticsearch[0].metadata[0].annotations.name
+
+  values = [
+    templatefile("${path.module}/templates/logstash.yaml", {
+      logstash_replicas = var.logstash_replicas
+
+      es_service_url = format("%s-%s.%s.svc.cluster.local:9200",
+        local.es_cluster_name,
+        local.es_node_group,
+        kubernetes_namespace.elasticsearch[0].metadata[0].annotations.name
+      )
     })
   ]
 
