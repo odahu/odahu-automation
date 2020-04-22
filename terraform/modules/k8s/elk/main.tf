@@ -7,9 +7,9 @@ locals {
   ingress_tls_secret_name = "odahu-flow-tls"
 
   ingress_common = {
-    enabled     = true
-    hosts       = [var.cluster_domain]
-    path        = "/kibana"
+    enabled = true
+    hosts   = [var.cluster_domain]
+    path    = "/kibana"
     annotations = {
       "kubernetes.io/ingress.class"                       = "nginx"
       "nginx.ingress.kubernetes.io/force-ssl-redirect"    = "true"
@@ -29,7 +29,7 @@ locals {
           end
         }
       EOT
-      "nginx.ingress.kubernetes.io/auth-snippet" = <<-EOT
+      "nginx.ingress.kubernetes.io/auth-snippet"          = <<-EOT
         proxy_set_header X-User        $user;
         proxy_set_header X-Email       $email;
         proxy_set_header X-JWT         $jwt;
@@ -170,12 +170,8 @@ resource "helm_release" "logstash" {
   values = [
     templatefile("${path.module}/templates/logstash.yaml", {
       logstash_replicas = var.logstash_replicas
-<<<<<<< HEAD
       version           = var.odahu_infra_version
       bucket            = var.bucket
-=======
-
->>>>>>> [legion-cicd#153] Dummy Logstash deployment
       es_service_url = format("%s-%s.%s.svc.cluster.local:9200",
         local.es_cluster_name,
         local.es_node_group,
