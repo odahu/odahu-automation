@@ -58,6 +58,17 @@ module "fluentd" {
   extra_helm_values = module.odahuflow_prereqs.fluent_helm_values
 }
 
+module "fluentd-daemonset" {
+  source                = "../../../../modules/k8s/fluentd-daemonset"
+
+  docker_repo         = var.docker_repo
+  docker_username     = var.docker_username
+  docker_password     = var.docker_password
+  odahu_infra_version = "1.2.0-b1587490464203"
+
+  extra_helm_values = module.odahuflow_prereqs.fluent_daemonset_helm_values
+}
+
 module "storage-syncer" {
   source = "../../../../modules/k8s/syncer"
 
