@@ -23,10 +23,12 @@ locals {
   config       = jsondecode(file(local.profile))
   cloud_type   = lookup(local.config.cloud, "type", "")
   dns_provider = lookup(local.config.dns, "provider", "gcp")
+  cluster_name = lookup(local.config, "cluster_name", "")
   cluster_fqdn = lookup(local.config.dns, "domain", "")
-  # As long we do not have the root domain in parameters anymore, we assume that dns_zone
-  # is 2nd level domain (temporary crutch until terragrunt modules dependencies will be set up)
-  dns_zone      = regex("[^.]*\\.[^.]{2,3}(?:\\.[^.]{2,3})?\\.?$", local.cluster_fqdn)
+  # As long we do not have the root domain in parameters anymore, we assume that cluster_name variable
+  # is prefix of domain (i.e. cluster_fqdn = whatever.<cluster_name>.<dns_zone>)
+  # This is temporary crutch until terragrunt modules dependencies will be set up.
+  dns_zone      = replace(local.cluster_fqdn, "/^(?:.*\\.)?${local.cluster_name}\\./", "")
   records       = lookup(local.config.dns, "records", get_env("TF_VAR_records", "[]"))
   records_str   = join(" ", [for rec in jsondecode(local.records) : "${rec.name}:${rec.value}" if rec.value != "null"])
   scripts_dir   = "${get_terragrunt_dir()}/../../../../../scripts"
