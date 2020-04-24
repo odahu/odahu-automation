@@ -4,46 +4,52 @@
 variable "cluster_name" {
   default     = "odahuflow"
   description = "Odahuflow cluster name"
+  type        = string
 }
 
 variable "config_context_auth_info" {
   description = "Kubernetes cluster context auth"
+  type        = string
 }
 
 variable "config_context_cluster" {
   description = "Kubernetes cluster context name"
+  type        = string
 }
 
 variable "project_id" {
   description = "Target project id"
+  type        = string
 }
 
 variable "zone" {
   description = "Default zone"
+  type        = string
 }
 
 variable "region" {
   description = "Region of resources"
+  type        = string
 }
 
 variable "helm_repo" {
   description = "Odahuflow helm repo"
-}
-
-variable "tiller_image" {
-  default = "gcr.io/kubernetes-helm/tiller:v2.14.3"
+  type        = string
 }
 
 variable "cluster_domain_name" {
   description = "Odahuflow cluster FQDN"
+  type        = string
 }
 
 variable "tls_key" {
   description = "TLS key for Odahuflow cluster"
+  type        = string
 }
 
 variable "tls_crt" {
   description = "TLS certificate file for Odahuflow cluster"
+  type        = string
 }
 
 ##################
@@ -51,44 +57,60 @@ variable "tls_crt" {
 ##################
 variable "odahuflow_version" {
   description = "Odahuflow release version"
+  type        = string
+}
+
+variable "odahuflow_training_timeout" {
+  default     = ""
+  description = "ODAHU Flow maximum timeout for model training process (example: '24h')"
+  type        = string
 }
 
 variable "odahu_airflow_plugin_version" {
   description = "Odahuflow Airflow plugn version"
+  type        = string
 }
 
 variable "docker_repo" {
   description = "Odahuflow Docker repo url"
+  type        = string
 }
 
 variable "docker_username" {
   default     = ""
   description = "Odahuflow Docker repo username"
+  type        = string
 }
 
 variable "docker_password" {
   default     = ""
   description = "Odahuflow Docker repo password"
+  type        = string
 }
 
 variable "odahu_infra_version" {
   description = "Odahuflow infra release version"
+  type        = string
 }
 
 variable "odahu_ui_version" {
   description = "Version of odahu-ui helm chart"
+  type        = string
 }
 
 variable "data_bucket" {
   description = "Odahuflow data storage bucket"
+  type        = string
 }
 
 variable "mlflow_toolchain_version" {
   description = "Version of odahuflow-mlflow helm chart"
+  type        = string
 }
 
 variable "oauth_oidc_issuer_url" {
   description = "OAuth2/OIDC provider Issuer URL"
+  type        = string
 }
 
 variable "oauth_oidc_token_endpoint" {
@@ -103,10 +125,12 @@ variable "oauth_oidc_signout_endpoint" {
 
 variable "oauth_client_id" {
   description = "OAuth2 Client ID"
+  type        = string
 }
 
 variable "oauth_client_secret" {
   description = "OAuth2 Client Secret"
+  type        = string
 }
 
 variable "model_authorization_enabled" {

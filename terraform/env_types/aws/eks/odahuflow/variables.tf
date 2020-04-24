@@ -36,6 +36,12 @@ variable "odahuflow_version" {
   description = "Odahuflow release version"
 }
 
+variable "odahuflow_training_timeout" {
+  default     = ""
+  description = "ODAHU Flow maximum timeout for model training process (example: '24h')"
+  type        = string
+}
+
 variable "odahu_ui_version" {
   description = "Version of odahu-ui helm chart"
 }
