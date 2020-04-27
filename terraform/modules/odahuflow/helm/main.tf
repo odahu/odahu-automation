@@ -78,6 +78,7 @@ locals {
       namespace          = var.odahuflow_training_namespace
       outputConnectionID = "models-output"
       metricUrl          = "${local.url_schema}://${var.cluster_domain}/mlflow"
+      timeout            = length(var.odahuflow_training_timeout) == 0 ? null : var.odahuflow_training_timeout
     }
     trainer = {
       auth = {

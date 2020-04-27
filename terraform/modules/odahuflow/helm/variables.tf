@@ -106,6 +106,12 @@ variable "odahuflow_connections" {
 # Odahuflow config
 ##################
 
+variable "odahuflow_training_timeout" {
+  default     = ""
+  description = "ODAHU Flow maximum timeout for model training process (example: '24h')"
+  type        = string
+}
+
 variable "extra_external_urls" {
   default = []
   type = list(object({
