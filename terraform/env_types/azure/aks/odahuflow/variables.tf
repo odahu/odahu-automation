@@ -50,10 +50,6 @@ variable "cluster_domain_name" {
   description = "Odahuflow cluster FQDN"
 }
 
-variable "tiller_image" {
-  default = "gcr.io/kubernetes-helm/tiller:v2.14.3"
-}
-
 variable "tls_key" {
   description = "TLS key for Odahuflow cluster"
 }
@@ -71,6 +67,12 @@ variable "allowed_ips" {
 ##################
 variable "odahuflow_version" {
   description = "Odahuflow release version"
+}
+
+variable "odahuflow_training_timeout" {
+  default     = ""
+  description = "ODAHU Flow maximum timeout for model training process (example: '24h')"
+  type        = string
 }
 
 variable "odahu_ui_version" {
