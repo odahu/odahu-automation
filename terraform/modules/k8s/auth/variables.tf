@@ -52,3 +52,7 @@ variable "oauth_cookie_expire" {
 variable "oauth_cookie_secret" {
   description = "Secret for issuing cookies by oauth2_proxy"
 }
+
+variable "helm_timeout" {
+  default = "600"
+}

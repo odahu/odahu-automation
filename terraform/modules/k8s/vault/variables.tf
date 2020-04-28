@@ -14,3 +14,7 @@ variable "configuration" {
   })
   description = "Vault configuration"
 }
+
+variable "helm_timeout" {
+  default = "600"
+}

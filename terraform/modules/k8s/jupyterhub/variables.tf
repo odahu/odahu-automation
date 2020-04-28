@@ -82,3 +82,7 @@ variable "tls_secret_key" {
   description = "Ingress TLS key"
   default     = ""
 }
+
+variable "helm_timeout" {
+  default = "900"
+}

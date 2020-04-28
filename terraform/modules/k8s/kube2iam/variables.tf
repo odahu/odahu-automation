@@ -16,3 +16,7 @@ variable "image_tag" {
 variable "chart_version" {
   default = "2.0.2"
 }
+
+variable "helm_timeout" {
+  default = "600"
+}

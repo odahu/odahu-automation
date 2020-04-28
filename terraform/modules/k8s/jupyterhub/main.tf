@@ -115,7 +115,7 @@ resource "helm_release" "jupyterhub" {
   version    = var.jupyterhub_chart_version
   namespace  = var.jupyterhub_namespace
   repository = "jupyterhub"
-  timeout    = "900"
+  timeout    = var.helm_timeout
 
   values = [
     templatefile("${path.module}/templates/jupyterhub.yaml", {

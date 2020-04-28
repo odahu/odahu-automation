@@ -53,7 +53,7 @@ resource "helm_release" "monitoring" {
   version    = var.odahu_infra_version
   namespace  = var.monitoring_namespace
   repository = "odahuflow"
-  timeout    = "600"
+  timeout    = var.helm_timeout
 
   values = [
     data.template_file.monitoring_values.rendered

@@ -48,8 +48,6 @@ locals {
 
   ingress_config = merge(local.ingress_common, { web = merge(local.ingress_web, local.ingress_tls) })
 
-  deploy_helm_timeout = "500"
-
   odahu_conn = {
     "auth_url"      = var.oauth_oidc_token_endpoint,
     "client_id"     = var.service_account.client_id,
@@ -112,7 +110,7 @@ resource "helm_release" "airflow" {
   version    = local.airflow_helm_version
   namespace  = var.namespace
   repository = local.airflow_helm_repo
-  timeout    = local.deploy_helm_timeout
+  timeout    = var.helm_timeout
 
   values = [
     templatefile("${path.module}/templates/airflow.yaml", {

@@ -21,6 +21,7 @@ resource "helm_release" "fluentd" {
   version    = var.odahu_infra_version
   namespace  = var.namespace
   repository = "odahuflow"
+  timeout    = var.helm_timeout
 
   values = [
     templatefile("${path.module}/templates/helm_values.yaml", {

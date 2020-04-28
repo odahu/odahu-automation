@@ -27,6 +27,7 @@ resource "helm_release" "istio-init" {
   version    = var.istio_version
   namespace  = var.istio_namespace
   repository = "istio"
+  timeout    = var.helm_timeout
   depends_on = [kubernetes_namespace.istio]
 }
 
@@ -51,7 +52,7 @@ resource "helm_release" "istio" {
   version    = var.istio_version
   namespace  = var.istio_namespace
   repository = "istio"
-  timeout    = "600"
+  timeout    = var.helm_timeout
 
   values = [
     data.template_file.istio_values.rendered,
@@ -88,6 +89,7 @@ resource "helm_release" "knative" {
   version    = var.odahu_infra_version
   namespace  = var.knative_namespace
   repository = "odahuflow"
+  timeout    = var.helm_timeout
   depends_on = [kubernetes_namespace.knative, helm_release.istio]
 }
 

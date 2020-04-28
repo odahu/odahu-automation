@@ -5,7 +5,6 @@ locals {
   debug_log_level     = "true"
   helm_repo           = "bitnami"
   helm_version        = "2.0.1"
-  deploy_helm_timeout = "600"
 }
 
 resource "kubernetes_namespace" "this" {
@@ -33,7 +32,7 @@ resource "helm_release" "this" {
   version    = local.helm_version
   namespace  = var.namespace
   repository = local.helm_repo
-  timeout    = local.deploy_helm_timeout
+  timeout    = var.helm_timeout
 
   values = [
     templatefile("${path.module}/templates/values.yaml", {
