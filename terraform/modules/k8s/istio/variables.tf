@@ -51,3 +51,7 @@ variable "docker_password" {
   default     = ""
   description = "Odahuflow docker repo password"
 }
+
+variable "helm_timeout" {
+  default = "600"
+}

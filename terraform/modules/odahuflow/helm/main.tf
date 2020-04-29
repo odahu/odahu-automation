@@ -283,7 +283,7 @@ resource "helm_release" "odahuflow" {
   version    = var.odahuflow_version
   namespace  = var.odahuflow_namespace
   repository = data.helm_repository.odahuflow.metadata[0].name
-  timeout    = 600
+  timeout    = var.helm_timeout
 
   values = [
     templatefile("${path.module}/templates/odahuflow.yaml", {
@@ -324,6 +324,7 @@ resource "helm_release" "mlflow" {
   version    = var.mlflow_toolchain_version
   namespace  = var.odahuflow_namespace
   repository = data.helm_repository.odahuflow.metadata[0].name
+  timeout    = var.helm_timeout
 
   values = [
     templatefile("${path.module}/templates/mlflow.yaml", {
@@ -357,6 +358,7 @@ resource "helm_release" "rest_packagers" {
   version    = var.packager_version
   namespace  = var.odahuflow_namespace
   repository = data.helm_repository.odahuflow.metadata[0].name
+  timeout    = var.helm_timeout
 
   values = [
     templatefile("${path.module}/templates/packagers.yaml", {
@@ -386,6 +388,7 @@ resource "helm_release" "odahu_ui" {
   version    = var.odahu_ui_version
   namespace  = var.odahuflow_namespace
   repository = data.helm_repository.odahuflow.metadata[0].name
+  timeout    = var.helm_timeout
 
   values = [
     templatefile("${path.module}/templates/ui.yaml", {

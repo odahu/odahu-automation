@@ -13,6 +13,6 @@ resource "helm_release" "tekton" {
   version    = var.odahu_infra_version
   namespace  = var.namespace
   repository = "odahuflow"
-  timeout    = "600"
+  timeout    = var.helm_timeout
   depends_on = [kubernetes_namespace.tekton]
 }

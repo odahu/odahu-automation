@@ -11,7 +11,6 @@ resource "kubernetes_namespace" "vault" {
 locals {
   vault_helm_version    = "0.8.3"
   vault_version         = "1.2.3"
-  deploy_helm_timeout   = "600"
   vault_helm_repo       = "banzaicloud-stable"
   vault_debug_log_level = "true"
   vault_pvc_name        = "vault-file"
@@ -24,7 +23,7 @@ resource "helm_release" "vault" {
   version    = local.vault_helm_version
   namespace  = var.namespace
   repository = local.vault_helm_repo
-  timeout    = local.deploy_helm_timeout
+  timeout    = var.helm_timeout
   depends_on = [kubernetes_namespace.vault]
   values = [
     templatefile("${path.module}/templates/vault_values.yaml", {

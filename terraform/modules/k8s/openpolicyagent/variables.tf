@@ -77,3 +77,7 @@ variable "opa_policies" {
   default     = {}
   description = "Opa .rego policies"
 }
+
+variable "helm_timeout" {
+  default = "600"
+}

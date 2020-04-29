@@ -81,3 +81,7 @@ variable "configuration" {
 variable "examples_version" {
   description = "Version of test data to upload"
 }
+
+variable "helm_timeout" {
+  default = "500"
+}

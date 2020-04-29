@@ -194,3 +194,7 @@ variable "airflow_enabled" {
   type        = bool
   description = "Is Airflow deployment enabled"
 }
+
+variable "helm_timeout" {
+  default = "600"
+}
