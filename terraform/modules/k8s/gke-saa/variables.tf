@@ -55,3 +55,7 @@ variable "gke_saa_name" {
   default     = "gke-sa-assigner"
   description = "GKE Service Account Assigner name"
 }
+
+variable "helm_timeout" {
+  default = "300"
+}

@@ -19,7 +19,7 @@ resource "helm_release" "kube2iam" {
   version       = var.chart_version
   force_update  = true
   recreate_pods = true
-  timeout       = "600"
+  timeout       = var.helm_timeout
 
   values = [
     data.template_file.kube2iam_values[0].rendered,

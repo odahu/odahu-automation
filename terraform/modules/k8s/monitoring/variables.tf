@@ -41,3 +41,7 @@ variable "tls_secret_crt" {
 variable "tls_secret_key" {
   description = "Odahuflow cluster TLS key"
 }
+
+variable "helm_timeout" {
+  default = "600"
+}

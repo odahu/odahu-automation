@@ -6,3 +6,7 @@ variable "configuration" {
   })
   description = "NFS configuration"
 }
+
+variable "helm_timeout" {
+  default = "300"
+}
