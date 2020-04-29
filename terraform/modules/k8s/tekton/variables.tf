@@ -10,3 +10,7 @@ variable "namespace" {
   description = "Tekton namespace"
   default     = "tekton-pipelines"
 }
+
+variable "helm_timeout" {
+  default = "600"
+}

@@ -26,3 +26,7 @@ variable "extra_helm_values" {
   # TODO:
   description = ""
 }
+
+variable "helm_timeout" {
+  default = "300"
+}
