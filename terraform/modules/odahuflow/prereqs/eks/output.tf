@@ -3,7 +3,7 @@ output "extra_external_urls" {
     {
       name     = "Feedback storage"
       url      = "https://s3.console.aws.amazon.com/s3/buckets/${var.data_bucket}/?region=${var.region}"
-      imageUrl = "/img/logo/aws-s3.svg"
+      imageUrl = "/img/logo/aws-s3.png"
     }
   ]
 }
