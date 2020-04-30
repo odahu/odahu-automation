@@ -6,7 +6,7 @@ locals {
 
   default_external_urls = [
     {
-      name     = "Documentation",
+      name     = "Docs",
       url      = "https://docs.odahu.org",
       imageUrl = "/img/logo/documentation.png"
     },
