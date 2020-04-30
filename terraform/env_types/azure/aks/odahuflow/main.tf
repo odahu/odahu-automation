@@ -99,7 +99,7 @@ module "odahuflow_helm" {
 
   odahuflow_training_timeout  = var.odahuflow_training_timeout
   odahuflow_connections       = concat(var.odahuflow_connections, module.odahuflow_prereqs.odahuflow_connections)
-  extra_external_urls         = concat(module.jupyterhub.external_url, module.odahuflow_prereqs.extra_external_urls)
+  extra_external_urls         = concat(module.jupyterhub.external_url, module.odahuflow_prereqs.extra_external_urls, module.airflow.external_url)
   resource_uploader_sa        = var.service_accounts.resource_uploader
   operator_sa                 = var.service_accounts.operator
   oauth_oidc_token_endpoint   = var.oauth_oidc_token_endpoint
