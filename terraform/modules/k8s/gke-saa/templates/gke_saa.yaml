@@ -7,19 +7,10 @@ image:
   tag: "${image_tag}"
   pullPolicy: IfNotPresent
 
-nameOverride: "${name}"
-fullnameOverride: ""
+fullnameOverride: "${name}"
 
 daemonset:
   hostPort: ${host_port}
   containerPort: ${container_port}
 
-resources: {}
-
-podAnnotations: {}
-
-nodeSelector: {}
-
-tolerations: []
-
-affinity: {}
+${tolerations}
