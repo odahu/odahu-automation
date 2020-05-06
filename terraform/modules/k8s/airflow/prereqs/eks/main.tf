@@ -11,7 +11,7 @@ data "aws_iam_role" "node" {
 }
 
 data "aws_s3_bucket" "dags" {
-  bucket = var.dags_bucket
+  bucket = var.dag_bucket
 }
 
 data "aws_iam_policy_document" "syncer" {

@@ -52,6 +52,12 @@ prometheus-operator:
           spec:
             storageClassName: "${storage_class}"
             resources:
+              limits:
+                cpu: "2"
+                memory: 2.5Gi
+              requests:
+                cpu: "1"
+                memory: 2Gi
               requests:
                 storage: "${prom_storage_size}"
       retention: "${prom_retention_time}"
