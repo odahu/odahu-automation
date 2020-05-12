@@ -28,7 +28,7 @@ locals {
   # As long we do not have the root domain in parameters anymore, we assume that cluster_name variable
   # is prefix of domain (i.e. cluster_fqdn = whatever.<cluster_name>.<dns_zone>)
   # This is temporary crutch until terragrunt modules dependencies will be set up.
-  dns_zone      = replace(local.cluster_fqdn, "/^(?:.*\\.)?${local.cluster_name}\\./", "")
+  dns_zone      = replace(local.cluster_fqdn, "/^[a-zA-Z0-9-_]+\\./", "")
   records       = lookup(local.config.dns, "records", get_env("TF_VAR_records", "[]"))
   records_str   = join(" ", [for rec in jsondecode(local.records) : "${rec.name}:${rec.value}" if rec.value != "null"])
   scripts_dir   = "${get_terragrunt_dir()}/../../../../../scripts"
