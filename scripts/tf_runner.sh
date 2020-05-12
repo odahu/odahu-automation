@@ -219,24 +219,25 @@ function TerraformCreate() {
 	esac
 	CLUSTER_FQDN="$(GetParam 'dns.domain')"
 	DOMAIN="$(echo "${CLUSTER_FQDN}" | sed -e 's/^[0-9a-zA-Z_-]*\.//')"
+        CLUSTER_SUBDOMAIN="$(echo "${CLUSTER_FQDN}" | sed -re 's/.(.[0-9a-zA-Z_-])*$//')"
 	case $(GetParam "cluster_type") in
 		"aws/eks")
 			TerragruntRun eks_create output
 			K8S_API_IP="$(GetParam 'k8s_api_address.value' "$OUTPUT_FILE" | sed -e 's/https:\/\///')."
 			BASTION_IP=$(GetParam 'bastion_address.value' "$OUTPUT_FILE")
-			TF_VAR_records=$(jq -rn "[{name: \"bastion.$DOMAIN\", value: \"$BASTION_IP\"}, {name: \"$CLUSTER_FQDN\", value: \"$LB_IP\", type: \"CNAME\"}, {name: \"api.$CLUSTER_FQDN\", value: \"$K8S_API_IP\", type: \"CNAME\"}]")
+			TF_VAR_records=$(jq -rn "[{name: \"bastion.$DOMAIN\", value: \"$BASTION_IP\"}, {name: \"$CLUSTER_SUBDOMAIN\", value: \"$LB_IP\", type: \"CNAME\"}, {name: \"api.$CLUSTER_SUBDOMAIN\", value: \"$K8S_API_IP\", type: \"CNAME\"}]")
 			;;
 		"gcp/gke")
 			TerragruntRun gke_create output
 			K8S_API_IP=$(GetParam 'k8s_api_address.value' "$OUTPUT_FILE")
 			BASTION_IP=$(GetParam 'bastion_address.value' "$OUTPUT_FILE")
-			TF_VAR_records=$(jq -rn "[{name: \"bastion.$CLUSTER_FQDN\", value: \"$BASTION_IP\"}, {name: \"$CLUSTER_FQDN\", value: \"$LB_IP\"}, {name: \"api.$CLUSTER_FQDN\", value: \"$K8S_API_IP\"}]")
+			TF_VAR_records=$(jq -rn "[{name: \"bastion.$CLUSTER_SUBDOMAIN\", value: \"$BASTION_IP\"}, {name: \"$CLUSTER_SUBDOMAIN\", value: \"$LB_IP\"}, {name: \"api.$CLUSTER_SUBDOMAIN\", value: \"$K8S_API_IP\"}]")
 			;;
 		"azure/aks")
 			TerragruntRun aks_create output
 			K8S_API_IP="$(GetParam 'k8s_api_address.value' "$OUTPUT_FILE" | sed -e 's/^https:\/\///'| sed -e 's/:443//')."
 			BASTION_IP=$(GetParam 'bastion_address.value' "$OUTPUT_FILE")
-			TF_VAR_records=$(jq -rn "[{name: \"bastion.$CLUSTER_FQDN\", value: \"$BASTION_IP\"}, {name: \"$CLUSTER_FQDN\", value: \"$K8S_API_IP\", type: \"CNAME\"}]")
+			TF_VAR_records=$(jq -rn "[{name: \"bastion.$CLUSTER_SUBDOMAIN\", value: \"$BASTION_IP\"}, {name: \"$CLUSTER_SUBDOMAIN\", value: \"$K8S_API_IP\", type: \"CNAME\"}]")
 			;;
 	esac
 	export TF_VAR_records
