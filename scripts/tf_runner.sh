@@ -217,24 +217,26 @@ function TerraformCreate() {
 			LB_IP=$(GetParam 'helm_values.value["controller.service.loadBalancerIP"]' "$OUTPUT_FILE")
 			;;
 	esac
+	CLUSTER_FQDN="$(GetParam 'dns.domain')"
+	DOMAIN="$(echo "${CLUSTER_FQDN}" | sed -e 's/^[0-9a-zA-Z_-]*\.//')"
 	case $(GetParam "cluster_type") in
 		"aws/eks")
 			TerragruntRun eks_create output
 			K8S_API_IP="$(GetParam 'k8s_api_address.value' "$OUTPUT_FILE" | sed -e 's/https:\/\///')."
 			BASTION_IP=$(GetParam 'bastion_address.value' "$OUTPUT_FILE")
-			TF_VAR_records=$(jq -rn "[{name: \"bastion.$(GetParam 'cluster_name')\", value: \"$BASTION_IP\"}, {name: \"$(GetParam 'dns.domain' | sed -r "s/(.*$(GetParam 'cluster_name'))\..*/\1/")\", value: \"$LB_IP\", type: \"CNAME\"}, {name: \"api.$(GetParam 'cluster_name')\", value: \"$K8S_API_IP\", type: \"CNAME\"}]")
+			TF_VAR_records=$(jq -rn "[{name: \"bastion.$DOMAIN\", value: \"$BASTION_IP\"}, {name: \"$DOMAIN\", value: \"$LB_IP\", type: \"CNAME\"}, {name: \"api.$DOMAIN\", value: \"$K8S_API_IP\", type: \"CNAME\"}]")
 			;;
 		"gcp/gke")
 			TerragruntRun gke_create output
 			K8S_API_IP=$(GetParam 'k8s_api_address.value' "$OUTPUT_FILE")
 			BASTION_IP=$(GetParam 'bastion_address.value' "$OUTPUT_FILE")
-			TF_VAR_records=$(jq -rn "[{name: \"bastion.$(GetParam 'cluster_name')\", value: \"$BASTION_IP\"}, {name: \"$(GetParam 'dns.domain' | sed -r "s/(.*$(GetParam 'cluster_name'))\..*/\1/")\", value: \"$LB_IP\"}, {name: \"api.$(GetParam 'cluster_name')\", value: \"$K8S_API_IP\"}]")
+			TF_VAR_records=$(jq -rn "[{name: \"bastion.$DOMAIN\", value: \"$BASTION_IP\"}, {name: \"$DOMAIN\", value: \"$LB_IP\"}, {name: \"api.$DOMAIN\", value: \"$K8S_API_IP\"}]")
 			;;
 		"azure/aks")
 			TerragruntRun aks_create output
 			K8S_API_IP="$(GetParam 'k8s_api_address.value' "$OUTPUT_FILE" | sed -e 's/^https:\/\///'| sed -e 's/:443//')."
 			BASTION_IP=$(GetParam 'bastion_address.value' "$OUTPUT_FILE")
-			TF_VAR_records=$(jq -rn "[{name: \"bastion.$(GetParam 'cluster_name')\", value: \"$BASTION_IP\"}, {name: \"$(GetParam 'dns.domain' | sed -r "s/(.*$(GetParam 'cluster_name'))\..*/\1/")\", value: \"$LB_IP\"}, {name: \"api.$(GetParam 'cluster_name')\", value: \"$K8S_API_IP\", type: \"CNAME\"}]")
+			TF_VAR_records=$(jq -rn "[{name: \"bastion.$DOMAIN\", value: \"$BASTION_IP\"}, {name: \"$DOMAIN\", value: \"$K8S_API_IP\", type: \"CNAME\"}]")
 			;;
 	esac
 	export TF_VAR_records
