@@ -218,7 +218,8 @@ function TerraformCreate() {
 			;;
 	esac
 	CLUSTER_FQDN="$(GetParam 'dns.domain')"
-	DOMAIN="${CLUSTER_FQDN//^[0-9a-zA-Z_-]*\./}"
+        # shellcheck disable=SC2001
+	DOMAIN="$(sed 's/^[0-9a-zA-Z-]*.//' <<< "$CLUSTER_FQDN")"
         CLUSTER_SUBDOMAIN="${CLUSTER_FQDN//.${DOMAIN}//}"
 	case $(GetParam "cluster_type") in
 		"aws/eks")
