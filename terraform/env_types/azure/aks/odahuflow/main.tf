@@ -61,6 +61,17 @@ module "fluentd" {
   extra_helm_values = module.odahuflow_prereqs.fluent_helm_values
 }
 
+module "fluentd-daemonset" {
+  source = "../../../../modules/k8s/fluentd-daemonset"
+
+  docker_repo         = var.docker_repo
+  docker_username     = var.docker_username
+  docker_password     = var.docker_password
+  odahu_infra_version = var.odahu_infra_version
+
+  extra_helm_values = module.odahuflow_prereqs.fluent_daemonset_helm_values
+}
+
 module "jupyterhub" {
   source = "../../../../modules/k8s/jupyterhub"
 
@@ -109,3 +120,16 @@ module "odahuflow_helm" {
   vault_enabled               = var.vault.enabled
   airflow_enabled             = false
 }
+
+module "elasticsearch" {
+  source                = "../../../../modules/k8s/elk"
+  cluster_domain        = var.cluster_domain_name
+  tls_secret_key        = var.tls_key
+  tls_secret_crt        = var.tls_crt
+  docker_repo           = var.docker_repo
+  docker_username       = var.docker_username
+  docker_password       = var.docker_password
+  logstash_input_config = module.odahuflow_prereqs.logstash_input_config
+  odahu_infra_version   = var.odahu_infra_version
+}
+

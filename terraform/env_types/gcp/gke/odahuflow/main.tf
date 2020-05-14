@@ -149,14 +149,15 @@ module "odahuflow_helm" {
 }
 
 module "elasticsearch" {
-  source              = "../../../../modules/k8s/elk"
-  cluster_domain      = var.cluster_domain_name
-  tls_secret_key      = var.tls_key
-  tls_secret_crt      = var.tls_crt
-  sa_key              = module.odahuflow_prereqs.odahu_collector_sa_key
-  docker_repo         = var.docker_repo
-  docker_username     = var.docker_username
-  docker_password     = var.docker_password
-  bucket              = module.odahuflow_prereqs.odahu_bucket_name
-  odahu_infra_version = var.odahu_infra_version
+  source                = "../../../../modules/k8s/elk"
+  cluster_domain        = var.cluster_domain_name
+  tls_secret_key        = var.tls_key
+  tls_secret_crt        = var.tls_crt
+  docker_repo           = var.docker_repo
+  docker_username       = var.docker_username
+  docker_password       = var.docker_password
+  sa_key                = module.odahuflow_prereqs.odahu_collector_sa_key
+  cloud_type            = "gcp"
+  logstash_input_config = module.odahuflow_prereqs.logstash_input_config
+  odahu_infra_version   = var.odahu_infra_version
 }

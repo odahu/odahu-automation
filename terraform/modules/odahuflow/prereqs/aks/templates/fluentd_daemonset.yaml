@@ -1,0 +1,7 @@
+output:
+  target: "azureblob"
+  azureblob:
+    authorization: "sastoken"
+    bucket: "${data_bucket}"
+    AzureStorageAccount: "${azure_storage_account}"
+    AzureStorageSasToken: "${azure_storage_sas_token}"

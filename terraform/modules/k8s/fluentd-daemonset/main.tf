@@ -16,7 +16,7 @@ module "docker_credentials" {
 }
 
 resource "helm_release" "fluentd-daemonset" {
-  name       = "logging-operator"
+  name       = "fluentd"
   chart      = "odahu-flow-fluentd-daemonset"
   version    = var.odahu_infra_version
   namespace  = var.namespace

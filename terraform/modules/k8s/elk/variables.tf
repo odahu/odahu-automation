@@ -94,15 +94,22 @@ variable "docker_password" {
   description = "Odahuflow Docker repo password"
 }
 
-variable "sa_key" {
-  default     = ""
-  description = "Service Account Key"
-}
-
 variable "odahu_infra_version" {
   description = "Odahuflow infra release version"
 }
 
-variable "bucket" {
-  description = "Bucket to get logs from"
+variable "logstash_input_config" {
+  description = "Raw logstash input config"
+}
+
+variable "sa_key" {
+  default = ""
+}
+
+variable "logstash_annotations" {
+  default = {}
+}
+
+variable "cloud_type" {
+  default = ""
 }

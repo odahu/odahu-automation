@@ -1,9 +1,8 @@
 ---
 # https://github.com/elastic/helm-charts/blob/master/logstash/values.yaml
-secretMounts:
-  - name: logstash-gke-sa
-    secretName: logstash-gke-sa
-    path: /credentials
+${secret_mounts}
+
+${annotations}
 
 fullnameOverride: "logstash"
 image: "gcr.io/or2-msq-epmd-legn-t1iylu/odahu/odahu-flow-logstash-oss"
@@ -12,7 +11,7 @@ imageTag: ${version}
 imagePullSecrets:
   - name: repo-json-key
 
-replicas: ${logstash_replicas}
+replicas: ${replicas}
 
 # Allows you to add any config files in /usr/share/logstash/config/
 # such as logstash.yml and log4j2.properties
@@ -22,23 +21,7 @@ logstashConfig:
 
 # Allows you to add any pipeline files in /usr/share/logstash/pipeline/
 ### ***warn*** there is a hardcoded logstash.conf in the image, override it first
-logstashPipeline:
-  logstash.conf: |
-    input {
-      google_cloud_storage {
-        interval => 60
-        bucket_id => "${bucket}"
-        file_matches => "logs/.*\.txt"
-        codec => "json"
-        json_key_file => "/credentials/logstash-gke-sa"
-      }
-    }
-    output {
-      elasticsearch {
-        hosts => ["${es_service_url}"]
-        index => "logstash-%%{+YYYY.MM.dd}"
-      }
-    }
+${config}
 
 logstashJavaOpts: "-Xmx1g -Xms1g"
 

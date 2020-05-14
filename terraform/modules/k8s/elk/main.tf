@@ -1,4 +1,14 @@
 locals {
+  secret_mounts = length(var.sa_key) == 0 ? {} : {secretMounts = [{name = "logstash-gke-sa", secretName = "logstash-gke-sa", path = "/credentials"}]}
+  logstash_output_config = templatefile("${path.module}/templates/logstash_output.yaml", {
+    es_service_url = format("%s-%s.%s.svc.cluster.local:9200",
+                     local.es_cluster_name,
+                     local.es_node_group,
+                     kubernetes_namespace.elasticsearch[0].metadata[0].annotations.name)
+  })
+  logstash_config_plain = format("%s%s", var.logstash_input_config, local.logstash_output_config)
+  logstash_config = {logstashPipeline = {"logstash.conf" = format("%s", local.logstash_config_plain)}}
+
   es_cluster_name = "es"
   es_node_group   = "odahu"
 
@@ -95,16 +105,18 @@ resource "kubernetes_secret" "ingress_tls" {
 }
 
 resource "kubernetes_secret" "sa" {
+  count = var.cloud_type == "gcp" ? 0 : 1
+
   metadata {
     name      = "logstash-gke-sa"
-    namespace = var.elasticsearch_namespace
+    namespace = kubernetes_namespace.elasticsearch[0].metadata[0].annotations.name
   }
   data = {
     "logstash-gke-sa" = var.sa_key
   }
   type       = "opaque"
-  depends_on = [kubernetes_namespace.elasticsearch[0]]
 }
+
 
 resource "helm_release" "elasticsearch" {
   count      = var.elasticsearch_enabled ? 1 : 0
@@ -169,14 +181,11 @@ resource "helm_release" "logstash" {
 
   values = [
     templatefile("${path.module}/templates/logstash.yaml", {
-      logstash_replicas = var.logstash_replicas
-      version           = var.odahu_infra_version
-      bucket            = var.bucket
-      es_service_url = format("%s-%s.%s.svc.cluster.local:9200",
-        local.es_cluster_name,
-        local.es_node_group,
-        kubernetes_namespace.elasticsearch[0].metadata[0].annotations.name
-      )
+      secret_mounts = local.secret_mounts == {} ? yamlencode({}) : yamlencode(local.secret_mounts)
+      config        = yamlencode(local.logstash_config)
+      replicas      = var.logstash_replicas
+      annotations   = length(var.logstash_annotations) == 0 ? "" : yamlencode(var.logstash_annotations)
+      version       = var.odahu_infra_version
     })
   ]
 

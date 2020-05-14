@@ -56,3 +56,9 @@ output "fluent_daemonset_helm_values" {
     collector_sa = google_service_account.collector_sa.email
   })
 }
+
+output "logstash_input_config" {
+  value = templatefile("${path.module}/templates/logstash.yaml", {
+    bucket = google_storage_bucket.this.name
+  })
+}
