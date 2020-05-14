@@ -46,12 +46,6 @@ variable "kibana_chart_version" {
   type        = string
 }
 
-variable "elasticsearch_replicas" {
-  default     = "1"
-  description = "Replica count for the Elasticsearch StatefulSet"
-  type        = string
-}
-
 variable "logstash_replicas" {
   default     = "1"
   description = "Replica count for the Logstash StatefulSet"
