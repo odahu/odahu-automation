@@ -105,7 +105,7 @@ resource "kubernetes_secret" "ingress_tls" {
 }
 
 resource "kubernetes_secret" "sa" {
-  count = var.cloud_type == "gcp" ? 0 : 1
+  count = var.cloud_type == "gcp" ? 1 : 0
 
   metadata {
     name      = "logstash-gke-sa"
