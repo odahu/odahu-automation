@@ -1,0 +1,9 @@
+input {
+  s3 {
+    bucket   => "${bucket}"
+    region   => "${region}"
+    codec    => "json"
+    interval => 30
+    prefix   => "logs"
+  }
+}

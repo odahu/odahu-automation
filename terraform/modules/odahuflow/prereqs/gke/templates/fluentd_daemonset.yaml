@@ -1,0 +1,6 @@
+output:
+  target: "gcs"
+  gcs:
+    authorization: "sa"
+    customSA: "${collector_sa}"
+    bucket: "${data_bucket}"

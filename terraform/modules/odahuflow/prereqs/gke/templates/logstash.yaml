@@ -1,0 +1,10 @@
+input {
+  google_cloud_storage {
+    interval      => 60
+    bucket_id     => "${bucket}"
+    file_matches  => "logs/.*\.txt"
+    codec         => "json"
+    json_key_file => "/credentials/logstash-gke-sa"
+  }
+}
+

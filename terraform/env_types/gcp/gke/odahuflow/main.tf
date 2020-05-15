@@ -58,6 +58,17 @@ module "fluentd" {
   extra_helm_values = module.odahuflow_prereqs.fluent_helm_values
 }
 
+module "fluentd-daemonset" {
+  source = "../../../../modules/k8s/fluentd-daemonset"
+
+  docker_repo         = var.docker_repo
+  docker_username     = var.docker_username
+  docker_password     = var.docker_password
+  odahu_infra_version = var.odahu_infra_version
+
+  extra_helm_values = module.odahuflow_prereqs.fluent_daemonset_helm_values
+}
+
 module "storage-syncer" {
   source = "../../../../modules/k8s/syncer"
 
@@ -84,6 +95,21 @@ module "jupyterhub" {
   oauth_oidc_issuer_url = var.oauth_oidc_issuer_url
 }
 
+module "elasticsearch" {
+  source                = "../../../../modules/k8s/elk"
+  cluster_domain        = var.cluster_domain_name
+  tls_secret_key        = var.tls_key
+  tls_secret_crt        = var.tls_crt
+  docker_repo           = var.docker_repo
+  docker_username       = var.docker_username
+  docker_password       = var.docker_password
+  sa_key                = module.odahuflow_prereqs.odahu_collector_sa_key
+  cloud_type            = "gcp"
+  logstash_input_config = module.odahuflow_prereqs.logstash_input_config
+  odahu_infra_version   = var.odahu_infra_version
+}
+
+
 module "odahuflow_helm" {
   source = "../../../../modules/odahuflow/helm"
 
@@ -102,9 +128,18 @@ module "odahuflow_helm" {
 
   node_pools = var.node_pools
 
-  odahuflow_training_timeout  = var.odahuflow_training_timeout
-  odahuflow_connections       = concat(var.odahuflow_connections, module.odahuflow_prereqs.odahuflow_connections)
-  extra_external_urls         = concat(module.jupyterhub.external_url, module.odahuflow_prereqs.extra_external_urls, module.airflow.external_url)
+  odahuflow_connections = concat(
+    var.odahuflow_connections,
+    module.odahuflow_prereqs.odahuflow_connections
+  )
+
+  extra_external_urls = concat(
+    module.jupyterhub.external_url,
+    module.airflow.external_url,
+    module.elasticsearch.external_url,
+    module.odahuflow_prereqs.extra_external_urls
+  )
+
   resource_uploader_sa        = var.service_accounts.resource_uploader
   operator_sa                 = var.service_accounts.operator
   oauth_oidc_token_endpoint   = var.oauth_oidc_token_endpoint
