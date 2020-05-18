@@ -12,6 +12,10 @@ output "odahu_bucket_name" {
   value = google_storage_bucket.this.name
 }
 
+output "odahu_collector_sa_key" {
+  value = local.collector_sa_key_one_line
+}
+
 output "odahuflow_connections" {
   value = [
     {
@@ -43,5 +47,18 @@ output "fluent_helm_values" {
   value = templatefile("${path.module}/templates/fluentd.yaml", {
     data_bucket  = google_storage_bucket.this.name,
     collector_sa = google_service_account.collector_sa.email
+  })
+}
+
+output "fluent_daemonset_helm_values" {
+  value = templatefile("${path.module}/templates/fluentd_daemonset.yaml", {
+    data_bucket  = google_storage_bucket.this.name,
+    collector_sa = google_service_account.collector_sa.email
+  })
+}
+
+output "logstash_input_config" {
+  value = templatefile("${path.module}/templates/logstash.yaml", {
+    bucket = google_storage_bucket.this.name
   })
 }

@@ -47,3 +47,28 @@ output "fluent_helm_values" {
     collector_iam_role = aws_iam_role.collector.name
   })
 }
+
+output "fluent_daemonset_helm_values" {
+  value = templatefile("${path.module}/templates/fluentd_daemonset.yaml", {
+    data_bucket        = aws_s3_bucket.this.id
+    data_bucket_region = aws_s3_bucket.this.region
+    collector_iam_role = aws_iam_role.collector.name
+  })
+}
+
+output "logstash_input_config" {
+  value = templatefile("${path.module}/templates/logstash.yaml", {
+    bucket = aws_s3_bucket.this.id
+    region = aws_s3_bucket.this.region
+  })
+}
+
+output "logstash_annotations" {
+  value = {
+    podAnnotations = {
+      "sidecar.istio.io/inject" = "false"
+      "iam.amazonaws.com/role"  = aws_iam_role.collector.name
+    }
+  }
+}
+

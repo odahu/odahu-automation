@@ -14,7 +14,7 @@ variable "cluster_domain" {
 ########################
 variable "monitoring_namespace" {
   default     = "kube-monitoring"
-  description = "clusterwide monitoring namespace"
+  description = "Clusterwide namespace for monitoring stuff"
 }
 
 variable "odahu_infra_version" {
@@ -29,7 +29,7 @@ variable "grafana_pass" {
   description = "Grafana admin password"
 }
 
-variable "grafana_storage_class" {
+variable "storage_class" {
   default     = "standard"
   description = "Grafana storage class"
 }
