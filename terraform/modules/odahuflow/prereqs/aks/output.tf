@@ -46,3 +46,19 @@ output "fluent_helm_values" {
     azure_storage_sas_token = data.azurerm_storage_account_sas.odahuflow.sas
   })
 }
+
+output "fluent_daemonset_helm_values" {
+  value = templatefile("${path.module}/templates/fluentd_daemonset.yaml", {
+    data_bucket             = var.data_bucket
+    azure_storage_account   = azurerm_storage_account.odahuflow_data.name
+    azure_storage_sas_token = data.azurerm_storage_account_sas.odahuflow.sas
+  })
+}
+
+output "logstash_input_config" {
+  value = templatefile("${path.module}/templates/logstash.yaml", {
+    storage_account_name = azurerm_storage_account.odahuflow_data.name
+    storage_access_key   = azurerm_storage_account.odahuflow_data.primary_access_key
+    container            = var.data_bucket
+  })
+}
