@@ -1,5 +1,5 @@
 locals {
-  pg_version          = "11.7.0-debian-10-r51"
+  pg_version          = "11.7.0-debian-10-r51-test"
   pg_registry         = "gcr.io"
   pg_repository       = "or2-msq-epmd-legn-t1iylu/odahu-infra/postgresql-repmgr"
   debug_log_level     = "true"
