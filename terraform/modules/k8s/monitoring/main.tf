@@ -18,8 +18,8 @@ locals {
         end
       }
     EOT
-    "nginx.ingress.kubernetes.io/auth-signin" = format("https://%s/oauth2/start?rd=https://$host$escaped_request_uri", var.cluster_domain)
-    "nginx.ingress.kubernetes.io/auth-url"    = "http://oauth2-proxy.kube-system.svc.cluster.local:4180/oauth2/auth"
+    "nginx.ingress.kubernetes.io/auth-signin"           = format("https://%s/oauth2/start?rd=https://$host$escaped_request_uri", var.cluster_domain)
+    "nginx.ingress.kubernetes.io/auth-url"              = "http://oauth2-proxy.kube-system.svc.cluster.local:4180/oauth2/auth"
   }
 
   ingress_nginx_grafana_auth_snippet = {
@@ -88,8 +88,8 @@ resource "helm_release" "monitoring" {
       monitoring_namespace = kubernetes_namespace.monitoring.metadata[0].annotations.name
       odahu_infra_version  = var.odahu_infra_version
 
-      grafana_annotations = yamlencode({annotations = local.grafana_annotations})
-      prom_annotations    = yamlencode({annotations = local.prometheus_annotations})
+      grafana_annotations = yamlencode({ annotations = local.grafana_annotations })
+      prom_annotations    = yamlencode({ annotations = local.prometheus_annotations })
 
       cluster_domain          = var.cluster_domain
       grafana_admin           = var.grafana_admin
