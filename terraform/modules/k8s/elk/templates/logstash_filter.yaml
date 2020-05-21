@@ -1,0 +1,9 @@
+filter {
+  if [kubernetes][labels][app_kubernetes_io/name] == "odahu-flow-opa" and [kubernetes][labels][app_kubernetes_io/instance] == "odahu-flow-opa" {
+    json {
+      source => "log"
+      target => "opa-log"
+      remove_field => ["log", "[opa-log][input][attributes]"]
+    }
+  }
+}

@@ -78,11 +78,11 @@ function ReadArguments() {
 
 # Get parameter from cluster profile
 function GetParam() {
-    if [[ $# -ge 2 ]]; then
-        local jsonfile=$2
-    else
-        local jsonfile=${PROFILE}
-    fi
+	if [[ $# -ge 2 ]]; then
+		local jsonfile=$2
+	else
+		local jsonfile=${PROFILE}
+	fi
 	jq -rc ".$1" "${jsonfile}"
 }
 
@@ -218,9 +218,9 @@ function TerraformCreate() {
 			;;
 	esac
 	CLUSTER_FQDN="$(GetParam 'dns.domain')"
-        # shellcheck disable=SC2001
+	# shellcheck disable=SC2001
 	DOMAIN="$(sed 's/^[0-9a-zA-Z-]*.//' <<< "$CLUSTER_FQDN")"
-        CLUSTER_SUBDOMAIN="${CLUSTER_FQDN/%.${DOMAIN}/}"
+	CLUSTER_SUBDOMAIN="${CLUSTER_FQDN/%.${DOMAIN}/}"
 	case $(GetParam "cluster_type") in
 		"aws/eks")
 			TerragruntRun eks_create output
@@ -238,7 +238,7 @@ function TerraformCreate() {
 			TerragruntRun aks_create output
 			K8S_API_IP="$(GetParam 'k8s_api_address.value' "$OUTPUT_FILE" | sed -e 's/^https:\/\///'| sed -e 's/:443//')."
 			BASTION_IP=$(GetParam 'bastion_address.value' "$OUTPUT_FILE")
-			TF_VAR_records=$(jq -rn "[{name: \"bastion.$CLUSTER_SUBDOMAIN\", value: \"$BASTION_IP\"}, {name: \"$CLUSTER_SUBDOMAIN\", value: \"$K8S_API_IP\", type: \"CNAME\"}]")
+			TF_VAR_records=$(jq -rn "[{name: \"bastion.$CLUSTER_SUBDOMAIN\", value: \"$BASTION_IP\"}, {name: \"$CLUSTER_SUBDOMAIN\", value: \"$LB_IP\"}, {name: \"api.$CLUSTER_SUBDOMAIN\", value: \"$K8S_API_IP\", type: \"CNAME\"}]")
 			;;
 	esac
 	export TF_VAR_records
