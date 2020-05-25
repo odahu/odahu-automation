@@ -32,7 +32,10 @@ terraform {
       "plan",
       "destroy"
     ]
-    arguments = ["-no-color", "-compact-warnings"]
+    arguments = [
+      "-no-color",
+      "-compact-warnings"
+    ]
   }
 
   after_hook "k8s_fwrules_cleanup" {
