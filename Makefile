@@ -4,7 +4,7 @@ ROOT_DIR := terraform/env_types
 SECRET_DIR := $(CURDIR)/.secrets
 SECRET_FILE_NAME := cluster_profile.json
 ENV_TYPE := gcp/gke
-FIND_ALL_TF_MODULES_COMMAND := gfind terraform -name '*.tf' -printf "%h\n" | uniq | tr '\n' ' '
+FIND_ALL_TF_MODULES_COMMAND := find terraform -name '*.tf' -printf "%h\n" | uniq | tr '\n' ' '
 FIND_TOPLEVEL_TF_MODULES_COMMAND := find terraform/env_types -name '*.tf' -printf "%h\n" | uniq | tr '\n' ' '
 
 GKE_PROJECT :=

@@ -1,10 +1,10 @@
 locals {
-  pg_version          = "11.7.0-debian-10-r51"
-  pg_registry         = "gcr.io"
-  pg_repository       = "or2-msq-epmd-legn-t1iylu/odahu-infra/postgresql-repmgr"
-  debug_log_level     = "true"
-  helm_repo           = "bitnami"
-  helm_version        = "2.0.1"
+  pg_version      = "11.7.0-debian-10-r51"
+  pg_registry     = "gcr.io"
+  pg_repository   = "or2-msq-epmd-legn-t1iylu/odahu-infra/postgresql-repmgr"
+  debug_log_level = "true"
+  helm_repo       = "bitnami"
+  helm_version    = "2.0.1"
 }
 
 resource "kubernetes_namespace" "this" {

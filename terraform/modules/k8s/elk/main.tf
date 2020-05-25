@@ -1,13 +1,14 @@
 locals {
-  secret_mounts = length(var.sa_key) == 0 ? {} : {secretMounts = [{name = "logstash-gke-sa", secretName = "logstash-gke-sa", path = "/credentials"}]}
+  secret_mounts = length(var.sa_key) == 0 ? {} : { secretMounts = [{ name = "logstash-gke-sa", secretName = "logstash-gke-sa", path = "/credentials" }] }
   logstash_output_config = templatefile("${path.module}/templates/logstash_output.yaml", {
     es_service_url = format("%s-%s.%s.svc.cluster.local:9200",
-                     local.es_cluster_name,
-                     local.es_node_group,
-                     kubernetes_namespace.elasticsearch[0].metadata[0].annotations.name)
+      local.es_cluster_name,
+      local.es_node_group,
+      kubernetes_namespace.elasticsearch[0].metadata[0].annotations.name
+    )
   })
   logstash_config_plain = format("%s%s", var.logstash_input_config, local.logstash_output_config)
-  logstash_config = {logstashPipeline = {"logstash.conf" = format("%s", local.logstash_config_plain)}}
+  logstash_config       = { logstashPipeline = { "logstash.conf" = format("%s", local.logstash_config_plain) } }
 
   es_cluster_name = "es"
   es_node_group   = "odahu"
@@ -114,7 +115,7 @@ resource "kubernetes_secret" "sa" {
   data = {
     "logstash-gke-sa" = var.sa_key
   }
-  type       = "opaque"
+  type = "opaque"
 }
 
 

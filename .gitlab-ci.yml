@@ -28,11 +28,16 @@ terraform:
   stage: lint
   variables:
     AWS_DEFAULT_REGION: test_region
-    TF_PLUGIN_CACHE_DIR: /.terraform.d/plugin-cache
+    TF_PLUGIN_CACHE_DIR: "${CI_PROJECT_DIR}/.terraform.d/plugin-cache"
   before_script:
     - apk add -U make bash findutils
-    - mkdir -p "${TF_PLUGIN_CACHE_DIR}"
+    - mkdir -vp "${TF_PLUGIN_CACHE_DIR}"
   script:
     - make terraform-fmt-check
     - make terraform-validate
     - make terragrunt-fmt-check
+  artifacts:
+    name: "terraform-plugins"
+    paths:
+      - ${TF_PLUGIN_CACHE_DIR}/
+    expire_in: 1 week
