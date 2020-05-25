@@ -1,6 +1,6 @@
 sync:
   volume: "airflow"
-  subPath: "${subpath}"   
+  subPath: "${subpath}"
   target: "azureblob"
   azureblob:
     bucket: "${data_bucket_name}"

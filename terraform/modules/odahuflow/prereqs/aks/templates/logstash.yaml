@@ -1,14 +1,11 @@
 input {
-  azure_blob_storage {
-    storageaccount => "${storage_account_name}"
-    access_key   => "${storage_access_key}"
-    container            => "${container}"
+  azureblob {
+    storage_account_name   => "${storage_account_name}"
+    storage_access_key     => "${storage_access_key}"
+    container              => "${container}"
     registry_create_policy => "start_over"
-    codec                => "json"
-    logtype              => "raw"
-    file_head         => '{'
-    file_tail         => '}'
-    registry_path   => "data/registry.dat"
-    path_filters         => "logs/**/*.txt"
+    codec                  => "json"
+    registry_path          => "data/registry.dat"
+    path_filters           => "logs/**/*.txt"
   }
 }

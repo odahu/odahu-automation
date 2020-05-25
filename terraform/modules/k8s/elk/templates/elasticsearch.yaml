@@ -13,54 +13,25 @@ roles:
 resources:
   requests:
     cpu: "1"
-    memory: "2Gi"
+    memory: "${es_mem}Gi"
   limits:
     cpu: "1"
-    memory: "2Gi"
-
-esJavaOpts: ${es_java_opts}
-
-replicas: ${es_replicas}
-
-# Allows you to add any config files in /usr/share/elasticsearch/config/
-# such as elasticsearch.yml and log4j2.properties
-esConfig: {}
-#  elasticsearch.yml: |
-#    key:
-#      nestedkey: value
-#  log4j2.properties: |
-#    key = value
-
-# Extra environment variables to append to this nodeGroup
-# This will be appended to the current 'env:' key. You can use any of the kubernetes env
-# syntax here
-extraEnvs: []
-#  - name: MY_ENVIRONMENT_VAR
-#    value: the_value_goes_here
-
-# A list of secrets and their paths to mount inside the pod
-# This is useful for mounting certificates for security and for mounting
-# the X-Pack license
-secretMounts: []
-#  - name: elastic-certificates
-#    secretName: elastic-certificates
-#    path: /usr/share/elasticsearch/config/certs
+    memory: "${es_mem}Gi"
 
 initResources: {}
-  # limits:
-  #   cpu: "25m"
-  #   # memory: "128Mi"
-  # requests:
-  #   cpu: "25m"
-  #   memory: "128Mi"
 
 sidecarResources: {}
-  # limits:
-  #   cpu: "25m"
-  #   # memory: "128Mi"
-  # requests:
-  #   cpu: "25m"
-  #   memory: "128Mi"
+
+esJavaOpts: "-Xmx${es_mem / 2}g -Xms${es_mem / 2}g"
+
+replicas: "${es_replicas}"
+
+# readinessProbe minimal viable healthcheck
+clusterHealthCheckParams: "timeout=1s"
+
+esConfig:
+ elasticsearch.yml: |
+   xpack.monitoring.collection.enabled: true
 
 persistence:
   enabled: true
@@ -68,29 +39,10 @@ volumeClaimTemplate:
   accessModes: [ "ReadWriteOnce" ]
   resources:
     requests:
-      storage: ${storage_size}
+      storage: "${storage_size}"
 
 rbac:
   create: true
-
-extraVolumes: ""
-  # - name: extras
-  #   emptyDir: {}
-
-extraVolumeMounts: ""
-  # - name: extras
-  #   mountPath: /usr/share/extras
-  #   readOnly: true
-
-extraContainers: ""
-  # - name: do-something
-  #   image: busybox
-  #   command: ['do', 'something']
-
-extraInitContainers: ""
-  # - name: do-something
-  #   image: busybox
-  #   command: ['do', 'something']
 
 protocol: http
 httpPort: 9200
@@ -101,7 +53,6 @@ service:
   httpPortName: http
   transportPortName: transport
 
-# updateStrategy: RollingUpdate
 updateStrategy: OnDelete
 
 sysctlVmMaxMapCount: 262144
