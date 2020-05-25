@@ -1,12 +1,17 @@
-variable "elasticsearch_enabled" {
+variable "elk_enabled" {
   default     = true
-  description = "Flag to install Elasticsearch (true) or not (false)"
+  description = "Flag to install ELK stack (true) or not (false)"
   type        = bool
 }
 
-variable "elasticsearch_namespace" {
-  default     = "elasticsearch"
-  description = "Elasticsearch namespace name"
+variable "elk_namespace" {
+  default     = "odahu-flow-elk"
+  description = "ELK stack namespace name"
+  type        = string
+}
+
+variable "odahu_helm_repo" {
+  description = "ODAHU-flow helm repo"
   type        = string
 }
 
@@ -19,6 +24,12 @@ variable "elasticsearch_helm_repo" {
 variable "elasticsearch_chart_version" {
   default     = "7.6.2"
   description = "Elasticsearch helm chart version"
+  type        = string
+}
+
+variable "elasticsearch_memory" {
+  default     = "4"
+  description = "Memory limit for Elasticsearch process (in GiB)"
   type        = string
 }
 

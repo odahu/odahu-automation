@@ -5,22 +5,18 @@ ${secret_mounts}
 ${annotations}
 
 fullnameOverride: "logstash"
-image: "gcr.io/or2-msq-epmd-legn-t1iylu/odahu/odahu-flow-logstash-oss"
-imageTag: ${version}
+image: "${logstash_image}"
+imageTag: "${logstash_image_tag}"
 
 imagePullSecrets:
   - name: repo-json-key
 
-replicas: ${replicas}
+replicas: "${replicas}"
 
-# Allows you to add any config files in /usr/share/logstash/config/
-# such as logstash.yml and log4j2.properties
 logstashConfig:
   logstash.yml: |
     http.host: 0.0.0.0
 
-# Allows you to add any pipeline files in /usr/share/logstash/pipeline/
-### ***warn*** there is a hardcoded logstash.conf in the image, override it first
 ${config}
 
 logstashJavaOpts: "-Xmx1g -Xms1g"
@@ -37,12 +33,12 @@ volumeClaimTemplate:
   accessModes: [ "ReadWriteOnce" ]
   resources:
     requests:
-      storage: 1Gi
+      storage: "1Gi"
 
 rbac:
   create: true
 
-updateStrategy: OnDelete
+updateStrategy: "OnDelete"
 
 httpPort: 9600
 

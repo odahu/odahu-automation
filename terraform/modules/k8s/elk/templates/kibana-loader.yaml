@@ -1,0 +1,6 @@
+image: ${kibana_image}
+imageTag: ${kibana_image_tag}
+kibanaUrl: ${kibana_url}
+kibanaData:
+  odahu-stuff.ndjson: |
+    ${indent(4, kibana_odahu_stuff)}

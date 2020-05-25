@@ -7,21 +7,22 @@ fullnameOverride: "kibana"
 
 resources:
   requests:
-    cpu: "250m"
+    cpu: "500m"
     memory: "512Mi"
   limits:
-    cpu: "500m"
+    cpu: "1"
     memory: "1Gi"
 
-# Allows you to add any config files in /usr/share/kibana/config/
-# such as kibana.yml
 kibanaConfig:
   kibana.yml: |
-    server.basePath: /kibana
-    server.rewriteBasePath: false
+    server:
+      basePath: /kibana
+      rewriteBasePath: false
+    xpack:
+      monitoring.kibana.collection.enabled: true
 
 serverHost: "0.0.0.0"
-protocol: http
+protocol: "http"
 httpPort: 5601
 healthCheckPath: "/app/kibana"
 
@@ -29,7 +30,7 @@ updateStrategy:
   type: "Recreate"
 
 service:
-  type: ClusterIP
+  type: "ClusterIP"
   port: 5601
 
 ${ingress_config}

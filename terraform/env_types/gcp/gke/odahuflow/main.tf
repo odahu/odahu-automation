@@ -107,8 +107,8 @@ module "elasticsearch" {
   cloud_type            = "gcp"
   logstash_input_config = module.odahuflow_prereqs.logstash_input_config
   odahu_infra_version   = var.odahu_infra_version
+  odahu_helm_repo       = var.helm_repo
 }
-
 
 module "odahuflow_helm" {
   source = "../../../../modules/odahuflow/helm"
@@ -140,6 +140,7 @@ module "odahuflow_helm" {
     module.odahuflow_prereqs.extra_external_urls
   )
 
+  odahuflow_training_timeout  = var.odahuflow_training_timeout
   resource_uploader_sa        = var.service_accounts.resource_uploader
   operator_sa                 = var.service_accounts.operator
   oauth_oidc_token_endpoint   = var.oauth_oidc_token_endpoint
