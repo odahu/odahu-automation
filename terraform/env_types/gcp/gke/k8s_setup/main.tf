@@ -9,7 +9,16 @@ module "gpu_drivers" {
 module "nfs" {
   source = "../../../../modules/k8s/nfs"
 
-  configuration = var.nfs
+  configuration  = var.nfs
+  nfs_image_repo = "gcr.io/or2-msq-epmd-legn-t1iylu/odahu-infra/nfs-provisioner"
+}
+
+module "docker_credentials" {
+  source          = "../../../../modules/k8s/docker_auth"
+  docker_repo     = var.docker_repo
+  docker_username = var.docker_username
+  docker_password = var.docker_password
+  namespaces      = ["kube-system"]
 }
 
 module "nginx_ingress_tls" {
@@ -43,6 +52,7 @@ module "auth" {
   oauth_cookie_expire   = "168h0m0s"
   oauth_cookie_secret   = var.oauth_cookie_secret
   oauth_oidc_scope      = var.oauth_oidc_scope
+  oauth_image_repo      = "gcr.io/or2-msq-epmd-legn-t1iylu/odahu-infra/oauth2-proxy"
 }
 
 module "monitoring" {

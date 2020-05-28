@@ -43,7 +43,7 @@ variable "oauth_helm_chart_version" {
   type        = string
 }
 
-variable "oauth_image_repository" {
+variable "oauth_image_repo" {
   default     = "quay.io/oauth2-proxy/oauth2-proxy"
   description = "Image repository of oauth2-proxy"
   type        = string

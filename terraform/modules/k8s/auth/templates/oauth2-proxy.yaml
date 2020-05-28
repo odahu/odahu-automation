@@ -1,9 +1,12 @@
 fullnameOverride: oauth2-proxy
  
 image:
-  repository: ${oauth_image_repository}
+  repository: ${oauth_image_repo}
   tag: ${oauth_image_tag}
- 
+
+imagePullSecrets:
+  - name: repo-json-key
+
 config:
   clientID: "${oauth_client_id}"
   clientSecret: "${oauth_client_secret}"

@@ -1,8 +1,11 @@
 replicaCount: 1
 
+imagePullSecrets:
+  - name: repo-json-key
+
 image:
-  repository: quay.io/kubernetes_incubator/nfs-provisioner
-  tag: ${version}
+  repository: ${image_repo}
+  tag: ${image_version}
   pullPolicy: IfNotPresent
 
 storageClass:

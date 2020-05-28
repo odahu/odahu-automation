@@ -21,7 +21,7 @@ resource "helm_release" "oauth2-proxy" {
   values = [
     templatefile("${path.module}/templates/oauth2-proxy.yaml", {
       domain_name             = var.domain_name
-      oauth_image_repository  = var.oauth_image_repository
+      oauth_image_repo        = var.oauth_image_repo
       oauth_image_tag         = var.oauth_image_tag
       oauth_client_id         = var.oauth_client_id
       oauth_client_secret     = var.oauth_client_secret

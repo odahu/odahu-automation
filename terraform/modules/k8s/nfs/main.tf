@@ -1,7 +1,6 @@
 locals {
-  nfs_provisioner_version = "v2.3.0"
-  nfs_helm_version        = "1.0.0"
-  nfs_helm_repo           = "stable"
+  nfs_helm_version = "1.0.0"
+  nfs_helm_repo    = "stable"
 }
 
 resource "helm_release" "nfs" {
@@ -15,8 +14,9 @@ resource "helm_release" "nfs" {
 
   values = [
     templatefile("${path.module}/templates/nfs.yaml", {
-      version      = local.nfs_provisioner_version
-      storage_size = var.configuration.storage_size
+      image_version = var.nfs_image_tag
+      image_repo    = var.nfs_image_repo
+      storage_size  = var.configuration.storage_size
     }),
   ]
 }

@@ -43,18 +43,23 @@ variable "cluster_domain_name" {
 }
 
 variable "docker_repo" {
-  description = "Odahuflow Docker repo url"
+  type        = string
+  default     = ""
+  description = "ODAHU flow Docker repo url"
 }
 
 variable "docker_username" {
+  type        = string
   default     = ""
-  description = "Odahuflow Docker repo username"
+  description = "ODAHU flow Docker repo username"
 }
 
 variable "docker_password" {
+  type        = string
   default     = ""
-  description = "Odahuflow Docker repo password"
+  description = "ODAHU flow Docker repo password"
 }
+
 
 variable "vpc_name" {
   description = "The VPC network to host the cluster in"
