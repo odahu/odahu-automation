@@ -94,6 +94,7 @@ resource "helm_release" "monitoring" {
       cluster_domain          = var.cluster_domain
       grafana_admin           = var.grafana_admin
       grafana_pass            = var.grafana_pass
+      grafana_storage_size    = var.grafana_storage_size
       storage_class           = var.storage_class
       ingress_tls_secret_name = local.ingress_tls_secret_name
     })

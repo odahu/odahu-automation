@@ -127,7 +127,7 @@ resource "helm_release" "airflow" {
       odahu_conn                   = jsonencode(local.odahu_conn)
       odahu_airflow_plugin_version = var.odahu_airflow_plugin_version
       storage_size                 = var.configuration.storage_size
-    }),
+    })
   ]
 
   depends_on = [kubernetes_namespace.this, kubernetes_secret.postgres]

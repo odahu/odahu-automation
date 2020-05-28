@@ -62,16 +62,17 @@ prometheus-operator:
       ${indent(6, prom_annotations)}
 
 odahuflow-grafana:
-  adminUser: "${grafana_admin}"
-  adminPassword:  "${grafana_pass}"
+  adminUser: ${grafana_admin}
+  adminPassword: ${grafana_pass}
   persistence:
-    storageClassName: "${storage_class}"
+    storageClassName: ${storage_class}
+    size: ${grafana_storage_size}
   ingress:
     path: /grafana
     hosts:
-      - "${cluster_domain}"
+      - ${cluster_domain}
     tls:
-      - secretName: "${ingress_tls_secret_name}"
+      - secretName: ${ingress_tls_secret_name}
         hosts: ["${cluster_domain}"]
     ${indent(4, grafana_annotations)}
   env:

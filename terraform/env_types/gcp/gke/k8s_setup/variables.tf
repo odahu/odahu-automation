@@ -235,4 +235,3 @@ variable "nfs" {
   })
   description = "NFS configuration"
 }
-

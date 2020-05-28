@@ -143,14 +143,16 @@ resource "helm_release" "elasticsearch" {
   chart      = "elasticsearch"
   version    = var.elasticsearch_chart_version
   namespace  = kubernetes_namespace.elk[0].metadata[0].annotations.name
+  timeout    = var.helm_timeout
 
   values = [
     templatefile("${path.module}/templates/elasticsearch.yaml", {
-      cluster_name = local.es_cluster_name
-      node_group   = local.es_node_group
-      es_replicas  = var.elasticsearch_replicas
-      es_mem       = var.elasticsearch_memory
-      storage_size = var.storage_size
+      cluster_name  = local.es_cluster_name
+      node_group    = local.es_node_group
+      es_replicas   = var.elasticsearch_replicas
+      es_mem        = var.elasticsearch_memory
+      storage_class = var.storage_class
+      storage_size  = var.storage_size
     }),
   ]
 
@@ -167,6 +169,7 @@ resource "helm_release" "kibana" {
   chart      = "kibana"
   version    = var.kibana_chart_version
   namespace  = kubernetes_namespace.elk[0].metadata[0].annotations.name
+  timeout    = var.helm_timeout
 
   values = [
     templatefile("${path.module}/templates/kibana.yaml", {
@@ -194,7 +197,7 @@ resource "helm_release" "kibana_loader" {
 
   values = [
     templatefile("${path.module}/templates/kibana-loader.yaml", {
-      kibana_odahu_stuff = file("${path.module}/templates/kibana-odahu-stuff.ndjson")
+      kibana_odahu_stuff = file("${path.module}/files/kibana-odahu-stuff.ndjson")
       kibana_url = format("http://kibana.%s.svc.cluster.local:5601",
         kubernetes_namespace.elk[0].metadata[0].annotations.name
       )
@@ -217,6 +220,7 @@ resource "helm_release" "logstash" {
   chart      = "logstash"
   version    = var.logstash_chart_version
   namespace  = kubernetes_namespace.elk[0].metadata[0].annotations.name
+  timeout    = var.helm_timeout
 
   values = [
     templatefile("${path.module}/templates/logstash.yaml", {

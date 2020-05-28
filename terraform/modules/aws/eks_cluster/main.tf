@@ -76,21 +76,21 @@ resource "null_resource" "setup_kubectl" {
 
 resource "null_resource" "setup_calico" {
   provisioner "local-exec" {
-    command = "timeout 60 bash -c 'until kubectl apply -f ${path.module}/files/calico-1.5.yml;do sleep 5; done'"
+    command = "timeout 60 bash -c 'until kubectl apply -f ${path.module}/files/calico-1.5.yml; do sleep 5; done'"
   }
   depends_on = [null_resource.setup_kubectl]
 }
 
 resource "null_resource" "populate_auth_map" {
   provisioner "local-exec" {
-    command = "timeout 60 bash -c 'until kubectl apply -f ${local_file.aws_auth_cm.filename};do sleep 5; done'"
+    command = "timeout 60 bash -c 'until kubectl apply -f ${local_file.aws_auth_cm.filename}; do sleep 5; done'"
   }
   depends_on = [null_resource.setup_kubectl]
 }
 
 resource "null_resource" "setup_cluster_autoscaler" {
   provisioner "local-exec" {
-    command = "timeout 60 bash -c 'until kubectl apply -f ${local_file.cluster_autoscaler.filename};do sleep 5; done'"
+    command = "timeout 60 bash -c 'until kubectl apply -f ${local_file.cluster_autoscaler.filename}; do sleep 5; done'"
   }
   depends_on = [null_resource.setup_calico]
 }

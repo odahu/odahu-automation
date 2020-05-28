@@ -74,6 +74,7 @@ module "jupyterhub" {
   cluster_domain     = var.cluster_domain_name
   tls_secret_crt     = var.tls_crt
   tls_secret_key     = var.tls_key
+  storage_class      = "odahu-regular"
 
   docker_tag      = var.jupyterlab_version
   docker_repo     = var.docker_repo
@@ -97,6 +98,7 @@ module "elasticsearch" {
   logstash_annotations  = module.odahuflow_prereqs.logstash_annotations
   odahu_infra_version   = var.odahu_infra_version
   odahu_helm_repo       = var.helm_repo
+  storage_class         = "odahu-regular"
 }
 
 module "odahuflow_helm" {

@@ -1,6 +1,22 @@
 ########################################################
 # K8S setup
 ########################################################
+module "storage_prereqs" {
+  source = "../../../../modules/k8s/storage/prereqs/eks"
+}
+
+module "storage" {
+  source = "../../../../modules/k8s/storage"
+
+  storage_class_settings = module.storage_prereqs.settings
+}
+
+module "nfs" {
+  source        = "../../../../modules/k8s/nfs"
+  configuration = var.nfs
+  storage_class = module.storage.storage_class
+}
+
 module "nginx_ingress_tls" {
   source         = "../../../../modules/k8s/nginx-ingress/tls"
   cluster_name   = var.cluster_name
@@ -39,7 +55,7 @@ module "monitoring" {
   odahu_infra_version  = var.odahu_infra_version
   grafana_admin        = var.grafana_admin
   grafana_pass         = var.grafana_pass
-  storage_class        = var.storage_class
+  storage_class        = module.storage.storage_class
   monitoring_namespace = var.monitoring_namespace
   tls_secret_key       = var.tls_key
   tls_secret_crt       = var.tls_crt
@@ -74,13 +90,6 @@ module "openpolicyagent" {
   opa_policies          = var.opa_policies
 }
 
-module "gke-saa" {
-  source              = "../../../../modules/k8s/gke-saa"
-  cluster_type        = var.cluster_type
-  helm_repo           = var.helm_repo
-  odahu_infra_version = var.odahu_infra_version
-}
-
 module "kube2iam" {
   source       = "../../../../modules/k8s/kube2iam"
   cluster_type = var.cluster_type
@@ -93,15 +102,9 @@ module "tekton" {
 }
 
 module "vault" {
-  source                  = "../../../../modules/k8s/vault"
-  vault_pvc_storage_class = var.storage_class
-  configuration           = var.vault
-}
-
-module "nfs" {
-  source = "../../../../modules/k8s/nfs"
-
-  configuration = var.nfs
+  source        = "../../../../modules/k8s/vault"
+  configuration = var.vault
+  storage_class = module.storage.storage_class
 }
 
 module "postgresql" {

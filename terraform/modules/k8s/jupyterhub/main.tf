@@ -127,6 +127,9 @@ resource "helm_release" "jupyterhub" {
       oauth_client_secret   = var.oauth_client_secret
       oauth_oidc_issuer_url = var.oauth_oidc_issuer_url
 
+      storage_class = var.storage_class
+      storage_size  = var.storage_size
+
       ingress = yamlencode({ ingress = local.ingress_config })
       culling = yamlencode({ cull = local.culling_config })
 

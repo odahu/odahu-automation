@@ -1,17 +1,27 @@
 ########################################################
 # K8S setup
 ########################################################
+module "storage_prereqs" {
+  source = "../../../../modules/k8s/storage/prereqs/aks"
+}
+
+module "storage" {
+  source = "../../../../modules/k8s/storage"
+
+  storage_class_settings = module.storage_prereqs.settings
+}
+
+module "nfs" {
+  source        = "../../../../modules/k8s/nfs"
+  configuration = var.nfs
+  storage_class = module.storage.storage_class
+}
+
 module "nginx_ingress_tls" {
   source         = "../../../../modules/k8s/nginx-ingress/tls"
   cluster_name   = var.cluster_name
   tls_secret_key = var.tls_key
   tls_secret_crt = var.tls_crt
-}
-
-module "nfs" {
-  source = "../../../../modules/k8s/nfs"
-
-  configuration = var.nfs
 }
 
 module "nginx_ingress_prereqs" {
@@ -49,7 +59,7 @@ module "monitoring" {
   odahu_infra_version  = var.odahu_infra_version
   grafana_admin        = var.grafana_admin
   grafana_pass         = var.grafana_pass
-  storage_class        = var.storage_class
+  storage_class        = module.storage.storage_class
   monitoring_namespace = var.monitoring_namespace
   tls_secret_key       = var.tls_key
   tls_secret_crt       = var.tls_crt
@@ -91,9 +101,9 @@ module "tekton" {
 }
 
 module "vault" {
-  source                  = "../../../../modules/k8s/vault"
-  vault_pvc_storage_class = var.storage_class
-  configuration           = var.vault
+  source        = "../../../../modules/k8s/vault"
+  storage_class = module.storage.storage_class
+  configuration = var.vault
 }
 
 module "postgresql" {

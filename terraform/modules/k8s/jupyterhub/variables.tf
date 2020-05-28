@@ -86,3 +86,14 @@ variable "tls_secret_key" {
 variable "helm_timeout" {
   default = "900"
 }
+
+variable "storage_class" {
+  type        = string
+  description = "JupyterHub notebook PVC k8s storage class"
+}
+
+variable "storage_size" {
+  type        = string
+  default     = "2Gi"
+  description = "The size of storage requested by JupyterHub in the k8s PVC"
+}

@@ -43,6 +43,10 @@ singleuser:
   image:
     name: ${docker_repo}/base-notebook
     tag: ${docker_tag}
+  storage:
+    dynamic:
+      storageClass: ${storage_class}
+      capacity: ${storage_size}
   profileList:
     - display_name: "Base Jupyter Notebook"
       description: "Base image for Jupyter Notebook with ODAHU plugin"
