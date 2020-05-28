@@ -1,11 +1,8 @@
 fullnameOverride: postgres
 
 global:
-  imagePullSecrets:
-    - repo-json-key
   postgresql:
     password: ${password}
-    database: airflow
   pgpool:
     adminPassword: ${password}
 
@@ -23,11 +20,16 @@ metricsImage:
 
 postgresql:
   replicaCount: ${replica_count}
-  pgHbaConfiguration: |-
-    local all all trust
-    host  all all localhost trust
-    host  repmgr all ${allowed_networks} trust
-    host  all all ${allowed_networks} md5
+  repmgrLogLevel: DEBUG
+  repmgrReconnectInterval: 10
+  initdbScripts:
+    odahu_init.sh: |
+      #!/usr/bin/env bash
+      DBS="${databases}"
+      for db in $${DBS}; do
+        echo "Creating database $db"
+        PGPASSWORD=${password} psql -w -U "postgres" -d "postgres" -h 127.0.0.1 -c "CREATE DATABASE $db"
+      done
 
 pgpool:
   replicaCount: 1
@@ -44,7 +46,5 @@ metrics:
 
 persistence:
   enabled: true
+  existingClaim: ${pg_volume_name}
   mountPath: /bitnami/postgresql
-  accessModes:
-    - ReadWriteOnce
-  size: ${storage_size}

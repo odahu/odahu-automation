@@ -1,13 +1,14 @@
 locals {
-  pg_version      = "11.7.0-debian-10-r51"
-  pg_registry     = "gcr.io"
-  pg_repository   = "or2-msq-epmd-legn-t1iylu/odahu-infra/postgresql-repmgr"
+  pg_version      = "11.8.0-debian-10-r13"
+  pg_registry     = "docker.io"
+  pg_repository   = "bitnami/postgresql-repmgr"
   debug_log_level = "true"
   helm_repo       = "bitnami"
-  helm_version    = "2.0.1"
+  helm_version    = "3.2.7"
+  pg_volume_name  = "postgresql-data"
 }
 
-resource "kubernetes_namespace" "this" {
+resource "kubernetes_namespace" "pgsql" {
   count = var.configuration.enabled ? 1 : 0
   metadata {
     annotations = {
@@ -17,35 +18,47 @@ resource "kubernetes_namespace" "this" {
   }
 }
 
-module "docker_credentials" {
-  source          = "../docker_auth"
-  docker_repo     = var.docker_repo
-  docker_username = var.docker_username
-  docker_password = var.docker_password
-  namespaces      = [kubernetes_namespace.this[0].metadata[0].annotations.name]
+resource "kubernetes_persistent_volume_claim" "pgsql" {
+  count = var.configuration.enabled ? 1 : 0
+  metadata {
+    name      = local.pg_volume_name
+    namespace = kubernetes_namespace.pgsql[0].metadata[0].annotations.name
+  }
+  spec {
+    access_modes = ["ReadWriteOnce"]
+    resources {
+      requests = {
+        storage = var.configuration.storage_size
+      }
+    }
+  }
+  wait_until_bound = false
 }
 
-resource "helm_release" "this" {
+resource "helm_release" "pgsql" {
   count      = var.configuration.enabled ? 1 : 0
   name       = "db"
   chart      = "postgresql-ha"
   version    = local.helm_version
-  namespace  = var.namespace
+  namespace  = kubernetes_namespace.pgsql[0].metadata[0].annotations.name
   repository = local.helm_repo
   timeout    = var.helm_timeout
 
   values = [
     templatefile("${path.module}/templates/values.yaml", {
-      password         = var.configuration.password
-      storage_size     = var.configuration.storage_size
-      debug            = local.debug_log_level
-      pg_version       = local.pg_version
-      pg_registry      = local.pg_registry
-      pg_repository    = local.pg_repository
-      replica_count    = var.configuration.replica_count
-      allowed_networks = var.allowed_networks
-    }),
+      password       = var.configuration.password
+      debug          = local.debug_log_level
+      pg_version     = local.pg_version
+      pg_registry    = local.pg_registry
+      pg_repository  = local.pg_repository
+      replica_count  = var.configuration.replica_count
+      databases      = join(" ", var.databases)
+      pg_volume_name = local.pg_volume_name
+    })
   ]
 
-  depends_on = [kubernetes_namespace.this, var.monitoring_dependency, module.docker_credentials]
+  depends_on = [
+    var.monitoring_dependency,
+    kubernetes_persistent_volume_claim.pgsql[0]
+  ]
 }
