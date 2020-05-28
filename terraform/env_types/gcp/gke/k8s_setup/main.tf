@@ -1,15 +1,24 @@
 ########################################################
 # K8S setup
 ########################################################
+module "storage_prereqs" {
+  source = "../../../../modules/k8s/storage/prereqs/gke"
+}
 
-module "gpu_drivers" {
-  source = "../../../../modules/k8s/gpu_drivers_setup"
+module "storage" {
+  source = "../../../../modules/k8s/storage"
+
+  storage_class_settings = module.storage_prereqs.settings
 }
 
 module "nfs" {
-  source = "../../../../modules/k8s/nfs"
-
+  source        = "../../../../modules/k8s/nfs"
   configuration = var.nfs
+  storage_class = module.storage.storage_class
+}
+
+module "gpu_drivers" {
+  source = "../../../../modules/k8s/gpu_drivers_setup"
 }
 
 module "nginx_ingress_tls" {
@@ -52,6 +61,7 @@ module "monitoring" {
   odahu_infra_version  = var.odahu_infra_version
   grafana_admin        = var.grafana_admin
   grafana_pass         = var.grafana_pass
+  storage_class        = module.storage.storage_class
   monitoring_namespace = var.monitoring_namespace
   tls_secret_key       = var.tls_key
   tls_secret_crt       = var.tls_crt
@@ -102,6 +112,7 @@ module "tekton" {
 module "vault" {
   source        = "../../../../modules/k8s/vault"
   configuration = var.vault
+  storage_class = module.storage.storage_class
 }
 
 module "postgresql" {

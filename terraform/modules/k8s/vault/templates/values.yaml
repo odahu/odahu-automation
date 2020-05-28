@@ -11,8 +11,8 @@ service:
   port: 8200
 persistence:
   enabled: true
-  storageClass: "${vault_pvc_storage_class}"
-  size: 10G
+  storageClass: ${storage_class}
+  size: ${storage_size}
   accessMode: ReadWriteOnce
 
 vault:
@@ -35,7 +35,7 @@ vault:
     secrets:
       - path: odahu-flow/connections
         type: kv
-        description: Odahuflow connection storage.
+        description: Odahuflow connection storage
   config:
     listener:
       tcp:

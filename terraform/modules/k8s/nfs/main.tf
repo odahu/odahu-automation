@@ -15,8 +15,9 @@ resource "helm_release" "nfs" {
 
   values = [
     templatefile("${path.module}/templates/nfs.yaml", {
-      version      = local.nfs_provisioner_version
-      storage_size = var.configuration.storage_size
-    }),
+      version       = local.nfs_provisioner_version
+      storage_size  = var.configuration.storage_size
+      storage_class = var.storage_class
+    })
   ]
 }

@@ -57,6 +57,11 @@ variable "logstash_replicas" {
   type        = string
 }
 
+variable "storage_class" {
+  description = "Elasticsearch PVC k8s storage class"
+  type        = string
+}
+
 variable "storage_size" {
   default     = "30Gi"
   description = "Elasticsearch nodes attached PVC size"
@@ -69,32 +74,38 @@ variable "cluster_domain" {
 }
 
 variable "tls_secret_crt" {
-  description = "Ingress TLS certificate"
   default     = ""
+  description = "Ingress TLS certificate"
+  type        = string
 }
 
 variable "tls_secret_key" {
-  description = "Ingress TLS key"
   default     = ""
+  description = "Ingress TLS key"
+  type        = string
 }
 
 # Docker
 variable "docker_repo" {
-  description = "Odahuflow Docker repo url"
+  description = "ODAHU flow Docker repo url"
+  type        = string
 }
 
 variable "docker_username" {
   default     = ""
-  description = "Odahuflow Docker repo username"
+  description = "ODAHU flow Docker repo username"
+  type        = string
 }
 
 variable "docker_password" {
   default     = ""
-  description = "Odahuflow Docker repo password"
+  description = "ODAHU flow Docker repo password"
+  type        = string
 }
 
 variable "odahu_infra_version" {
-  description = "Odahuflow infra release version"
+  description = "ODAHU flow infra release version"
+  type        = string
 }
 
 variable "logstash_input_config" {
@@ -103,6 +114,7 @@ variable "logstash_input_config" {
 
 variable "sa_key" {
   default = ""
+  type    = string
 }
 
 variable "logstash_annotations" {
@@ -111,4 +123,10 @@ variable "logstash_annotations" {
 
 variable "cloud_type" {
   default = ""
+  type    = string
+}
+
+variable "helm_timeout" {
+  default = "600"
+  type    = string
 }

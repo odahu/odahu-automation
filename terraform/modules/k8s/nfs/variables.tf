@@ -8,5 +8,11 @@ variable "configuration" {
 }
 
 variable "helm_timeout" {
+  type    = string
   default = "300"
+}
+
+variable "storage_class" {
+  type        = string
+  description = "Kubernetes storage class"
 }

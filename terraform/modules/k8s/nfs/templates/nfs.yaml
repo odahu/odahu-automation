@@ -6,11 +6,7 @@ image:
   pullPolicy: IfNotPresent
 
 storageClass:
-  create: true
-  defaultClass: false
-  name: nfs
-  allowVolumeExpansion: null
-  reclaimPolicy: Delete
+  create: false
 
 rbac:
   create: true
@@ -19,4 +15,4 @@ persistence:
   enabled: true
   accessMode: ReadWriteOnce
   size: ${storage_size}
-
+  storageClass: ${storage_class}

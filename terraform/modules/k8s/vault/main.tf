@@ -26,11 +26,12 @@ resource "helm_release" "vault" {
   timeout    = var.helm_timeout
   depends_on = [kubernetes_namespace.vault]
   values = [
-    templatefile("${path.module}/templates/vault_values.yaml", {
-      vault_version           = local.vault_version
-      vault_pvc_storage_class = var.vault_pvc_storage_class
-      namespace               = var.namespace
-      vault_debug_log_level   = local.vault_debug_log_level
+    templatefile("${path.module}/templates/values.yaml", {
+      vault_version         = local.vault_version
+      storage_class         = var.storage_class
+      storage_size          = var.storage_size
+      namespace             = var.namespace
+      vault_debug_log_level = local.vault_debug_log_level
     }),
   ]
 }

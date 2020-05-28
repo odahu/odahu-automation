@@ -36,10 +36,11 @@ esConfig:
 persistence:
   enabled: true
 volumeClaimTemplate:
-  accessModes: [ "ReadWriteOnce" ]
+  accessModes: ["ReadWriteOnce"]
+  storageClassName: ${storage_class}
   resources:
     requests:
-      storage: "${storage_size}"
+      storage: ${storage_size}
 
 rbac:
   create: true

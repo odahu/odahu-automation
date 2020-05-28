@@ -83,14 +83,9 @@ variable "grafana_pass" {
   description = "Grafana admin password"
 }
 
-variable "storage_class" {
-  default     = "gp2"
-  description = "Grafana storage class"
-}
-
 variable "monitoring_namespace" {
   default     = "kube-monitoring"
-  description = "clusterwide monitoring namespace"
+  description = "Clusterwide monitoring namespace"
 }
 
 
