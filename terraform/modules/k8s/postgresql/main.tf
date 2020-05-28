@@ -1,13 +1,13 @@
 locals {
-  pg_version      = "11.7.0-debian-10-r51"
-  pg_registry     = "gcr.io"
-  pg_repository   = "or2-msq-epmd-legn-t1iylu/odahu-infra/postgresql-repmgr"
+  pg_version      = "11.8.0-debian-10-r13"
+  pg_registry     = "docker.io"
+  pg_repository   = "bitnami/postgresql-repmgr"
   debug_log_level = "true"
   helm_repo       = "bitnami"
-  helm_version    = "2.0.1"
+  helm_version    = "3.2.7"
 }
 
-resource "kubernetes_namespace" "this" {
+resource "kubernetes_namespace" "pgsql" {
   count = var.configuration.enabled ? 1 : 0
   metadata {
     annotations = {
@@ -17,20 +17,12 @@ resource "kubernetes_namespace" "this" {
   }
 }
 
-module "docker_credentials" {
-  source          = "../docker_auth"
-  docker_repo     = var.docker_repo
-  docker_username = var.docker_username
-  docker_password = var.docker_password
-  namespaces      = [kubernetes_namespace.this[0].metadata[0].annotations.name]
-}
-
-resource "helm_release" "this" {
+resource "helm_release" "pgsql" {
   count      = var.configuration.enabled ? 1 : 0
   name       = "db"
   chart      = "postgresql-ha"
   version    = local.helm_version
-  namespace  = var.namespace
+  namespace  = kubernetes_namespace.pgsql[0].metadata[0].annotations.name
   repository = local.helm_repo
   timeout    = var.helm_timeout
 
@@ -44,8 +36,10 @@ resource "helm_release" "this" {
       pg_repository    = local.pg_repository
       replica_count    = var.configuration.replica_count
       allowed_networks = var.allowed_networks
-    }),
+    })
   ]
 
-  depends_on = [kubernetes_namespace.this, var.monitoring_dependency, module.docker_credentials]
+  depends_on = [
+    var.monitoring_dependency
+  ]
 }

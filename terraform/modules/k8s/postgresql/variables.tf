@@ -1,11 +1,13 @@
 variable "namespace" {
-  description = "Postgres namespace"
+  type        = string
   default     = "postgres"
+  description = "PostgreSQL namespace name"
 }
 
 variable "allowed_networks" {
+  type        = string
   default     = "0.0.0.0/0"
-  description = "Postgres pg_hba allowed networks"
+  description = "PostgreSQL allowed networks in `pg_hba` config"
 }
 
 variable "configuration" {
@@ -15,26 +17,15 @@ variable "configuration" {
     replica_count : number,
     password : string
   })
-  description = "Postgres configuration"
+  description = "PostgreSQL configuration"
 }
 
-variable "monitoring_dependency" {}
-
-# Docker
-variable "docker_repo" {
-  description = "Odahuflow Docker repo url"
-}
-
-variable "docker_username" {
-  default     = ""
-  description = "Odahuflow Docker repo username"
-}
-
-variable "docker_password" {
-  default     = ""
-  description = "Odahuflow Docker repo password"
+variable "monitoring_dependency" {
+  type        = any
+  description = "Resource dependency from one of Terraform modules"
 }
 
 variable "helm_timeout" {
+  type    = string
   default = "600"
 }
