@@ -108,5 +108,6 @@ module "postgresql" {
   source                = "../../../../modules/k8s/postgresql"
   allowed_networks      = var.pods_cidr
   configuration         = var.postgres
+  databases             = ["airflow", "mlflow", "jupyterhub"]
   monitoring_dependency = module.monitoring.helm_chart
 }

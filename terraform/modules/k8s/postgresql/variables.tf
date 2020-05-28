@@ -29,3 +29,9 @@ variable "helm_timeout" {
   type    = string
   default = "600"
 }
+
+variable "databases" {
+  type        = list(string)
+  default     = []
+  description = "List of DB names to create at PostgreSQL init"
+}

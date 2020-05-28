@@ -36,6 +36,7 @@ resource "helm_release" "pgsql" {
       pg_repository    = local.pg_repository
       replica_count    = var.configuration.replica_count
       allowed_networks = var.allowed_networks
+      databases        = join(" ", var.databases)
     })
   ]
 

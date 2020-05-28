@@ -22,17 +22,17 @@ postgresql:
   replicaCount: ${replica_count}
   repmgrLogLevel: DEBUG
   repmgrReconnectInterval: 10
-  pgHbaConfiguration: |-
-    host   all          repmgr  ${allowed_networks}  md5
-    host   repmgr       repmgr  ${allowed_networks}  md5
-    host   replication  repmgr  ${allowed_networks}  md5
-    host   all          all     ${allowed_networks}  md5
-    host   all          all     ::/0                 md5
-    local  all          all                          md5
+  # pgHbaConfiguration: |-
+  #   host   all          repmgr  ${allowed_networks}  md5
+  #   host   repmgr       repmgr  ${allowed_networks}  md5
+  #   host   replication  repmgr  ${allowed_networks}  md5
+  #   host   all          all     ${allowed_networks}  md5
+  #   host   all          all     ::/0                 md5
+  #   local  all          all                          md5
   initdbScripts:
     odahu_init.sh: |
       #!/usr/bin/env bash
-      DBS="airflow mlflow jupyterhub"
+      DBS="${databases}"
       for db in $${DBS}; do
         echo "Creating database $db"
         PGPASSWORD=${password} psql -w -U "postgres" -d "postgres" -h 127.0.0.1 -c "CREATE DATABASE $db"
