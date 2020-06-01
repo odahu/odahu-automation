@@ -143,6 +143,7 @@ resource "helm_release" "elasticsearch" {
   chart      = "elasticsearch"
   version    = var.elasticsearch_chart_version
   namespace  = kubernetes_namespace.elk[0].metadata[0].annotations.name
+  timeout    = var.helm_timeout
 
   values = [
     templatefile("${path.module}/templates/elasticsearch.yaml", {
@@ -167,6 +168,7 @@ resource "helm_release" "kibana" {
   chart      = "kibana"
   version    = var.kibana_chart_version
   namespace  = kubernetes_namespace.elk[0].metadata[0].annotations.name
+  timeout    = var.helm_timeout
 
   values = [
     templatefile("${path.module}/templates/kibana.yaml", {
@@ -191,6 +193,7 @@ resource "helm_release" "kibana_loader" {
   chart      = "odahu-flow-kibana-loader"
   version    = var.odahu_infra_version
   namespace  = kubernetes_namespace.elk[0].metadata[0].annotations.name
+  timeout    = var.helm_timeout
 
   values = [
     templatefile("${path.module}/templates/kibana-loader.yaml", {
@@ -217,6 +220,7 @@ resource "helm_release" "logstash" {
   chart      = "logstash"
   version    = var.logstash_chart_version
   namespace  = kubernetes_namespace.elk[0].metadata[0].annotations.name
+  timeout    = var.helm_timeout
 
   values = [
     templatefile("${path.module}/templates/logstash.yaml", {

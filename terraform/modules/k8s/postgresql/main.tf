@@ -1,13 +1,9 @@
 locals {
-  pg_version      = "11.7.0-debian-10-r51"
-  pg_registry     = "gcr.io"
-  pg_repository   = "or2-msq-epmd-legn-t1iylu/odahu-infra/postgresql-repmgr"
-  debug_log_level = "true"
-  helm_repo       = "bitnami"
-  helm_version    = "2.0.1"
+  helm_repo    = "postgres-operator"
+  helm_version = "1.5.0"
 }
 
-resource "kubernetes_namespace" "this" {
+resource "kubernetes_namespace" "pgsql" {
   count = var.configuration.enabled ? 1 : 0
   metadata {
     annotations = {
@@ -17,35 +13,33 @@ resource "kubernetes_namespace" "this" {
   }
 }
 
-module "docker_credentials" {
-  source          = "../docker_auth"
-  docker_repo     = var.docker_repo
-  docker_username = var.docker_username
-  docker_password = var.docker_password
-  namespaces      = [kubernetes_namespace.this[0].metadata[0].annotations.name]
+resource "helm_release" "pg_operator" {
+  count      = var.configuration.enabled ? 1 : 0
+  name       = "odahu"
+  chart      = "postgres-operator"
+  version    = local.helm_version
+  repository = local.helm_repo
+  namespace  = kubernetes_namespace.pgsql[0].metadata[0].annotations.name
+  timeout    = var.helm_timeout
+  depends_on = [kubernetes_namespace.pgsql[0]]
 }
 
-resource "helm_release" "this" {
-  count      = var.configuration.enabled ? 1 : 0
-  name       = "db"
-  chart      = "postgresql-ha"
-  version    = local.helm_version
-  namespace  = var.namespace
-  repository = local.helm_repo
-  timeout    = var.helm_timeout
+resource "local_file" "pg_cluster_manifest" {
+  count = var.configuration.enabled ? 1 : 0
+  content = templatefile("${path.module}/templates/pg_crd_manifest.tpl", {
+    namespace    = kubernetes_namespace.pgsql[0].metadata[0].annotations.name
+    storage_size = var.configuration.storage_size
+    replicas     = var.configuration.replica_count
+    databases    = var.databases
+  })
+  filename   = "/tmp/pg_crd_manifest.yml"
+  depends_on = [helm_release.pg_operator[0]]
+}
 
-  values = [
-    templatefile("${path.module}/templates/values.yaml", {
-      password         = var.configuration.password
-      storage_size     = var.configuration.storage_size
-      debug            = local.debug_log_level
-      pg_version       = local.pg_version
-      pg_registry      = local.pg_registry
-      pg_repository    = local.pg_repository
-      replica_count    = var.configuration.replica_count
-      allowed_networks = var.allowed_networks
-    }),
-  ]
-
-  depends_on = [kubernetes_namespace.this, var.monitoring_dependency, module.docker_credentials]
+resource "null_resource" "pg_cluster" {
+  count = var.configuration.enabled ? 1 : 0
+  provisioner "local-exec" {
+    command = "timeout 60 bash -c 'until kubectl apply -f /tmp/pg_crd_manifest.yml; do sleep 5; done'"
+  }
+  depends_on = [local_file.pg_cluster_manifest[0]]
 }

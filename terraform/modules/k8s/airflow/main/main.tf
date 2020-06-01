@@ -57,7 +57,14 @@ locals {
 
 }
 
-resource "kubernetes_namespace" "this" {
+data "kubernetes_secret" "postgres" {
+  metadata {
+    name      = "airflow.odahu-db.credentials.postgresql.acid.zalan.do"
+    namespace = "postgresql"
+  }
+}
+
+resource "kubernetes_namespace" "airflow" {
   metadata {
     annotations = {
       name = var.namespace
@@ -71,28 +78,25 @@ resource "kubernetes_secret" "postgres" {
 
   metadata {
     name      = "airflow-postgres"
-    namespace = var.namespace
+    namespace = kubernetes_namespace.airflow.metadata[0].annotations.name
   }
   data = {
-    "postgresql-password" = var.postgres_password
+    "postgresql-password" = data.kubernetes_secret.postgres.data.password
   }
-  type       = "Opaque"
-  depends_on = [kubernetes_namespace.this]
+  type = "Opaque"
 }
 
 resource "kubernetes_secret" "airflow_tls" {
   count = var.configuration.enabled && local.ingress_tls_enabled ? 1 : 0
   metadata {
     name      = local.ingress_tls_secret_name
-    namespace = var.namespace
+    namespace = kubernetes_namespace.airflow.metadata[0].annotations.name
   }
   data = {
     "tls.key" = var.tls_secret_key
     "tls.crt" = var.tls_secret_crt
   }
   type = "kubernetes.io/tls"
-
-  depends_on = [kubernetes_namespace.this]
 }
 
 module "docker_credentials" {
@@ -100,7 +104,7 @@ module "docker_credentials" {
   docker_repo     = var.docker_repo
   docker_username = var.docker_username
   docker_password = var.docker_password
-  namespaces      = [kubernetes_namespace.this.metadata[0].annotations.name]
+  namespaces      = [kubernetes_namespace.airflow.metadata[0].annotations.name]
 }
 
 resource "helm_release" "airflow" {
@@ -108,7 +112,7 @@ resource "helm_release" "airflow" {
   name       = "airflow"
   chart      = "airflow"
   version    = local.airflow_helm_version
-  namespace  = var.namespace
+  namespace  = kubernetes_namespace.airflow.metadata[0].annotations.name
   repository = local.airflow_helm_repo
   timeout    = var.helm_timeout
 
@@ -130,5 +134,5 @@ resource "helm_release" "airflow" {
     }),
   ]
 
-  depends_on = [kubernetes_namespace.this, kubernetes_secret.postgres]
+  depends_on = [kubernetes_secret.postgres]
 }
