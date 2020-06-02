@@ -2,46 +2,81 @@
 # Common
 ##################
 variable "helm_repo" {
-  description = "Odahuflow helm repo"
+  type        = string
+  description = "ODAHU flow helm repo"
 }
 
 variable "cluster_domain" {
-  description = "Odahuflow cluster domain"
+  type        = string
+  description = "ODAHU flow cluster domain"
 }
 
 ########################
 # Prometheus monitoring
 ########################
 variable "monitoring_namespace" {
-  default     = "kube-monitoring"
+  type        = string
   description = "Clusterwide namespace for monitoring stuff"
+  default     = "kube-monitoring"
 }
 
 variable "odahu_infra_version" {
-  description = "Odahuflow infra release version"
+  type        = string
+  description = "ODAHU flow infra release version"
 }
 
 variable "grafana_admin" {
+  type        = string
   description = "Grafana admin username"
 }
 
 variable "grafana_pass" {
+  type        = string
   description = "Grafana admin password"
 }
 
+variable "grafana_storage_size" {
+  type        = string
+  description = "Grafana PVC size"
+  default     = "1Gi"
+}
+
+variable "prom_storage_size" {
+  type        = string
+  description = "Prometheus PVC size"
+  default     = "20Gi"
+}
+
+variable "prom_retention_size" {
+  type        = string
+  description = "Used Storage Prometheus shall retain data for"
+  default     = "19GiB"
+}
+
+variable "prom_retention_time" {
+  type        = string
+  description = "Time duration Prometheus shall retain data for"
+  default     = "14d"
+}
+
 variable "storage_class" {
+  type        = string
+  description = "Used kubernetes storage class name"
   default     = "standard"
-  description = "Grafana storage class"
 }
 
 variable "tls_secret_crt" {
-  description = "Odahuflow cluster TLS certificate"
+  type        = string
+  description = "ODAHU flow cluster TLS certificate"
 }
 
 variable "tls_secret_key" {
-  description = "Odahuflow cluster TLS key"
+  type        = string
+  description = "ODAHU flow cluster TLS key"
 }
 
 variable "helm_timeout" {
-  default = "600"
+  type        = string
+  description = "Helm chart installation timeout"
+  default     = "600"
 }
