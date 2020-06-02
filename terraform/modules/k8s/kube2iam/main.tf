@@ -15,7 +15,7 @@ data "template_file" "kube2iam_values" {
 resource "helm_release" "kube2iam" {
   count         = local.aws_resource_count
   name          = "kube2iam"
-  chart         = "default/kube2iam"
+  chart         = "stable/kube2iam"
   version       = var.chart_version
   force_update  = true
   recreate_pods = true

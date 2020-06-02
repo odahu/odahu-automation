@@ -9,12 +9,12 @@ variable "image_repo" {
 }
 
 variable "image_tag" {
-  default     = "0.10.9"
+  default     = "0.10.8"
   description = "docker image repository"
 }
 
 variable "chart_version" {
-  default = "2.5.0"
+  default = "2.3.0"
 }
 
 variable "helm_timeout" {
