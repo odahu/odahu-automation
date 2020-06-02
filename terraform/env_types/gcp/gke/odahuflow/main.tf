@@ -32,7 +32,6 @@ module "airflow" {
 
   configuration                = var.airflow
   cluster_name                 = var.cluster_name
-  postgres_password            = var.postgres.password
   cluster_domain               = var.cluster_domain_name
   airflow_variables            = module.airflow_prereqs.airflow_variables
   examples_version             = var.examples_version

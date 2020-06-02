@@ -42,21 +42,12 @@ variable "docker_password" {
   description = "Odahuflow Docker repo password"
 }
 
-# Airflow configuration
-#variable "wine_bucket" {
-#  description = "Wine bucket name"
-#}
-
 variable "wine_connection" {
   description = "GCP wine connection service account private key"
 }
 
 variable "airflow_variables" {
   description = "Variables to create in Airflow instance"
-}
-
-variable "postgres_password" {
-  description = "Postgres password"
 }
 
 variable "oauth_oidc_token_endpoint" {

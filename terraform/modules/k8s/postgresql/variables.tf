@@ -1,11 +1,7 @@
 variable "namespace" {
-  description = "Postgres namespace"
-  default     = "postgres"
-}
-
-variable "allowed_networks" {
-  default     = "0.0.0.0/0"
-  description = "Postgres pg_hba allowed networks"
+  type        = string
+  description = "PostgreSQL operator namespace"
+  default     = "postgresql"
 }
 
 variable "configuration" {
@@ -15,26 +11,22 @@ variable "configuration" {
     replica_count : number,
     password : string
   })
-  description = "Postgres configuration"
+  description = "PostgreSQL configuration"
+  default = {
+    enabled       = false
+    storage_size  = "8Gi"
+    replica_count = "2"
+    password      = "notasecret"
+  }
 }
 
-variable "monitoring_dependency" {}
-
-# Docker
-variable "docker_repo" {
-  description = "Odahuflow Docker repo url"
-}
-
-variable "docker_username" {
-  default     = ""
-  description = "Odahuflow Docker repo username"
-}
-
-variable "docker_password" {
-  default     = ""
-  description = "Odahuflow Docker repo password"
+variable "databases" {
+  type        = list(string)
+  description = "List of PostgreSQL databases to be created on cluster init"
+  default     = []
 }
 
 variable "helm_timeout" {
+  type    = string
   default = "600"
 }
