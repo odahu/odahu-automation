@@ -44,7 +44,7 @@ airflow:
           name: airflow-postgres
           key: postgresql-password
     - name: AIRFLOW__CORE__SQL_ALCHEMY_CONN
-      value: postgresql://postgres:$(POSTGRES_PASSWORD)@postgres-pgpool.postgres/airflow
+      value: postgresql://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@$(POSTGRES_HOST)/$(POSTGRES_DB)
 
   config:
     AIRFLOW__CORE__LOGGING_LEVEL: DEBUG
@@ -124,7 +124,8 @@ postgresql:
   enabled: false
   service:
     port: 5432
-  postgresHost: postgres-pgpool.postgres
+  postgresUser: airflow
+  postgresHost: odahu-db.postgresql
   postgresqlDatabase: airflow
   existingSecret: airflow-postgres
 

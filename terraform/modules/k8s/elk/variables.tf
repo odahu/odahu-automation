@@ -112,3 +112,8 @@ variable "logstash_annotations" {
 variable "cloud_type" {
   default = ""
 }
+
+variable "helm_timeout" {
+  type    = string
+  default = "600"
+}
