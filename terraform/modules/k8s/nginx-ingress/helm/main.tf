@@ -2,7 +2,7 @@ resource "helm_release" "nginx-ingress" {
   name      = "nginx-ingress"
   chart     = "stable/nginx-ingress"
   namespace = "kube-system"
-  version   = "0.25.1"
+  version   = "0.30.0"
   wait      = false
 
   set {
