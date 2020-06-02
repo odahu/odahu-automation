@@ -51,6 +51,11 @@ prometheus-operator:
         volumeClaimTemplate:
           spec:
             storageClassName: "${storage_class}"
+            resources:
+              requests:
+                storage: "${prom_storage_size}"
+      retention: "${prom_retention_time}"
+      retentionSize: "${prom_retention_size}"
     ingress:
       paths:
         - /prometheus
@@ -66,6 +71,7 @@ odahuflow-grafana:
   adminPassword:  "${grafana_pass}"
   persistence:
     storageClassName: "${storage_class}"
+    size: "${grafana_storage_size}"
   ingress:
     path: /grafana
     hosts:

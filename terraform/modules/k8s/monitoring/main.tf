@@ -92,8 +92,12 @@ resource "helm_release" "monitoring" {
       prom_annotations    = yamlencode({ annotations = local.prometheus_annotations })
 
       cluster_domain          = var.cluster_domain
+      prom_retention_time     = var.prom_retention_time
+      prom_retention_size     = var.prom_retention_size
+      prom_storage_size       = var.prom_storage_size
       grafana_admin           = var.grafana_admin
       grafana_pass            = var.grafana_pass
+      grafana_storage_size    = var.grafana_storage_size
       storage_class           = var.storage_class
       ingress_tls_secret_name = local.ingress_tls_secret_name
     })
