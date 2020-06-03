@@ -15,7 +15,8 @@ module "airflow_prereqs" {
   project_id   = var.project_id
   wine_bucket  = module.odahuflow_prereqs.odahu_bucket_name
   cluster_name = var.cluster_name
-  dags_bucket  = module.odahuflow_prereqs.odahu_bucket_name
+# dags_bucket  = module.odahuflow_prereqs.odahu_bucket_name
+  dags_bucket  = "wpm-dlab01-empmathc-local-bucket"
   region       = var.region
 }
 

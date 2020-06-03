@@ -190,7 +190,7 @@ resource "google_compute_project_metadata_item" "ssh_public_keys" {
 ########################################################
 resource "google_compute_instance" "gke_bastion" {
   count                     = var.bastion_enabled ? 1 : 0
-  name                      = "${var.bastion_hostname}-${var.cluster_name}"
+  name                      = "${var.cluster_name}-${var.bastion_hostname}"
   machine_type              = var.bastion_machine_type
   zone                      = var.zone
   project                   = var.project_id
@@ -220,7 +220,9 @@ resource "google_compute_instance" "gke_bastion" {
     ssh-keys = "${var.ssh_user}:${var.ssh_public_key}"
   }
 
-  metadata_startup_script = "sed -i '/AllowAgentForwarding/s/^#//g' /etc/ssh/sshd_config && service sshd restart"
+  metadata_startup_script = <<SCRIPT
+    sed -i '/AllowAgentForwarding/s/^#//g' /etc/ssh/sshd_config && systemctl restart ssh.service
+  SCRIPT
 
   // Necessary scopes for administering kubernetes.
   service_account {
