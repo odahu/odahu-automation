@@ -76,21 +76,21 @@ resource "null_resource" "setup_kubectl" {
 
 resource "null_resource" "setup_calico" {
   provisioner "local-exec" {
-    command = "timeout 60 bash -c 'until kubectl apply -f ${path.module}/files/calico-1.5.yml;do sleep 5; done'"
+    command = "timeout 90 bash -c 'until kubectl apply -f ${path.module}/files/calico-1.5.yml; do sleep 5; done'"
   }
   depends_on = [null_resource.setup_kubectl]
 }
 
 resource "null_resource" "populate_auth_map" {
   provisioner "local-exec" {
-    command = "timeout 60 bash -c 'until kubectl apply -f ${local_file.aws_auth_cm.filename};do sleep 5; done'"
+    command = "timeout 90 bash -c 'until kubectl apply -f ${local_file.aws_auth_cm.filename}; do sleep 5; done'"
   }
   depends_on = [null_resource.setup_kubectl]
 }
 
 resource "null_resource" "setup_cluster_autoscaler" {
   provisioner "local-exec" {
-    command = "timeout 60 bash -c 'until kubectl apply -f ${local_file.cluster_autoscaler.filename};do sleep 5; done'"
+    command = "timeout 90 bash -c 'until kubectl apply -f ${local_file.cluster_autoscaler.filename}; do sleep 5; done'"
   }
   depends_on = [null_resource.setup_calico]
 }
@@ -99,7 +99,7 @@ resource "null_resource" "setup_cluster_autoscaler" {
 resource "aws_launch_template" "this" {
   for_each      = var.node_pools
   name          = "tf-${var.cluster_name}-${substr(replace(each.key, "/[_\\W]/", "-"), 0, 40)}"
-  image_id      = lookup(each.value, "image", "ami-038bd8d3a2345061f")
+  image_id      = lookup(each.value, "image", var.node_ami)
   instance_type = lookup(each.value, "machine_type", "m5.large")
   key_name      = var.cluster_name
 
@@ -218,7 +218,7 @@ resource "aws_autoscaling_group" "this" {
 }
 
 # Wait for cluster startup
-resource "null_resource" "kubectl_config" {
+resource "null_resource" "kube_api_check" {
   triggers = {
     build_number = timestamp()
   }
