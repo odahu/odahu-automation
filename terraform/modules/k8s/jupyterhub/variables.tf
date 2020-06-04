@@ -47,6 +47,12 @@ variable "jupyterhub_culling_enabled" {
   description = "JupyterHub will automatically delete any user pods that have no activity for a period of time"
 }
 
+variable "jupyterhub_puller_enabled" {
+  default     = false
+  type        = bool
+  description = "With the hook-image-puller enabled, the user images will be pulled to the nodes before the hub pod is updated to utilize the new image"
+}
+
 variable "jupyterhub_culling_timeout" {
   default     = "1200"
   description = "Time in seconds of the user's browser inactivity which is defined as no response by JupyterHub"

@@ -56,13 +56,6 @@ locals {
   }
 }
 
-data "kubernetes_secret" "postgres" {
-  metadata {
-    name      = "airflow.odahu-db.credentials.postgresql.acid.zalan.do"
-    namespace = "postgresql"
-  }
-}
-
 resource "kubernetes_namespace" "airflow" {
   metadata {
     annotations = {
@@ -70,6 +63,14 @@ resource "kubernetes_namespace" "airflow" {
     }
     name = var.namespace
   }
+}
+
+data "kubernetes_secret" "postgres" {
+  metadata {
+    name      = "airflow.odahu-db.credentials.postgresql.acid.zalan.do"
+    namespace = "postgresql"
+  }
+  depends_on = [kubernetes_namespace.airflow]
 }
 
 resource "kubernetes_secret" "postgres" {

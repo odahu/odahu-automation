@@ -114,6 +114,7 @@ variable "cloud_type" {
 }
 
 variable "helm_timeout" {
-  type    = string
-  default = "600"
+  type        = string
+  description = "Helm chart installation timeout in seconds"
+  default     = "900"
 }

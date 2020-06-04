@@ -34,6 +34,10 @@ auth:
       userdata_params: {'state': 'state'}
       username_key: preferred_username
 
+prePuller:
+  hook:
+    enabled: ${image_puller}
+
 singleuser:
   startTimeout: 900
   extraEnv:
