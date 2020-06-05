@@ -15,9 +15,9 @@ output "airflow_variables" {
 
 output "syncer_helm_values" {
   value = templatefile("${path.module}/templates/syncer.yaml", {
-    data_bucket_name   = var.dags_bucket
+    data_bucket_name   = var.dag_bucket
     data_bucket_region = var.region
-    subpath            = "/dags"
+    subpath            = var.dag_bucket_path
     syncer_sa          = google_service_account.syncer_sa.email
   })
 }

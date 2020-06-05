@@ -1,5 +1,5 @@
 locals {
-  airflow_helm_version = "6.3.0"
+  airflow_helm_version = "6.5.0"
   airflow_helm_repo    = "stable"
   debug_log_level      = "true"
 
@@ -28,10 +28,10 @@ locals {
           auth_request_set $jwt    $upstream_http_x_auth_request_access_token;
           auth_request_set $_oauth2_proxy_1 $upstream_cookie__oauth2_proxy_1;
 
-          proxy_set_header X-User            $user;
-          proxy_set_header X-Email           $email;
-          proxy_set_header X-JWT             $jwt;
-          proxy_set_header Authorization     "Bearer $jwt";
+          proxy_set_header X-User        $user;
+          proxy_set_header X-Email       $email;
+          proxy_set_header X-JWT         $jwt;
+          proxy_set_header Authorization "Bearer $jwt";
 
           access_by_lua_block {
             if ngx.var._oauth2_proxy_1 ~= "" then
@@ -54,7 +54,6 @@ locals {
     "client_secret" = var.service_account.client_secret,
     "scope"         = "openid profile offline_access groups"
   }
-
 }
 
 data "kubernetes_secret" "postgres" {
@@ -127,11 +126,11 @@ resource "helm_release" "airflow" {
       fernet_key                   = var.configuration.fernet_key
       wine_conn                    = jsonencode(var.wine_connection)
       log_storage_size             = var.configuration.log_storage_size
-      namespace                    = var.namespace
+      namespace                    = kubernetes_namespace.airflow.metadata[0].annotations.name
       odahu_conn                   = jsonencode(local.odahu_conn)
       odahu_airflow_plugin_version = var.odahu_airflow_plugin_version
       storage_size                 = var.configuration.storage_size
-    }),
+    })
   ]
 
   depends_on = [kubernetes_secret.postgres]
