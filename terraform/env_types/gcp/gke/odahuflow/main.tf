@@ -12,11 +12,12 @@ module "odahuflow_prereqs" {
 module "airflow_prereqs" {
   source = "../../../../modules/k8s/airflow/prereqs/gke"
 
-  project_id   = var.project_id
-  wine_bucket  = module.odahuflow_prereqs.odahu_bucket_name
-  cluster_name = var.cluster_name
-  dags_bucket  = module.odahuflow_prereqs.odahu_bucket_name
-  region       = var.region
+  project_id      = var.project_id
+  wine_bucket     = module.odahuflow_prereqs.odahu_bucket_name
+  cluster_name    = var.cluster_name
+  dag_bucket      = local.dag_bucket
+  dag_bucket_path = local.dag_bucket_path
+  region          = var.region
 }
 
 module "airflow_test_data" {

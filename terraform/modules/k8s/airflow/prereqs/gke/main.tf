@@ -47,8 +47,7 @@ resource "google_service_account_key" "syncer_sa_key" {
 }
 
 resource "google_storage_bucket_iam_member" "odahuflow_store_reader" {
-  bucket = var.dags_bucket
+  bucket = var.dag_bucket
   member = "serviceAccount:${google_service_account.syncer_sa.email}"
   role   = "roles/storage.objectViewer"
 }
-

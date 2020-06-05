@@ -13,12 +13,13 @@ module "odahuflow_prereqs" {
 module "airflow_prereqs" {
   source = "../../../../modules/k8s/airflow/prereqs/aks"
 
-  wine_bucket    = module.odahuflow_prereqs.odahu_bucket_name
-  cluster_name   = var.cluster_name
-  dags_bucket    = module.odahuflow_prereqs.odahu_bucket_name
-  sa_name        = yamldecode(module.odahuflow_prereqs.fluent_helm_values).output.azureblob.AzureStorageAccount
-  sas_token      = yamldecode(module.odahuflow_prereqs.fluent_helm_values).output.azureblob.AzureStorageSasToken
-  resource_group = var.azure_resource_group
+  wine_bucket     = module.odahuflow_prereqs.odahu_bucket_name
+  cluster_name    = var.cluster_name
+  dag_bucket      = local.dag_bucket
+  dag_bucket_path = local.dag_bucket_path
+  sa_name         = yamldecode(module.odahuflow_prereqs.fluent_helm_values).output.azureblob.AzureStorageAccount
+  sas_token       = yamldecode(module.odahuflow_prereqs.fluent_helm_values).output.azureblob.AzureStorageSasToken
+  resource_group  = var.azure_resource_group
 }
 
 module "airflow" {
