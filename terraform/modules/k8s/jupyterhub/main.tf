@@ -130,8 +130,9 @@ resource "helm_release" "jupyterhub" {
       ingress = yamlencode({ ingress = local.ingress_config })
       culling = yamlencode({ cull = local.culling_config })
 
-      docker_tag  = var.docker_tag
-      docker_repo = var.docker_repo
+      image_puller = var.jupyterhub_puller_enabled
+      docker_tag   = var.docker_tag
+      docker_repo  = var.docker_repo
     }),
   ]
 

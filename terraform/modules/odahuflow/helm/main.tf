@@ -127,7 +127,7 @@ locals {
   }
 
   odahu_docker_creds_present = length(var.docker_username) != 0 && length(var.docker_password) != 0
-  odahu_docker_creds_connection = {
+  odahu_docker_creds = {
     id = "odahuflow-docker-repository"
     spec = {
       type        = "docker"
@@ -137,11 +137,14 @@ locals {
       description = "Docker repository for ODAHU services"
     }
   }
+  odahu_docker_creds_connection = [{
+    for key, value in local.odahu_docker_creds : key => value if local.odahu_docker_creds_present
+  }]
   packagers = {
     rest = {
       targets = {
         docker_pull = {
-          default = local.odahu_docker_creds_present ? local.odahu_docker_creds_connection.id : ""
+          default = lookup(local.odahu_docker_creds_connection[0], "id", "")
         }
         docker_push = {
           default = local.default_model_docker_connection_id
@@ -151,7 +154,7 @@ locals {
     cli = {
       targets = {
         docker_pull = {
-          default = local.odahu_docker_creds_present ? local.odahu_docker_creds_connection.id : ""
+          default = lookup(local.odahu_docker_creds_connection[0], "id", "")
         }
         docker_push = {
           default = local.default_model_docker_connection_id
@@ -295,7 +298,12 @@ resource "helm_release" "odahuflow" {
       docker_secret     = var.docker_secret_name
       odahuflow_version = var.odahuflow_version
 
-      connections           = yamlencode({ connections = concat(var.odahuflow_connections, [local.odahu_docker_creds_connection]) })
+      connections = yamlencode({
+        connections = concat(
+          var.odahuflow_connections,
+          [for elem in local.odahu_docker_creds_connection : elem if length(elem) > 0]
+        )
+      })
       api_configuration     = yamlencode({ api = local.api_config })
       config                = yamlencode({ config = local.odahuflow_config })
       resource_uploader_sa  = var.resource_uploader_sa
