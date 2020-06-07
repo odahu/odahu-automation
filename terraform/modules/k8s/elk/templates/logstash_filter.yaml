@@ -1,7 +1,7 @@
 filter {
-  mutate {
-    update => { "@timestamp" => "%{[fields][event_time]}" }
-  }
+  ruby {
+    code => "event.set('@timestamp', event.get('event_time'));"
+  } 
   if [kubernetes][labels][app_kubernetes_io/name] == "odahu-flow-opa" and [kubernetes][labels][app_kubernetes_io/instance] == "odahu-flow-opa" {
     json {
       source => "log"
