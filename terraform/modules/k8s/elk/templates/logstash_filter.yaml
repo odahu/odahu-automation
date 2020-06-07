@@ -1,6 +1,6 @@
 filter {
   mutate {
-    update => { "timestamp" => "%{[fields][event_time]}" }
+    update => { "@timestamp" => "%{[fields][event_time]}" }
   }
   if [kubernetes][labels][app_kubernetes_io/name] == "odahu-flow-opa" and [kubernetes][labels][app_kubernetes_io/instance] == "odahu-flow-opa" {
     json {
