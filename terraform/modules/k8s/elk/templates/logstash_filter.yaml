@@ -1,6 +1,8 @@
 filter {
-  rename => {
-    "event_time" => "@timestamp"
+  mutate {
+    rename => {
+      "event_time" => "@timestamp"
+    }
   }
   if [kubernetes][labels][app_kubernetes_io/name] == "odahu-flow-opa" and [kubernetes][labels][app_kubernetes_io/instance] == "odahu-flow-opa" {
     json {
