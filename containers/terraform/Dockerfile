@@ -19,7 +19,7 @@ RUN terraform-bundle package -os=linux -arch=amd64 terraform-bundle.hcl && \
 FROM ubuntu:18.04
 
 ENV DEBIAN_FRONTEND=noninteractive \
-    KUBECTL_VERSION=v1.14.10 \
+    KUBECTL_VERSION=v1.16.10 \
     TERRAGRUNT_VERSION=v0.23.4 \
     HELM_VERSION=v3.1.2 \
     TF_PLUGIN_CACHE_DIR=/tmp/.terraform/cache

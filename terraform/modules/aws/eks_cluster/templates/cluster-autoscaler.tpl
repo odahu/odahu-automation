@@ -52,6 +52,9 @@ rules:
   - apiGroups: ["storage.k8s.io"]
     resources: ["storageclasses"]
     verbs: ["watch", "list", "get"]
+  - apiGroups: ["storage.k8s.io"]
+    resources: ["csinodes"]
+    verbs: ["watch", "list", "get"]
   - apiGroups: ["batch", "extensions"]
     resources: ["jobs"]
     verbs: ["get", "list", "watch", "patch"]
@@ -129,7 +132,7 @@ spec:
     spec:
       serviceAccountName: cluster-autoscaler
       containers:
-        - image: k8s.gcr.io/cluster-autoscaler:v${k8s_version}
+        - image: eu.gcr.io/k8s-artifacts-prod/autoscaling/cluster-autoscaler:v${k8s_version}
           name: cluster-autoscaler
           resources:
             limits:

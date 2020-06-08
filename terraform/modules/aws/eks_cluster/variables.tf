@@ -90,7 +90,7 @@ variable "k8s_version" {
 
 variable "autoscaler_version" {
   type        = string
-  default     = "1.14.7"
+  default     = "1.16.5"
   description = "Kubernetes Cluster Autoscaler component version"
 }
 
