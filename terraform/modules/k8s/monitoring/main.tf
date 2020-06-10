@@ -12,6 +12,11 @@ locals {
       auth_request_set $jwt    $upstream_http_x_auth_request_access_token;
       auth_request_set $_oauth2_proxy_1 $upstream_cookie__oauth2_proxy_1;
 
+      proxy_set_header X-User        $user;
+      proxy_set_header X-Email       $email;
+      proxy_set_header X-JWT         $jwt;
+      proxy_set_header Authorization "";
+
       access_by_lua_block {
         if ngx.var._oauth2_proxy_1 ~= "" then
           ngx.header["Set-Cookie"] = "_oauth2_proxy_1=" .. ngx.var._oauth2_proxy_1 .. ngx.var.auth_cookie:match("(; .*)")
@@ -22,26 +27,6 @@ locals {
     "nginx.ingress.kubernetes.io/auth-url"              = "http://oauth2-proxy.kube-system.svc.cluster.local:4180/oauth2/auth"
   }
 
-  ingress_nginx_grafana_auth_snippet = {
-    "nginx.ingress.kubernetes.io/auth-snippet" = <<-EOT
-      proxy_set_header X-User  $user;
-      proxy_set_header X-Email $email;
-      proxy_set_header X-JWT   $jwt;
-      proxy_set_header Authorization "";
-    EOT
-  }
-
-  ingress_nginx_prometheus_auth_snippet = {
-    "nginx.ingress.kubernetes.io/auth-snippet" = <<-EOT
-      proxy_set_header X-User  $user;
-      proxy_set_header X-Email $email;
-      proxy_set_header X-JWT   $jwt;
-      proxy_set_header Authorization "Bearer $jwt";
-    EOT
-  }
-
-  grafana_annotations    = merge(local.ingress_nginx_annotations, local.ingress_nginx_grafana_auth_snippet)
-  prometheus_annotations = merge(local.ingress_nginx_annotations, local.ingress_nginx_prometheus_auth_snippet)
 }
 
 ########################################################
@@ -88,8 +73,8 @@ resource "helm_release" "monitoring" {
       monitoring_namespace = kubernetes_namespace.monitoring.metadata[0].annotations.name
       odahu_infra_version  = var.odahu_infra_version
 
-      grafana_annotations = yamlencode({ annotations = local.grafana_annotations })
-      prom_annotations    = yamlencode({ annotations = local.prometheus_annotations })
+      grafana_annotations = yamlencode({ annotations = local.ingress_nginx_annotations })
+      prom_annotations    = yamlencode({ annotations = local.ingress_nginx_annotations })
 
       cluster_domain          = var.cluster_domain
       prom_retention_time     = var.prom_retention_time
