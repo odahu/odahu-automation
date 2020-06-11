@@ -41,6 +41,12 @@ variable "grafana_storage_size" {
   default     = "1Gi"
 }
 
+variable "grafana_image_tag" {
+  type        = string
+  description = "Default Grafana docker image tag"
+  default     = "6.7.4"
+}
+
 variable "prom_storage_size" {
   type        = string
   description = "Prometheus PVC size"
