@@ -214,10 +214,11 @@ variable "postgres" {
     password : string
   })
   default = {
-    enabled : true,
-    storage_size : "8Gi",
-    replica_count : 1,
-    password : "odahu"
+    enabled       = true
+    storage_size  = "8Gi"
+    replica_count = 1
+    password      = "odahu"
+    cluster_name  = "odahu-db"
   }
   description = "PostgreSQL configuration"
 }

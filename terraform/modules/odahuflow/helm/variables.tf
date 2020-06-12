@@ -205,7 +205,4 @@ variable "db" {
     cluster_name = string
     db_name      = string
   })
-  default = {
-    enabled = false
-  }
 }

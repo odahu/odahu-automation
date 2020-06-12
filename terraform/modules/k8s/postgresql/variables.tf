@@ -14,6 +14,7 @@ variable "configuration" {
   })
   description = "PostgreSQL configuration"
   default = {
+    cluster_name = "odahu-db"
     enabled       = false
     storage_size  = "8Gi"
     replica_count = "2"
