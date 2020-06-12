@@ -50,7 +50,7 @@ locals {
   db_host              = "${var.db.cluster_name}.postgresql"
   db_user              = data.kubernetes_secret.db_creds.data.username
   db_password          = data.kubernetes_secret.db_creds.data.password
-  db_connection_string = "postgresql://${local.db_user}:${local.db_password}@${local.db_host}/${var.db.db_name}?sslmode=disable"
+  db_connection_string = "postgresql://${local.db_user}:${local.db_password}@${local.db_host}/${var.db.db_name}"
 
   odahuflow_config = {
     common = {
