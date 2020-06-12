@@ -206,19 +206,25 @@ variable "vault" {
 # PostgreSQL
 ########################
 variable "postgres" {
+  type = object({
+    cluster_name : string,
+    enabled : bool,
+    storage_size : string,
+    replica_count : number,
+    password : string
+  })
   default = {
     enabled : true,
     storage_size : "8Gi",
     replica_count : 1,
     password : "odahu"
   }
-  type = object({
-    enabled : bool,
-    storage_size : string,
-    replica_count : number,
-    password : string
-  })
   description = "PostgreSQL configuration"
+}
+
+variable "odahu_database" {
+  description = "Name of database for ODAHU entities"
+  type        = string
 }
 
 ########################

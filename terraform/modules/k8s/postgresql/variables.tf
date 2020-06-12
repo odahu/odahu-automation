@@ -6,6 +6,7 @@ variable "namespace" {
 
 variable "configuration" {
   type = object({
+    cluster_name : string,
     enabled : bool,
     storage_size : string,
     replica_count : number,
