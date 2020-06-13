@@ -111,10 +111,10 @@ locals {
       }
     }
     packaging = {
-      toleration         = contains(keys(var.node_pools), "packaging") ? { Key = var.node_pools["packaging"].taints[0].key, Operator = "Equal", Value = var.node_pools["packaging"].taints[0].value, Effect = replace(var.node_pools["packaging"].taints[0].effect, "/(?i)no_?schedule/", "NoSchedule") } : null
-      nodeSelector       = contains(keys(var.node_pools), "packaging") ? { for key, value in var.node_pools["packaging"].labels : key => value } : null
-      namespace          = var.odahuflow_packaging_namespace
-      outputConnectionID = "models-output"
+      toleration                         = contains(keys(var.node_pools), "packaging") ? { Key = var.node_pools["packaging"].taints[0].key, Operator = "Equal", Value = var.node_pools["packaging"].taints[0].value, Effect = replace(var.node_pools["packaging"].taints[0].effect, "/(?i)no_?schedule/", "NoSchedule") } : null
+      nodeSelector                       = contains(keys(var.node_pools), "packaging") ? { for key, value in var.node_pools["packaging"].labels : key => value } : null
+      namespace                          = var.odahuflow_packaging_namespace
+      outputConnectionID                 = "models-output"
       packagingIntegrationRepositoryType = var.db.enabled ? "postgres" : "kubernetes"
     }
     migrate = {
