@@ -115,6 +115,7 @@ locals {
       nodeSelector       = contains(keys(var.node_pools), "packaging") ? { for key, value in var.node_pools["packaging"].labels : key => value } : null
       namespace          = var.odahuflow_packaging_namespace
       outputConnectionID = "models-output"
+      packagingIntegrationRepositoryType = var.db.enabled ? "postgres" : "kubernetes"
     }
     migrate = {
       enabled = var.db.enabled
