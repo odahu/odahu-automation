@@ -220,3 +220,29 @@ variable "examples_version" {
   description = "Wine examples version"
 }
 
+########################
+# PostgreSQL
+########################
+variable "postgres" {
+  type = object({
+    cluster_name : string,
+    enabled : bool,
+    storage_size : string,
+    replica_count : number,
+    password : string
+  })
+  default = {
+    enabled       = true
+    storage_size  = "8Gi"
+    replica_count = 1
+    password      = "odahu"
+    cluster_name  = "odahu-db"
+  }
+  description = "PostgreSQL configuration"
+}
+
+variable "odahu_database" {
+  description = "Name of database for ODAHU entities"
+  type        = string
+}
+
