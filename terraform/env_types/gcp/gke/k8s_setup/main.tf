@@ -2,10 +2,6 @@
 # K8S setup
 ########################################################
 
-module "gpu_drivers" {
-  source = "../../../../modules/k8s/gpu_drivers_setup"
-}
-
 module "nfs" {
   source = "../../../../modules/k8s/nfs"
 
@@ -55,6 +51,13 @@ module "monitoring" {
   monitoring_namespace = var.monitoring_namespace
   tls_secret_key       = var.tls_key
   tls_secret_crt       = var.tls_crt
+}
+
+module "gpu_drivers" {
+  source = "../../../../modules/k8s/gpu_drivers_setup"
+
+  module_dependency    = module.monitoring.helm_chart
+  monitoring_namespace = module.monitoring.namespace
 }
 
 module "istio" {

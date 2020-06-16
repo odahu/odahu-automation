@@ -27,65 +27,68 @@ prometheus-operator:
         {{ define "slack.default.text" }}{{ end }}
         {{ define "slack.default.footer" }}{{ end }}
     alertmanagerSpec:
-      externalUrl: https://${cluster_domain}/alertmanager
-      routePrefix: /
+      externalUrl: "https://${cluster_domain}/alertmanager"
+      routePrefix: "/"
       storageSpec:
         volumeClaimTemplate:
           spec:
             storageClassName: "${storage_class}"
     ingress:
       paths:
-        - /alertmanager
+      - "/alertmanager"
       hosts:
-        - "${cluster_domain}"
+      - "${cluster_domain}"
       tls:
-        - secretName: "${ingress_tls_secret_name}"
-          hosts: ["${cluster_domain}"]
-      ${indent(6, prom_annotations)}
+      - secretName: "${ingress_tls_secret_name}"
+        hosts: ["${cluster_domain}"]
+      ${indent(6, nginx_annotations)}
 
   prometheus:
     prometheusSpec:
-      externalUrl: https://${cluster_domain}/prometheus
-      routePrefix: /
+      externalUrl: "https://${cluster_domain}/prometheus"
+      routePrefix: "/"
       storageSpec:
         volumeClaimTemplate:
           spec:
             storageClassName: "${storage_class}"
             resources:
-              limits:
-                cpu: "2"
-                memory: 2.5Gi
-              requests:
-                cpu: "1"
-                memory: 2Gi
               requests:
                 storage: "${prom_storage_size}"
       retention: "${prom_retention_time}"
       retentionSize: "${prom_retention_size}"
+      resources:
+        limits:
+          cpu: "2"
+          memory: "2.5Gi"
+        requests:
+          cpu: "1"
+          memory: "2Gi"
     ingress:
       paths:
-        - /prometheus
+      - "/prometheus"
       hosts:
-        - "${cluster_domain}"
+      - "${cluster_domain}"
       tls:
-        - secretName: "${ingress_tls_secret_name}"
-          hosts: ["${cluster_domain}"]
-      ${indent(6, prom_annotations)}
+      - secretName: "${ingress_tls_secret_name}"
+        hosts: ["${cluster_domain}"]
+      ${indent(6, nginx_annotations)}
 
 odahuflow-grafana:
+  image:
+    tag: "${grafana_image_tag}"
   adminUser: "${grafana_admin}"
-  adminPassword:  "${grafana_pass}"
+  adminPassword: "${grafana_pass}"
   persistence:
     storageClassName: "${storage_class}"
     size: "${grafana_storage_size}"
   ingress:
-    path: /grafana
+    path: "/grafana"
     hosts:
-      - "${cluster_domain}"
+    - "${cluster_domain}"
     tls:
-      - secretName: "${ingress_tls_secret_name}"
-        hosts: ["${cluster_domain}"]
-    ${indent(4, grafana_annotations)}
+    - secretName: "${ingress_tls_secret_name}"
+      hosts: ["${cluster_domain}"]
+    ${indent(4, nginx_annotations)}
   env:
     GF_AUTH_ANONYMOUS_ENABLED: "true"
     GF_SERVER_ROOT_URL: "https://${cluster_domain}/grafana/"

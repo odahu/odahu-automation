@@ -24,7 +24,6 @@ apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: nvidia-driver-installer
-  namespace: kube-system
   labels:
     k8s-app: nvidia-driver-installer
 spec:
