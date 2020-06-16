@@ -1,20 +1,25 @@
 variable "cluster_type" {
+  type        = string
   default     = "odahuflow"
-  description = "Odahuflow cluster type"
+  description = "ODAHU flow cluster type"
 }
 
 variable "image_repo" {
+  type        = string
   default     = "jtblin/kube2iam"
-  description = "docker repository"
+  description = "Docker image repository"
 }
 
 variable "image_tag" {
+  type        = string
   default     = "0.10.9"
-  description = "docker image repository"
+  description = "Docker image tag"
 }
 
 variable "chart_version" {
-  default = "2.5.0"
+  type        = string
+  default     = "2.5.0"
+  description = "Helm chart version"
 }
 
 variable "namespace" {
@@ -24,5 +29,7 @@ variable "namespace" {
 }
 
 variable "helm_timeout" {
-  default = "600"
+  type        = number
+  default     = 600
+  description = "Helm chart deploy timeout in seconds"
 }

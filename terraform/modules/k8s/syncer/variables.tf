@@ -1,18 +1,22 @@
 variable "namespace" {
-  description = "Syncer namespace"
+  type        = string
   default     = "default"
+  description = "Syncer namespace"
 }
 
 variable "odahu_infra_version" {
-  description = "Odahuflow infra release version"
+  type        = string
+  description = "ODAHU flow infra release version"
 }
 
 variable "extra_helm_values" {
-  default = ""
-  # TODO:
-  description = ""
+  type        = string
+  default     = ""
+  description = "String variable with YAML set of Helm chart values"
 }
 
 variable "helm_timeout" {
-  default = "300"
+  type        = number
+  default     = 300
+  description = "Helm chart deploy timeout in seconds"
 }

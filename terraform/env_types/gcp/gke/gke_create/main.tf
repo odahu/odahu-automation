@@ -49,7 +49,6 @@ module "gke_cluster" {
   cluster_name   = var.cluster_name
   zone           = var.zone
   allowed_ips    = var.allowed_ips
-  agent_cidr     = var.agent_cidr
   nodes_sa       = module.iam.service_account
   node_pools     = var.node_pools
   pods_cidr      = var.pods_cidr

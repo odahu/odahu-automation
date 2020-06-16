@@ -42,15 +42,14 @@ module "auth" {
 }
 
 module "monitoring" {
-  source               = "../../../../modules/k8s/monitoring"
-  cluster_domain       = var.cluster_domain_name
-  helm_repo            = var.helm_repo
-  odahu_infra_version  = var.odahu_infra_version
-  grafana_admin        = var.grafana_admin
-  grafana_pass         = var.grafana_pass
-  monitoring_namespace = var.monitoring_namespace
-  tls_secret_key       = var.tls_key
-  tls_secret_crt       = var.tls_crt
+  source              = "../../../../modules/k8s/monitoring"
+  cluster_domain      = var.cluster_domain_name
+  helm_repo           = var.helm_repo
+  odahu_infra_version = var.odahu_infra_version
+  grafana_admin       = var.grafana_admin
+  grafana_pass        = var.grafana_pass
+  tls_secret_key      = var.tls_key
+  tls_secret_crt      = var.tls_crt
 }
 
 module "gpu_drivers" {
@@ -62,7 +61,7 @@ module "gpu_drivers" {
 
 module "istio" {
   source               = "../../../../modules/k8s/istio"
-  monitoring_namespace = var.monitoring_namespace
+  monitoring_namespace = module.monitoring.namespace
   helm_repo            = var.helm_repo
   docker_repo          = var.docker_repo
   docker_username      = var.docker_username

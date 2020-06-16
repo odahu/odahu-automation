@@ -1,21 +1,29 @@
 variable "helm_repo" {
-  description = "Odahuflow helm repo"
+  type        = string
+  description = "ODAHU flow helm repo"
+}
+
+variable "helm_timeout" {
+  type        = number
+  default     = 600
+  description = "Helm chart deploy timeout in seconds"
 }
 
 variable "odahu_infra_version" {
-  description = "Odahuflow infra release version"
+  type        = string
+  description = "ODAHU flow infra release version"
 }
 
 variable "namespace" {
-  description = "Open Policy Agent namespace"
+  type        = string
   default     = "odahu-flow-opa"
+  description = "Open Policy Agent namespace"
 }
 
-# Dependency of this module
-# https://discuss.hashicorp.com/t/tips-howto-implement-module-depends-on-emulation/2305
 variable "mesh_dependency" {
-  type    = any
-  default = null
+  type        = any
+  default     = null
+  description = "Dependency of this module (https://discuss.hashicorp.com/t/tips-howto-implement-module-depends-on-emulation/2305)"
 }
 
 variable "oauth_oidc_issuer_url" {
@@ -76,8 +84,4 @@ variable "opa_policies" {
   type        = map(string)
   default     = {}
   description = "Opa .rego policies"
-}
-
-variable "helm_timeout" {
-  default = "600"
 }

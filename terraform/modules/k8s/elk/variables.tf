@@ -1,120 +1,133 @@
 variable "elk_enabled" {
+  type        = bool
   default     = true
   description = "Flag to install ELK stack (true) or not (false)"
-  type        = bool
 }
 
 variable "elk_namespace" {
+  type        = string
   default     = "odahu-flow-elk"
   description = "ELK stack namespace name"
-  type        = string
 }
 
 variable "odahu_helm_repo" {
-  description = "ODAHU-flow helm repo"
   type        = string
+  description = "ODAHU flow helm repo"
 }
 
 variable "elasticsearch_helm_repo" {
+  type        = string
   default     = "https://helm.elastic.co"
   description = "Elasticsearch helm repository"
-  type        = string
 }
 
 variable "elasticsearch_chart_version" {
+  type        = string
   default     = "7.6.2"
   description = "Elasticsearch helm chart version"
-  type        = string
 }
 
 variable "elasticsearch_memory" {
+  type        = string
   default     = "4"
   description = "Memory limit for Elasticsearch process (in GiB)"
-  type        = string
 }
 
 variable "logstash_chart_version" {
+  type        = string
   default     = "7.6.2"
   description = "Logstash helm chart version"
-  type        = string
 }
 
 variable "elasticsearch_replicas" {
-  default     = "1"
+  type        = number
+  default     = 1
   description = "Replica count for the Elasticsearch StatefulSet"
-  type        = string
 }
 
 variable "kibana_chart_version" {
+  type        = string
   default     = "7.6.2"
   description = "Kibana helm chart version"
-  type        = string
 }
 
 variable "logstash_replicas" {
-  default     = "1"
+  type        = number
+  default     = 1
   description = "Replica count for the Logstash StatefulSet"
-  type        = string
 }
 
 variable "storage_size" {
+  type        = string
   default     = "30Gi"
   description = "Elasticsearch nodes attached PVC size"
-  type        = string
 }
 
 variable "cluster_domain" {
-  description = "ODAHU Flow cluster FQDN"
   type        = string
+  description = "ODAHU Flow cluster FQDN"
 }
 
 variable "tls_secret_crt" {
-  description = "Ingress TLS certificate"
+  type        = string
   default     = ""
+  description = "Ingress TLS certificate"
 }
 
 variable "tls_secret_key" {
-  description = "Ingress TLS key"
+  type        = string
   default     = ""
+  description = "Ingress TLS key"
 }
 
 # Docker
 variable "docker_repo" {
-  description = "Odahuflow Docker repo url"
+  type        = string
+  description = "ODAHU flow Docker repo url"
 }
 
 variable "docker_username" {
+  type        = string
   default     = ""
-  description = "Odahuflow Docker repo username"
+  description = "ODAHU flow Docker repo username"
 }
 
 variable "docker_password" {
+  type        = string
   default     = ""
-  description = "Odahuflow Docker repo password"
+  description = "ODAHU flow Docker repo password"
 }
 
 variable "odahu_infra_version" {
-  description = "Odahuflow infra release version"
+  type        = string
+  description = "ODAHU flow infra release version"
 }
 
 variable "logstash_input_config" {
+  type        = string
   description = "Raw logstash input config"
 }
 
 variable "sa_key" {
-  default = ""
+  type        = string
+  default     = ""
+  description = "Kubernetes serviceAccount key"
 }
 
 variable "logstash_annotations" {
-  default = {}
+  type        = map(any)
+  default     = {}
+  description = "Logstash annotations"
 }
 
 variable "cloud_type" {
-  default = ""
+  type        = string
+  default     = ""
+  description = "Cloud type attribute (aws, azure, gcp)"
 }
 
 variable "helm_timeout" {
-  type        = string
-  description = "Helm chart installation timeout in seconds"
-  default     = "900"
+  type        = number
+  default     = 900
+  description = "Helm chart deploy timeout in seconds"
 }

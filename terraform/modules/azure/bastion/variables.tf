@@ -1,7 +1,7 @@
 variable "cluster_name" {
-  description = "Odahuflow k8s cluster name"
-  default     = "odahuflow"
   type        = string
+  default     = "odahuflow"
+  description = "ODAHU flow k8s cluster name"
 }
 
 variable "location" {
@@ -20,25 +20,26 @@ variable "aks_subnet_id" {
 }
 
 variable "allowed_ips" {
+  type        = list(string)
   description = "CIDRs to allow access from"
 }
 
 variable "bastion_enabled" {
-  default     = false
   type        = bool
+  default     = false
   description = "Flag to install bastion host or not"
 }
 
 variable "bastion_machine_type" {
   type        = string
   default     = "Standard_B1ls"
-  description = ""
+  description = "Bastion host machine type"
 }
 
 variable "bastion_labels" {
+  type        = map(string)
   default     = {}
   description = "Bastion host Azure resource tags"
-  type        = map
 }
 
 variable "bastion_hostname" {

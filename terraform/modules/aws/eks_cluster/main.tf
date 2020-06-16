@@ -1,28 +1,24 @@
-data "template_file" "aws_auth_cm" {
-  template = "${file("${path.module}/templates/aws-auth-cm.tpl")}"
-  vars = {
+resource "local_file" "aws_auth_cm" {
+  content = templatefile("${path.module}/templates/aws-auth-cm.tpl", {
     node_role_arn = var.node_role_arn
-  }
+  })
+  filename = "/tmp/.odahu/aws_auth_cm.yml"
+
+  file_permission      = 0644
+  directory_permission = 0755
 }
 
-data "template_file" "cluster_autoscaler" {
-  template = "${file("${path.module}/templates/cluster-autoscaler.tpl")}"
-  vars = {
+resource "local_file" "cluster_autoscaler" {
+  content = templatefile("${path.module}/templates/cluster-autoscaler.tpl", {
     cluster_name  = var.cluster_name
     k8s_version   = var.autoscaler_version
     cpu_max_limit = var.cluster_autoscaling_cpu_max_limit
     mem_max_limit = var.cluster_autoscaling_memory_max_limit
-  }
-}
+  })
+  filename = "/tmp/.odahu/aws_cluster_autoscaler.yml"
 
-resource "local_file" "aws_auth_cm" {
-  content  = data.template_file.aws_auth_cm.rendered
-  filename = "/tmp/aws_auth_cm.yml"
-}
-
-resource "local_file" "cluster_autoscaler" {
-  content  = data.template_file.cluster_autoscaler.rendered
-  filename = "/tmp/cluster_autoscaler.yml"
+  file_permission      = 0644
+  directory_permission = 0755
 }
 
 ########################################################
@@ -85,14 +81,20 @@ resource "null_resource" "populate_auth_map" {
   provisioner "local-exec" {
     command = "timeout 90 bash -c 'until kubectl apply -f ${local_file.aws_auth_cm.filename}; do sleep 5; done'"
   }
-  depends_on = [null_resource.setup_kubectl]
+  depends_on = [
+    null_resource.setup_kubectl,
+    local_file.aws_auth_cm
+  ]
 }
 
 resource "null_resource" "setup_cluster_autoscaler" {
   provisioner "local-exec" {
     command = "timeout 90 bash -c 'until kubectl apply -f ${local_file.cluster_autoscaler.filename}; do sleep 5; done'"
   }
-  depends_on = [null_resource.setup_calico]
+  depends_on = [
+    null_resource.setup_calico,
+    local_file.cluster_autoscaler
+  ]
 }
 
 # Node pools

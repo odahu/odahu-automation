@@ -1,36 +1,36 @@
 # Common
 variable "sa_name" {
-  description = "Azure Storage Account name"
   type        = string
+  description = "Azure Storage Account name"
 }
 
 variable "resource_group" {
-  description = "Azure Resouce Group name"
   type        = string
+  description = "Azure Resouce Group name"
 }
 
 variable "sas_token" {
-  description = "Azure SAS token"
   type        = string
+  description = "Azure SAS token"
 }
 
 variable "cluster_name" {
+  type        = string
   default     = "odahuflow"
   description = "ODAHU flow cluster name"
-  type        = string
 }
 
 variable "wine_bucket" {
-  description = "Wine bucket name"
   type        = string
+  description = "Wine bucket name"
 }
 
 variable "dag_bucket_path" {
-  description = "DAGs bucket subpath"
   type        = string
+  description = "DAGs bucket subpath"
 }
 
 variable "dag_bucket" {
-  description = "DAGs bucket name"
   type        = string
+  description = "DAGs bucket name"
 }

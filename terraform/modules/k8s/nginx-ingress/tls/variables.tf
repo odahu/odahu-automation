@@ -2,19 +2,23 @@
 # Common
 ##################
 variable "cluster_name" {
+  type        = string
   default     = "odahuflow"
-  description = "Odahuflow cluster name"
+  description = "ODAHU flow cluster name"
 }
 
 variable "tls_namespaces" {
+  type        = list(string)
   default     = ["default", "kube-system"]
-  description = "Default namespaces with TLS secret"
+  description = "Default list of namespaces with TLS secret"
 }
 
 variable "tls_secret_crt" {
-  description = "Odahuflow cluster TLS certificate"
+  type        = string
+  description = "ODAHU flow cluster TLS certificate"
 }
 
 variable "tls_secret_key" {
-  description = "Odahuflow cluster TLS key"
+  type        = string
+  description = "ODAHU flow cluster TLS key"
 }

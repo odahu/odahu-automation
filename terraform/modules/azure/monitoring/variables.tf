@@ -5,21 +5,24 @@ variable "enabled" {
 }
 
 variable "cluster_name" {
-  description = "Odahuflow k8s cluster name"
+  type        = string
   default     = "odahuflow"
+  description = "ODAHU flow k8s cluster name"
 }
 
 variable "location" {
+  type        = string
   description = "Azure location where the resource group should be created"
 }
 
 variable "resource_group" {
-  description = "The name of the resource group, unique within Azure subscription"
+  type        = string
   default     = "testResourceGroup1"
+  description = "The name of the resource group, unique within Azure subscription"
 }
 
 variable "tags" {
-  description = "Tags used for resource"
+  type        = map(string)
   default     = {}
-  type        = map
+  description = "Tags used for resource"
 }
