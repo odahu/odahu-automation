@@ -74,13 +74,6 @@ module "openpolicyagent" {
   opa_policies          = var.opa_policies
 }
 
-module "gke-saa" {
-  source              = "../../../../modules/k8s/gke-saa"
-  cluster_type        = var.cluster_type
-  helm_repo           = var.helm_repo
-  odahu_infra_version = var.odahu_infra_version
-}
-
 module "kube2iam" {
   source       = "../../../../modules/k8s/kube2iam"
   cluster_type = var.cluster_type

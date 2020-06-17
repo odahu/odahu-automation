@@ -54,5 +54,5 @@ updateStrategy: OnDelete
 
 verbose: true
 
-tolerations: []
+${tolerations}
 
