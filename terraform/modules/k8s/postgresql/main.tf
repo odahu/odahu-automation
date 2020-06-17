@@ -32,8 +32,14 @@ resource "local_file" "pg_cluster_manifest" {
     replicas     = var.configuration.replica_count
     databases    = var.databases
   })
-  filename   = "/tmp/pg_crd_manifest.yml"
-  depends_on = [helm_release.pg_operator[0]]
+  filename = "/tmp/pg_crd_manifest.yml"
+
+  file_permission      = 0644
+  directory_permission = 0755
+
+  depends_on = [
+    helm_release.pg_operator[0]
+  ]
 }
 
 resource "null_resource" "pg_cluster" {

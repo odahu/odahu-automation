@@ -1,9 +1,17 @@
 locals {
   ingress_tls_secret_name = "odahu-flow-tls"
 
+  ingress_auth_signin = format(
+    "https://%s/oauth2/start?rd=https://$host$escaped_request_uri",
+    var.cluster_domain
+  )
+  ingress_auth_url = "http://oauth2-proxy.kube-system.svc.cluster.local:4180/oauth2/auth"
+
   ingress_nginx_annotations = {
     "kubernetes.io/ingress.class"                       = "nginx"
     "nginx.ingress.kubernetes.io/force-ssl-redirect"    = "true"
+    "nginx.ingress.kubernetes.io/auth-signin"           = local.ingress_auth_signin
+    "nginx.ingress.kubernetes.io/auth-url"              = local.ingress_auth_url
     "nginx.ingress.kubernetes.io/configuration-snippet" = <<-EOT
       rewrite          ^\/[\w-]+(\/|$)(.*) /$2 break;
       set_escape_uri   $escaped_request_uri $request_uri;
@@ -23,10 +31,7 @@ locals {
         end
       }
     EOT
-    "nginx.ingress.kubernetes.io/auth-signin"           = format("https://%s/oauth2/start?rd=https://$host$escaped_request_uri", var.cluster_domain)
-    "nginx.ingress.kubernetes.io/auth-url"              = "http://oauth2-proxy.kube-system.svc.cluster.local:4180/oauth2/auth"
   }
-
 }
 
 ########################################################
@@ -73,8 +78,7 @@ resource "helm_release" "monitoring" {
       monitoring_namespace = kubernetes_namespace.monitoring.metadata[0].annotations.name
       odahu_infra_version  = var.odahu_infra_version
 
-      grafana_annotations = yamlencode({ annotations = local.ingress_nginx_annotations })
-      prom_annotations    = yamlencode({ annotations = local.ingress_nginx_annotations })
+      nginx_annotations = yamlencode({ annotations = local.ingress_nginx_annotations })
 
       cluster_domain          = var.cluster_domain
       prom_retention_time     = var.prom_retention_time
@@ -83,8 +87,10 @@ resource "helm_release" "monitoring" {
       grafana_admin           = var.grafana_admin
       grafana_pass            = var.grafana_pass
       grafana_storage_size    = var.grafana_storage_size
+      grafana_image_tag       = var.grafana_image_tag
       storage_class           = var.storage_class
       ingress_tls_secret_name = local.ingress_tls_secret_name
     })
   ]
+  depends_on = [kubernetes_secret.tls_monitoring]
 }
