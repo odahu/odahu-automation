@@ -10,7 +10,6 @@ variable "configuration" {
     enabled : bool,
     storage_size : string,
     replica_count : number,
-    password : string
   })
   description = "PostgreSQL configuration"
   default = {
@@ -18,7 +17,6 @@ variable "configuration" {
     enabled       = false
     storage_size  = "8Gi"
     replica_count = "2"
-    password      = "notasecret"
   }
 }
 

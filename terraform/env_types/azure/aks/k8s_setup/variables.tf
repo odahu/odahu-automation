@@ -212,13 +212,11 @@ variable "postgres" {
     enabled : bool,
     storage_size : string,
     replica_count : number,
-    password : string
   })
   default = {
     enabled       = true
     storage_size  = "8Gi"
     replica_count = 1
-    password      = "odahu"
     cluster_name  = "odahu-db"
   }
   description = "PostgreSQL configuration"
