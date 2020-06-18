@@ -1,5 +1,5 @@
 terraform {
-  version = "0.12.24"
+  version = "0.12.26"
 }
 
 providers {
