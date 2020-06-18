@@ -10,7 +10,8 @@ RUN apk --no-cache add git unzip && \
 
 COPY containers/terraform/terraform-bundle.hcl .
 
-RUN terraform-bundle package -os=linux -arch=amd64 terraform-bundle.hcl && \
+RUN sed -i "s/{TERRAFORM_VERSION}/${TERRAFORM_VERSION}/" terraform-bundle.hcl && \
+    terraform-bundle package -os=linux -arch=amd64 terraform-bundle.hcl && \
     mkdir -p terraform-bundle && \
     unzip -d terraform-bundle terraform_*.zip
 
@@ -20,8 +21,8 @@ FROM ubuntu:18.04
 
 ENV DEBIAN_FRONTEND=noninteractive \
     KUBECTL_VERSION=v1.16.10 \
-    TERRAGRUNT_VERSION=v0.23.4 \
-    HELM_VERSION=v3.1.2 \
+    TERRAGRUNT_VERSION=v0.23.27 \
+    HELM_VERSION=v3.2.4 \
     TF_PLUGIN_CACHE_DIR=/tmp/.terraform/cache
 
 # install system utilities

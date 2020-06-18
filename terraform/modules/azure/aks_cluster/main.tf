@@ -19,14 +19,32 @@ locals {
     var.allowed_ips
   )
 
-  default_node_pool     = var.node_pools["main"]
-  additional_node_pools = length(var.node_pools) > 1 ? { for key, value in var.node_pools : key => value if key != "main" } : map({})
-  default_nodes_count   = "1"
-  default_nodes_min     = "1"
-  default_nodes_max     = "2"
-  default_machine_type  = "Standard_B2s"
-  default_disk_size_gb  = "32"
-  default_pods_max      = "64"
+  default_node_pool = var.node_pools["main"]
+  additional_node_pools = length(var.node_pools) > 1 ? {
+    for key, value in var.node_pools : key => value if key != "main"
+  } : map({})
+
+  node_pools_spot_settings = length(var.node_pools) > 1 ? {
+    for key, value in var.node_pools :
+    key => tobool(lookup(value, "preemptible", false)) ? {
+      labels          = { "kubernetes.azure.com/scalesetpriority" = "spot" }
+      priority        = "Spot"
+      eviction_policy = "Delete"
+      spot_max_price  = 0.5
+      } : {
+      labels          = {}
+      priority        = "Regular"
+      eviction_policy = null
+      spot_max_price  = null
+    }
+  } : map({})
+
+  default_nodes_count  = "1"
+  default_nodes_min    = "1"
+  default_nodes_max    = "2"
+  default_machine_type = "Standard_B2s"
+  default_disk_size_gb = "32"
+  default_pods_max     = "32"
 }
 
 ########################################################
@@ -43,7 +61,7 @@ resource "azurerm_kubernetes_cluster" "aks" {
   node_resource_group = "${var.resource_group}-k8s"
   kubernetes_version  = var.k8s_version
 
-  private_link_enabled       = false
+  private_cluster_enabled    = false
   enable_pod_security_policy = false
   dns_prefix                 = var.aks_dns_prefix
 
@@ -81,8 +99,9 @@ resource "azurerm_kubernetes_cluster" "aks" {
       "${taint.key}=${taint.value}:${taint.effect}"
     ]
 
-    # Labels applied to only default pool, so are pretty useless for the moment
-    #node_labels = {}
+    node_labels = {
+      project = "odahu-flow"
+    }
     tags = var.aks_tags
   }
 
@@ -102,6 +121,18 @@ resource "azurerm_kubernetes_cluster" "aks" {
       enabled                    = var.aks_analytics_workspace_id == "" ? false : true
       log_analytics_workspace_id = var.aks_analytics_workspace_id == "" ? null : var.aks_analytics_workspace_id
     }
+  }
+
+  auto_scaler_profile {
+    balance_similar_node_groups      = false
+    max_graceful_termination_sec     = 600
+    scale_down_delay_after_add       = "10m"
+    scale_down_delay_after_delete    = "10s"
+    scale_down_delay_after_failure   = "3m"
+    scale_down_unneeded              = "10m"
+    scale_down_unready               = "20m"
+    scale_down_utilization_threshold = 0.5
+    scan_interval                    = "10s"
   }
 
   api_server_authorized_ip_ranges = local.allowed_nets
@@ -144,15 +175,24 @@ resource "azurerm_kubernetes_cluster_node_pool" "aks" {
 
   enable_auto_scaling = true
 
+  priority        = local.node_pools_spot_settings[each.key].priority
+  eviction_policy = local.node_pools_spot_settings[each.key].eviction_policy
+  spot_max_price  = local.node_pools_spot_settings[each.key].spot_max_price
+
   node_count = lookup(each.value, "init_node_count", local.default_nodes_count)
   min_count  = lookup(each.value, "min_node_count", local.default_nodes_min)
   max_count  = lookup(each.value, "max_node_count", local.default_nodes_max)
   max_pods   = lookup(each.value, "max_pods", local.default_pods_max)
 
   node_taints = [
-    for taint in lookup(each.value, "taints", []) :
-    "${taint.key}=${taint.value}:${taint.effect}"
+    for taint in lookup(each.value, "taints", []) : "${taint.key}=${taint.value}:${taint.effect}"
   ]
+
+  node_labels = merge(
+    { project = "odahu-flow" },
+    { for key, value in lookup(each.value, "labels", {}) : key => value },
+    local.node_pools_spot_settings[each.key].labels
+  )
 
   tags = var.aks_tags
 }
