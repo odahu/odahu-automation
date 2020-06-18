@@ -198,3 +198,11 @@ variable "airflow_enabled" {
 variable "helm_timeout" {
   default = "600"
 }
+
+variable "db" {
+  type = object({
+    enabled      = bool
+    cluster_name = string
+    db_name      = string
+  })
+}

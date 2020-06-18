@@ -6,17 +6,17 @@ variable "namespace" {
 
 variable "configuration" {
   type = object({
+    cluster_name : string,
     enabled : bool,
     storage_size : string,
     replica_count : number,
-    password : string
   })
   description = "PostgreSQL configuration"
   default = {
+    cluster_name  = "odahu-db"
     enabled       = false
     storage_size  = "8Gi"
     replica_count = "2"
-    password      = "notasecret"
   }
 }
 
