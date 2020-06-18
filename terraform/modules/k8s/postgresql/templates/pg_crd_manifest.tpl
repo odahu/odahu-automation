@@ -1,10 +1,10 @@
 apiVersion: "acid.zalan.do/v1"
 kind: postgresql
 metadata:
-  name: odahu-db
+  name: ${cluster_name}
   namespace: ${namespace}
 spec:
-  teamId: "odahu"
+  teamId: "${regex("^[[:alnum:]]+", cluster_name)}"
   volume:
     size: ${storage_size}
   numberOfInstances: ${replicas}

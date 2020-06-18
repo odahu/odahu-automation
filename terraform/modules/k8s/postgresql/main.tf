@@ -30,6 +30,7 @@ resource "local_file" "pg_cluster_manifest" {
     namespace    = kubernetes_namespace.pgsql[0].metadata[0].annotations.name
     storage_size = var.configuration.storage_size
     replicas     = var.configuration.replica_count
+    cluster_name = var.configuration.cluster_name
     databases    = var.databases
   })
   filename = "/tmp/pg_crd_manifest.yml"

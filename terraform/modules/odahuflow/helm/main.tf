@@ -1,3 +1,12 @@
+
+
+data "kubernetes_secret" "db_creds" {
+  metadata {
+    name      = "${var.db.db_name}.${var.db.cluster_name}.credentials.postgresql.acid.zalan.do"
+    namespace = "postgresql"
+  }
+}
+
 locals {
   ingress_tls_enabled     = var.tls_secret_crt != "" && var.tls_secret_key != ""
   url_schema              = local.ingress_tls_enabled ? "https" : "http"
@@ -38,10 +47,16 @@ locals {
   # Endpoint documentation https://oauth2-proxy.github.io/oauth2-proxy/endpoints#sign-out
   signout_url_redirect = "${local.url_schema}://${var.cluster_domain}/oauth2/sign_out?rd=${urlencode("${local.url_schema}://${var.cluster_domain}/dashboard")}"
 
+  db_host              = "${var.db.cluster_name}.postgresql"
+  db_user              = data.kubernetes_secret.db_creds.data.username
+  db_password          = data.kubernetes_secret.db_creds.data.password
+  db_connection_string = "postgresql://${local.db_user}:${local.db_password}@${local.db_host}/${var.db.db_name}"
+
   odahuflow_config = {
     common = {
-      version      = var.odahuflow_version
-      externalUrls = concat(local.default_external_urls, var.extra_external_urls)
+      version                  = var.odahuflow_version
+      externalUrls             = concat(local.default_external_urls, var.extra_external_urls)
+      databaseConnectionString = local.db_connection_string
     }
     users = {
       # Keycloak end_session_endpoint redirect
@@ -71,14 +86,15 @@ locals {
       }
     }
     training = {
-      toleration         = contains(keys(var.node_pools), "training") ? { Key = var.node_pools["training"].taints[0].key, Operator = "Equal", Value = var.node_pools["training"].taints[0].value, Effect = replace(var.node_pools["training"].taints[0].effect, "/(?i)no_?schedule/", "NoSchedule") } : null
-      nodeSelector       = contains(keys(var.node_pools), "training") ? { for key, value in var.node_pools["training"].labels : key => value } : null
-      gpuToleration      = contains(keys(var.node_pools), "training_gpu") ? { Key = var.node_pools["training_gpu"].taints[0].key, Operator = "Equal", Value = var.node_pools["training_gpu"].taints[0].value, Effect = replace(var.node_pools["training_gpu"].taints[0].effect, "/(?i)no_?schedule/", "NoSchedule") } : null
-      gpuNodeSelector    = contains(keys(var.node_pools), "training_gpu") ? { for key, value in var.node_pools["training_gpu"].labels : key => value } : null
-      namespace          = var.odahuflow_training_namespace
-      outputConnectionID = "models-output"
-      metricUrl          = "${local.url_schema}://${var.cluster_domain}/mlflow"
-      timeout            = length(var.odahuflow_training_timeout) == 0 ? null : var.odahuflow_training_timeout
+      toleration                         = contains(keys(var.node_pools), "training") ? { Key = var.node_pools["training"].taints[0].key, Operator = "Equal", Value = var.node_pools["training"].taints[0].value, Effect = replace(var.node_pools["training"].taints[0].effect, "/(?i)no_?schedule/", "NoSchedule") } : null
+      nodeSelector                       = contains(keys(var.node_pools), "training") ? { for key, value in var.node_pools["training"].labels : key => value } : null
+      gpuToleration                      = contains(keys(var.node_pools), "training_gpu") ? { Key = var.node_pools["training_gpu"].taints[0].key, Operator = "Equal", Value = var.node_pools["training_gpu"].taints[0].value, Effect = replace(var.node_pools["training_gpu"].taints[0].effect, "/(?i)no_?schedule/", "NoSchedule") } : null
+      gpuNodeSelector                    = contains(keys(var.node_pools), "training_gpu") ? { for key, value in var.node_pools["training_gpu"].labels : key => value } : null
+      namespace                          = var.odahuflow_training_namespace
+      outputConnectionID                 = "models-output"
+      metricUrl                          = "${local.url_schema}://${var.cluster_domain}/mlflow"
+      timeout                            = length(var.odahuflow_training_timeout) == 0 ? null : var.odahuflow_training_timeout
+      toolchainIntegrationRepositoryType = var.db.enabled ? "postgres" : "kubernetes"
     }
     trainer = {
       auth = {
@@ -95,10 +111,14 @@ locals {
       }
     }
     packaging = {
-      toleration         = contains(keys(var.node_pools), "packaging") ? { Key = var.node_pools["packaging"].taints[0].key, Operator = "Equal", Value = var.node_pools["packaging"].taints[0].value, Effect = replace(var.node_pools["packaging"].taints[0].effect, "/(?i)no_?schedule/", "NoSchedule") } : null
-      nodeSelector       = contains(keys(var.node_pools), "packaging") ? { for key, value in var.node_pools["packaging"].labels : key => value } : null
-      namespace          = var.odahuflow_packaging_namespace
-      outputConnectionID = "models-output"
+      toleration                         = contains(keys(var.node_pools), "packaging") ? { Key = var.node_pools["packaging"].taints[0].key, Operator = "Equal", Value = var.node_pools["packaging"].taints[0].value, Effect = replace(var.node_pools["packaging"].taints[0].effect, "/(?i)no_?schedule/", "NoSchedule") } : null
+      nodeSelector                       = contains(keys(var.node_pools), "packaging") ? { for key, value in var.node_pools["packaging"].labels : key => value } : null
+      namespace                          = var.odahuflow_packaging_namespace
+      outputConnectionID                 = "models-output"
+      packagingIntegrationRepositoryType = var.db.enabled ? "postgres" : "kubernetes"
+    }
+    migrate = {
+      enabled = var.db.enabled
     }
   }
   api_vault_volume = {

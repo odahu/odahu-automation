@@ -142,4 +142,9 @@ module "odahuflow_helm" {
   oauth_mesh_enabled          = var.oauth_mesh_enabled
   vault_enabled               = var.vault.enabled
   airflow_enabled             = var.airflow.enabled
+  db = {
+    enabled      = var.postgres.enabled
+    db_name      = var.odahu_database
+    cluster_name = var.postgres.cluster_name
+  }
 }
