@@ -150,6 +150,7 @@ spec:
             - --skip-nodes-with-system-pods=false
             - --expander=least-waste
             - --node-group-auto-discovery=asg:tag=k8s.io/cluster-autoscaler/enabled,k8s.io/cluster-autoscaler/${cluster_name}
+            - --balance-similar-node-groups
             - --cores-total=2:${cpu_max_limit}
             - --memory-total=8:${mem_max_limit}
           volumeMounts:
