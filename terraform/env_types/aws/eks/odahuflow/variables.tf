@@ -199,7 +199,6 @@ variable "examples_version" {
   description = "Wine examples version"
 }
 
-
 ########################
 # PostgreSQL
 ########################

@@ -1,6 +1,15 @@
-########################################################
-# Odahuflow setup
-########################################################
+module "postgresql" {
+  source = "../../../../modules/k8s/postgresql"
+
+  configuration = var.postgres
+  databases = [
+    "airflow",
+    "mlflow",
+    "jupyterhub",
+    var.odahu_database
+  ]
+}
+
 module "odahuflow_prereqs" {
   source       = "../../../../modules/odahuflow/prereqs/gke"
   project_id   = var.project_id
@@ -45,6 +54,14 @@ module "airflow" {
   odahu_airflow_plugin_version = var.odahu_airflow_plugin_version
   tls_secret_crt               = var.tls_crt
   tls_secret_key               = var.tls_key
+
+  pgsql = {
+    enabled     = var.postgres.enabled
+    db_host     = module.postgresql.pgsql_endpoint
+    db_name     = "airflow"
+    db_user     = module.postgresql.pgsql_credentials["airflow"].username
+    db_password = module.postgresql.pgsql_credentials["airflow"].password
+  }
 }
 
 module "fluentd" {
@@ -149,10 +166,11 @@ module "odahuflow_helm" {
   oauth_mesh_enabled          = var.oauth_mesh_enabled
   vault_enabled               = var.vault.enabled
   airflow_enabled             = var.airflow.enabled
-  db = {
-    enabled      = var.postgres.enabled
-    db_name      = var.odahu_database
-    cluster_name = var.postgres.cluster_name
+  pgsql = {
+    enabled     = var.postgres.enabled
+    db_host     = module.postgresql.pgsql_endpoint
+    db_name     = var.odahu_database
+    db_user     = module.postgresql.pgsql_credentials[var.odahu_database].username
+    db_password = module.postgresql.pgsql_credentials[var.odahu_database].password
   }
-
 }

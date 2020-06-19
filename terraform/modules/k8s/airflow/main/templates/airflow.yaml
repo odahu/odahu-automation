@@ -37,6 +37,7 @@ airflow:
 
   webReplicas: 1
 
+%{ if "${pgsql_db}" != "" ~}
   extraEnv:
     - name: POSTGRES_PASSWORD
       valueFrom:
@@ -45,6 +46,7 @@ airflow:
           key: postgresql-password
     - name: AIRFLOW__CORE__SQL_ALCHEMY_CONN
       value: postgresql://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@$(POSTGRES_HOST)/$(POSTGRES_DB)
+%{ endif ~}
 
   config:
     AIRFLOW__CORE__LOGGING_LEVEL: DEBUG
@@ -120,14 +122,16 @@ dags:
     mountPath: "/dags"
     syncSubPath: ""
   %{ endif }
+%{ if "${pgsql_db}" != "" ~}
 postgresql:
   enabled: false
   service:
     port: 5432
-  postgresUser: airflow
-  postgresHost: odahu-db.postgresql
-  postgresqlDatabase: airflow
+  postgresUser: ${pgsql_user}
+  postgresHost: ${pgsql_host}
+  postgresqlDatabase: ${pgsql_db}
   existingSecret: airflow-postgres
+%{ endif ~}
 
 redis:
   enabled: false

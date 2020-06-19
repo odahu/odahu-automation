@@ -1,12 +1,3 @@
-
-
-data "kubernetes_secret" "db_creds" {
-  metadata {
-    name      = "${var.db.db_name}.${var.db.cluster_name}.credentials.postgresql.acid.zalan.do"
-    namespace = "postgresql"
-  }
-}
-
 locals {
   ingress_tls_enabled     = var.tls_secret_crt != "" && var.tls_secret_key != ""
   url_schema              = local.ingress_tls_enabled ? "https" : "http"
@@ -47,10 +38,7 @@ locals {
   # Endpoint documentation https://oauth2-proxy.github.io/oauth2-proxy/endpoints#sign-out
   signout_url_redirect = "${local.url_schema}://${var.cluster_domain}/oauth2/sign_out?rd=${urlencode("${local.url_schema}://${var.cluster_domain}/dashboard")}"
 
-  db_host              = "${var.db.cluster_name}.postgresql"
-  db_user              = data.kubernetes_secret.db_creds.data.username
-  db_password          = data.kubernetes_secret.db_creds.data.password
-  db_connection_string = "postgresql://${local.db_user}:${local.db_password}@${local.db_host}/${var.db.db_name}"
+  db_connection_string = var.pgsql.enabled ? "postgresql://${var.pgsql.db_user}:${var.pgsql.db_password}@${var.pgsql.db_host}/${var.pgsql.db_name}" : null
 
   odahuflow_config = {
     common = {
@@ -94,7 +82,7 @@ locals {
       outputConnectionID                 = "models-output"
       metricUrl                          = "${local.url_schema}://${var.cluster_domain}/mlflow"
       timeout                            = length(var.odahuflow_training_timeout) == 0 ? null : var.odahuflow_training_timeout
-      toolchainIntegrationRepositoryType = var.db.enabled ? "postgres" : "kubernetes"
+      toolchainIntegrationRepositoryType = var.pgsql.enabled ? "postgres" : "kubernetes"
     }
     trainer = {
       auth = {
@@ -115,10 +103,10 @@ locals {
       nodeSelector                       = contains(keys(var.node_pools), "packaging") ? { for key, value in var.node_pools["packaging"].labels : key => value } : null
       namespace                          = var.odahuflow_packaging_namespace
       outputConnectionID                 = "models-output"
-      packagingIntegrationRepositoryType = var.db.enabled ? "postgres" : "kubernetes"
+      packagingIntegrationRepositoryType = var.pgsql.enabled ? "postgres" : "kubernetes"
     }
     migrate = {
-      enabled = var.db.enabled
+      enabled = var.pgsql.enabled
     }
   }
   api_vault_volume = {
@@ -430,6 +418,6 @@ resource "helm_release" "odahu_ui" {
   ]
 
   depends_on = [
-    helm_release.odahuflow,
+    helm_release.odahuflow
   ]
 }
