@@ -106,9 +106,3 @@ module "vault" {
   source        = "../../../../modules/k8s/vault"
   configuration = var.vault
 }
-
-module "postgresql" {
-  source        = "../../../../modules/k8s/postgresql"
-  configuration = var.postgres
-  databases     = ["airflow", "mlflow", "jupyterhub", var.odahu_database]
-}

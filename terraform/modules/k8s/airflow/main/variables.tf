@@ -69,20 +69,20 @@ variable "oauth_oidc_token_endpoint" {
 variable "service_account" {
   description = "Service account that Airflow should use to connect ODAHU"
   type = object({
-    client_id : string
-    client_secret : string
+    client_id     = string
+    client_secret = string
   })
 }
 
 variable "configuration" {
   type = object({
-    enabled : bool,
-    storage_size : string,
-    log_storage_size : string,
-    fernet_key : string,
-    dag_repo : string,
-    dag_bucket : string,
-    dag_bucket_path : string
+    enabled          = bool
+    storage_size     = string
+    log_storage_size = string
+    fernet_key       = string
+    dag_repo         = string
+    dag_bucket       = string
+    dag_bucket_path  = string
   })
   description = "Airflow configuration"
 }
@@ -95,4 +95,22 @@ variable "examples_version" {
 variable "helm_timeout" {
   default = "500"
   type    = string
+}
+
+variable "pgsql" {
+  type = object({
+    enabled     = bool
+    db_host     = string
+    db_name     = string
+    db_user     = string
+    db_password = string
+  })
+  default = {
+    enabled     = false
+    db_host     = ""
+    db_name     = ""
+    db_user     = ""
+    db_password = ""
+  }
+  description = "PostgreSQL settings for Airflow"
 }
