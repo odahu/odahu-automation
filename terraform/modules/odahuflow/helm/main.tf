@@ -62,26 +62,57 @@ locals {
       }
     }
     deployment = {
-      toleration                = contains(keys(var.node_pools), "model_deployment") ? { Key = var.node_pools["model_deployment"].taints[0].key, Operator = "Equal", Value = var.node_pools["model_deployment"].taints[0].value, Effect = replace(var.node_pools["model_deployment"].taints[0].effect, "/(?i)no_?schedule/", "NoSchedule") } : null
-      nodeSelector              = contains(keys(var.node_pools), "model_deployment") ? { for key, value in var.node_pools["model_deployment"].labels : key => value } : null
+      toleration = contains(keys(var.node_pools), "model_deployment") ? {
+        Key      = var.node_pools["model_deployment"].taints[0].key
+        Operator = "Equal"
+        Value    = var.node_pools["model_deployment"].taints[0].value
+        Effect   = replace(var.node_pools["model_deployment"].taints[0].effect, "/(?i)no_?schedule/", "NoSchedule")
+      } : null
+
+      nodeSelector = contains(keys(var.node_pools), "model_deployment") ? {
+        for key, value in var.node_pools["model_deployment"].labels : key => value
+      } : null
+
       defaultDockerPullConnName = local.default_model_docker_connection_id
+
+      namespace = var.odahuflow_deployment_namespace
+
       edge = {
         host = "${local.url_schema}://${var.cluster_domain}"
       }
-      namespace = var.odahuflow_deployment_namespace
+
       security = {
         jwks = var.model_deployment_jws_configuration
       }
     }
     training = {
-      toleration                         = contains(keys(var.node_pools), "training") ? { Key = var.node_pools["training"].taints[0].key, Operator = "Equal", Value = var.node_pools["training"].taints[0].value, Effect = replace(var.node_pools["training"].taints[0].effect, "/(?i)no_?schedule/", "NoSchedule") } : null
-      nodeSelector                       = contains(keys(var.node_pools), "training") ? { for key, value in var.node_pools["training"].labels : key => value } : null
-      gpuToleration                      = contains(keys(var.node_pools), "training_gpu") ? { Key = var.node_pools["training_gpu"].taints[0].key, Operator = "Equal", Value = var.node_pools["training_gpu"].taints[0].value, Effect = replace(var.node_pools["training_gpu"].taints[0].effect, "/(?i)no_?schedule/", "NoSchedule") } : null
-      gpuNodeSelector                    = contains(keys(var.node_pools), "training_gpu") ? { for key, value in var.node_pools["training_gpu"].labels : key => value } : null
-      namespace                          = var.odahuflow_training_namespace
-      outputConnectionID                 = "models-output"
-      metricUrl                          = "${local.url_schema}://${var.cluster_domain}/mlflow"
-      timeout                            = length(var.odahuflow_training_timeout) == 0 ? null : var.odahuflow_training_timeout
+      toleration = contains(keys(var.node_pools), "training") ? {
+        Key      = var.node_pools["training"].taints[0].key
+        Operator = "Equal"
+        Value    = var.node_pools["training"].taints[0].value
+        Effect   = replace(var.node_pools["training"].taints[0].effect, "/(?i)no_?schedule/", "NoSchedule")
+      } : null
+
+      nodeSelector = contains(keys(var.node_pools), "training") ? {
+        for key, value in var.node_pools["training"].labels : key => value
+      } : null
+
+      gpuToleration = contains(keys(var.node_pools), "training_gpu") ? {
+        Key      = var.node_pools["training_gpu"].taints[0].key
+        Operator = "Equal"
+        Value    = var.node_pools["training_gpu"].taints[0].value
+        Effect   = replace(var.node_pools["training_gpu"].taints[0].effect, "/(?i)no_?schedule/", "NoSchedule")
+      } : null
+
+      gpuNodeSelector = contains(keys(var.node_pools), "training_gpu") ? {
+        for key, value in var.node_pools["training_gpu"].labels : key => value
+      } : null
+
+      namespace          = var.odahuflow_training_namespace
+      outputConnectionID = "models-output"
+      metricUrl          = "${local.url_schema}://${var.cluster_domain}/mlflow"
+      timeout            = length(var.odahuflow_training_timeout) == 0 ? null : var.odahuflow_training_timeout
+
       toolchainIntegrationRepositoryType = var.pgsql.enabled ? "postgres" : "kubernetes"
     }
     trainer = {
@@ -99,10 +130,20 @@ locals {
       }
     }
     packaging = {
-      toleration                         = contains(keys(var.node_pools), "packaging") ? { Key = var.node_pools["packaging"].taints[0].key, Operator = "Equal", Value = var.node_pools["packaging"].taints[0].value, Effect = replace(var.node_pools["packaging"].taints[0].effect, "/(?i)no_?schedule/", "NoSchedule") } : null
-      nodeSelector                       = contains(keys(var.node_pools), "packaging") ? { for key, value in var.node_pools["packaging"].labels : key => value } : null
-      namespace                          = var.odahuflow_packaging_namespace
-      outputConnectionID                 = "models-output"
+      toleration = contains(keys(var.node_pools), "packaging") ? {
+        Key      = var.node_pools["packaging"].taints[0].key
+        Operator = "Equal"
+        Value    = var.node_pools["packaging"].taints[0].value
+        Effect   = replace(var.node_pools["packaging"].taints[0].effect, "/(?i)no_?schedule/", "NoSchedule")
+      } : null
+
+      nodeSelector = contains(keys(var.node_pools), "packaging") ? {
+        for key, value in var.node_pools["packaging"].labels : key => value
+      } : null
+
+      namespace          = var.odahuflow_packaging_namespace
+      outputConnectionID = "models-output"
+
       packagingIntegrationRepositoryType = var.pgsql.enabled ? "postgres" : "kubernetes"
     }
     migrate = {
@@ -114,16 +155,16 @@ locals {
     mount_path = "/vault/tls"
   }
   api_config = {
-    replicas = 2,
+    replicas = 2
     env = var.vault_enabled ? {
       VAULT_CACERT = join("/", [local.api_vault_volume.mount_path, "ca.crt"])
-    } : {},
+    } : {}
     volumeMounts = var.vault_enabled ? [
       {
         name      = local.api_vault_volume.name,
         mountPath = local.api_vault_volume.mount_path,
       }
-    ] : [],
+    ] : []
     volumes = var.vault_enabled ? [
       {
         name = local.api_vault_volume.name,
@@ -131,7 +172,7 @@ locals {
           secretName = local.vault_tls_secret_name
         }
       }
-    ] : [],
+    ] : []
   }
 
   odahu_docker_creds_present = length(var.docker_username) != 0 && length(var.docker_password) != 0
