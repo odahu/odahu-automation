@@ -115,9 +115,9 @@ variable "odahuflow_training_timeout" {
 variable "extra_external_urls" {
   default = []
   type = list(object({
-    name     = string,
-    url      = string,
-    imageUrl = string,
+    name     = string
+    url      = string
+    imageUrl = string
   }))
 }
 
@@ -152,16 +152,15 @@ variable "model_deployment_jws_configuration" {
 
 variable "resource_uploader_sa" {
   type = object({
-    client_id : string
-    client_secret : string
+    client_id     = string
+    client_secret = string
   })
 }
 
-
 variable "operator_sa" {
   type = object({
-    client_id : string
-    client_secret : string
+    client_id     = string
+    client_secret = string
   })
 }
 
@@ -199,10 +198,20 @@ variable "helm_timeout" {
   default = "600"
 }
 
-variable "db" {
+variable "pgsql" {
   type = object({
-    enabled      = bool
-    cluster_name = string
-    db_name      = string
+    enabled     = bool
+    db_host     = string
+    db_name     = string
+    db_user     = string
+    db_password = string
   })
+  default = {
+    enabled     = false
+    db_host     = ""
+    db_name     = ""
+    db_user     = ""
+    db_password = ""
+  }
+  description = "PostgreSQL settings for ODAHU flow services"
 }

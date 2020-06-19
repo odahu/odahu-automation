@@ -204,22 +204,22 @@ variable "vault" {
 ########################
 variable "airflow" {
   default = {
-    enabled : false,
-    storage_size : "1Gi",
-    log_storage_size : "1Gi",
-    fernet_key : "changeme",
-    dag_repo : "https://github.com/odahu/odahu-examples.git",
-    dag_bucket : "",
-    dag_bucket_path : ""
+    enabled          = false
+    storage_size     = "1Gi"
+    log_storage_size = "1Gi"
+    fernet_key       = "changeme"
+    dag_repo         = "https://github.com/odahu/odahu-examples.git"
+    dag_bucket       = ""
+    dag_bucket_path  = ""
   }
   type = object({
-    enabled : bool,
-    storage_size : string,
-    log_storage_size : string,
-    fernet_key : string,
-    dag_repo : string,
-    dag_bucket : string,
-    dag_bucket_path : string
+    enabled          = bool
+    storage_size     = string
+    log_storage_size = string
+    fernet_key       = string
+    dag_repo         = string
+    dag_bucket       = string
+    dag_bucket_path  = string
   })
 
   description = "Airflow configuration"
@@ -237,16 +237,15 @@ variable "examples_version" {
   description = "Wine examples version"
 }
 
-
 ########################
 # PostgreSQL
 ########################
 variable "postgres" {
   type = object({
-    cluster_name : string,
-    enabled : bool,
-    storage_size : string,
-    replica_count : number,
+    cluster_name  = string
+    enabled       = bool
+    storage_size  = string
+    replica_count = number
   })
   default = {
     enabled       = true
@@ -258,6 +257,6 @@ variable "postgres" {
 }
 
 variable "odahu_database" {
-  description = "Name of database for ODAHU entities"
   type        = string
+  description = "Name of database for ODAHU entities"
 }

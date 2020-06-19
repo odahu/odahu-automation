@@ -57,6 +57,7 @@ locals {
 }
 
 resource "kubernetes_namespace" "airflow" {
+  count = var.configuration.enabled ? 1 : 0
   metadata {
     annotations = {
       name = var.namespace
@@ -65,38 +66,34 @@ resource "kubernetes_namespace" "airflow" {
   }
 }
 
-data "kubernetes_secret" "postgres" {
-  metadata {
-    name      = "airflow.odahu-db.credentials.postgresql.acid.zalan.do"
-    namespace = "postgresql"
-  }
-  depends_on = [kubernetes_namespace.airflow]
-}
-
 resource "kubernetes_secret" "postgres" {
-  count = var.configuration.enabled ? 1 : 0
+  count = var.configuration.enabled && var.pgsql.enabled ? 1 : 0
 
   metadata {
     name      = "airflow-postgres"
-    namespace = kubernetes_namespace.airflow.metadata[0].annotations.name
+    namespace = var.namespace
   }
   data = {
-    "postgresql-password" = data.kubernetes_secret.postgres.data.password
+    "postgresql-password" = var.pgsql.db_password
   }
   type = "Opaque"
+
+  depends_on = [kubernetes_namespace.airflow[0]]
 }
 
 resource "kubernetes_secret" "airflow_tls" {
   count = var.configuration.enabled && local.ingress_tls_enabled ? 1 : 0
   metadata {
     name      = local.ingress_tls_secret_name
-    namespace = kubernetes_namespace.airflow.metadata[0].annotations.name
+    namespace = var.namespace
   }
   data = {
     "tls.key" = var.tls_secret_key
     "tls.crt" = var.tls_secret_crt
   }
   type = "kubernetes.io/tls"
+
+  depends_on = [kubernetes_namespace.airflow[0]]
 }
 
 module "docker_credentials" {
@@ -104,7 +101,7 @@ module "docker_credentials" {
   docker_repo     = var.docker_repo
   docker_username = var.docker_username
   docker_password = var.docker_password
-  namespaces      = [kubernetes_namespace.airflow.metadata[0].annotations.name]
+  namespaces      = [kubernetes_namespace.airflow[0].metadata[0].annotations.name]
 }
 
 resource "helm_release" "airflow" {
@@ -112,27 +109,32 @@ resource "helm_release" "airflow" {
   name       = "airflow"
   chart      = "airflow"
   version    = local.airflow_helm_version
-  namespace  = kubernetes_namespace.airflow.metadata[0].annotations.name
+  namespace  = var.namespace
   repository = local.airflow_helm_repo
   timeout    = var.helm_timeout
 
   values = [
     templatefile("${path.module}/templates/airflow.yaml", {
-      airflow_variables            = jsonencode(var.airflow_variables)
-      cluster_domain               = var.cluster_domain
-      ingress                      = yamlencode({ ingress = local.ingress_config })
-      docker_repo                  = var.docker_repo
-      dag_repo                     = var.configuration.dag_repo
-      dag_rev                      = var.examples_version
-      fernet_key                   = var.configuration.fernet_key
-      wine_conn                    = jsonencode(var.wine_connection)
-      log_storage_size             = var.configuration.log_storage_size
-      namespace                    = kubernetes_namespace.airflow.metadata[0].annotations.name
-      odahu_conn                   = jsonencode(local.odahu_conn)
+      airflow_variables = jsonencode(var.airflow_variables)
+      cluster_domain    = var.cluster_domain
+      ingress           = yamlencode({ ingress = local.ingress_config })
+      docker_repo       = var.docker_repo
+      dag_repo          = var.configuration.dag_repo
+      dag_rev           = var.examples_version
+      fernet_key        = var.configuration.fernet_key
+      wine_conn         = jsonencode(var.wine_connection)
+      log_storage_size  = var.configuration.log_storage_size
+      namespace         = var.namespace
+      odahu_conn        = jsonencode(local.odahu_conn)
+      storage_size      = var.configuration.storage_size
+
       odahu_airflow_plugin_version = var.odahu_airflow_plugin_version
-      storage_size                 = var.configuration.storage_size
+
+      pgsql_db   = var.pgsql.db_name
+      pgsql_user = var.pgsql.db_user
+      pgsql_host = var.pgsql.db_host
     })
   ]
 
-  depends_on = [kubernetes_secret.postgres]
+  depends_on = [kubernetes_namespace.airflow[0]]
 }
