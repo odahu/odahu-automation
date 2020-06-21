@@ -1,66 +1,66 @@
 variable "tls_secret_crt" {
-  description = "ODAHU flow cluster TLS certificate"
   type        = string
+  description = "ODAHU flow cluster TLS certificate"
 }
 
 variable "tls_secret_key" {
-  description = "ODAHU flow cluster TLS key"
   type        = string
+  description = "ODAHU flow cluster TLS key"
 }
 
 variable "istio_version" {
-  default = "1.4.4"
   type    = string
+  default = "1.4.4"
 }
 
 variable "istio_namespace" {
+  type        = string
   default     = "istio-system"
   description = "Istio namespace"
-  type        = string
 }
 
 variable "monitoring_namespace" {
+  type        = string
   default     = "kube-monitoring"
   description = "Monitoring namespace"
-  type        = string
 }
 
 variable "knative_namespace" {
+  type        = string
   default     = "knative-serving"
   description = "Knative namespace"
-  type        = string
 }
 
 variable "odahu_infra_version" {
-  description = "ODAHU flow infra release version"
   type        = string
+  description = "ODAHU flow infra release version"
 }
 
 variable "helm_repo" {
+  type        = string
   description = "ODAHU flow helm repo"
-  type        = string
-}
-
-variable "docker_repo" {
-  default     = ""
-  description = "ODAHU flow docker repo URL"
-  type        = string
-}
-
-variable "docker_username" {
-  default     = ""
-  description = "ODAHU flow docker repo username"
-  type        = string
-}
-
-variable "docker_password" {
-  default     = ""
-  description = "ODAHU flow docker repo password"
-  type        = string
 }
 
 variable "helm_timeout" {
-  default     = "600"
-  description = "Helm charts installation timeout in seconds"
+  type        = number
+  default     = 600
+  description = "Helm chart deploy timeout in seconds"
+}
+
+variable "docker_repo" {
   type        = string
+  default     = ""
+  description = "ODAHU flow docker repo URL"
+}
+
+variable "docker_username" {
+  type        = string
+  default     = ""
+  description = "ODAHU flow docker repo username"
+}
+
+variable "docker_password" {
+  type        = string
+  default     = ""
+  description = "ODAHU flow docker repo password"
 }

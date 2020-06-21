@@ -1,13 +1,16 @@
 variable "project_id" {
+  type        = string
   description = "Target project id"
 }
 
 variable "cluster_name" {
+  type        = string
   default     = "odahuflow"
-  description = "Odahuflow cluster name"
+  description = "ODAHU flow cluster name"
 }
 
 variable "service_account_iam_roles" {
+  type = list(string)
   default = [
     "roles/logging.logWriter",
     "roles/monitoring.metricWriter",

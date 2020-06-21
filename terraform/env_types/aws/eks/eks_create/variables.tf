@@ -3,12 +3,7 @@
 ##################
 variable "cluster_name" {
   type        = string
-  description = "Odahuflow cluster name"
-}
-
-variable "infra_cidr" {
-  type        = string
-  description = "Infrastructure network CIDR to peering with"
+  description = "ODAHU flow cluster name"
 }
 
 variable "k8s_version" {
@@ -20,12 +15,6 @@ variable "k8s_version" {
 variable "allowed_ips" {
   type        = list(string)
   description = "CIDR list to allow access from"
-}
-
-variable "agent_cidr" {
-  type        = string
-  default     = "0.0.0.0/0"
-  description = "Jenkins agent CIDR to allow access for CI jobs or your WAN address in case of locla run"
 }
 
 ##################
@@ -69,6 +58,7 @@ variable "nat_subnet_cidr" {
 # Node pool
 #############
 variable "node_pools" {
+  type        = any
   default     = {}
   description = "Default node pool configuration"
 }
@@ -83,12 +73,13 @@ variable "bastion_enabled" {
 }
 
 variable "bastion_machine_type" {
-  type    = string
-  default = "f1-micro"
+  type        = string
+  default     = "f1-micro"
+  description = "Bastion host VM type"
 }
 
 variable "bastion_hostname" {
   type        = string
   default     = "bastion"
-  description = "bastion hostname"
+  description = "Bastion hostname"
 }

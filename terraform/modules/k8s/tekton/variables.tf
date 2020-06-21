@@ -1,16 +1,21 @@
 variable "helm_repo" {
-  description = "Odahuflow helm repo"
+  type        = string
+  description = "ODAHU flow helm repo"
 }
 
 variable "odahu_infra_version" {
-  description = "Odahuflow infra release version"
+  type        = string
+  description = "ODAHU flow infra release version"
 }
 
 variable "namespace" {
-  description = "Tekton namespace"
+  type        = string
   default     = "tekton-pipelines"
+  description = "Tekton namespace"
 }
 
 variable "helm_timeout" {
-  default = "600"
+  type        = number
+  default     = 600
+  description = "Helm chart deploy timeout in seconds"
 }

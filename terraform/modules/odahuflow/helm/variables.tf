@@ -3,41 +3,56 @@
 ####################
 
 variable "helm_repo" {
-  description = "Odahuflow helm repo"
+  type        = string
+  description = "ODAHU flow helm repo"
+}
+
+variable "helm_timeout" {
+  type        = number
+  default     = 600
+  description = "Helm chart deploy timeout in seconds"
 }
 
 variable "docker_repo" {
-  description = "Odahuflow Docker repo url"
+  type        = string
+  description = "ODAHU flow Docker repo url"
 }
 
 variable "docker_secret_name" {
+  type        = string
   default     = "repo-json-key"
-  description = "Odahuflow Docker repo secret name to create"
+  description = "ODAHU flow Docker repo secret name to create"
 }
 
 variable "docker_username" {
+  type        = string
   default     = ""
-  description = "Odahuflow Docker repo username"
+  description = "ODAHU flow Docker repo username"
 }
 
 variable "docker_password" {
+  type        = string
   default     = ""
-  description = "Odahuflow Docker repo password"
+  description = "ODAHU flow Docker repo password"
 }
 
 variable "odahuflow_version" {
-  description = "Odahuflow release version"
+  type        = string
+  description = "ODAHU flow release version"
 }
 
 variable "packager_version" {
+  type        = string
   description = "Packager version"
 }
 
 variable "mlflow_toolchain_version" {
+  type        = string
   description = "Version of odahu-flow-mlflow helm chart"
 }
 
 variable "odahu_ui_version" {
+  type        = string
   description = "Version of odahu-ui helm chart"
 }
 
@@ -46,17 +61,20 @@ variable "odahu_ui_version" {
 ###############
 
 variable "cluster_domain" {
-  description = "Odahuflow cluster domain"
+  type        = string
+  description = "ODAHU flow cluster domain"
 }
 
 variable "tls_secret_crt" {
-  description = "Odahuflow cluster TLS certificate"
+  type        = string
   default     = ""
+  description = "ODAHU flow cluster TLS certificate"
 }
 
 variable "tls_secret_key" {
-  description = "Odahuflow cluster TLS key"
+  type        = string
   default     = ""
+  description = "ODAHU flow cluster TLS key"
 }
 
 ##################
@@ -64,61 +82,68 @@ variable "tls_secret_key" {
 ##################
 
 variable "odahuflow_namespace" {
+  type        = string
   default     = "odahu-flow"
-  description = "odahu-flow k8s namespace"
+  description = "ODAHU flow k8s namespace"
 }
 
 variable "odahuflow_training_namespace" {
+  type        = string
   default     = "odahu-flow-training"
-  description = "odahu-flow training k8s namespace"
+  description = "ODAHU flow training k8s namespace"
 }
 
 variable "odahuflow_packaging_namespace" {
+  type        = string
   default     = "odahu-flow-packaging"
-  description = "odahu-flow packaging k8s namespace"
+  description = "ODAHU flow packaging k8s namespace"
 }
 
 variable "odahuflow_deployment_namespace" {
+  type        = string
   default     = "odahu-flow-deployment"
-  description = "odahu-flow deployment k8s namespace"
+  description = "ODAHU flow deployment k8s namespace"
 }
 
 variable "vault_namespace" {
+  type        = string
   default     = "vault"
   description = "Vault namespace"
 }
 
 variable "fluentd_namespace" {
+  type        = string
   default     = "fluentd"
   description = "Fluentd namespace"
 }
 
 ##################
-# Odahuflow app
+# ODAHU flow app
 ##################
 
 variable "odahuflow_connections" {
+  type        = any
   default     = []
-  description = "TODO"
+  description = "Initial list of ODAHU flow connections (https://docs.odahu.org/ref_connections.html)"
 }
 
 ##################
-# Odahuflow config
+# ODAHU flow config
 ##################
 
 variable "odahuflow_training_timeout" {
+  type        = string
   default     = ""
   description = "ODAHU Flow maximum timeout for model training process (example: '24h')"
-  type        = string
 }
 
 variable "extra_external_urls" {
-  default = []
   type = list(object({
     name     = string
     url      = string
     imageUrl = string
   }))
+  default = []
 }
 
 variable "connection_vault_configuration" {
@@ -135,6 +160,7 @@ variable "connection_vault_configuration" {
 }
 
 variable "node_pools" {
+  type = any
 }
 
 variable "model_deployment_jws_configuration" {
@@ -192,10 +218,6 @@ variable "vault_enabled" {
 variable "airflow_enabled" {
   type        = bool
   description = "Is Airflow deployment enabled"
-}
-
-variable "helm_timeout" {
-  default = "600"
 }
 
 variable "pgsql" {

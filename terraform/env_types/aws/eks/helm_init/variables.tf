@@ -1,11 +1,14 @@
 variable "config_context_auth_info" {
+  type        = string
   description = "Kubernetes cluster context auth"
 }
 
 variable "config_context_cluster" {
+  type        = string
   description = "Kubernetes cluster context name"
 }
 
 variable "helm_repo" {
-  description = "Odahuflow helm repo"
+  type        = string
+  description = "ODAHU flow helm repo"
 }

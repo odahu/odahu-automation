@@ -1,7 +1,7 @@
 variable "cluster_name" {
-  default     = "odahuflow"
   type        = string
-  description = "Odahuflow cluster name"
+  default     = "odahuflow"
+  description = "ODAHU flow cluster name"
 }
 
 variable "resource_group" {
@@ -10,6 +10,7 @@ variable "resource_group" {
 }
 
 variable "location" {
+  type        = string
   description = "Azure location"
 }
 

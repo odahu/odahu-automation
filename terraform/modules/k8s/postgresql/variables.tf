@@ -1,7 +1,7 @@
 variable "namespace" {
   type        = string
-  description = "PostgreSQL operator namespace"
   default     = "postgresql"
+  description = "PostgreSQL operator namespace"
 }
 
 variable "configuration" {
@@ -22,11 +22,12 @@ variable "configuration" {
 
 variable "databases" {
   type        = list(string)
-  description = "List of PostgreSQL databases to be created on cluster init"
   default     = []
+  description = "List of PostgreSQL databases to be created on cluster init"
 }
 
 variable "helm_timeout" {
-  type    = string
-  default = "600"
+  type        = number
+  default     = 600
+  description = "Helm chart deploy timeout in seconds"
 }

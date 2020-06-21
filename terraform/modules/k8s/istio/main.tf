@@ -38,14 +38,6 @@ resource "null_resource" "delay" {
   depends_on = [helm_release.istio-init]
 }
 
-data "template_file" "istio_values" {
-  template = file("${path.module}/templates/istio.yaml")
-  vars = {
-    monitoring_namespace    = var.monitoring_namespace
-    ingress_tls_secret_name = local.ingress_tls_secret_name
-  }
-}
-
 resource "helm_release" "istio" {
   name       = "istio"
   chart      = "istio/istio"
@@ -55,7 +47,10 @@ resource "helm_release" "istio" {
   timeout    = var.helm_timeout
 
   values = [
-    data.template_file.istio_values.rendered,
+    templatefile("${path.module}/templates/istio.yaml", {
+      monitoring_namespace    = var.monitoring_namespace,
+      ingress_tls_secret_name = local.ingress_tls_secret_name
+    })
   ]
 
   depends_on = [null_resource.delay]
@@ -99,5 +94,10 @@ module "docker_credentials" {
   docker_username = var.docker_username
   docker_password = var.docker_password
   namespaces      = [helm_release.istio.namespace]
-  sa_list         = ["istio-ingressgateway-service-account", "istio-citadel-service-account", "istio-init-service-account", "default"]
+  sa_list = [
+    "istio-ingressgateway-service-account",
+    "istio-citadel-service-account",
+    "istio-init-service-account",
+    "default"
+  ]
 }

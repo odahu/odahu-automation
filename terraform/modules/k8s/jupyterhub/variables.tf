@@ -1,44 +1,53 @@
 variable "docker_repo" {
-  description = "Odahuflow Docker repo url"
+  type        = string
+  description = "ODAHU flow Docker repo url"
 }
 
 variable "docker_username" {
+  type        = string
   default     = ""
-  description = "Odahuflow Docker repo username"
+  description = "ODAHU flow Docker repo username"
 }
 
 variable "docker_password" {
+  type        = string
   default     = ""
-  description = "Odahuflow Docker repo password"
+  description = "ODAHU flow Docker repo password"
 }
 
 variable "docker_tag" {
+  type        = string
   description = "Tag of Docker containers used as JupyterHub Notebooks"
 }
 
 variable "jupyterhub_enabled" {
-  default     = false
   type        = bool
+  default     = false
   description = "Flag to install JupyterHub (true) or not (false)"
 }
 
 variable "jupyterhub_namespace" {
-  default = "jupyterhub"
+  type        = string
+  default     = "jupyterhub"
+  description = "JupyterHub Kubernetes namespace"
 }
 
 variable "jupyterhub_helm_repo" {
-  description = "Jupyterhub helm repo address"
+  type        = string
+  description = "JupyterHub helm repo address"
   default     = "https://jupyterhub.github.io/helm-chart/"
 }
 
 variable "jupyterhub_chart_version" {
-  description = "Jupyterhub chart version"
+  type        = string
   default     = "0.8.2"
+  description = "JupyterHub chart version"
 }
 
 variable "jupyterhub_secret_token" {
-  description = "Jupyterhub secret token"
+  type        = string
   default     = ""
+  description = "JupyterHub secret token"
 }
 
 variable "jupyterhub_culling_enabled" {
@@ -54,41 +63,51 @@ variable "jupyterhub_puller_enabled" {
 }
 
 variable "jupyterhub_culling_timeout" {
-  default     = "1200"
+  type        = number
+  default     = 1200
   description = "Time in seconds of the user's browser inactivity which is defined as no response by JupyterHub"
 }
 
 variable "jupyterhub_culling_frequency" {
-  default     = "300"
+  type        = number
+  default     = 300
   description = "Period in seconds with which JupyterHub pings browser session to check whether it is open"
 }
 
 variable "oauth_client_id" {
+  type        = string
   description = "OAuth 2 Client ID"
 }
 
 variable "oauth_client_secret" {
+  type        = string
   description = "OAuth 2 Client Secret"
 }
 
 variable "oauth_oidc_issuer_url" {
+  type        = string
   description = "OAuth 2 JWT token issuer"
 }
 
 variable "cluster_domain" {
-  description = "Odahuflow cluster domain"
+  type        = string
+  description = "ODAHU flow cluster domain"
 }
 
 variable "tls_secret_crt" {
-  description = "Ingress TLS certificate"
+  type        = string
   default     = ""
+  description = "Ingress TLS certificate"
 }
 
 variable "tls_secret_key" {
-  description = "Ingress TLS key"
+  type        = string
   default     = ""
+  description = "Ingress TLS key"
 }
 
 variable "helm_timeout" {
-  default = "900"
+  type        = number
+  default     = 900
+  description = "Helm chart deploy timeout in seconds"
 }

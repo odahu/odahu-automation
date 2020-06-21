@@ -35,7 +35,7 @@ resource "local_file" "pg_cluster" {
     cluster_name = var.configuration.cluster_name
     databases    = var.databases
   })
-  filename = "/tmp/.odahu/pg_crd_manifest.yml"
+  filename = "/tmp/.odahu/pg_cluster.yml"
 
   file_permission      = 0644
   directory_permission = 0755
