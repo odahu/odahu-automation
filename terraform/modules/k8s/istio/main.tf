@@ -1,5 +1,19 @@
 locals {
   ingress_tls_secret_name = "odahu-flow-tls"
+
+  kubecmd = <<-EOT
+    kubectl get crds gateways.networking.istio.io &&
+     kubectl get crds envoyfilters.networking.istio.io &&
+     kubectl get crds policies.authentication.istio.io &&
+     kubectl get crds destinationrules.networking.istio.io &&
+     kubectl get crds virtualservices.networking.istio.io &&
+     kubectl get crds envoyfilters.networking.istio.io &&
+     kubectl get crds attributemanifests.config.istio.io &&
+     kubectl get crds handlers.config.istio.io &&
+     kubectl get crds meshpolicies.authentication.istio.io
+  EOT
+
+  kubecmd_raw = replace(local.kubecmd, "/\\n/", "")
 }
 
 resource "kubernetes_namespace" "istio" {
@@ -21,7 +35,7 @@ resource "kubernetes_secret" "tls_istio" {
   depends_on = [kubernetes_namespace.istio]
 }
 
-resource "helm_release" "istio-init" {
+resource "helm_release" "istio_init" {
   name       = "istio-init"
   chart      = "istio/istio-init"
   version    = var.istio_version
@@ -31,11 +45,12 @@ resource "helm_release" "istio-init" {
   depends_on = [kubernetes_namespace.istio]
 }
 
-resource "null_resource" "delay" {
+resource "null_resource" "istio_crds_check" {
   provisioner "local-exec" {
-    command = "timeout 200 bash -c 'until kubectl get crds gateways.networking.istio.io && kubectl get crds envoyfilters.networking.istio.io && kubectl get crds policies.authentication.istio.io && kubectl get crds destinationrules.networking.istio.io && kubectl get crds virtualservices.networking.istio.io && kubectl get crds envoyfilters.networking.istio.io && kubectl get crds attributemanifests.config.istio.io && kubectl get crds handlers.config.istio.io && kubectl get crds meshpolicies.authentication.istio.io; do sleep 5; done'"
+    interpreter = ["timeout", "3m", "bash", "-c"]
+    command     = "until ${local.kubecmd_raw}; do sleep 5; done"
   }
-  depends_on = [helm_release.istio-init]
+  depends_on = [helm_release.istio_init]
 }
 
 resource "helm_release" "istio" {
@@ -48,44 +63,11 @@ resource "helm_release" "istio" {
 
   values = [
     templatefile("${path.module}/templates/istio.yaml", {
-      monitoring_namespace    = var.monitoring_namespace,
       ingress_tls_secret_name = local.ingress_tls_secret_name
     })
   ]
 
-  depends_on = [null_resource.delay]
-}
-
-resource "kubernetes_namespace" "knative" {
-  metadata {
-    name = var.knative_namespace
-    labels = {
-      istio-injection = "enabled"
-    }
-  }
-}
-
-resource "kubernetes_secret" "tls_knative" {
-  metadata {
-    name      = local.ingress_tls_secret_name
-    namespace = var.knative_namespace
-  }
-  data = {
-    "tls.key" = var.tls_secret_key
-    "tls.crt" = var.tls_secret_crt
-  }
-  type       = "kubernetes.io/tls"
-  depends_on = [kubernetes_namespace.knative]
-}
-
-resource "helm_release" "knative" {
-  name       = "knative"
-  chart      = "odahu-flow-knative"
-  version    = var.odahu_infra_version
-  namespace  = var.knative_namespace
-  repository = "odahuflow"
-  timeout    = var.helm_timeout
-  depends_on = [kubernetes_namespace.knative, helm_release.istio]
+  depends_on = [null_resource.istio_crds_check]
 }
 
 module "docker_credentials" {

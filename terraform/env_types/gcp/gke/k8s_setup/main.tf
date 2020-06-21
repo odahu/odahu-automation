@@ -2,12 +2,6 @@
 # K8S setup
 ########################################################
 
-module "nfs" {
-  source = "../../../../modules/k8s/nfs"
-
-  configuration = var.nfs
-}
-
 module "nginx_ingress_tls" {
   source         = "../../../../modules/k8s/nginx-ingress/tls"
   cluster_name   = var.cluster_name
@@ -60,22 +54,25 @@ module "gpu_drivers" {
 }
 
 module "istio" {
-  source               = "../../../../modules/k8s/istio"
-  monitoring_namespace = module.monitoring.namespace
-  helm_repo            = var.helm_repo
-  docker_repo          = var.docker_repo
-  docker_username      = var.docker_username
-  docker_password      = var.docker_password
-  odahu_infra_version  = var.odahu_infra_version
-  tls_secret_key       = var.tls_key
-  tls_secret_crt       = var.tls_crt
+  source          = "../../../../modules/k8s/istio"
+  tls_secret_key  = var.tls_key
+  tls_secret_crt  = var.tls_crt
+  docker_repo     = var.docker_repo
+  docker_username = var.docker_username
+  docker_password = var.docker_password
+}
+
+module "knative" {
+  source              = "../../../../modules/k8s/knative"
+  module_dependency   = module.istio.helm_chart
+  odahu_infra_version = var.odahu_infra_version
 }
 
 module "openpolicyagent" {
   source                = "../../../../modules/k8s/openpolicyagent"
   helm_repo             = var.helm_repo
   odahu_infra_version   = var.odahu_infra_version
-  mesh_dependency       = module.istio.helm_chart
+  module_dependency     = module.istio.helm_chart
   oauth_mesh_enabled    = var.oauth_mesh_enabled
   oauth_oidc_jwks_url   = var.oauth_oidc_jwks_url
   oauth_oidc_host       = var.oauth_oidc_host
@@ -104,4 +101,10 @@ module "tekton" {
 module "vault" {
   source        = "../../../../modules/k8s/vault"
   configuration = var.vault
+}
+
+module "nfs" {
+  source = "../../../../modules/k8s/nfs"
+
+  configuration = var.nfs
 }

@@ -20,7 +20,7 @@ variable "namespace" {
   description = "Open Policy Agent namespace"
 }
 
-variable "mesh_dependency" {
+variable "module_dependency" {
   type        = any
   default     = null
   description = "Dependency of this module (https://discuss.hashicorp.com/t/tips-howto-implement-module-depends-on-emulation/2305)"
