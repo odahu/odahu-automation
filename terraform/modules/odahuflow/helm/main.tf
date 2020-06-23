@@ -342,6 +342,7 @@ resource "helm_release" "odahuflow" {
       cluster_domain          = var.cluster_domain
       ingress_tls_enabled     = local.ingress_tls_enabled
       ingress_tls_secret_name = local.ingress_tls_secret_name
+      knative_namespace       = var.knative_namespace
 
       docker_repo       = var.docker_repo
       docker_secret     = var.docker_secret_name

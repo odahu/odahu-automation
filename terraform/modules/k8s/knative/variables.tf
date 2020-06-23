@@ -11,7 +11,7 @@ variable "odahu_infra_version" {
 
 variable "knative_namespace" {
   type        = string
-  default     = "knative"
+  default     = "knative-serving"
   description = "Knative namespace"
 }
 

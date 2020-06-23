@@ -105,6 +105,12 @@ variable "odahuflow_deployment_namespace" {
   description = "ODAHU flow deployment k8s namespace"
 }
 
+variable "knative_namespace" {
+  type        = string
+  default     = "knative-serving"
+  description = "Knative Serving component namespace"
+}
+
 variable "vault_namespace" {
   type        = string
   default     = "vault"
