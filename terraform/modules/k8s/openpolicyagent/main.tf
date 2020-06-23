@@ -5,6 +5,7 @@ resource "kubernetes_namespace" "opa" {
     }
     name = var.namespace
   }
+  depends_on = [var.module_dependency]
 }
 
 resource "helm_release" "opa" {
@@ -16,7 +17,7 @@ resource "helm_release" "opa" {
   timeout    = var.helm_timeout
   depends_on = [
     kubernetes_namespace.opa,
-    var.mesh_dependency
+    var.module_dependency
   ]
   values = [
     templatefile("${path.module}/templates/values.yaml", {
