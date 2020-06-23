@@ -1,29 +1,29 @@
 variable "domain" {
-  default = ""
   type    = string
+  default = ""
 }
 
 variable "managed_zone" {
-  default = ""
   type    = string
+  default = ""
 }
 
 variable "aws_region" {
-  default = ""
   type    = string
+  default = ""
 }
 
 variable "gcp_project_id" {
-  default = ""
   type    = string
+  default = ""
 }
 
 variable "gcp_credentials" {
-  default = ""
   type    = string
+  default = ""
 }
 
 variable "records" {
-  default = []
   type    = list(map(string))
+  default = []
 }

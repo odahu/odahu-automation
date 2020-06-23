@@ -1,13 +1,16 @@
 variable "cluster_name" {
-  default     = "odahu-flow-"
-  description = "Odahuflow cluster name"
+  type        = string
+  default     = "odahu-flow"
+  description = "ODAHU flow cluster name"
 }
 
 variable "region" {
+  type        = string
   default     = "eu-central-1"
   description = "Region of resources"
 }
 
 variable "data_bucket" {
-  description = "Odahuflow data storage bucket"
+  type        = string
+  description = "ODAHU flow data storage bucket"
 }

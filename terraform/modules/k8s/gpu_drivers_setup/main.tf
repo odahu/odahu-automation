@@ -1,6 +1,6 @@
 locals {
   drivers_yaml  = "${path.module}/files/cos-nvidia-driver-installer.yaml"
-  exporter_yaml = "/tmp/nvidia_exporter.yml"
+  exporter_yaml = "/tmp/.odahu/nvidia_exporter.yml"
 }
 
 # Daemonset config for GCP Container-Optimized OS

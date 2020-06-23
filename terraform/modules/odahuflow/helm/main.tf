@@ -214,7 +214,7 @@ locals {
 }
 
 ########################################################
-# Odahuflow namespaces
+# ODAHU flow namespaces
 ########################################################
 
 resource "kubernetes_namespace" "odahuflow" {
@@ -269,7 +269,7 @@ resource "kubernetes_namespace" "odahuflow_deployment" {
 }
 
 ########################################################
-# Odahuflow secrets
+# ODAHU flow secrets
 ########################################################
 
 module "docker_credentials" {
@@ -321,7 +321,7 @@ resource "kubernetes_secret" "odahuflow_vault_tls" {
 }
 
 ########################################################
-# Install Odahuflow chart
+# Install ODAHU flow chart
 ########################################################
 
 data "helm_repository" "odahuflow" {
@@ -372,7 +372,7 @@ resource "helm_release" "odahuflow" {
 }
 
 ########################################################
-# Install Odahuflow-mlflow chart
+# Install ODAHU flow MLflow chart
 ########################################################
 
 resource "helm_release" "mlflow" {
@@ -406,7 +406,7 @@ resource "helm_release" "mlflow" {
 }
 
 ########################################################
-# Install Odahuflow packagers
+# Install ODAHU flow packagers
 ########################################################
 
 resource "helm_release" "rest_packagers" {
@@ -436,7 +436,7 @@ resource "helm_release" "rest_packagers" {
 }
 
 ########################################################
-# Install Odahuflow UI
+# Install ODAHU flow UI
 ########################################################
 
 resource "helm_release" "odahu_ui" {

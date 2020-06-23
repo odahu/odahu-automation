@@ -2,68 +2,72 @@
 # Common
 ##################
 variable "cluster_type" {
+  type        = string
   description = "Cloud provider"
 }
 
 variable "tls_key" {
-  description = "TLS key for Odahuflow cluster"
+  type        = string
+  description = "TLS key for ODAHU flow cluster"
 }
 
 variable "tls_crt" {
-  description = "TLS certificate file for Odahuflow cluster"
-}
-
-variable "public_subnet_cidrs" {
-  default = []
+  type        = string
+  description = "TLS certificate file for ODAHU flow cluster"
 }
 
 variable "aws_region" {
+  type        = string
   default     = "eu-central-1"
   description = "Region of AWS resources"
 }
 
-variable "az_list" {
-  type        = list(string)
-  description = "AWS AZ list to use"
-}
-
 variable "cluster_name" {
+  type        = string
   default     = "odahuflow"
-  description = "Odahuflow cluster name"
+  description = "ODAHU flow cluster name"
 }
 
 variable "config_context_auth_info" {
+  type        = string
   description = "Kubernetes cluster context auth"
 }
 
 variable "config_context_cluster" {
+  type        = string
   description = "Kubernetes cluster context name"
 }
 
 variable "helm_repo" {
-  description = "Odahuflow helm repo"
+  type        = string
+  description = "ODAHU flow helm repo"
 }
 
 variable "odahu_infra_version" {
-  description = "Odahuflow infra release version"
+  type        = string
+  description = "ODAHU flow infra release version"
 }
 
 variable "cluster_domain_name" {
-  description = "Odahuflow cluster FQDN"
+  type        = string
+  description = "ODAHU flow cluster FQDN"
 }
 
 variable "docker_repo" {
-  description = "Odahuflow Docker repo url"
+  type        = string
+  description = "ODAHU flow Docker repo url"
 }
 
 variable "docker_username" {
+  type        = string
   default     = ""
-  description = "Odahuflow Docker repo username"
+  description = "ODAHU flow Docker repo username"
 }
 
 variable "docker_password" {
+  type        = string
   default     = ""
-  description = "Odahuflow Docker repo password"
+  description = "ODAHU flow Docker repo password"
 }
 
 ########################
@@ -75,49 +79,52 @@ variable "allowed_ips" {
 }
 
 variable "grafana_admin" {
+  type        = string
   default     = "grafana_admin"
   description = "Grafana admin username"
 }
 
 variable "grafana_pass" {
+  type        = string
   description = "Grafana admin password"
 }
 
 variable "storage_class" {
+  type        = string
   default     = "gp2"
   description = "Grafana storage class"
 }
-
-variable "monitoring_namespace" {
-  default     = "kube-monitoring"
-  description = "clusterwide monitoring namespace"
-}
-
 
 ##################
 # OAuth2
 ##################
 variable "oauth_client_id" {
+  type        = string
   description = "OAuth2 Client ID"
 }
 
 variable "oauth_client_secret" {
+  type        = string
   description = "OAuth2 Client Secret"
 }
 
 variable "oauth_cookie_secret" {
+  type        = string
   description = "OAuth2 Cookie Secret"
 }
 
 variable "oauth_oidc_issuer_url" {
+  type        = string
   description = "OAuth2/OIDC provider Issuer URL"
 }
 
 variable "oauth_oidc_audience" {
+  type        = string
   description = "Oauth2 access token audience"
 }
 
 variable "oauth_oidc_scope" {
+  type        = string
   description = "OAuth2 scope"
 }
 
@@ -154,8 +161,6 @@ variable "oauth_local_jwks" {
 ##########################
 #  Authorization
 ##########################
-
-
 variable "authorization_enabled" {
   type        = bool
   default     = true
@@ -184,6 +189,7 @@ variable "opa_policies" {
 # Istio
 ########################
 variable "istio_namespace" {
+  type        = string
   default     = "istio-system"
   description = "istio namespace"
 }
@@ -192,12 +198,12 @@ variable "istio_namespace" {
 # Vault
 ########################
 variable "vault" {
-  default = {
-    enabled : false
-  }
   type = object({
-    enabled : bool
+    enabled = bool
   })
+  default = {
+    enabled = false
+  }
   description = "Vault configuration"
 }
 
@@ -205,13 +211,13 @@ variable "vault" {
 # NFS
 ########################
 variable "nfs" {
-  default = {
-    enabled : false,
-    storage_size : "10Gi"
-  }
   type = object({
-    enabled : bool,
-    storage_size : string
+    enabled      = bool
+    storage_size = string
   })
+  default = {
+    enabled      = false
+    storage_size = "10Gi"
+  }
   description = "NFS configuration"
 }

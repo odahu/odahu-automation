@@ -1,77 +1,77 @@
 # Common
 variable "cluster_domain" {
-  description = "ODAHU flow cluster FQDN"
   type        = string
+  description = "ODAHU flow cluster FQDN"
 }
 
 variable "namespace" {
-  description = "Airflow namespace"
-  default     = "airflow"
   type        = string
+  default     = "airflow"
+  description = "Airflow namespace"
 }
 
 variable "cluster_name" {
+  type        = string
   default     = "odahuflow"
   description = "ODAHU flow cluster name"
-  type        = string
 }
 
 variable "tls_secret_crt" {
-  description = "Ingress TLS certificate"
-  default     = ""
   type        = string
+  default     = ""
+  description = "Ingress TLS certificate"
 }
 
 variable "tls_secret_key" {
-  description = "Ingress TLS key"
-  default     = ""
   type        = string
+  default     = ""
+  description = "Ingress TLS key"
 }
 
 variable "odahu_airflow_plugin_version" {
-  description = "ODAHU Airflow plugin version to use"
   type        = string
+  description = "ODAHU Airflow plugin version to use"
 }
 
 # Docker
 variable "docker_repo" {
-  description = "ODAHU flow Docker repo url"
   type        = string
+  description = "ODAHU flow Docker repo url"
 }
 
 variable "docker_username" {
+  type        = string
   default     = ""
   description = "ODAHU flow Docker repo username"
-  type        = string
 }
 
 variable "docker_password" {
+  type        = string
   default     = ""
   description = "ODAHU flow Docker repo password"
-  type        = string
 }
 
 variable "wine_connection" {
-  description = "GCP wine connection service account private key"
   type        = map(string)
+  description = "GCP wine connection service account private key"
 }
 
 variable "airflow_variables" {
-  description = "Variables to create in Airflow instance"
   type        = map(string)
+  description = "Variables to create in Airflow instance"
 }
 
 variable "oauth_oidc_token_endpoint" {
-  description = "Auth endpoint"
   type        = string
+  description = "Auth endpoint"
 }
 
 variable "service_account" {
-  description = "Service account that Airflow should use to connect ODAHU"
   type = object({
     client_id     = string
     client_secret = string
   })
+  description = "Service account that Airflow should use to connect ODAHU"
 }
 
 variable "configuration" {
@@ -88,13 +88,14 @@ variable "configuration" {
 }
 
 variable "examples_version" {
-  description = "Version of test data to upload"
   type        = string
+  description = "Version of test data to upload"
 }
 
 variable "helm_timeout" {
-  default = "500"
-  type    = string
+  type        = number
+  default     = 500
+  description = "Helm chart deploy timeout in seconds"
 }
 
 variable "pgsql" {

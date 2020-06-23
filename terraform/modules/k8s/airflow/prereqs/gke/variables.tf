@@ -1,31 +1,31 @@
 # Common
 variable "project_id" {
-  description = "Google Cloud Project ID"
   type        = string
+  description = "Google Cloud Project ID"
 }
 
 variable "cluster_name" {
+  type        = string
   default     = "odahuflow"
   description = "ODAHU flow cluster name"
-  type        = string
 }
 
 variable "wine_bucket" {
-  description = "Wine bucket name"
   type        = string
+  description = "Wine bucket name"
 }
 
 variable "dag_bucket" {
-  description = "DAGs bucket name"
   type        = string
+  description = "DAGs bucket name"
 }
 
 variable "dag_bucket_path" {
-  description = "DAGs bucket subpath"
   type        = string
+  description = "DAGs bucket subpath"
 }
 
 variable "region" {
-  description = "DAGs bucket region"
   type        = string
+  description = "DAGs bucket region"
 }

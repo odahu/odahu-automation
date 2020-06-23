@@ -1,29 +1,34 @@
 variable "docker_repo" {
+  type        = string
   default     = ""
-  description = "Odahuflow Docker repo url"
+  description = "ODAHU flow Docker repo url"
 }
 
 variable "docker_username" {
+  type        = string
   default     = ""
-  description = "Odahuflow Docker repo username"
+  description = "ODAHU flow Docker repo username"
 }
 
 variable "docker_password" {
+  type        = string
   default     = ""
-  description = "Odahuflow Docker repo password"
+  description = "ODAHU flow Docker repo password"
 }
 
 variable "odahu_infra_version" {
-  description = "Odahuflow infra release version"
+  type        = string
+  description = "ODAHU flow infra release version"
 }
 
 variable "namespace" {
-  description = "Fluentd namespace"
+  type        = string
   default     = "logging"
+  description = "fluentd-daemonset namespace"
 }
 
 variable "extra_helm_values" {
-  default = ""
-  # TODO:
-  description = ""
+  type        = string
+  default     = ""
+  description = "String variable with YAML set of Helm chart values"
 }

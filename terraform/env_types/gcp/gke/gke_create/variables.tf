@@ -87,12 +87,6 @@ variable "allowed_ips" {
   description = "CIDR to allow access from"
 }
 
-variable "agent_cidr" {
-  type        = string
-  default     = "0.0.0.0/0"
-  description = "Jenkins agent CIDR to allow access for CI jobs or your WAN address in case of locla run"
-}
-
 variable "ssh_key" {
   type        = string
   description = "SSH public key for Odahuflow cluster nodes and bastion host"
@@ -108,6 +102,7 @@ variable "nodes_sa" {
 }
 
 variable "node_pools" {
+  type        = any
   default     = {}
   description = "Default node pools configuration"
 }

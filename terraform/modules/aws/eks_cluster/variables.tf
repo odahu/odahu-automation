@@ -41,7 +41,7 @@ variable "cluster_name" {
 }
 
 variable "node_pools" {
-  description = "Default node pools configurations"
+  type = any
   default = {
     main = {
       init_node_count = 1
@@ -49,6 +49,7 @@ variable "node_pools" {
       max_node_count  = 5
     }
   }
+  description = "Default node pools configurations"
 }
 
 variable "node_ami" {
@@ -101,21 +102,25 @@ variable "ssh_user" {
 }
 
 variable "cluster_autoscaling_cpu_max_limit" {
+  type        = number
   default     = 30
   description = "Maximum CPU limit for autoscaling if it is enabled."
 }
 
 variable "cluster_autoscaling_cpu_min_limit" {
+  type        = number
   default     = 2
   description = "Minimum CPU limit for autoscaling if it is enabled."
 }
 
 variable "cluster_autoscaling_memory_max_limit" {
+  type        = number
   default     = 64
   description = "Maximum memory limit for autoscaling if it is enabled."
 }
 
 variable "cluster_autoscaling_memory_min_limit" {
+  type        = number
   default     = 4
   description = "Minimum memory limit for autoscaling if it is enabled."
 }
@@ -138,13 +143,13 @@ variable "bastion_ami" {
 variable "bastion_machine_type" {
   type        = string
   default     = "t2.micro"
-  description = ""
+  description = "Bastion host VM type"
 }
 
 variable "bastion_hostname" {
   type        = string
   default     = "bastion"
-  description = "bastion hostname"
+  description = "Bastion hostname"
 }
 
 variable "bastion_tag" {

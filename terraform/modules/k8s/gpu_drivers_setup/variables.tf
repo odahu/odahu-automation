@@ -1,7 +1,7 @@
 variable "module_dependency" {
   type        = any
   default     = null
-  description = "Terraform resource the module depends of"
+  description = "Terraform resource the module depends of (if any)"
 }
 
 variable "namespace" {
@@ -12,8 +12,7 @@ variable "namespace" {
 
 variable "monitoring_namespace" {
   type        = string
-  default     = "kube-monitoring"
-  description = "Kubernetes namespace where monitoring services are deployed"
+  description = "Kubernetes namespace where Prometheus-operator is deployed"
 }
 
 variable "exporter_image" {
@@ -29,7 +28,7 @@ variable "exporter_tag" {
 }
 
 variable "exporter_port" {
-  type        = string
-  default     = "9400"
+  type        = number
+  default     = 9400
   description = "Nvidia GPU Prometheus exporter metrics HTTP port"
 }

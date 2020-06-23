@@ -1,7 +1,7 @@
 variable "cluster_name" {
   type        = string
   default     = "odahuflow"
-  description = "Odahuflow k8s cluster name"
+  description = "ODAHU flow k8s cluster name"
 }
 
 variable "location" {
@@ -53,11 +53,12 @@ variable "service_cidr" {
 }
 
 variable "allowed_ips" {
+  type        = list(string)
   description = "CIDRs to allow access from"
 }
 
 variable "aks_tags" {
-  type        = map
+  type        = map(string)
   default     = {}
   description = "Tags used for Azure Kubernetes cluster resources labeling"
 }
@@ -79,6 +80,7 @@ variable "sp_secret" {
 }
 
 variable "node_pools" {
+  type = any
   default = {
     main = {
       init_node_count = 3
@@ -95,8 +97,8 @@ variable "egress_ip_name" {
 }
 
 variable "bastion_enabled" {
-  default     = false
   type        = bool
+  default     = false
   description = "Is bastion host enabled or not"
 }
 

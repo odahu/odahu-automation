@@ -9,10 +9,8 @@ module "nginx_ingress_tls" {
 }
 
 module "nginx_ingress_prereqs" {
-  source         = "../../../../modules/k8s/nginx-ingress/prereqs/eks"
-  az_list        = var.az_list
-  aws_lb_subnets = var.public_subnet_cidrs
-  cluster_name   = var.cluster_name
+  source       = "../../../../modules/k8s/nginx-ingress/prereqs/eks"
+  cluster_name = var.cluster_name
 }
 
 module "nginx_ingress_helm" {
@@ -33,21 +31,20 @@ module "auth" {
 }
 
 module "monitoring" {
-  source               = "../../../../modules/k8s/monitoring"
-  cluster_domain       = var.cluster_domain_name
-  helm_repo            = var.helm_repo
-  odahu_infra_version  = var.odahu_infra_version
-  grafana_admin        = var.grafana_admin
-  grafana_pass         = var.grafana_pass
-  storage_class        = var.storage_class
-  monitoring_namespace = var.monitoring_namespace
-  tls_secret_key       = var.tls_key
-  tls_secret_crt       = var.tls_crt
+  source              = "../../../../modules/k8s/monitoring"
+  cluster_domain      = var.cluster_domain_name
+  helm_repo           = var.helm_repo
+  odahu_infra_version = var.odahu_infra_version
+  grafana_admin       = var.grafana_admin
+  grafana_pass        = var.grafana_pass
+  storage_class       = var.storage_class
+  tls_secret_key      = var.tls_key
+  tls_secret_crt      = var.tls_crt
 }
 
 module "istio" {
   source               = "../../../../modules/k8s/istio"
-  monitoring_namespace = var.monitoring_namespace
+  monitoring_namespace = module.monitoring.namespace
   helm_repo            = var.helm_repo
   docker_repo          = var.docker_repo
   docker_username      = var.docker_username
