@@ -55,6 +55,7 @@ mixer:
 
 grafana:
   enabled: false
+
 prometheus:
   enabled: false
 

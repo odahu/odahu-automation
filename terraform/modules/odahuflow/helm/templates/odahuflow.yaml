@@ -3,6 +3,9 @@ imagesRegistry: "${docker_repo}/"
 dockerSecret: "${docker_secret}"
 logLevel: debug
 
+edge:
+  knative_namespace: "${knative_namespace}"
+
 ingress:
   enabled: true
   globalDomain: "${cluster_domain}"

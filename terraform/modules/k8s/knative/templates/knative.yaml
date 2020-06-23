@@ -1,0 +1,15 @@
+fullnameOverride: knative
+knative:
+  serving:
+    create: true
+    # spec:
+    #   config:
+    #     defaults:
+    #       revision-timeout-seconds: 300
+    #     observability:
+    #       metrics.backend-destination: prometheus
+    #     autoscaler:
+    #       stable-window: "60s"
+    #       container-concurrency-target-default: 100
+  eventing:
+    create: false
