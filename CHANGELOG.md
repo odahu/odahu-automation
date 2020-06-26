@@ -17,14 +17,13 @@
 - Long object name strings fomatted to be more readable.
 - Normalize ingress headers that passed to oauth proxy.
 - Fix public docker repo deployment [#184](https://github.com/odahu/odahu-flow/issues/184).
-- Project resources moved to odahu.org.
+- Project resources moved to `odahu.org` domain.
 - Fix GKE Service Account Assigner & and kube2iam tolerations.
 - Fix suspend/resume function to correctly restore k8s clusters node count.
 - Fix Azure stucked destroy [#152](https://git.epam.com/epmd-legn/legion-cicd/-/issues/152).
 - Fix AWS environment destroy failures with new cleanup script [#114](https://git.epam.com/epmd-legn/legion-cicd/-/issues/114).
 - storage sized and retention options added for `monitoring` module.
 - Prometheus memory limits/requests increased.
-- `dag_bucket` and `dag_bucket_path` added to `airflow` map variable.
 - Azure prerequisites documentation updated.
 - Kubernetes version updated to 1.16.
 - Helm version updated to 3.2.14.
