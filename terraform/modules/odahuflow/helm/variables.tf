@@ -56,6 +56,11 @@ variable "odahu_ui_version" {
   description = "Version of odahu-ui helm chart"
 }
 
+variable "node_selector_webhook_version" {
+  type        = string
+  description = "Version of Node Selector Webhook helm chart"
+}
+
 ###############
 ### Ingress ###
 ###############
