@@ -173,4 +173,6 @@ module "odahuflow_helm" {
     db_user     = module.postgresql.pgsql_credentials[var.odahu_database].username
     db_password = module.postgresql.pgsql_credentials[var.odahu_database].password
   }
+  node_selector_webhook_version = var.node_selector_webhook_version
+  node_selector_webhook_settings = var.node_selector_webhook_settings
 }

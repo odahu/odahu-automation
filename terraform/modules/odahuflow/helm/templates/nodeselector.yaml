@@ -4,7 +4,15 @@
 
 replicaCount: 1
 
-image: "odahu/node-selector-webhook:${version}"
+image: "${docker_repo}/node-selector-webhook:${image_version}"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+service:
+  type: ClusterIP
+  port: 5000
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
@@ -24,18 +32,6 @@ nodeSelector: {}
 tolerations: []
 
 # crt must be issued on service domain name e.g. service-name.namespace.svc
-certs:
-  crt: ${tls_crt}
-  key: ${tls_key}
-  ca: ${ca}
+${certs}
 
-config:
-  nodeSelector:
-    mode: deployment
-  tolerations:
-    - key: dedicated
-      operator: Equal
-      value: deployment
-      effect: NoSchedule
-  crtDirName: /etc/node-selector-webhook-certs
-  port: 5000
+${config}

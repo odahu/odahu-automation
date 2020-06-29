@@ -248,3 +248,24 @@ variable "pgsql" {
   }
   description = "PostgreSQL settings for ODAHU flow services"
 }
+
+
+variable "node_selector_webhook_settings" {
+  description = "Settings for installation of Node selector webhook settings"
+  type = object({
+    certs = object({
+      crt = string
+      key = string
+      ca = string
+    })
+    config = object({
+      nodeSelector = map(string)
+      tolerations = list(object({
+        key = string
+        operator = string
+        value =  string
+        effect = string
+      }))
+    })
+  })
+}
