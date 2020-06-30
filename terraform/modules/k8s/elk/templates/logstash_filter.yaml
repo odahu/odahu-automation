@@ -6,4 +6,7 @@ filter {
       remove_field => ["log", "[opa-log][input][attributes]"]
     }
   }
+  ruby {
+    code => "event.set('event_time', event.get('@timestamp'));"
+  }
 }
