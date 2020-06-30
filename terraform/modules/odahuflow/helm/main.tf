@@ -260,9 +260,10 @@ resource "kubernetes_namespace" "odahuflow_deployment" {
       name = var.odahuflow_deployment_namespace
     }
     labels = {
-      project                 = "odahu-flow"
-      istio-injection         = "enabled"
-      modeldeployment-webhook = "enabled"
+      project                       = "odahu-flow"
+      istio-injection               = "enabled"
+      modeldeployment-webhook       = "enabled"
+      "odahu/node-selector-webhook" = "enabled"
     }
     name = var.odahuflow_deployment_namespace
   }
@@ -461,5 +462,37 @@ resource "helm_release" "odahu_ui" {
 
   depends_on = [
     helm_release.odahuflow
+  ]
+}
+
+
+########################################################
+# Install Node Selector Webhook helm
+########################################################
+
+
+resource "helm_release" "node_selector_webhook" {
+  name       = "node-selector-webhook"
+  chart      = "node-selector-webhook"
+  version    = var.node_selector_webhook_version
+  namespace  = var.odahuflow_namespace
+  repository = data.helm_repository.odahuflow.metadata[0].name
+  timeout    = var.helm_timeout
+
+  values = [
+    templatefile("${path.module}/templates/nodeselector.yaml", {
+      docker_repo = var.docker_repo
+      config = yamlencode({
+        config = var.node_selector_webhook_settings.config
+      })
+      certs = yamlencode({
+        certs = var.node_selector_webhook_settings.certs
+      })
+      image_version = var.node_selector_webhook_version
+    }),
+  ]
+
+  depends_on = [
+    kubernetes_namespace.odahuflow
   ]
 }

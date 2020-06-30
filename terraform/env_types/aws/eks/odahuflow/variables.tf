@@ -249,3 +249,28 @@ variable "odahu_database" {
   type        = string
   description = "Name of database for ODAHU entities"
 }
+
+variable "node_selector_webhook_version" {
+  type        = string
+  description = "Version of Node Selector Webhook helm chart"
+}
+
+variable "node_selector_webhook_settings" {
+  description = "Settings for installation of Node selector webhook settings"
+  type = object({
+    certs = object({
+      crt = string
+      key = string
+      ca  = string
+    })
+    config = object({
+      nodeSelector = map(string)
+      tolerations = list(object({
+        key      = string
+        operator = string
+        value    = string
+        effect   = string
+      }))
+    })
+  })
+}
