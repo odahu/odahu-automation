@@ -274,15 +274,15 @@ variable "node_selector_webhook_settings" {
     certs = object({
       crt = string
       key = string
-      ca = string
+      ca  = string
     })
     config = object({
       nodeSelector = map(string)
       tolerations = list(object({
-        key = string
+        key      = string
         operator = string
-        value =  string
-        effect = string
+        value    = string
+        effect   = string
       }))
     })
   })
