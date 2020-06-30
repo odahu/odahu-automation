@@ -45,6 +45,7 @@ locals {
       version                  = var.odahuflow_version
       externalUrls             = concat(local.default_external_urls, var.extra_external_urls)
       databaseConnectionString = local.db_connection_string
+      oauthOidcTokenEndpoint = var.oauth_oidc_token_endpoint
     }
     users = {
       # Keycloak end_session_endpoint redirect
