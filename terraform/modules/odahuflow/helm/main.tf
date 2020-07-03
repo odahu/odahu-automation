@@ -489,6 +489,7 @@ resource "helm_release" "node_selector_webhook" {
         certs = var.node_selector_webhook_settings.certs
       })
       image_version = var.node_selector_webhook_version
+      docker_secret = var.docker_secret_name
     }),
   ]
 
