@@ -2,6 +2,10 @@ fullnameOverride: knative
 knative:
   serving:
     create: true
+    spec:
+      config:
+        deployment:
+          progressDeadline: "500s"
     # spec:
     #   config:
     #     defaults:
