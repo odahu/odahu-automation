@@ -34,6 +34,7 @@ module "monitoring" {
   source              = "../../../../modules/k8s/monitoring"
   cluster_domain      = var.cluster_domain_name
   helm_repo           = var.helm_repo
+  helm_timeout        = 25 * 60
   odahu_infra_version = var.odahu_infra_version
   grafana_admin       = var.grafana_admin
   grafana_pass        = var.grafana_pass
