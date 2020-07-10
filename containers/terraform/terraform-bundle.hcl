@@ -1,10 +1,10 @@
 terraform {
-  version = "0.12.26"
+  version = "{TERRAFORM_VERSION}"
 }
 
 providers {
   aws         = ["2.52.0"]
-  azurerm     = ["2.5.0"]
+  azurerm     = ["2.16.0"]
   external    = ["1.2.0"]
   google-beta = ["2.20.2"]
   google      = ["2.20.2"]
