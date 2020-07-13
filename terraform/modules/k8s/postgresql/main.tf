@@ -6,8 +6,8 @@ locals {
 }
 
 resource "random_password" "exporter_user" {
-  length = 16
-  special = true
+  length           = 16
+  special          = true
   override_special = "_%@#"
 }
 
