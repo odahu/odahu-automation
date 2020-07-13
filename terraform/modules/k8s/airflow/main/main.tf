@@ -1,5 +1,6 @@
 locals {
-  airflow_helm_version = "6.5.0"
+  airflow_helm_version = "7.1.0"
+  airflow_helm_repo    = "stable"
   debug_log_level      = "true"
 
   ingress_tls_enabled     = var.tls_secret_crt != "" && var.tls_secret_key != ""
@@ -144,3 +145,13 @@ resource "helm_release" "airflow" {
 
   depends_on = [kubernetes_namespace.airflow[0]]
 }
+
+resource "null_resource" "airflow_logrotate" {
+  provisioner "local-exec" {
+    interpreter = ["timeout", "1m", "bash", "-c"]
+
+    command = "until kubectl apply -f ${path.module}/files/logrotate.yaml; do sleep 5; done"
+  }
+  depends_on = [helm_release.airflow]
+}
+
