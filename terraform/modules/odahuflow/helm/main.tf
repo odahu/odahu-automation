@@ -63,12 +63,13 @@ locals {
       }
     }
     deployment = {
-      toleration = contains(keys(var.node_pools), "model_deployment") ? {
-        Key      = var.node_pools["model_deployment"].taints[0].key
-        Operator = "Equal"
-        Value    = var.node_pools["model_deployment"].taints[0].value
-        Effect   = replace(var.node_pools["model_deployment"].taints[0].effect, "/(?i)no_?schedule/", "NoSchedule")
-      } : null
+      tolerations = contains(keys(var.node_pools), "model_deployment") ? [
+        for taint in lookup(var.node_pools["model_deployment"], "taints", []) : {
+          Key      = taint.key
+          Operator = "Equal"
+          Value    = taint.value
+          Effect   = replace(taint.effect, "/(?i)no_?schedule/", "NoSchedule")
+      }] : null
 
       nodeSelector = contains(keys(var.node_pools), "model_deployment") ? {
         for key, value in var.node_pools["model_deployment"].labels : key => value
@@ -87,23 +88,25 @@ locals {
       }
     }
     training = {
-      toleration = contains(keys(var.node_pools), "training") ? {
-        Key      = var.node_pools["training"].taints[0].key
-        Operator = "Equal"
-        Value    = var.node_pools["training"].taints[0].value
-        Effect   = replace(var.node_pools["training"].taints[0].effect, "/(?i)no_?schedule/", "NoSchedule")
-      } : null
+      tolerations = contains(keys(var.node_pools), "training") ? [
+        for taint in lookup(var.node_pools["training"], "taints", []) : {
+          Key      = taint.key
+          Operator = "Equal"
+          Value    = taint.value
+          Effect   = replace(taint.effect, "/(?i)no_?schedule/", "NoSchedule")
+      }] : null
 
       nodeSelector = contains(keys(var.node_pools), "training") ? {
         for key, value in var.node_pools["training"].labels : key => value
       } : null
 
-      gpuToleration = contains(keys(var.node_pools), "training_gpu") ? {
-        Key      = var.node_pools["training_gpu"].taints[0].key
-        Operator = "Equal"
-        Value    = var.node_pools["training_gpu"].taints[0].value
-        Effect   = replace(var.node_pools["training_gpu"].taints[0].effect, "/(?i)no_?schedule/", "NoSchedule")
-      } : null
+      gpuTolerations = contains(keys(var.node_pools), "training_gpu") ? [
+        for taint in lookup(var.node_pools["training_gpu"], "taints", []) : {
+          Key      = taint.key
+          Operator = "Equal"
+          Value    = taint.value
+          Effect   = replace(taint.effect, "/(?i)no_?schedule/", "NoSchedule")
+      }] : null
 
       gpuNodeSelector = contains(keys(var.node_pools), "training_gpu") ? {
         for key, value in var.node_pools["training_gpu"].labels : key => value
@@ -131,12 +134,13 @@ locals {
       }
     }
     packaging = {
-      toleration = contains(keys(var.node_pools), "packaging") ? {
-        Key      = var.node_pools["packaging"].taints[0].key
-        Operator = "Equal"
-        Value    = var.node_pools["packaging"].taints[0].value
-        Effect   = replace(var.node_pools["packaging"].taints[0].effect, "/(?i)no_?schedule/", "NoSchedule")
-      } : null
+      tolerations = contains(keys(var.node_pools), "packaging") ? [
+        for taint in lookup(var.node_pools["packaging"], "taints", []) : {
+          Key      = taint.key
+          Operator = "Equal"
+          Value    = taint.value
+          Effect   = replace(taint.effect, "/(?i)no_?schedule/", "NoSchedule")
+      }] : null
 
       nodeSelector = contains(keys(var.node_pools), "packaging") ? {
         for key, value in var.node_pools["packaging"].labels : key => value
