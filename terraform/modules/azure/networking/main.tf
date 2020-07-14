@@ -18,7 +18,9 @@ resource "azurerm_subnet" "subnet" {
   name                 = "${var.cluster_name}-subnet"
   resource_group_name  = var.resource_group
   virtual_network_name = azurerm_virtual_network.vpc.name
-  address_prefix       = var.subnet_cidr
+  address_prefixes = [
+    var.subnet_cidr
+  ]
   service_endpoints = [
     "Microsoft.ContainerRegistry",
     "Microsoft.Storage"

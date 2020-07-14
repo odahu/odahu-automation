@@ -110,7 +110,7 @@ resource "aws_launch_template" "this" {
     certificate_authority = aws_eks_cluster.default.certificate_authority.0.data,
     name                  = var.cluster_name,
     taints                = join(",", [for t in lookup(each.value, "taints", []) : "${t.key}=${t.value}:${replace(title(lower(replace(t.effect, "_", " "))), " ", "")}"]),
-    labels                = join(",", concat([for k in keys(lookup(each.value, "labels", {})) : "${k}=${lookup(each.value, "labels")[k]}"], ["project=odahuflow"]))
+    labels                = join(",", concat([for k in keys(lookup(each.value, "labels", {})) : "${k}=${lookup(each.value, "labels")[k]}"], ["project=odahu-flow"]))
   }))
 
   dynamic "instance_market_options" {

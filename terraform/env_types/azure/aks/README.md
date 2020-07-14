@@ -20,6 +20,7 @@ $ az feature register --namespace Microsoft.ContainerService -n VMSSPreview
 $ az feature register --namespace Microsoft.ContainerService -n MultiAgentpoolPreview
 $ az feature register --namespace Microsoft.ContainerService -n AvailabilityZonePreview
 $ az feature register --namespace Microsoft.ContainerService -n APIServerSecurityPreview
+$ az feature register --namespace Microsoft.ContainerService -n SpotPoolPreview
 $ az provider register -n Microsoft.ContainerService
 ```
 
