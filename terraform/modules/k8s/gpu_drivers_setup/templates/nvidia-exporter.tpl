@@ -84,7 +84,7 @@ spec:
         - name: "DCGM_EXPORTER_KUBERNETES"
           value: "true"
         - name: "DCGM_EXPORTER_LISTEN"
-          value: "${exporter_port}"
+          value: ":${exporter_port}"
         - name: LD_LIBRARY_PATH
           value: /usr/local/nvidia/lib64
         ports:
