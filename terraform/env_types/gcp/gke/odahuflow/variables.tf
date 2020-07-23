@@ -287,4 +287,3 @@ variable "node_selector_webhook_settings" {
     })
   })
 }
-

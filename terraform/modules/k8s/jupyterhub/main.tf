@@ -3,6 +3,8 @@ locals {
   url_schema              = local.ingress_tls_enabled ? "https" : "http"
   ingress_tls_secret_name = "jupyterhub-tls"
 
+  jupyterhub_debug = "true"
+
   ingress_common = {
     enabled = true
     annotations = {
@@ -17,15 +19,15 @@ locals {
         auth_request_set $jwt    $upstream_http_x_auth_request_access_token;
         auth_request_set $_oauth2_proxy_1 $upstream_cookie__oauth2_proxy_1;
 
-        proxy_set_header X-User            $user;
-        proxy_set_header X-Email           $email;
-        proxy_set_header X-JWT             $jwt;
-        proxy_set_header Authorization     "Bearer $jwt";
+        proxy_set_header X-User        $user;
+        proxy_set_header X-Email       $email;
+        proxy_set_header X-JWT         $jwt;
+        proxy_set_header Authorization "Bearer $jwt";
 
         access_by_lua_block {
-            if ngx.var._oauth2_proxy_1 ~= "" then
-                ngx.header["Set-Cookie"] = "_oauth2_proxy_1=" .. ngx.var._oauth2_proxy_1 .. ngx.var.auth_cookie:match("(; .*)")
-            end
+          if ngx.var._oauth2_proxy_1 ~= "" then
+            ngx.header["Set-Cookie"] = "_oauth2_proxy_1=" .. ngx.var._oauth2_proxy_1 .. ngx.var.auth_cookie:match("(; .*)")
+          end
         }
         EOT
     }
@@ -46,10 +48,6 @@ locals {
     every   = var.jupyterhub_culling_frequency
   }
 }
-
-########################################################
-# Install Jupyterhub flow chart
-########################################################
 
 resource "null_resource" "add_helm_jupyterhub_repository" {
   count = var.jupyterhub_enabled ? 1 : 0
@@ -122,6 +120,7 @@ resource "helm_release" "jupyterhub" {
       cluster_domain          = var.cluster_domain
       ingress_tls_secret_name = local.ingress_tls_secret_name
       jupyterhub_secret_token = var.jupyterhub_secret_token == "" ? random_string.secret[0].result : var.jupyterhub_secret_token
+      debug_enabled           = local.jupyterhub_debug
 
       oauth_client_id       = var.oauth_client_id
       oauth_client_secret   = var.oauth_client_secret
@@ -133,7 +132,16 @@ resource "helm_release" "jupyterhub" {
       image_puller = var.jupyterhub_puller_enabled
       docker_tag   = var.docker_tag
       docker_repo  = var.docker_repo
-    }),
+
+      pgsql_enabled  = var.pgsql.enabled
+      pgsql_password = var.pgsql.db_password
+      pgsql_url = format(
+        "postgres+psycopg2://%s@%s/%s",
+        var.pgsql.db_user,
+        var.pgsql.db_host,
+        var.pgsql.db_name
+      )
+    })
   ]
 
   depends_on = [
