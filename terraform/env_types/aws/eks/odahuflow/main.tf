@@ -99,6 +99,14 @@ module "jupyterhub" {
   oauth_client_id       = var.oauth_client_id
   oauth_client_secret   = var.oauth_client_secret
   oauth_oidc_issuer_url = var.oauth_oidc_issuer_url
+
+  pgsql = {
+    enabled     = var.postgres.enabled
+    db_host     = module.postgresql.pgsql_endpoint
+    db_name     = "jupyterhub"
+    db_user     = module.postgresql.pgsql_credentials["jupyterhub"].username
+    db_password = module.postgresql.pgsql_credentials["jupyterhub"].password
+  }
 }
 
 module "elasticsearch" {

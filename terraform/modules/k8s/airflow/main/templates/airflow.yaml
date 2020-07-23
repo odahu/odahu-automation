@@ -37,7 +37,7 @@ airflow:
 
   webReplicas: 1
 
-%{ if "${pgsql_db}" != "" ~}
+%{ if pgsql_enabled ~}
   extraEnv:
     - name: POSTGRES_PASSWORD
       valueFrom:
@@ -61,7 +61,7 @@ airflow:
     AIRFLOW__KUBERNETES__WORKER_CONTAINER_REPOSITORY: ${docker_repo}/odahu-airflow
     AIRFLOW__KUBERNETES__WORKER_CONTAINER_TAG: ${odahu_airflow_plugin_version}
     AIRFLOW__KUBERNETES__DELETE_WORKER_PODS: True
-    %{ if ("${dag_repo}" != "" && "${dag_rev}" != "") }
+%{ if ("${dag_repo}" != "" && "${dag_rev}" != "") ~}
     AIRFLOW__KUBERNETES__GIT_REPO: "${dag_repo}"
     AIRFLOW__KUBERNETES__GIT_BRANCH: "${dag_rev}"
     AIRFLOW__KUBERNETES__GIT_DAGS_FOLDER_MOUNT_POINT: "/usr/local/airflow/dags"
@@ -71,9 +71,9 @@ airflow:
     AIRFLOW__KUBERNETES__GIT_SYNC_CONTAINER_REPOSITORY: gcr.io/or2-msq-epmd-legn-t1iylu/odahu/git-sync
     AIRFLOW__KUBERNETES__GIT_SYNC_CONTAINER_TAG: 0.0.3
     AIRFLOW__KUBERNETES__GIT_SYNC_INIT_CONTAINER_NAME: git-sync-clone
-    %{ else }
+%{ else ~}
     AIRFLOW__KUBERNETES__DAGS_VOLUME_CLAIM: airflow
-    %{ endif }
+%{ endif ~}
   service:
     type: ClusterIP
     port: 80
@@ -83,11 +83,11 @@ airflow:
 ${ingress}
 
 persistence:
-  %{ if ("${dag_repo}" != "" && "${dag_rev}" != "") }
+%{ if ("${dag_repo}" != "" && "${dag_rev}" != "") ~}
   enabled: false
-  %{ else }
+%{ else ~}
   enabled: true
-  %{ endif }
+%{ endif ~}
   storageClass: nfs
   accessMode: ReadWriteMany
   size: ${storage_size}
@@ -100,7 +100,7 @@ logsPersistence:
 
 dags:
   path: /usr/local/airflow/dags
-  %{ if ("${dag_repo}" != "" && "${dag_rev}" != "") }
+%{ if ("${dag_repo}" != "" && "${dag_rev}" != "") ~}
   git:
     url: "${dag_repo}"
     ref: "${dag_rev}"
@@ -121,8 +121,8 @@ dags:
     installRequirements: true
     mountPath: "/dags"
     syncSubPath: ""
-  %{ endif }
-%{ if "${pgsql_db}" != "" ~}
+%{ endif ~}
+%{ if pgsql_enabled ~}
 postgresql:
   enabled: false
   service:

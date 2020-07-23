@@ -136,9 +136,10 @@ resource "helm_release" "airflow" {
 
       odahu_airflow_plugin_version = var.odahu_airflow_plugin_version
 
-      pgsql_db   = var.pgsql.db_name
-      pgsql_user = var.pgsql.db_user
-      pgsql_host = var.pgsql.db_host
+      pgsql_enabled = var.pgsql.enabled
+      pgsql_db      = var.pgsql.db_name
+      pgsql_user    = var.pgsql.db_user
+      pgsql_host    = var.pgsql.db_host
     })
   ]
 
