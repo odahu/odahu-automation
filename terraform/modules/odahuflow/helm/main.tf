@@ -310,7 +310,7 @@ resource "kubernetes_secret" "tls_odahuflow" {
 data "kubernetes_secret" "vault_tls" {
   count = var.vault_enabled ? 1 : 0
   metadata {
-    name      = local.vault_tls_secret_name
+    name      = var.vault_tls_secret_name
     namespace = var.vault_namespace
   }
   depends_on = [kubernetes_namespace.odahuflow]
@@ -470,11 +470,9 @@ resource "helm_release" "odahu_ui" {
   ]
 }
 
-
 ########################################################
 # Install Node Selector Webhook helm
 ########################################################
-
 
 resource "helm_release" "node_selector_webhook" {
   name       = "node-selector-webhook"

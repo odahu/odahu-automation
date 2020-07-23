@@ -9,7 +9,7 @@ providers {
   google-beta = ["2.20.2"]
   google      = ["2.20.2"]
   helm        = ["1.2.4"]
-  kubernetes  = ["1.11.0"]
+  kubernetes  = ["1.11.4"]
   local       = ["1.4.0"]
   null        = ["2.1.2"]
   random      = ["2.2.1"]
