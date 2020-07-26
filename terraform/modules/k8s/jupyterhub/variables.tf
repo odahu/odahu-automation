@@ -111,3 +111,21 @@ variable "helm_timeout" {
   default     = 900
   description = "Helm chart deploy timeout in seconds"
 }
+
+variable "pgsql" {
+  type = object({
+    enabled     = bool
+    db_host     = string
+    db_name     = string
+    db_user     = string
+    db_password = string
+  })
+  default = {
+    enabled     = false
+    db_host     = ""
+    db_name     = ""
+    db_user     = ""
+    db_password = ""
+  }
+  description = "PostgreSQL settings for JupyterHub"
+}

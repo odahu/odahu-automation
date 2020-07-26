@@ -5,6 +5,9 @@ proxy:
   https:
     enabled: false
 
+debug:
+  enabled: ${debug_enabled}
+
 hub:
   service:
     type: ClusterIP
@@ -16,6 +19,19 @@ hub:
     OAUTH2_AUTHORIZE_URL: ${oauth_oidc_issuer_url}/protocol/openid-connect/auth
     OAUTH2_TOKEN_URL: ${oauth_oidc_issuer_url}/protocol/openid-connect/token
     OAUTH_CALLBACK_URL: https://${cluster_domain}/jupyterhub/hub/oauth_callback
+%{ if pgsql_enabled }
+  db:
+    type: postgres
+    url: ${pgsql_url}
+    password: ${pgsql_password}
+%{ else ~}
+  db:
+    type: sqlite-pvc
+    pvc:
+      accessModes:
+      - ReadWriteOnce
+      storage: 1Gi
+%{ endif ~}
 
 ${ingress}
 
