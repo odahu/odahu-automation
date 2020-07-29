@@ -4,11 +4,11 @@ terraform {
 
 providers {
   aws         = ["2.52.0"]
-  azurerm     = ["2.16.0"]
+  azurerm     = ["2.21.0"]
   external    = ["1.2.0"]
   google-beta = ["2.20.2"]
   google      = ["2.20.2"]
-  helm        = ["1.0.0"]
+  helm        = ["1.2.4"]
   kubernetes  = ["1.11.0"]
   local       = ["1.4.0"]
   null        = ["2.1.2"]
