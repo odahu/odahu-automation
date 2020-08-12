@@ -31,3 +31,10 @@ variable "helm_timeout" {
   default     = 600
   description = "Helm chart deploy timeout in seconds"
 }
+
+variable "monitoring_namespace" {
+  type        = string
+  default     = "kube-monitoring"
+  description = "Kubernetes namespace where Prometheus-operator is deployed"
+}
+
