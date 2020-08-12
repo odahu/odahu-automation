@@ -5,6 +5,12 @@ locals {
   kube_pg_status_cmd = "kubectl -n ${var.namespace} get postgresql ${var.configuration.cluster_name} -ojsonpath='{.status.PostgresClusterStatus}'"
 }
 
+resource "random_password" "exporter_user" {
+  length           = 16
+  special          = true
+  override_special = "_%@#"
+}
+
 resource "kubernetes_namespace" "pgsql" {
   count = var.configuration.enabled ? 1 : 0
   metadata {
@@ -23,6 +29,12 @@ resource "helm_release" "pg_operator" {
   repository = local.helm_repo
   namespace  = var.namespace
   timeout    = var.helm_timeout
+
+  set {
+    name  = "configKubernetes.infrastructure_roles_secret_name"
+    value = "postgresql-infrastructure-roles"
+  }
+
   depends_on = [kubernetes_namespace.pgsql[0]]
 }
 
@@ -71,4 +83,37 @@ data "kubernetes_secret" "pg" {
     namespace = var.namespace
   }
   depends_on = [null_resource.pg_cluster_check[0]]
+}
+
+resource "kubernetes_secret" "infra_roles" {
+  metadata {
+    name      = "postgresql-infrastructure-roles"
+    namespace = var.namespace
+  }
+  data = {
+    "user1"     = "exporter"
+    "password1" = random_password.exporter_user.result
+    "inrole1"   = "pg_monitor"
+  }
+  type       = "Opaque"
+  depends_on = [kubernetes_namespace.pgsql]
+}
+
+resource "kubernetes_config_map" "grafana_dashboard" {
+  metadata {
+    annotations = {
+      k8s-sidecar-target-directory = "/tmp/dashboards/k8s"
+    }
+    labels = {
+      grafana_dashboard = "1"
+    }
+    name      = "psql-dashboard.json"
+    namespace = var.monitoring_namespace
+  }
+
+  data = {
+    "psql-dashboard.json" = file("${path.module}/files/grafana-psql-dashboard.json")
+  }
+
+  depends_on = [helm_release.pg_operator[0]]
 }
