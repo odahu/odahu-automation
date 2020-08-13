@@ -118,8 +118,12 @@ variable "knative_namespace" {
 
 variable "vault_namespace" {
   type        = string
-  default     = "vault"
   description = "Vault namespace"
+}
+
+variable "vault_tls_secret_name" {
+  type        = string
+  description = "Vault TLS secret name in vault namespace"
 }
 
 variable "fluentd_namespace" {
@@ -248,7 +252,6 @@ variable "pgsql" {
   }
   description = "PostgreSQL settings for ODAHU flow services"
 }
-
 
 variable "node_selector_webhook_settings" {
   description = "Settings for installation of Node selector webhook settings"

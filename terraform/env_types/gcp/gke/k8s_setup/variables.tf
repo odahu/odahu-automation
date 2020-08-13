@@ -210,19 +210,6 @@ variable "istio_namespace" {
 }
 
 ########################
-# Vault
-########################
-variable "vault" {
-  type = object({
-    enabled = bool
-  })
-  default = {
-    enabled = false
-  }
-  description = "Vault configuration"
-}
-
-########################
 # NFS
 ########################
 variable "nfs" {

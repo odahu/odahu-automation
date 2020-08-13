@@ -87,12 +87,6 @@ module "tekton" {
   odahu_infra_version = var.odahu_infra_version
 }
 
-module "vault" {
-  source                  = "../../../../modules/k8s/vault"
-  vault_pvc_storage_class = var.storage_class
-  configuration           = var.vault
-}
-
 module "nfs" {
   source = "../../../../modules/k8s/nfs"
 
