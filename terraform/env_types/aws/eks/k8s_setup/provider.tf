@@ -7,7 +7,7 @@ provider "helm" {
 }
 
 provider "kubernetes" {
-  version                = "1.11.0"
+  version                = "1.11.4"
   config_context_cluster = var.config_context_auth_info
 }
 

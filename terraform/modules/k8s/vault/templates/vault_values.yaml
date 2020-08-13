@@ -2,18 +2,23 @@ replicaCount: 1
 image:
   repository: vault
   tag: ${vault_version}
-dockerizeImage:
-  repository: jwilder/dockerize
-  tag: 0.6.1
+resources:
+  limits:
+    cpu: 100m
+    memory: 1Gi
 service:
   name: https-vault
   type: ClusterIP
   port: 8200
+%{ if pgsql_enabled }
+persistence:
+  enabled: false
+%{ else ~}
 persistence:
   enabled: true
-  storageClass: "${vault_pvc_storage_class}"
-  size: 10G
+  size: 5G
   accessMode: ReadWriteOnce
+%{ endif ~}
 
 vault:
   externalConfig:
@@ -35,7 +40,7 @@ vault:
     secrets:
       - path: odahu-flow/connections
         type: kv
-        description: Odahuflow connection storage.
+        description: ODAHU-flow connection storage.
   config:
     listener:
       tcp:
@@ -45,16 +50,22 @@ vault:
 
     ui: false
 
+%{ if pgsql_enabled }
+    storage:
+       postgresql:
+         connection_url: ${pgsql_url}
+%{ else ~}
     storage:
        file:
-         path: "/vault/file"
+         path: /vault/file
+%{ endif ~}
 
   logLevel: debug
 
 unsealer:
   image:
     repository: banzaicloud/bank-vaults
-    tag: 0.5.0
+    tag: ${vault_unsealer_version}
     pullPolicy: IfNotPresent
   args: [
     "--mode",

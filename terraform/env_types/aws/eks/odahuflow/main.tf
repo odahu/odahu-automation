@@ -1,11 +1,13 @@
 module "postgresql" {
-  source        = "../../../../modules/k8s/postgresql"
+  source = "../../../../modules/k8s/postgresql"
+
   configuration = var.postgres
   databases = [
+    var.odahu_database,
     "airflow",
-    "mlflow",
     "jupyterhub",
-    var.odahu_database
+    "mlflow",
+    "vault"
   ]
 }
 
@@ -109,6 +111,18 @@ module "jupyterhub" {
   }
 }
 
+module "vault" {
+  source        = "../../../../modules/k8s/vault"
+  configuration = var.vault
+  pgsql = {
+    enabled     = var.postgres.enabled
+    db_host     = module.postgresql.pgsql_endpoint
+    db_name     = "vault"
+    db_user     = module.postgresql.pgsql_credentials["vault"].username
+    db_password = module.postgresql.pgsql_credentials["vault"].password
+  }
+}
+
 module "elasticsearch" {
   source                = "../../../../modules/k8s/elk"
   cluster_domain        = var.cluster_domain_name
@@ -162,6 +176,8 @@ module "odahuflow_helm" {
   oauth_oidc_issuer_url       = var.oauth_oidc_issuer_url
   oauth_mesh_enabled          = var.oauth_mesh_enabled
   vault_enabled               = var.vault.enabled
+  vault_namespace             = module.vault.namespace
+  vault_tls_secret_name       = module.vault.tls_secret
   airflow_enabled             = var.airflow.enabled
   pgsql = {
     enabled     = var.postgres.enabled
