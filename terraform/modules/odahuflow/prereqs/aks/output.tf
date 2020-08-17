@@ -30,7 +30,7 @@ output "odahuflow_connections" {
       id = "models-output"
       spec = {
         type        = "azureblob"
-        keySecret   = "${azurerm_storage_account.odahuflow_data.primary_blob_endpoint}${data.azurerm_storage_account_sas.odahuflow.sas}"
+        keySecret   = base64encode("${azurerm_storage_account.odahuflow_data.primary_blob_endpoint}${data.azurerm_storage_account_sas.odahuflow.sas}")
         uri         = "${var.data_bucket}/output"
         description = ""
         webUILink   = "${azurerm_storage_container.odahuflow_bucket.id}/output"
