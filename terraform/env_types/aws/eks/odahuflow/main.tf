@@ -36,7 +36,7 @@ module "odahuflow_prereqs" {
 module "airflow_prereqs" {
   source = "../../../../modules/k8s/airflow/prereqs/eks"
 
-  wine_bucket     = module.odahuflow_prereqs.odahu_bucket_name
+  wine_bucket     = module.odahuflow_prereqs.odahu_data_bucket_name
   cluster_name    = var.cluster_name
   dag_bucket      = local.dag_bucket
   dag_bucket_path = local.dag_bucket_path
