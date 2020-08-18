@@ -30,13 +30,15 @@ module "pg_backup" {
 module "odahuflow_prereqs" {
   source = "../../../../modules/odahuflow/prereqs/aks"
 
-  tags           = local.common_tags
-  location       = var.azure_location
-  resource_group = var.azure_resource_group
-  cluster_name   = var.cluster_name
-  data_bucket    = var.data_bucket
-  ip_egress_name = var.aks_egress_ip_name
-  allowed_ips    = var.allowed_ips
+  tags                = local.common_tags
+  location            = var.azure_location
+  resource_group      = var.azure_resource_group
+  cluster_name        = var.cluster_name
+  data_bucket         = var.data_bucket
+  log_bucket          = var.log_bucket
+  ip_egress_name      = var.aks_egress_ip_name
+  allowed_ips         = var.allowed_ips
+  log_expiration_days = var.log_expiration_days
 }
 
 module "airflow_prereqs" {

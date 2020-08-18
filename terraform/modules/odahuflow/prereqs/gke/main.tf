@@ -8,12 +8,13 @@ locals {
 
   gsa_collector_name       = "${var.cluster_name}-collector"
   gcp_bucket_registry_name = "artifacts.${var.project_id}.appspot.com"
+  log_bucket_name          = var.log_bucket == "" ? "${var.cluster_name}-log-storage" : var.log_bucket
 }
 
 ########################################################
-# GCS bucket
+# GCS data bucket
 ########################################################
-resource "google_storage_bucket" "this" {
+resource "google_storage_bucket" "data" {
   name          = var.data_bucket
   location      = var.region
   storage_class = "REGIONAL"
@@ -22,6 +23,30 @@ resource "google_storage_bucket" "this" {
   labels = {
     project = "odahuflow"
     env     = var.cluster_name
+  }
+}
+
+########################################################
+# GCS log bucket
+########################################################
+resource "google_storage_bucket" "log" {
+  name          = local.log_bucket_name
+  location      = var.region
+  storage_class = "REGIONAL"
+  force_destroy = true
+
+  labels = {
+    project = "odahuflow"
+    env     = var.cluster_name
+  }
+
+  lifecycle_rule {
+    condition {
+      age = var.log_expiration_days
+    }
+    action {
+      type = "Delete"
+    }
   }
 }
 
@@ -38,14 +63,26 @@ resource "google_service_account_key" "collector_sa_key" {
   service_account_id = google_service_account.collector_sa.name
 }
 
-resource "google_storage_bucket_iam_member" "odahuflow_store_legacy_write" {
-  bucket = google_storage_bucket.this.name
+resource "google_storage_bucket_iam_member" "odahuflow_data_store_legacy_write" {
+  bucket = google_storage_bucket.data.name
   member = "serviceAccount:${google_service_account.collector_sa.email}"
   role   = "roles/storage.legacyBucketWriter"
 }
 
-resource "google_storage_bucket_iam_member" "odahuflow_store" {
-  bucket = google_storage_bucket.this.name
+resource "google_storage_bucket_iam_member" "odahuflow_data_store" {
+  bucket = google_storage_bucket.data.name
+  member = "serviceAccount:${google_service_account.collector_sa.email}"
+  role   = "roles/storage.objectAdmin"
+}
+
+resource "google_storage_bucket_iam_member" "odahuflow_log_store_legacy_write" {
+  bucket = google_storage_bucket.log.name
+  member = "serviceAccount:${google_service_account.collector_sa.email}"
+  role   = "roles/storage.legacyBucketWriter"
+}
+
+resource "google_storage_bucket_iam_member" "odahuflow_log_store" {
+  bucket = google_storage_bucket.log.name
   member = "serviceAccount:${google_service_account.collector_sa.email}"
   role   = "roles/storage.objectAdmin"
 }

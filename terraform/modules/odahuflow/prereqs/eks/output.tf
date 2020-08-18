@@ -13,7 +13,7 @@ output "odahu_data_bucket_name" {
 }
 
 output "odahu_log_bucket_name" {
-  value = var.log_bucket == "" ? "" : aws_s3_bucket.logs[0].bucket 
+  value = var.log_bucket == "" ? "" : aws_s3_bucket.logs[0].bucket
 }
 
 output "odahuflow_connections" {

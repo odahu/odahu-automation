@@ -80,10 +80,10 @@ output "fluent_daemonset_helm_values" {
 
     secrets = [
       { name  = "AzureStorageAccount",
-        value = var.log_bucket == "" ? azurerm_storage_account.odahuflow_data.name : azurerm_storage_account.odahuflow_logs[0].name
+        value = var.log_bucket == "" ? azurerm_storage_account.odahuflow_data.name : try(azurerm_storage_account.odahuflow_logs[0].name, "")
       },
       { name  = "AzureStorageSasToken",
-        value = var.log_bucket == "" ? data.azurerm_storage_account_sas.odahuflow_data.sas : data.azurerm_storage_account_sas.odahuflow_logs[0].sas
+        value = var.log_bucket == "" ? data.azurerm_storage_account_sas.odahuflow_data.sas : try(data.azurerm_storage_account_sas.odahuflow_logs[0].sas, "")
       }
     ]
   }
@@ -91,8 +91,8 @@ output "fluent_daemonset_helm_values" {
 
 output "logstash_input_config" {
   value = templatefile("${path.module}/templates/logstash.yaml", {
-    storage_account_name = var.log_bucket == "" ? azurerm_storage_account.odahuflow_data.name : azurerm_storage_account.odahuflow_logs[0].name
-    storage_access_key   = var.log_bucket == "" ? azurerm_storage_account.odahuflow_data.primary_access_key : azurerm_storage_account.odahuflow_logs[0].primary_access_key
-    container            = var.log_bucket == "" ? azurerm_storage_container.odahuflow_data_bucket.name : azurerm_storage_container.odahuflow_log_bucket[0].name
+    storage_account_name = var.log_bucket == "" ? azurerm_storage_account.odahuflow_data.name : try(azurerm_storage_account.odahuflow_logs[0].name, "")
+    storage_access_key   = var.log_bucket == "" ? azurerm_storage_account.odahuflow_data.primary_access_key : try(azurerm_storage_account.odahuflow_logs[0].primary_access_key, "")
+    container            = var.log_bucket == "" ? azurerm_storage_container.odahuflow_data_bucket.name : try(azurerm_storage_container.odahuflow_log_bucket[0].name, "")
   })
 }
