@@ -55,8 +55,8 @@ output "fluent_helm_values" {
 output "fluent_daemonset_helm_values" {
   value = {
     config = templatefile("${path.module}/templates/fluentd_ds_cloud.tpl", {
-      data_bucket        = var.log_bucket == "" ? aws_s3_bucket.data.id : aws_s3_bucket.logs[0].id
-      data_bucket_region = var.log_bucket == "" ? aws_s3_bucket.data.region : aws_s3_bucket.logs[0].region
+      data_bucket        = local.log_bucket
+      data_bucket_region = local.log_bucket_region
     })
 
     annotations = {
@@ -72,8 +72,8 @@ output "fluent_daemonset_helm_values" {
 
 output "logstash_input_config" {
   value = templatefile("${path.module}/templates/logstash.yaml", {
-    bucket = var.log_bucket == "" ? aws_s3_bucket.data.id : aws_s3_bucket.logs[0].id
-    region = var.log_bucket == "" ? aws_s3_bucket.data.region : aws_s3_bucket.logs[0].region
+    bucket = local.log_bucket
+    region = local.log_bucket_region
   })
 }
 

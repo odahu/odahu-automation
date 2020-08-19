@@ -29,6 +29,11 @@ locals {
   model_docker_web_ui_link = "https://${local.model_docker_repo}"
 
   sas_token_period = "168h" # - 7 days # 8760h - 1 year
+
+  log_bucket             = var.log_bucket == "" ? azurerm_storage_container.odahuflow_data_bucket.name : try(azurerm_storage_container.odahuflow_log_bucket[0].name, "")
+  log_sas_token          = var.log_bucket == "" ? data.azurerm_storage_account_sas.odahuflow_data.sas : try(data.azurerm_storage_account_sas.odahuflow_logs[0].sas, "")
+  log_storage_account    = var.log_bucket == "" ? azurerm_storage_account.odahuflow_data.name : try(azurerm_storage_account.odahuflow_logs[0].name, "")
+  log_storage_access_key = var.log_bucket == "" ? azurerm_storage_account.odahuflow_data.primary_access_key : try(azurerm_storage_account.odahuflow_logs[0].primary_access_key, "")
 }
 
 ########################################################
