@@ -3,6 +3,12 @@ variable "helm_values" {
   description = "Extra helm nignx values"
 }
 
+variable "helm_repo" {
+  type        = string
+  default     = "https://kubernetes-charts.storage.googleapis.com"
+  description = "URL of used Helm chart repository"
+}
+
 variable "dependencies" {
   type        = any
   default     = null

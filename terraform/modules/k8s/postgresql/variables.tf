@@ -26,6 +26,12 @@ variable "databases" {
   description = "List of PostgreSQL databases to be created on cluster init"
 }
 
+variable "helm_repo" {
+  type        = string
+  default     = "https://raw.githubusercontent.com/zalando/postgres-operator/master/charts/postgres-operator"
+  description = "URL of used Helm chart repository"
+}
+
 variable "helm_timeout" {
   type        = number
   default     = 600

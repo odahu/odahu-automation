@@ -202,7 +202,6 @@ function TerraformCreate() {
 			TerragruntRun aks_create apply
 			;;
 	esac
-	TerragruntRun helm_init apply
 	TerragruntRun k8s_setup apply
 	echo 'INFO : Create Odahuflow DNS records'
 	TerragruntRun k8s_setup output
@@ -258,7 +257,6 @@ function TerraformDestroy() {
 		TerragruntRun odahu_dns destroy
 
 		TerragruntRun k8s_setup destroy
-		TerragruntRun helm_init destroy
 	else
 		echo -e "ERROR:\tThere is no cluster found with name \"$(GetParam 'cluster_name')\""
 	fi

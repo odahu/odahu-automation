@@ -70,7 +70,7 @@ resource "helm_release" "monitoring" {
   chart      = "odahu-flow-monitoring"
   version    = var.odahu_infra_version
   namespace  = kubernetes_namespace.monitoring.metadata[0].annotations.name
-  repository = "odahuflow"
+  repository = var.helm_repo
   timeout    = var.helm_timeout
 
   values = [

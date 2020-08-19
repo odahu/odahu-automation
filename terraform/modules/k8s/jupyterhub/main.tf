@@ -49,16 +49,6 @@ locals {
   }
 }
 
-resource "null_resource" "add_helm_jupyterhub_repository" {
-  count = var.jupyterhub_enabled ? 1 : 0
-  triggers = {
-    build_number = timestamp()
-  }
-  provisioner "local-exec" {
-    command = "helm repo add jupyterhub ${var.jupyterhub_helm_repo}"
-  }
-}
-
 resource "random_string" "secret" {
   count       = var.jupyterhub_enabled ? 1 : 0
   length      = 64
@@ -80,7 +70,6 @@ resource "kubernetes_namespace" "jupyterhub" {
     }
     name = var.jupyterhub_namespace
   }
-  depends_on = [null_resource.add_helm_jupyterhub_repository[0]]
 }
 
 module "docker_credentials" {
@@ -109,10 +98,10 @@ resource "kubernetes_secret" "jupyterhub_tls" {
 resource "helm_release" "jupyterhub" {
   count      = var.jupyterhub_enabled ? 1 : 0
   name       = "jupyterhub"
-  chart      = "jupyterhub/jupyterhub"
-  version    = var.jupyterhub_chart_version
+  chart      = "jupyterhub"
+  version    = var.helm_chart_version
   namespace  = var.jupyterhub_namespace
-  repository = "jupyterhub"
+  repository = var.helm_repo
   timeout    = var.helm_timeout
 
   values = [
@@ -144,9 +133,5 @@ resource "helm_release" "jupyterhub" {
     })
   ]
 
-  depends_on = [
-    null_resource.add_helm_jupyterhub_repository[0],
-    kubernetes_namespace.jupyterhub[0],
-    kubernetes_secret.jupyterhub_tls[0]
-  ]
+  depends_on = [kubernetes_secret.jupyterhub_tls[0]]
 }

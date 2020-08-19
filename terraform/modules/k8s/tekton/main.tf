@@ -12,7 +12,7 @@ resource "helm_release" "tekton" {
   chart      = "odahu-flow-tekton"
   version    = var.odahu_infra_version
   namespace  = var.namespace
-  repository = "odahuflow"
+  repository = var.helm_repo
   timeout    = var.helm_timeout
   depends_on = [kubernetes_namespace.tekton]
 }

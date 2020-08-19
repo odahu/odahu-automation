@@ -12,10 +12,11 @@ locals {
 # Oauth2 proxy
 resource "helm_release" "oauth2-proxy" {
   name          = "oauth2-proxy"
-  chart         = "stable/oauth2-proxy"
+  repository    = var.helm_repo
+  chart         = "oauth2-proxy"
   version       = var.oauth_helm_chart_version
   namespace     = "kube-system"
-  recreate_pods = "true"
+  recreate_pods = true
   timeout       = var.helm_timeout
 
   values = [

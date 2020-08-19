@@ -67,6 +67,7 @@ module "storage-syncer" {
   source = "../../../../modules/k8s/syncer"
 
   namespace           = "airflow"
+  helm_repo           = var.helm_repo
   extra_helm_values   = module.airflow_prereqs.syncer_helm_values
   odahu_infra_version = var.odahu_infra_version
 }
@@ -79,6 +80,7 @@ module "fluentd" {
   docker_password     = var.docker_password
   odahu_infra_version = var.odahu_infra_version
 
+  helm_repo         = var.helm_repo
   extra_helm_values = module.odahuflow_prereqs.fluent_helm_values
 }
 
@@ -90,6 +92,7 @@ module "fluentd-daemonset" {
   docker_password     = var.docker_password
   odahu_infra_version = var.odahu_infra_version
 
+  helm_repo         = var.helm_repo
   extra_helm_values = module.odahuflow_prereqs.fluent_daemonset_helm_values
 }
 

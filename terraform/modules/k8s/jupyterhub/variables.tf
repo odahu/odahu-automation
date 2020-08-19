@@ -32,18 +32,6 @@ variable "jupyterhub_namespace" {
   description = "JupyterHub Kubernetes namespace"
 }
 
-variable "jupyterhub_helm_repo" {
-  type        = string
-  description = "JupyterHub helm repo address"
-  default     = "https://jupyterhub.github.io/helm-chart/"
-}
-
-variable "jupyterhub_chart_version" {
-  type        = string
-  default     = "0.8.2"
-  description = "JupyterHub chart version"
-}
-
 variable "jupyterhub_secret_token" {
   type        = string
   default     = ""
@@ -104,6 +92,18 @@ variable "tls_secret_key" {
   type        = string
   default     = ""
   description = "Ingress TLS key"
+}
+
+variable "helm_chart_version" {
+  type        = string
+  default     = "0.8.2"
+  description = "JupyterHub chart version"
+}
+
+variable "helm_repo" {
+  type        = string
+  default     = "https://jupyterhub.github.io/helm-chart"
+  description = "URL of used Helm chart repository"
 }
 
 variable "helm_timeout" {

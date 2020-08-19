@@ -1,9 +1,10 @@
 resource "helm_release" "nginx-ingress" {
-  name      = "nginx-ingress"
-  chart     = "stable/nginx-ingress"
-  namespace = "kube-system"
-  version   = "1.36.3"
-  wait      = false
+  name       = "nginx-ingress"
+  repository = var.helm_repo
+  chart      = "nginx-ingress"
+  namespace  = "kube-system"
+  version    = "1.36.3"
+  wait       = false
 
   set {
     name  = "controller.config.proxy-buffer-size"

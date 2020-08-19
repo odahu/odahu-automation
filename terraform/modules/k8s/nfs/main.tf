@@ -1,7 +1,6 @@
 locals {
   nfs_provisioner_version = "v2.3.0"
   nfs_helm_version        = "1.0.0"
-  nfs_helm_repo           = "stable"
 }
 
 resource "helm_release" "nfs" {
@@ -10,7 +9,7 @@ resource "helm_release" "nfs" {
   chart      = "nfs-server-provisioner"
   version    = local.nfs_helm_version
   namespace  = "kube-system"
-  repository = local.nfs_helm_repo
+  repository = var.helm_repo
   timeout    = var.helm_timeout
 
   values = [

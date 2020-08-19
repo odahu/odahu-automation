@@ -1,6 +1,5 @@
 locals {
   airflow_helm_version = "6.5.0"
-  airflow_helm_repo    = "stable"
   debug_log_level      = "true"
 
   ingress_tls_enabled     = var.tls_secret_crt != "" && var.tls_secret_key != ""
@@ -116,7 +115,7 @@ resource "helm_release" "airflow" {
   chart      = "airflow"
   version    = local.airflow_helm_version
   namespace  = var.namespace
-  repository = local.airflow_helm_repo
+  repository = var.helm_repo
   timeout    = var.helm_timeout
 
   values = [
