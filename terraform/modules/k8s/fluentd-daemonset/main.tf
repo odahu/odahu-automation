@@ -1,3 +1,19 @@
+locals {
+  fluentd_daemonset_values = {
+    "extraAnnotations" = var.extra_helm_values.annotations
+    "extraEnvs"        = var.extra_helm_values.envs
+    "extraSecrets"     = var.extra_helm_values.secrets
+    "configData" = {
+      "cloud-config.inc"   = var.extra_helm_values.config
+      "filters-config.inc" = templatefile("${path.module}/templates/fluentd_filters.tpl", {})
+      "source-config.inc"  = templatefile("${path.module}/templates/fluentd_sources.tpl", {})
+      "fluent.conf" = templatefile(
+        "${path.module}/templates/fluentd_main.tpl", { pod_prefixes = var.pod_prefixes }
+      )
+    }
+  }
+}
+
 resource "kubernetes_namespace" "fluentd" {
   metadata {
     annotations = {
@@ -26,8 +42,9 @@ resource "helm_release" "fluentd-daemonset" {
     templatefile("${path.module}/templates/helm_values.yaml", {
       docker_repo         = var.docker_repo
       odahu_infra_version = var.odahu_infra_version
-    }),
-    var.extra_helm_values
+
+      fluentd_daemonset_values = yamlencode({ "fluentd" = local.fluentd_daemonset_values })
+    })
   ]
 
   depends_on = [kubernetes_namespace.fluentd]

@@ -48,11 +48,41 @@ output "fluent_helm_values" {
 }
 
 output "fluent_daemonset_helm_values" {
-  value = templatefile("${path.module}/templates/fluentd_daemonset.yaml", {
-    data_bucket             = var.data_bucket
-    azure_storage_account   = azurerm_storage_account.odahuflow_data.name
-    azure_storage_sas_token = data.azurerm_storage_account_sas.odahuflow.sas
-  })
+  value = {
+    config = templatefile("${path.module}/templates/fluentd_ds_cloud.tpl", {
+      data_bucket = var.data_bucket
+    })
+
+    annotations = {}
+
+    envs = [
+      { name = "AZURE_STORAGE_ACCOUNT",
+        valueFrom = {
+          secretKeyRef = {
+            name = "fluentd-secret",
+            key  = "AzureStorageAccount"
+          }
+        }
+      },
+      { name = "AZURE_STORAGE_SAS_TOKEN",
+        valueFrom = {
+          secretKeyRef = {
+            name = "fluentd-secret",
+            key  = "AzureStorageSasToken"
+          }
+        }
+      }
+    ]
+
+    secrets = [
+      { name  = "AzureStorageAccount",
+        value = azurerm_storage_account.odahuflow_data.name
+      },
+      { name  = "AzureStorageSasToken",
+        value = data.azurerm_storage_account_sas.odahuflow.sas
+      }
+    ]
+  }
 }
 
 output "logstash_input_config" {
