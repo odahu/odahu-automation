@@ -49,11 +49,21 @@ output "fluent_helm_values" {
 }
 
 output "fluent_daemonset_helm_values" {
-  value = templatefile("${path.module}/templates/fluentd_daemonset.yaml", {
-    data_bucket        = aws_s3_bucket.this.id
-    data_bucket_region = aws_s3_bucket.this.region
-    collector_iam_role = aws_iam_role.collector.name
-  })
+  value = {
+    config = templatefile("${path.module}/templates/fluentd_ds_cloud.tpl", {
+      data_bucket        = aws_s3_bucket.this.id
+      data_bucket_region = aws_s3_bucket.this.region
+    })
+
+    annotations = {
+      "sidecar.istio.io/inject" = "false"
+      "iam.amazonaws.com/role"  = aws_iam_role.collector.name
+    }
+
+    envs = []
+
+    secrets = []
+  }
 }
 
 output "logstash_input_config" {

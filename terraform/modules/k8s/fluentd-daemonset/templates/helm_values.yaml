@@ -1,2 +1,6 @@
 fluentdVersion: "${odahu_infra_version}"
 imagesRegistry: "${docker_repo}/"
+imagePullSecrets:
+- name: repo-json-key
+
+${fluentd_daemonset_values}

@@ -1,6 +1,0 @@
-output:
-  target: "s3"
-  s3:
-    bucket: "${data_bucket}"
-    region: "${data_bucket_region}"
-    customIAMRole: "${collector_iam_role}"
