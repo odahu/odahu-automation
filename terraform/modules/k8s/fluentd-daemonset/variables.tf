@@ -28,8 +28,13 @@ variable "namespace" {
 }
 
 variable "pod_prefixes" {
-  type        = list(string)
-  default     = ["odahu-flow-**"]
+  type = list(string)
+  default = [
+    "odahu-flow**",
+    "**_odahu-flow-training_**",
+    "**_odahu-flow-packaging_**",
+    "**_odahu-flow-deployment_**"
+  ]
   description = <<EOF
     List of pod names prefixes to be matched in Fluent daemonset for further processing.
     Examples in Fluent documentation:

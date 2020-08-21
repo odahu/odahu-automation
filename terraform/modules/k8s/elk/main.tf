@@ -8,18 +8,26 @@ locals {
     kubernetes_namespace.elk[0].metadata[0].annotations.name
   )
 
-  secret_mounts          = length(var.sa_key) == 0 ? { secretMounts = [] } : { secretMounts = [{ name = "logstash-gke-sa", secretName = "logstash-gke-sa", path = "/credentials" }] }
-  logstash_filter_config = file("${path.module}/templates/logstash_filter.yaml")
-  logstash_output_config = templatefile("${path.module}/templates/logstash_output.yaml", {
-    es_service_url = local.es_service_url
-  })
-  logstash_config_plain = format(
-    "%s%s%s",
-    var.logstash_input_config,
-    local.logstash_filter_config,
-    local.logstash_output_config
-  )
-  logstash_config = { logstashPipeline = { "logstash.conf" = format("%s", local.logstash_config_plain) } }
+  secret_mounts = length(var.sa_key) == 0 ? { secretMounts = [] } : {
+    secretMounts = [{
+      name       = "logstash-gke-sa",
+      secretName = "logstash-gke-sa",
+      path       = "/credentials"
+    }]
+  }
+
+  logstash_config = {
+    "logstashPipeline" = {
+      "logstash.conf" = format(
+        "%s%s%s",
+        var.logstash_input_config,
+        templatefile("${path.module}/templates/logstash_filter.tpl", {}),
+        templatefile("${path.module}/templates/logstash_output.tpl", {
+          es_service_url = local.es_service_url
+        })
+      )
+    }
+  }
 
   ingress_tls_enabled     = var.tls_secret_crt != "" && var.tls_secret_key != ""
   url_schema              = local.ingress_tls_enabled ? "https" : "http"
@@ -30,9 +38,12 @@ locals {
     hosts   = [var.cluster_domain]
     path    = "/kibana"
     annotations = {
-      "kubernetes.io/ingress.class"                       = "nginx"
-      "nginx.ingress.kubernetes.io/force-ssl-redirect"    = "true"
-      "nginx.ingress.kubernetes.io/auth-signin"           = format("https://%s/oauth2/start?rd=https://$host$escaped_request_uri", var.cluster_domain)
+      "kubernetes.io/ingress.class"                    = "nginx"
+      "nginx.ingress.kubernetes.io/force-ssl-redirect" = "true"
+      "nginx.ingress.kubernetes.io/auth-signin" = format(
+        "https://%s/oauth2/start?rd=https://$host$escaped_request_uri",
+        var.cluster_domain
+      )
       "nginx.ingress.kubernetes.io/auth-url"              = "http://oauth2-proxy.kube-system.svc.cluster.local:4180/oauth2/auth"
       "nginx.ingress.kubernetes.io/configuration-snippet" = <<-EOT
         rewrite          ^/kibana(/|$)(.*) /$2 break;
@@ -64,6 +75,70 @@ locals {
   } : {}
 
   ingress_config = merge(local.ingress_common, local.ingress_tls)
+
+  policies = [
+    {
+      name = "logstash-policy",
+      json = jsonencode({
+        "policy" = {
+          "phases" = {
+            "hot"    = { "min_age" = "0ms", "actions" = { "rollover" = { "max_size" = "1GB" } } },
+            "delete" = { "min_age" = "4d", "actions" = { "delete" = {} } }
+          }
+        }
+      })
+    },
+    {
+      name = "odahu-flow-policy",
+      json = jsonencode({
+        "policy" = {
+          "phases" = {
+            "hot"    = { "min_age" = "0ms", "actions" = { "rollover" = { "max_size" = "1GB" } } },
+            "delete" = { "min_age" = "25d", "actions" = { "delete" = {} } }
+          }
+        }
+      })
+    }
+  ]
+
+  templates = [
+    {
+      "name" = "logstash",
+      "json" = jsonencode({
+        "index_patterns" = ["logstash-*"],
+        "settings" = {
+          "number_of_shards"               = 1,
+          "number_of_replicas"             = "${var.elasticsearch_replicas - 1}",
+          "index.lifecycle.name"           = "logstash-policy",
+          "index.lifecycle.rollover_alias" = "logstash"
+        },
+        "mappings" = {
+          "_doc" = { "properties" = { "@timestamp" = { "type" = "date" } } }
+        }
+      }),
+      "alias" = jsonencode({
+        "aliases" = { "logstash" = { "is_write_index" = true } }
+      })
+    },
+    {
+      "name" = "odahu-flow",
+      "json" = jsonencode({
+        "index_patterns" = ["odahu-flow-*"],
+        "settings" = {
+          "number_of_shards"               = 1,
+          "number_of_replicas"             = "${var.elasticsearch_replicas - 1}",
+          "index.lifecycle.name"           = "odahu-flow-policy",
+          "index.lifecycle.rollover_alias" = "odahu-flow"
+        },
+        "mappings" = {
+          "_doc" = { "properties" = { "@timestamp" = { "type" = "date" } } }
+        }
+      }),
+      "alias" = jsonencode({
+        "aliases" = { "odahu-flow" = { "is_write_index" = true } }
+      })
+    }
+  ]
 }
 
 module "docker_credentials" {
@@ -131,7 +206,10 @@ resource "helm_release" "elasticsearch" {
       es_replicas  = var.elasticsearch_replicas
       es_mem       = var.elasticsearch_memory
       storage_size = var.storage_size
-    }),
+
+      policies  = local.policies
+      templates = local.templates
+    })
   ]
 
   depends_on = [kubernetes_namespace.elk[0]]
@@ -161,27 +239,82 @@ resource "helm_release" "kibana" {
   ]
 }
 
-resource "helm_release" "kibana_loader" {
-  count      = var.elk_enabled ? 1 : 0
-  name       = "kibana-loader"
-  repository = var.odahu_helm_repo
-  chart      = "odahu-flow-kibana-loader"
-  version    = var.odahu_infra_version
-  namespace  = kubernetes_namespace.elk[0].metadata[0].annotations.name
-  timeout    = var.helm_timeout
-
-  values = [
-    templatefile("${path.module}/templates/kibana-loader.yaml", {
-      kibana_odahu_stuff = file("${path.module}/templates/kibana-odahu-stuff.ndjson")
-      kibana_url = format("http://kibana.%s.svc.cluster.local:5601",
-        kubernetes_namespace.elk[0].metadata[0].annotations.name
-      )
-      kibana_image     = "docker.elastic.co/kibana/kibana"
-      kibana_image_tag = var.kibana_chart_version
-    })
+resource "kubernetes_config_map" "kibana_loader_data" {
+  count = var.elk_enabled ? 1 : 0
+  metadata {
+    name      = "kibana-loader-data"
+    namespace = var.elk_namespace
+  }
+  data = {
+    "kibana_odahu_stuff"   = file("${path.module}/files/kibana_odahu_stuff.ndjson")
+    "kibana_loader_script" = file("${path.module}/files/kibana_loader.sh")
+  }
+  depends_on = [
+    kubernetes_namespace.elk[0]
   ]
+}
 
-  depends_on = [helm_release.kibana[0]]
+resource "kubernetes_job" "kibana_loader" {
+  count = var.elk_enabled ? 1 : 0
+  metadata {
+    name      = "kibana-loader"
+    namespace = var.elk_namespace
+  }
+  spec {
+    template {
+      metadata {}
+      spec {
+        volume {
+          name = "import-script"
+          config_map {
+            name = kubernetes_config_map.kibana_loader_data[0].metadata[0].name
+            items {
+              key  = "kibana_loader_script"
+              path = "import.sh"
+              mode = "0755"
+            }
+          }
+        }
+        volume {
+          name = "kibana-data"
+          config_map {
+            name = kubernetes_config_map.kibana_loader_data[0].metadata[0].name
+            items {
+              key  = "kibana_odahu_stuff"
+              path = "kibana_odahu_stuff.ndjson"
+            }
+          }
+        }
+        container {
+          name    = "kibana-loader"
+          image   = "docker.elastic.co/kibana/kibana:${var.kibana_chart_version}"
+          command = ["/opt/bin/import.sh"]
+          env {
+            name = "KIBANA_URL"
+            value = format("http://kibana.%s.svc:5601",
+              kubernetes_namespace.elk[0].metadata[0].annotations.name
+            )
+          }
+          volume_mount {
+            name       = "kibana-data"
+            mount_path = "/opt/kibana-import-data/"
+          }
+          volume_mount {
+            name       = "import-script"
+            mount_path = "/opt/bin/"
+          }
+        }
+        restart_policy = "Never"
+      }
+    }
+    backoff_limit = 0
+  }
+  wait_for_completion = true
+
+  depends_on = [
+    helm_release.kibana[0],
+    kubernetes_config_map.kibana_loader_data[0]
+  ]
 }
 
 resource "helm_release" "logstash" {
@@ -199,7 +332,7 @@ resource "helm_release" "logstash" {
       config             = yamlencode(local.logstash_config)
       replicas           = var.logstash_replicas
       annotations        = length(var.logstash_annotations) == 0 ? "" : yamlencode(var.logstash_annotations)
-      logstash_image     = "gcr.io/or2-msq-epmd-legn-t1iylu/odahu/odahu-flow-logstash-oss"
+      logstash_image     = "${var.docker_repo}/odahu-flow-logstash-oss"
       logstash_image_tag = var.odahu_infra_version
     })
   ]

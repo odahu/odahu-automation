@@ -10,15 +10,15 @@ function ReadArguments() {
 	export TF_SUPPORTED_COMMANDS=(create destroy suspend resume)
 
 	if [[ $# == 0 ]]; then
-		echo -e "ERROR:\tOptions aren't specified! Use -h for help!"
+		echo -e "ERROR:\tOptions aren't specified! Use -h for help."
 		exit 1
 	fi
 
 	while [[ $# -gt 0 ]]; do
 		case "$1" in
 			-h|--help)
-				echo "tf_runner.sh - Run Terraform modules for Odahuflow clusters orchestration."
-				echo -e "Usage: ./tf_runner.sh [OPTIONS]\n\noptions:"
+				echo "${0##*/} - Run Terraform modules for ODAHU-flow clusters orchestration."
+				echo -e "Usage: ${0##*/} [OPTIONS]\n\noptions:"
 				echo "command to execute: \"${TF_SUPPORTED_COMMANDS[*]}\""
 				echo -e "-v  --verbose\t\tverbose mode for debug purposes"
 				echo -e "-o  --output\t\toutput file name"
@@ -58,7 +58,7 @@ function ReadArguments() {
 
 	# Check mandatory parameters
 	if [[ ! $COMMAND ]]; then
-		echo -e "ERROR:\tCommand argument must be specified. Use -h for help!"
+		echo -e "ERROR:\tCommand argument must be specified. Use -h for help."
 		exit 1
 	fi
 	# Validate profile path

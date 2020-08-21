@@ -23,7 +23,7 @@ variable "elasticsearch_helm_repo" {
 
 variable "elasticsearch_chart_version" {
   type        = string
-  default     = "7.6.2"
+  default     = "7.9.0"
   description = "Elasticsearch helm chart version"
 }
 
@@ -35,7 +35,7 @@ variable "elasticsearch_memory" {
 
 variable "logstash_chart_version" {
   type        = string
-  default     = "7.6.2"
+  default     = "7.9.0"
   description = "Logstash helm chart version"
 }
 
@@ -47,7 +47,7 @@ variable "elasticsearch_replicas" {
 
 variable "kibana_chart_version" {
   type        = string
-  default     = "7.6.2"
+  default     = "7.9.0"
   description = "Kibana helm chart version"
 }
 
