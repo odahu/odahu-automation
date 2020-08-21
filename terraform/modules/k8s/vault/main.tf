@@ -2,7 +2,6 @@ locals {
   vault_helm_version     = "1.4.0"
   vault_version          = "1.5.0"
   vault_unsealer_version = "1.4.0"
-  vault_helm_repo        = "banzaicloud-stable"
   vault_debug_log_level  = "true"
   vault_pvc_name         = "vault-file"
   pg_client_image        = "postgres:12-alpine"
@@ -108,10 +107,10 @@ resource "kubernetes_job" "vault_pgsql_init" {
 resource "helm_release" "vault" {
   count      = var.configuration.enabled ? 1 : 0
   name       = "vault"
-  chart      = "${local.vault_helm_repo}/vault"
+  chart      = "vault"
   version    = local.vault_helm_version
   namespace  = var.namespace
-  repository = local.vault_helm_repo
+  repository = var.helm_repo
   timeout    = var.helm_timeout
   values = [
     templatefile("${path.module}/templates/vault_values.yaml", {

@@ -20,7 +20,7 @@ resource "helm_release" "fluentd" {
   chart      = "odahu-flow-fluentd"
   version    = var.odahu_infra_version
   namespace  = var.namespace
-  repository = "odahuflow"
+  repository = var.helm_repo
   timeout    = var.helm_timeout
 
   values = [

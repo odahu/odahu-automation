@@ -37,6 +37,12 @@ variable "docker_password" {
   description = "ODAHU flow docker repo password"
 }
 
+variable "helm_repo" {
+  type        = string
+  default     = "https://storage.googleapis.com/istio-release/releases/1.4.4/charts"
+  description = "URL of used Helm chart repository"
+}
+
 variable "helm_timeout" {
   type        = number
   default     = 600

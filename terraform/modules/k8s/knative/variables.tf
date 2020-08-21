@@ -15,6 +15,11 @@ variable "knative_namespace" {
   description = "Knative namespace"
 }
 
+variable "helm_repo" {
+  type        = string
+  description = "ODAHU flow helm repo"
+}
+
 variable "helm_timeout" {
   type        = number
   default     = 300

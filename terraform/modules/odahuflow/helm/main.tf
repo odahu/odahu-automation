@@ -36,7 +36,12 @@ locals {
 
 
   # Endpoint documentation https://oauth2-proxy.github.io/oauth2-proxy/endpoints#sign-out
-  signout_url_redirect = "${local.url_schema}://${var.cluster_domain}/oauth2/sign_out?rd=${urlencode("${local.url_schema}://${var.cluster_domain}/dashboard")}"
+  signout_url_redirect = format(
+    "%s://%s/oauth2/sign_out?rd=%s",
+    local.url_schema,
+    var.cluster_domain,
+    urlencode("${local.url_schema}://${var.cluster_domain}/dashboard")
+  )
 
   db_connection_string = var.pgsql.enabled ? "postgresql://${var.pgsql.db_user}:${var.pgsql.db_password}@${var.pgsql.db_host}/${var.pgsql.db_name}" : null
 
@@ -49,7 +54,11 @@ locals {
     }
     users = {
       # Keycloak end_session_endpoint redirect
-      signOutUrl = "${var.oauth_oidc_signout_endpoint}?redirect_uri=${urlencode(local.signout_url_redirect)}"
+      signOutUrl = format(
+        "%s?redirect_uri=%s",
+        var.oauth_oidc_signout_endpoint,
+        urlencode(local.signout_url_redirect)
+      )
     }
     connection = {
       repositoryType = var.vault_enabled ? "vault" : "kubernetes"
@@ -330,17 +339,12 @@ resource "kubernetes_secret" "odahuflow_vault_tls" {
 # Install ODAHU flow chart
 ########################################################
 
-data "helm_repository" "odahuflow" {
-  name = "odahuflow"
-  url  = var.helm_repo
-}
-
 resource "helm_release" "odahuflow" {
   name       = "odahu-flow"
   chart      = "odahu-flow-core"
   version    = var.odahuflow_version
   namespace  = var.odahuflow_namespace
-  repository = data.helm_repository.odahuflow.metadata[0].name
+  repository = var.helm_repo
   timeout    = var.helm_timeout
 
   values = [
@@ -373,8 +377,7 @@ resource "helm_release" "odahuflow" {
     kubernetes_namespace.odahuflow_training,
     kubernetes_namespace.odahuflow_deployment,
     kubernetes_namespace.odahuflow_packaging,
-    kubernetes_secret.odahuflow_vault_tls,
-    data.helm_repository.odahuflow
+    kubernetes_secret.odahuflow_vault_tls
   ]
 }
 
@@ -387,7 +390,7 @@ resource "helm_release" "mlflow" {
   chart      = "odahu-flow-mlflow"
   version    = var.mlflow_toolchain_version
   namespace  = var.odahuflow_namespace
-  repository = data.helm_repository.odahuflow.metadata[0].name
+  repository = var.helm_repo
   timeout    = var.helm_timeout
 
   values = [
@@ -403,7 +406,7 @@ resource "helm_release" "mlflow" {
       resource_uploader_sa  = var.resource_uploader_sa
       oauth_oidc_issuer_url = var.oauth_oidc_issuer_url
       oauth_mesh_enabled    = var.oauth_mesh_enabled
-    }),
+    })
   ]
 
   depends_on = [
@@ -421,7 +424,7 @@ resource "helm_release" "rest_packagers" {
   chart      = "odahu-flow-packagers"
   version    = var.packager_version
   namespace  = var.odahuflow_namespace
-  repository = data.helm_repository.odahuflow.metadata[0].name
+  repository = var.helm_repo
   timeout    = var.helm_timeout
 
   values = [
@@ -433,7 +436,7 @@ resource "helm_release" "rest_packagers" {
       oauth_oidc_issuer_url = var.oauth_oidc_issuer_url
       oauth_mesh_enabled    = var.oauth_mesh_enabled
       packagers             = yamlencode({ packagers = local.packagers })
-    }),
+    })
   ]
 
   depends_on = [
@@ -451,7 +454,7 @@ resource "helm_release" "odahu_ui" {
   chart      = "odahu-ui"
   version    = var.odahu_ui_version
   namespace  = var.odahuflow_namespace
-  repository = data.helm_repository.odahuflow.metadata[0].name
+  repository = var.helm_repo
   timeout    = var.helm_timeout
 
   values = [
@@ -462,7 +465,7 @@ resource "helm_release" "odahu_ui" {
       cluster_domain          = var.cluster_domain
       ingress_tls_secret_name = local.ingress_tls_secret_name
       ingress_tls_enabled     = local.ingress_tls_enabled
-    }),
+    })
   ]
 
   depends_on = [
@@ -479,7 +482,7 @@ resource "helm_release" "node_selector_webhook" {
   chart      = "node-selector-webhook"
   version    = var.node_selector_webhook_version
   namespace  = var.odahuflow_namespace
-  repository = data.helm_repository.odahuflow.metadata[0].name
+  repository = var.helm_repo
   timeout    = var.helm_timeout
 
   values = [
@@ -493,7 +496,7 @@ resource "helm_release" "node_selector_webhook" {
       })
       image_version = var.node_selector_webhook_version
       docker_secret = var.docker_secret_name
-    }),
+    })
   ]
 
   depends_on = [

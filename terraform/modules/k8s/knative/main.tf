@@ -12,7 +12,7 @@ resource "helm_release" "knative" {
   chart      = "odahu-flow-knative"
   version    = var.odahu_infra_version
   namespace  = var.knative_namespace
-  repository = "odahuflow"
+  repository = var.helm_repo
   timeout    = var.helm_timeout
 
   values = [

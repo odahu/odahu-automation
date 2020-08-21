@@ -5,7 +5,7 @@ resource "helm_release" "syncer" {
   namespace     = var.namespace
   force_update  = true
   recreate_pods = true
-  repository    = "odahuflow"
+  repository    = var.helm_repo
   timeout       = var.helm_timeout
 
   values = [

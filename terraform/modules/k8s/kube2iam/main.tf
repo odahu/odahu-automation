@@ -5,11 +5,12 @@ locals {
 resource "helm_release" "kube2iam" {
   count         = local.aws_resource_count
   name          = "kube2iam"
-  chart         = "stable/kube2iam"
+  chart         = "kube2iam"
   version       = var.chart_version
   force_update  = true
   recreate_pods = true
   namespace     = var.namespace
+  repository    = var.helm_repo
   timeout       = var.helm_timeout
 
   values = [

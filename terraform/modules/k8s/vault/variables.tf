@@ -17,6 +17,12 @@ variable "configuration" {
   description = "Vault configuration"
 }
 
+variable "helm_repo" {
+  type        = string
+  default     = "https://kubernetes-charts.banzaicloud.com"
+  description = "URL of used Helm chart repository"
+}
+
 variable "helm_timeout" {
   type        = number
   default     = 600

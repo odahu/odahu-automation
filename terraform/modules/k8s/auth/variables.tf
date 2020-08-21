@@ -74,6 +74,12 @@ variable "oauth_cookie_secret" {
   description = "Secret for issuing cookies by oauth2_proxy"
 }
 
+variable "helm_repo" {
+  type        = string
+  default     = "https://kubernetes-charts.storage.googleapis.com"
+  description = "URL of used Helm chart repository"
+}
+
 variable "helm_timeout" {
   type        = number
   default     = 600

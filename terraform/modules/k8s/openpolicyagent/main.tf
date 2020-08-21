@@ -13,7 +13,7 @@ resource "helm_release" "opa" {
   chart      = "odahu-flow-opa"
   version    = var.odahu_infra_version
   namespace  = var.namespace
-  repository = "odahuflow"
+  repository = var.helm_repo
   timeout    = var.helm_timeout
   depends_on = [
     kubernetes_namespace.opa,
