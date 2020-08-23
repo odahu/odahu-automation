@@ -1,8 +1,12 @@
 output "extra_external_urls" {
   value = [
     {
-      name     = "Feedback storage"
-      url      = "https://console.cloud.google.com/storage/browser/${google_storage_bucket.this.name}/model_log?project=${var.project_id}"
+      name = "Feedback storage"
+      url = format(
+        "https://console.cloud.google.com/storage/browser/%s/model_log?project=%s",
+        google_storage_bucket.this.name,
+        var.project_id
+      )
       imageUrl = "/img/logo/gcs.png"
     }
   ]
@@ -37,7 +41,11 @@ output "odahuflow_connections" {
         uri         = "${google_storage_bucket.this.url}/output"
         region      = var.project_id
         description = "Storage for trained artifacts"
-        webUILink   = "https://console.cloud.google.com/storage/browser/${google_storage_bucket.this.name}/output?project=${var.project_id}"
+        webUILink = format(
+          "https://console.cloud.google.com/storage/browser/%s/output?project=%s",
+          google_storage_bucket.this.name,
+          var.project_id
+        )
       }
     }
   ]
@@ -51,10 +59,20 @@ output "fluent_helm_values" {
 }
 
 output "fluent_daemonset_helm_values" {
-  value = templatefile("${path.module}/templates/fluentd_daemonset.yaml", {
-    data_bucket  = google_storage_bucket.this.name,
-    collector_sa = google_service_account.collector_sa.email
-  })
+  value = {
+    config = templatefile("${path.module}/templates/fluentd_ds_cloud.tpl", {
+      data_bucket = google_storage_bucket.this.name
+    })
+
+    annotations = {
+      "accounts.google.com/service-account" = google_service_account.collector_sa.email
+      "accounts.google.com/scopes"          = "https://www.googleapis.com/auth/devstorage.read_write"
+    }
+
+    envs = []
+
+    secrets = []
+  }
 }
 
 output "logstash_input_config" {
