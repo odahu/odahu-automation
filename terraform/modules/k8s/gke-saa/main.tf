@@ -10,7 +10,7 @@ resource "helm_release" "gke_saa" {
   name       = "gke-saa"
   chart      = "odahu-flow-k8s-gke-saa"
   version    = var.odahu_infra_version
-  repository = "odahuflow"
+  repository = var.helm_repo
   namespace  = var.gke_saa_namespace
   timeout    = var.helm_timeout
 

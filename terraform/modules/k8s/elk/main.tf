@@ -71,27 +71,7 @@ module "docker_credentials" {
   docker_repo     = var.docker_repo
   docker_username = var.docker_username
   docker_password = var.docker_password
-  namespaces      = [kubernetes_namespace.elk[0].metadata[0].annotations.name]
-}
-
-resource "null_resource" "add_elastic_helm_repo" {
-  count = var.elk_enabled ? 1 : 0
-  triggers = {
-    build_number = timestamp()
-  }
-  provisioner "local-exec" {
-    command = "helm repo add elastic ${var.elasticsearch_helm_repo}"
-  }
-}
-
-resource "null_resource" "add_odahu_helm_repo" {
-  count = var.elk_enabled ? 1 : 0
-  triggers = {
-    build_number = timestamp()
-  }
-  provisioner "local-exec" {
-    command = "helm repo add odahuflow ${var.odahu_helm_repo}"
-  }
+  namespaces      = var.elk_enabled ? [kubernetes_namespace.elk[0].metadata[0].annotations.name] : []
 }
 
 resource "kubernetes_namespace" "elk" {
@@ -105,7 +85,6 @@ resource "kubernetes_namespace" "elk" {
     }
     name = var.elk_namespace
   }
-  depends_on = [null_resource.add_elastic_helm_repo[0]]
 }
 
 resource "kubernetes_secret" "ingress_tls" {
@@ -139,7 +118,7 @@ resource "kubernetes_secret" "sa" {
 resource "helm_release" "elasticsearch" {
   count      = var.elk_enabled ? 1 : 0
   name       = "elasticsearch"
-  repository = "elastic"
+  repository = var.elasticsearch_helm_repo
   chart      = "elasticsearch"
   version    = var.elasticsearch_chart_version
   namespace  = kubernetes_namespace.elk[0].metadata[0].annotations.name
@@ -155,16 +134,13 @@ resource "helm_release" "elasticsearch" {
     }),
   ]
 
-  depends_on = [
-    null_resource.add_elastic_helm_repo[0],
-    kubernetes_namespace.elk[0]
-  ]
+  depends_on = [kubernetes_namespace.elk[0]]
 }
 
 resource "helm_release" "kibana" {
   count      = var.elk_enabled ? 1 : 0
   name       = "kibana"
-  repository = "elastic"
+  repository = var.elasticsearch_helm_repo
   chart      = "kibana"
   version    = var.kibana_chart_version
   namespace  = kubernetes_namespace.elk[0].metadata[0].annotations.name
@@ -180,7 +156,6 @@ resource "helm_release" "kibana" {
   ]
 
   depends_on = [
-    null_resource.add_elastic_helm_repo[0],
     kubernetes_namespace.elk[0],
     helm_release.elasticsearch[0]
   ]
@@ -189,7 +164,7 @@ resource "helm_release" "kibana" {
 resource "helm_release" "kibana_loader" {
   count      = var.elk_enabled ? 1 : 0
   name       = "kibana-loader"
-  repository = "odahuflow"
+  repository = var.odahu_helm_repo
   chart      = "odahu-flow-kibana-loader"
   version    = var.odahu_infra_version
   namespace  = kubernetes_namespace.elk[0].metadata[0].annotations.name
@@ -206,17 +181,13 @@ resource "helm_release" "kibana_loader" {
     })
   ]
 
-  depends_on = [
-    null_resource.add_odahu_helm_repo[0],
-    kubernetes_namespace.elk[0],
-    helm_release.kibana[0]
-  ]
+  depends_on = [helm_release.kibana[0]]
 }
 
 resource "helm_release" "logstash" {
   count      = var.elk_enabled ? 1 : 0
   name       = "logstash"
-  repository = "elastic"
+  repository = var.elasticsearch_helm_repo
   chart      = "logstash"
   version    = var.logstash_chart_version
   namespace  = kubernetes_namespace.elk[0].metadata[0].annotations.name
@@ -234,7 +205,6 @@ resource "helm_release" "logstash" {
   ]
 
   depends_on = [
-    null_resource.add_elastic_helm_repo[0],
     kubernetes_namespace.elk[0],
     helm_release.elasticsearch[0]
   ]

@@ -36,7 +36,8 @@ resource "helm_release" "fluentd-daemonset" {
   chart      = "odahu-flow-fluentd-daemonset"
   version    = var.odahu_infra_version
   namespace  = var.namespace
-  repository = "odahuflow"
+  repository = var.helm_repo
+  timeout    = var.helm_timeout
 
   values = [
     templatefile("${path.module}/templates/helm_values.yaml", {

@@ -37,10 +37,10 @@ resource "kubernetes_secret" "tls_istio" {
 
 resource "helm_release" "istio_init" {
   name       = "istio-init"
-  chart      = "istio/istio-init"
+  chart      = "istio-init"
   version    = var.istio_version
   namespace  = var.istio_namespace
-  repository = "istio"
+  repository = var.helm_repo
   timeout    = var.helm_timeout
   depends_on = [kubernetes_namespace.istio]
 }
@@ -55,10 +55,10 @@ resource "null_resource" "istio_crds_check" {
 
 resource "helm_release" "istio" {
   name       = "istio"
-  chart      = "istio/istio"
+  chart      = "istio"
   version    = var.istio_version
   namespace  = var.istio_namespace
-  repository = "istio"
+  repository = var.helm_repo
   timeout    = var.helm_timeout
 
   values = [

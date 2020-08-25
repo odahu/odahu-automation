@@ -1,5 +1,4 @@
 locals {
-  helm_repo    = "postgres-operator"
   helm_version = "1.5.0"
 
   kube_pg_status_cmd = "kubectl -n ${var.namespace} get postgresql ${var.configuration.cluster_name} -ojsonpath='{.status.PostgresClusterStatus}'"
@@ -26,7 +25,7 @@ resource "helm_release" "pg_operator" {
   name       = "odahu"
   chart      = "postgres-operator"
   version    = local.helm_version
-  repository = local.helm_repo
+  repository = var.helm_repo
   namespace  = var.namespace
   timeout    = var.helm_timeout
 

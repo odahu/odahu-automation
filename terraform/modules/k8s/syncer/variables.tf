@@ -15,6 +15,11 @@ variable "extra_helm_values" {
   description = "String variable with YAML set of Helm chart values"
 }
 
+variable "helm_repo" {
+  type        = string
+  description = "ODAHU flow helm repo"
+}
+
 variable "helm_timeout" {
   type        = number
   default     = 300

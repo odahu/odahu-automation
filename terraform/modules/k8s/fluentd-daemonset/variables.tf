@@ -37,6 +37,17 @@ variable "pod_prefixes" {
   EOF
 }
 
+variable "helm_repo" {
+  type        = string
+  description = "ODAHU flow helm repo"
+}
+
+variable "helm_timeout" {
+  type        = number
+  default     = 300
+  description = "Helm chart deploy timeout in seconds"
+}
+
 variable "extra_helm_values" {
   type = object({
     config      = string
