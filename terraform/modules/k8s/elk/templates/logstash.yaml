@@ -9,7 +9,7 @@ image: "${logstash_image}"
 imageTag: "${logstash_image_tag}"
 
 imagePullSecrets:
-  - name: repo-json-key
+- name: repo-json-key
 
 replicas: "${replicas}"
 

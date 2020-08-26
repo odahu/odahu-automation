@@ -1,7 +1,8 @@
 output {
   elasticsearch {
     hosts => ["${es_service_url}"]
-    index => "logstash-%%{+YYYY.MM.dd}"
+    index => "%%{[@metadata][target_index]}"
+    manage_template => false
   }
   stdout { codec => rubydebug }
 }
