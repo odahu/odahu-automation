@@ -195,7 +195,7 @@ locals {
     spec = {
       type        = "docker"
       username    = var.docker_username
-      password    = var.docker_password
+      password    = base64encode(var.docker_password)
       uri         = var.docker_repo
       description = "Docker repository for ODAHU services"
     }

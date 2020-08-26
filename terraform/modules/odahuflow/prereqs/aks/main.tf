@@ -24,7 +24,7 @@ locals {
   )
 
   model_docker_user        = azurerm_container_registry.odahuflow.admin_username
-  model_docker_password    = azurerm_container_registry.odahuflow.admin_password
+  model_docker_password    = base64encode(azurerm_container_registry.odahuflow.admin_password)
   model_docker_repo        = "${azurerm_container_registry.odahuflow.login_server}/${var.cluster_name}"
   model_docker_web_ui_link = "https://${local.model_docker_repo}"
 
