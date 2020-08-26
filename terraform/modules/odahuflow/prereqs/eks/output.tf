@@ -19,7 +19,7 @@ output "odahuflow_connections" {
       spec = {
         type        = "ecr"
         keyID       = aws_iam_access_key.collector.id
-        keySecret   = aws_iam_access_key.collector.secret
+        keySecret   = base64encode(aws_iam_access_key.collector.secret)
         uri         = aws_ecr_repository.this.repository_url
         description = "Default ECR docker repository for model packaging"
         webUILink   = "https://${var.region}.console.aws.amazon.com/ecr/repositories/${aws_ecr_repository.this.name}/?region=${var.region}"
@@ -30,7 +30,7 @@ output "odahuflow_connections" {
       spec = {
         type        = "s3"
         keyID       = aws_iam_access_key.collector.id
-        keySecret   = aws_iam_access_key.collector.secret
+        keySecret   = base64encode(aws_iam_access_key.collector.secret)
         uri         = "s3://${aws_s3_bucket.this.id}/output"
         region      = aws_s3_bucket.this.region
         description = ""

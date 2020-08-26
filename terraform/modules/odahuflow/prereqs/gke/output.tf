@@ -27,7 +27,7 @@ output "odahuflow_connections" {
       spec = {
         type        = "docker"
         username    = local.model_docker_user
-        password    = local.collector_sa_key_one_line
+        password    = google_service_account_key.collector_sa_key.private_key
         uri         = "${data.google_container_registry_repository.odahuflow_registry.repository_url}/${var.cluster_name}"
         description = "Default GCR docker repository for model packaging"
         webUILink   = local.model_docker_web_ui_link
@@ -37,7 +37,7 @@ output "odahuflow_connections" {
       id = "models-output",
       spec = {
         type        = "gcs"
-        keySecret   = local.collector_sa_key_one_line
+        keySecret   = google_service_account_key.collector_sa_key.private_key
         uri         = "${google_storage_bucket.this.url}/output"
         region      = var.project_id
         description = "Storage for trained artifacts"
