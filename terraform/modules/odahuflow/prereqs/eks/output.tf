@@ -18,7 +18,7 @@ output "odahuflow_connections" {
       id = "docker-ci"
       spec = {
         type        = "ecr"
-        keyID       = aws_iam_access_key.collector.id
+        keyID       = base64encode(aws_iam_access_key.collector.id)
         keySecret   = base64encode(aws_iam_access_key.collector.secret)
         uri         = aws_ecr_repository.this.repository_url
         description = "Default ECR docker repository for model packaging"
@@ -29,7 +29,7 @@ output "odahuflow_connections" {
       id = "models-output"
       spec = {
         type        = "s3"
-        keyID       = aws_iam_access_key.collector.id
+        keyID       = base64encode(aws_iam_access_key.collector.id)
         keySecret   = base64encode(aws_iam_access_key.collector.secret)
         uri         = "s3://${aws_s3_bucket.this.id}/output"
         region      = aws_s3_bucket.this.region
