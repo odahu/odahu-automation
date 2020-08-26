@@ -77,24 +77,13 @@ locals {
   ingress_config = merge(local.ingress_common, local.ingress_tls)
 
   policies = [
-    {
-      name = "logstash-policy",
-      json = jsonencode({
+    for name, settings in var.es_index_settings : {
+      "name" = "${name}-policy",
+      "json" = jsonencode({
         "policy" = {
           "phases" = {
-            "hot"    = { "min_age" = "0ms", "actions" = { "rollover" = { "max_size" = "1GB" } } },
-            "delete" = { "min_age" = "4d", "actions" = { "delete" = {} } }
-          }
-        }
-      })
-    },
-    {
-      name = "odahu-flow-policy",
-      json = jsonencode({
-        "policy" = {
-          "phases" = {
-            "hot"    = { "min_age" = "0ms", "actions" = { "rollover" = { "max_size" = "1GB" } } },
-            "delete" = { "min_age" = "25d", "actions" = { "delete" = {} } }
+            "hot"    = { "min_age" = "0ms", "actions" = { "rollover" = { "max_size" = try(settings.size, "512MB") } } },
+            "delete" = { "min_age" = try(settings.age, "7d"), "actions" = { "delete" = {} } }
           }
         }
       })
@@ -102,40 +91,22 @@ locals {
   ]
 
   templates = [
-    {
-      "name" = "logstash",
+    for name, settings in var.es_index_settings : {
+      "name" = "${name}-template",
       "json" = jsonencode({
-        "index_patterns" = ["logstash-*"],
+        "index_patterns" = ["${name}-*"],
         "settings" = {
-          "number_of_shards"               = 1,
-          "number_of_replicas"             = "${var.elasticsearch_replicas - 1}",
-          "index.lifecycle.name"           = "logstash-policy",
-          "index.lifecycle.rollover_alias" = "logstash"
+          "number_of_shards"               = try(settings.shards, 1),
+          "number_of_replicas"             = "${var.es_replicas - 1}",
+          "index.lifecycle.name"           = "${name}-policy",
+          "index.lifecycle.rollover_alias" = "${name}"
         },
         "mappings" = {
           "_doc" = { "properties" = { "@timestamp" = { "type" = "date" } } }
         }
       }),
       "alias" = jsonencode({
-        "aliases" = { "logstash" = { "is_write_index" = true } }
-      })
-    },
-    {
-      "name" = "odahu-flow",
-      "json" = jsonencode({
-        "index_patterns" = ["odahu-flow-*"],
-        "settings" = {
-          "number_of_shards"               = 1,
-          "number_of_replicas"             = "${var.elasticsearch_replicas - 1}",
-          "index.lifecycle.name"           = "odahu-flow-policy",
-          "index.lifecycle.rollover_alias" = "odahu-flow"
-        },
-        "mappings" = {
-          "_doc" = { "properties" = { "@timestamp" = { "type" = "date" } } }
-        }
-      }),
-      "alias" = jsonencode({
-        "aliases" = { "odahu-flow" = { "is_write_index" = true } }
+        "aliases" = { "${name}" = { "is_write_index" = true } }
       })
     }
   ]
@@ -193,9 +164,9 @@ resource "kubernetes_secret" "sa" {
 resource "helm_release" "elasticsearch" {
   count      = var.elk_enabled ? 1 : 0
   name       = "elasticsearch"
-  repository = var.elasticsearch_helm_repo
+  repository = var.es_helm_repo
   chart      = "elasticsearch"
-  version    = var.elasticsearch_chart_version
+  version    = var.es_chart_version
   namespace  = kubernetes_namespace.elk[0].metadata[0].annotations.name
   timeout    = var.helm_timeout
 
@@ -203,8 +174,8 @@ resource "helm_release" "elasticsearch" {
     templatefile("${path.module}/templates/elasticsearch.yaml", {
       cluster_name = local.es_cluster_name
       node_group   = local.es_node_group
-      es_replicas  = var.elasticsearch_replicas
-      es_mem       = var.elasticsearch_memory
+      es_replicas  = var.es_replicas
+      es_mem       = var.es_memory
       storage_size = var.storage_size
 
       policies  = local.policies
@@ -218,7 +189,7 @@ resource "helm_release" "elasticsearch" {
 resource "helm_release" "kibana" {
   count      = var.elk_enabled ? 1 : 0
   name       = "kibana"
-  repository = var.elasticsearch_helm_repo
+  repository = var.es_helm_repo
   chart      = "kibana"
   version    = var.kibana_chart_version
   namespace  = kubernetes_namespace.elk[0].metadata[0].annotations.name
@@ -320,7 +291,7 @@ resource "kubernetes_job" "kibana_loader" {
 resource "helm_release" "logstash" {
   count      = var.elk_enabled ? 1 : 0
   name       = "logstash"
-  repository = var.elasticsearch_helm_repo
+  repository = var.es_helm_repo
   chart      = "logstash"
   version    = var.logstash_chart_version
   namespace  = kubernetes_namespace.elk[0].metadata[0].annotations.name

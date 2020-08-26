@@ -15,34 +15,55 @@ variable "odahu_helm_repo" {
   description = "ODAHU flow helm repo"
 }
 
-variable "elasticsearch_helm_repo" {
+variable "es_helm_repo" {
   type        = string
   default     = "https://helm.elastic.co"
   description = "Elasticsearch helm repository"
 }
 
-variable "elasticsearch_chart_version" {
+variable "es_chart_version" {
   type        = string
   default     = "7.9.0"
   description = "Elasticsearch helm chart version"
 }
 
-variable "elasticsearch_memory" {
+variable "es_memory" {
   type        = string
   default     = "4"
   description = "Memory limit for Elasticsearch process (in GiB)"
+}
+
+variable "es_replicas" {
+  type        = number
+  default     = 1
+  description = "Replica count for the Elasticsearch StatefulSet"
+}
+
+variable "es_index_settings" {
+  type = map(object({
+    size   = string
+    age    = string
+    shards = number
+  }))
+  default = {
+    "logstash" = {
+      size   = "1GB"
+      age    = "4d"
+      shards = 1
+    },
+    "odahu-flow" = {
+      size   = "1GB"
+      age    = "25d"
+      shards = 1
+    }
+  }
+  description = "Settings to configure Elasticsearch index templates and index lifecycle policies"
 }
 
 variable "logstash_chart_version" {
   type        = string
   default     = "7.9.0"
   description = "Logstash helm chart version"
-}
-
-variable "elasticsearch_replicas" {
-  type        = number
-  default     = 1
-  description = "Replica count for the Elasticsearch StatefulSet"
 }
 
 variable "kibana_chart_version" {
