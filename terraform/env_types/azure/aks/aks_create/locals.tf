@@ -1,8 +1,9 @@
 locals {
   common_tags = merge(
     {
-      "cluster" = var.cluster_name,
-      "project" = "odahu-flow"
+      "cluster"    = var.cluster_name,
+      "project"    = "odahu-flow",
+      "created-on" = timestamp()
     },
     var.aks_common_tags,
     var.node_labels

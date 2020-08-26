@@ -16,6 +16,7 @@ module "nginx_ingress_prereqs" {
   allowed_ips    = var.allowed_ips
   network_name   = var.vpc_name
   subnet_name    = var.subnet_name
+  tags           = local.common_tags
 }
 
 module "nginx_ingress_helm" {
