@@ -65,6 +65,15 @@ module "airflow" {
   }
 }
 
+module "storage-syncer" {
+  source = "../../../../modules/k8s/syncer"
+
+  namespace           = "airflow"
+  helm_repo           = var.helm_repo
+  extra_helm_values   = module.airflow_prereqs.syncer_helm_values
+  odahu_infra_version = var.odahu_infra_version
+}
+
 module "fluentd" {
   source = "../../../../modules/k8s/fluentd"
 
@@ -87,15 +96,6 @@ module "fluentd-daemonset" {
 
   helm_repo         = var.helm_repo
   extra_helm_values = module.odahuflow_prereqs.fluent_daemonset_helm_values
-}
-
-module "storage-syncer" {
-  source = "../../../../modules/k8s/syncer"
-
-  namespace           = "airflow"
-  helm_repo           = var.helm_repo
-  extra_helm_values   = module.airflow_prereqs.syncer_helm_values
-  odahu_infra_version = var.odahu_infra_version
 }
 
 module "jupyterhub" {
