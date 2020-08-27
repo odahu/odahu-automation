@@ -38,7 +38,6 @@ module "monitoring" {
   odahu_infra_version = var.odahu_infra_version
   grafana_admin       = var.grafana_admin
   grafana_pass        = var.grafana_pass
-  storage_class       = var.storage_class
   tls_secret_key      = var.tls_key
   tls_secret_crt      = var.tls_crt
 }
