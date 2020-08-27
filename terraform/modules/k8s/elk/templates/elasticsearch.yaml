@@ -59,3 +59,22 @@ sysctlVmMaxMapCount: 262144
 
 sysctlInitContainer:
   enabled: true
+
+lifecycle:
+  postStart:
+    exec:
+      command:
+        - bash
+        - -c
+        - |
+          #!/bin/bash
+          ES_URL=http://localhost:9200
+          JSON='Content-Type: application/json'
+          while [[ "$(curl -s -o /dev/null -w '%%{http_code}\n' $ES_URL)" != "200" ]]; do sleep 1; done
+%{ for policy in policies ~}
+          curl -XPUT "$ES_URL/_ilm/policy/${policy.name}" -H "$JSON" -d'${policy.json}'
+%{ endfor ~}
+%{ for template in templates ~}
+          curl -XPUT "$ES_URL/_template/${template.name}?include_type_name" -H "$JSON" -d'${template.json}'
+          curl -XPUT "$ES_URL/${template.name}-000001" -H "$JSON" -d'${template.alias}'
+%{ endfor ~}

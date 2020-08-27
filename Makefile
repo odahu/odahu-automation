@@ -75,7 +75,7 @@ terraform-fmt:
 ## terraform-fmt-check: Check that terraform modules are formatted
 terraform-fmt-check:
 	set -e; for module_path in $$(${FIND_ALL_TF_MODULES_COMMAND}) ; do \
-        terraform fmt -check $$module_path ; \
+        terraform fmt -check $$module_path || (terraform fmt -diff $$module_path ; exit 1); \
     done
 
 ## terraform-validate: Validate all odahu terraform modules
