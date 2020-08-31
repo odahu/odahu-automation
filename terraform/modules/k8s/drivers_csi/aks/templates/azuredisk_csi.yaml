@@ -1,0 +1,4 @@
+controller:
+  replicas: ${replicas}
+windows:
+  enabled: false

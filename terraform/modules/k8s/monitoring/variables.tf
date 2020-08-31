@@ -8,7 +8,7 @@ variable "helm_repo" {
 
 variable "helm_timeout" {
   type        = number
-  default     = 600
+  default     = 900
   description = "Helm chart deploy timeout in seconds"
 }
 
@@ -79,4 +79,10 @@ variable "tls_secret_crt" {
 variable "tls_secret_key" {
   type        = string
   description = "ODAHU flow cluster TLS key"
+}
+
+variable "module_dependency" {
+  type        = any
+  default     = null
+  description = "Dependency of this module (https://discuss.hashicorp.com/t/tips-howto-implement-module-depends-on-emulation/2305)"
 }
