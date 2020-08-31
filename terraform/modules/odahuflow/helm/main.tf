@@ -1,7 +1,7 @@
 locals {
-  training_node_pools = flatten([ for k, v in var.node_pools : [ for i in try(v["taints"], []) : k if i.value == "training"] ])
-  deployment_node_pools = flatten([ for k, v in var.node_pools : [ for i in try(v["taints"], []) : k if i.value == "deployment"] ])
-  packaging_node_pools = flatten([ for k, v in var.node_pools : [ for i in try(v["taints"], []) : k if i.value == "packaging"] ])
+  training_node_pools   = flatten([for k, v in var.node_pools : [for i in try(v["taints"], []) : k if i.value == "training"]])
+  deployment_node_pools = flatten([for k, v in var.node_pools : [for i in try(v["taints"], []) : k if i.value == "deployment"]])
+  packaging_node_pools  = flatten([for k, v in var.node_pools : [for i in try(v["taints"], []) : k if i.value == "packaging"]])
 
   ingress_tls_enabled     = var.tls_secret_crt != "" && var.tls_secret_key != ""
   url_schema              = local.ingress_tls_enabled ? "https" : "http"
@@ -111,10 +111,10 @@ locals {
 
       nodePools = length(local.training_node_pools) != 0 ? [
         for k, v in var.node_pools :
-          merge(
-            {nodeSelector = {for key, value in v.labels : key => value}},
-            {tags = try(v.tags,[])})
-          if contains(local.training_node_pools, k)
+        merge(
+          { nodeSelector = { for key, value in v.labels : key => value } },
+        { tags = try(v.tags, []) })
+        if contains(local.training_node_pools, k)
       ] : null
 
       gpuTolerations = contains(keys(var.node_pools), "training_gpu") ? [
