@@ -35,7 +35,7 @@ output "odahuflow_connections" {
         type        = "s3"
         keyID       = base64encode(aws_iam_access_key.collector.id)
         keySecret   = base64encode(aws_iam_access_key.collector.secret)
-        uri         = "s3://${aws_s3_bucket.this.id}/output"
+        uri         = "s3://${aws_s3_bucket.data.id}/output"
         region      = aws_s3_bucket.data.region
         description = ""
         webUILink   = "Storage for trained artifacts"
