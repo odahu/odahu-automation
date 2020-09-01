@@ -1,9 +1,5 @@
 locals {
-  ingress_tags = {
-    cluster = var.cluster_name
-    env     = "Development"
-    purpose = "Kubernetes cluster ingress"
-  }
+  ingress_tags = merge(var.tags, { "purpose" = "Kubernetes cluster ingress" })
 }
 
 data "azurerm_subnet" "aks_subnet" {
@@ -20,6 +16,12 @@ resource "azurerm_public_ip" "ingress" {
   sku                 = "Standard"
   tags                = local.ingress_tags
 
+  lifecycle {
+    ignore_changes = [
+      tags["created-on"]
+    ]
+  }
+
   provisioner "local-exec" {
     when    = destroy
     command = "timeout 300 bash ${path.module}/../../../../../../scripts/azure_lb_checker.sh destroy \"${self.resource_group_name}-k8s\" \"${self.name}\""
@@ -31,6 +33,12 @@ resource "azurerm_network_security_group" "ingress" {
   location            = azurerm_public_ip.ingress.location
   resource_group_name = azurerm_public_ip.ingress.resource_group_name
   tags                = local.ingress_tags
+
+  lifecycle {
+    ignore_changes = [
+      tags["created-on"]
+    ]
+  }
 
   security_rule {
     name                         = "allow-ingress"

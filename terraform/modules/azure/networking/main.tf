@@ -8,6 +8,12 @@ resource "azurerm_virtual_network" "vpc" {
   location            = var.location
   resource_group_name = var.resource_group
   tags                = var.tags
+
+  lifecycle {
+    ignore_changes = [
+      tags["created-on"]
+    ]
+  }
 }
 
 ########################################################

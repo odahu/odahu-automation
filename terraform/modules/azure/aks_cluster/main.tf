@@ -74,7 +74,9 @@ resource "azurerm_kubernetes_cluster" "aks" {
 
   lifecycle {
     ignore_changes = [
-      default_node_pool[0].node_count
+      default_node_pool[0].node_count,
+      default_node_pool[0].tags["created-on"],
+      tags["created-on"]
     ]
   }
 
@@ -99,9 +101,8 @@ resource "azurerm_kubernetes_cluster" "aks" {
       "${taint.key}=${taint.value}:${taint.effect}"
     ]
 
-    node_labels = {
-      project = "odahu-flow"
-    }
+    node_labels = { "project" = "odahu-flow" }
+
     tags = var.aks_tags
   }
 
@@ -159,7 +160,8 @@ resource "azurerm_kubernetes_cluster_node_pool" "aks" {
 
   lifecycle {
     ignore_changes = [
-      node_count
+      node_count,
+      tags["created-on"]
     ]
   }
 
@@ -189,7 +191,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "aks" {
   ]
 
   node_labels = merge(
-    { project = "odahu-flow" },
+    { "project" = "odahu-flow" },
     { for key, value in lookup(each.value, "labels", {}) : key => value },
     local.node_pools_spot_settings[each.key].labels
   )
