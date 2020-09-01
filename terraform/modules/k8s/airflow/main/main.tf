@@ -1,6 +1,5 @@
 locals {
   airflow_helm_version = "7.1.0"
-  airflow_helm_repo    = "stable"
   debug_log_level      = "true"
 
   ingress_tls_enabled     = var.tls_secret_crt != "" && var.tls_secret_key != ""
