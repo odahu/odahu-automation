@@ -90,22 +90,28 @@ locals {
     }
   ]
 
-  templates = [
+  indices = [
     for name, settings in var.es_index_settings : {
-      "name" = "${name}-template",
-      "json" = jsonencode({
+      "name" = "${name}",
+      "template" = jsonencode({
         "index_patterns" = ["${name}-*"],
         "settings" = {
           "number_of_shards"               = try(settings.shards, 1),
           "number_of_replicas"             = "${var.es_replicas - 1}",
           "index.lifecycle.name"           = "${name}-policy",
-          "index.lifecycle.rollover_alias" = "${name}"
+          "index.lifecycle.rollover_alias" = "${name}",
+          "index.refresh_interval"         = "5s"
         },
         "mappings" = {
-          "_doc" = { "properties" = { "@timestamp" = { "type" = "date" } } }
+          "_doc" = {
+            "properties" = {
+              "@timestamp" = { "type" = "date" },
+              "event_time" = { "type" = "date" }
+            },
+          }
         }
       }),
-      "alias" = jsonencode({
+      "settings" = jsonencode({
         "aliases" = { "${name}" = { "is_write_index" = true } }
       })
     }
@@ -178,8 +184,8 @@ resource "helm_release" "elasticsearch" {
       es_mem       = var.es_memory
       storage_size = var.storage_size
 
-      policies  = local.policies
-      templates = local.templates
+      policies = local.policies
+      indices  = local.indices
     })
   ]
 
