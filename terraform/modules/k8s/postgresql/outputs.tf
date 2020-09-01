@@ -11,5 +11,5 @@ output "pgsql_credentials" {
 
 output "pgsql_endpoint" {
   value = var.configuration.enabled ? format("%s.%s.svc", var.configuration.cluster_name,
-  kubernetes_namespace.pgsql[0].metadata[0].annotations.name) : ""
+  try(kubernetes_namespace.pgsql[0].metadata[0].annotations.name, "postgresql")) : ""
 }

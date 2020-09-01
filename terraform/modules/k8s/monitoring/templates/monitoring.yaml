@@ -29,10 +29,6 @@ prometheus-operator:
     alertmanagerSpec:
       externalUrl: "https://${cluster_domain}/alertmanager"
       routePrefix: "/"
-      storageSpec:
-        volumeClaimTemplate:
-          spec:
-            storageClassName: "${storage_class}"
     ingress:
       paths:
       - "/alertmanager"
@@ -50,7 +46,6 @@ prometheus-operator:
       storageSpec:
         volumeClaimTemplate:
           spec:
-            storageClassName: "${storage_class}"
             resources:
               requests:
                 storage: "${prom_storage_size}"
@@ -78,8 +73,13 @@ odahuflow-grafana:
     tag: "${grafana_image_tag}"
   adminUser: "${grafana_admin}"
   adminPassword: "${grafana_pass}"
+  deploymentStrategy:
+    type: Recreate
   persistence:
-    storageClassName: "${storage_class}"
+    enabled: true
+    initChownData: true
+    accessModes:
+    - ReadWriteOnce
     size: "${grafana_storage_size}"
   ingress:
     path: "/grafana"
@@ -89,6 +89,17 @@ odahuflow-grafana:
     - secretName: "${ingress_tls_secret_name}"
       hosts: ["${cluster_domain}"]
     ${indent(4, nginx_annotations)}
-  env:
-    GF_AUTH_ANONYMOUS_ENABLED: "true"
-    GF_SERVER_ROOT_URL: "https://${cluster_domain}/grafana/"
+  grafana.ini:
+    auth.anonymous:
+      enabled: true
+    security:
+      disable_gravatar: true
+      allow_embedding: true
+    analytics:
+      reporting_enabled: false
+    server:
+      domain: ${cluster_domain}
+      root_url: "%(protocol)s://%(domain)s/grafana"
+      serve_from_sub_path: true
+    dashboards:
+      default_home_dashboard_path: /tmp/dashboards/k8s/nodes.json

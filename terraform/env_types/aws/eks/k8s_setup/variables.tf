@@ -89,12 +89,6 @@ variable "grafana_pass" {
   description = "Grafana admin password"
 }
 
-variable "storage_class" {
-  type        = string
-  default     = "gp2"
-  description = "Grafana storage class"
-}
-
 ##################
 # OAuth2
 ##################

@@ -49,7 +49,7 @@ variable "grafana_storage_size" {
 
 variable "grafana_image_tag" {
   type        = string
-  default     = "6.7.4"
+  default     = "7.1.5"
   description = "Default Grafana docker image tag"
 }
 
@@ -69,12 +69,6 @@ variable "prom_retention_time" {
   type        = string
   default     = "14d"
   description = "Time duration Prometheus shall retain data for"
-}
-
-variable "storage_class" {
-  type        = string
-  default     = "standard"
-  description = "Used kubernetes storage class name"
 }
 
 variable "tls_secret_crt" {
