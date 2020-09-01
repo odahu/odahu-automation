@@ -88,7 +88,6 @@ resource "helm_release" "monitoring" {
       grafana_pass            = var.grafana_pass
       grafana_storage_size    = var.grafana_storage_size
       grafana_image_tag       = var.grafana_image_tag
-      storage_class           = var.storage_class
       ingress_tls_secret_name = local.ingress_tls_secret_name
     })
   ]

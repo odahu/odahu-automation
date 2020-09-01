@@ -85,12 +85,6 @@ variable "tls_crt" {
   description = "TLS certificate for ODAHU flow cluster"
 }
 
-variable "storage_class" {
-  type        = string
-  default     = "default"
-  description = "Kubernetes PVC storage class"
-}
-
 ########################
 # Prometheus monitoring
 ########################
