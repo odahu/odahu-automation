@@ -1,0 +1,26 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: airflow-logrotate
+  namespace: airflow
+spec:
+  schedule: "@daily"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: logrotate
+            image: busybox
+            args:
+            - /bin/sh
+            - -c
+            - find /logs/health_check -type d -mtime +1 -exec rm -rf {} \;
+            volumeMounts:
+            - mountPath: /logs
+              name: logs-data
+          volumes:
+            - name: logs-data
+              persistentVolumeClaim:
+                claimName: airflow-logs
+          restartPolicy: Never
