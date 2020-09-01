@@ -41,7 +41,7 @@ output "odahuflow_connections" {
       id = "models-output",
       spec = {
         type        = "gcs"
-        keySecret   = local.collector_sa_key_one_line
+        keySecret   = google_service_account_key.collector_sa_key.private_key
         uri         = "${google_storage_bucket.data.url}/output"
         region      = var.project_id
         description = "Storage for trained artifacts"
