@@ -7,9 +7,22 @@ rbac:
 workers:
   enabled: false
 
+flower:
+  enabled: false
+
 web:
+  resources:
+     requests:
+       cpu: "500m"
+       memory: "512Mi"
+
+  replicas: 1
+
   baseUrl: "http://localhost:8080/airflow"
-  initialDelaySeconds: "80"
+  serializeDAGs: false
+
+  extraPipPackages:
+    - "airflow-exporter==1.3.0"
 
 airflow:
   image:
@@ -18,37 +31,19 @@ airflow:
     pullPolicy: IfNotPresent
     pullSecret: repo-json-key
 
+  executor: KubernetesExecutor
+
   fernetKey: ${fernet_key}
 
-  variables: '${airflow_variables}'
-  connections:
-  - id: odahuflow_api
-    type: http
-    schema: https
-    host: ${cluster_domain}
-    extra: '${odahu_conn}'
-  - id: odahuflow_model
-    type: http
-    schema: https
-    host: ${cluster_domain}/service-catalog
-  - id: wine_input
-    type: google_cloud_platform
-    extra: '${wine_conn}'
-
-  webReplicas: 1
-
-%{ if pgsql_enabled ~}
   extraEnv:
     - name: POSTGRES_PASSWORD
       valueFrom:
         secretKeyRef:
           name: airflow-postgres
           key: postgresql-password
-    - name: AIRFLOW__CORE__SQL_ALCHEMY_CONN
-      value: postgresql://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@$(POSTGRES_HOST)/$(POSTGRES_DB)
-%{ endif ~}
 
   config:
+    AIRFLOW__KUBERNETES__RUN_AS_USER: "50000" # Temporary fix for https://github.com/apache/airflow/issues/8564
     AIRFLOW__CORE__LOGGING_LEVEL: DEBUG
     AIRFLOW__CORE__LOAD_EXAMPLES: True
     AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: False
@@ -64,43 +59,65 @@ airflow:
 %{ if ("${dag_repo}" != "" && "${dag_rev}" != "") ~}
     AIRFLOW__KUBERNETES__GIT_REPO: "${dag_repo}"
     AIRFLOW__KUBERNETES__GIT_BRANCH: "${dag_rev}"
-    AIRFLOW__KUBERNETES__GIT_DAGS_FOLDER_MOUNT_POINT: "/usr/local/airflow/dags"
+    AIRFLOW__KUBERNETES__GIT_DAGS_FOLDER_MOUNT_POINT: "/opt/airflow/dags"
     AIRFLOW__KUBERNETES__GIT_SYNC_BRANCH: "${dag_rev}"
-    AIRFLOW__KUBERNETES__GIT_SYNC_ROOT: "/usr/local/airflow/dags"
-    AIRFLOW__KUBERNETES__GIT_SYNC_DEST: "/usr/local/airflow/dags"
+    AIRFLOW__KUBERNETES__GIT_SYNC_ROOT: "/opt/airflow/dags"
+    AIRFLOW__KUBERNETES__GIT_SYNC_DEST: "/opt/airflow/dags"
     AIRFLOW__KUBERNETES__GIT_SYNC_CONTAINER_REPOSITORY: gcr.io/or2-msq-epmd-legn-t1iylu/odahu/git-sync
     AIRFLOW__KUBERNETES__GIT_SYNC_CONTAINER_TAG: 0.0.3
     AIRFLOW__KUBERNETES__GIT_SYNC_INIT_CONTAINER_NAME: git-sync-clone
 %{ else ~}
     AIRFLOW__KUBERNETES__DAGS_VOLUME_CLAIM: airflow
 %{ endif ~}
-  service:
-    type: ClusterIP
-    port: 80
 
-  executor: Kubernetes
+scheduler:
+  resources:
+     requests:
+       cpu: "500m"
+       memory: "512Mi"
 
-${ingress}
+  podDisruptionBudget:
+    enabled: true
+    maxUnavailable: "100%"
+    minAvailable: ""
 
-persistence:
-%{ if ("${dag_repo}" != "" && "${dag_rev}" != "") ~}
-  enabled: false
-%{ else ~}
-  enabled: true
-%{ endif ~}
-  storageClass: nfs
-  accessMode: ReadWriteMany
-  size: ${storage_size}
+  connections:
+    - id: odahuflow_api
+      type: http
+      schema: https
+      host: ${cluster_domain}
+      extra: '${odahu_conn}'
+    - id: odahuflow_model
+      type: http
+      schema: https
+      host: ${cluster_domain}/service-catalog
+    - id: wine_input
+      type: google_cloud_platform
+      extra: '${wine_conn}'
 
-logsPersistence:
-  enabled: true
-  storageClass: nfs
-  accessMode: ReadWriteMany
-  size: ${log_storage_size}
+logs:
+  path: /opt/airflow/logs
+  persistence:
+    enabled: true
+    storageClass: "nfs"
+    accessMode: ReadWriteMany
+    size: ${log_storage_size}
 
 dags:
-  path: /usr/local/airflow/dags
-%{ if ("${dag_repo}" != "" && "${dag_rev}" != "") ~}
+  path: /opt/airflow/dags
+  doNotPickle: true
+  installRequirements: false
+  persistence:
+    %{ if ("${dag_repo}" != "" && "${dag_rev}" != "") }
+    enabled: false
+    %{ else }
+    enabled: true
+    %{ endif }
+    storageClass: "nfs"
+    accessMode: ReadWriteMany
+    size: ${storage_size}
+
+  %{ if ("${dag_repo}" != "" && "${dag_rev}" != "") }
   git:
     url: "${dag_repo}"
     ref: "${dag_rev}"
@@ -118,23 +135,31 @@ dags:
       repository: alpine/git
       tag: v2.24.1
       pullPolicy: IfNotPresent
-    installRequirements: true
     mountPath: "/dags"
     syncSubPath: ""
-%{ endif ~}
-%{ if pgsql_enabled ~}
+  %{ endif }
+
+${ingress}
+
+extraManifests: []
+
 postgresql:
   enabled: false
-  service:
-    port: 5432
-  postgresUser: ${pgsql_user}
-  postgresHost: ${pgsql_host}
-  postgresqlDatabase: ${pgsql_db}
-  existingSecret: airflow-postgres
-%{ endif ~}
 
 redis:
   enabled: false
 
-flower:
+externalDatabase:
+  type: postgres
+  host: ${pgsql_host}
+  port: 5432
+  database: ${pgsql_db}
+  user: ${pgsql_user}
+  passwordSecret: airflow-postgres
+  passwordSecretKey: "postgresql-password"
+
+serviceMonitor:
+  enabled: false
+
+prometheusRule:
   enabled: false
