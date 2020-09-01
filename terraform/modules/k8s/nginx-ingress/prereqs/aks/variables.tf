@@ -28,3 +28,9 @@ variable "subnet_name" {
   type        = string
   description = "Name of existing subnet to use"
 }
+
+variable "tags" {
+  type        = map(string)
+  default     = {}
+  description = "Common tags used in resources creation"
+}
