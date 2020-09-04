@@ -156,17 +156,21 @@ locals {
       }
     }
     packaging = {
-      tolerations = contains(keys(var.node_pools), "packaging") ? [
-        for taint in lookup(var.node_pools["packaging"], "taints", []) : {
+      tolerations = length(local.packaging_node_pools) != 0 ? [
+        for taint in lookup(var.node_pools[local.packaging_node_pools[0]], "taints", []) : {
           Key      = taint.key
           Operator = "Equal"
           Value    = taint.value
           Effect   = replace(taint.effect, "/(?i)no_?schedule/", "NoSchedule")
       }] : null
 
-      nodeSelector = contains(keys(var.node_pools), "packaging") ? {
-        for key, value in var.node_pools["packaging"].labels : key => value
-      } : null
+      nodePools = length(local.packaging_node_pools) != 0 ? [
+        for k, v in var.node_pools :
+        merge(
+          { nodeSelector = { for key, value in v.labels : key => value } },
+        { tags = try(v.tags, []) })
+        if contains(local.packaging_node_pools, k)
+      ] : null
 
       namespace          = var.odahuflow_packaging_namespace
       outputConnectionID = "models-output"
