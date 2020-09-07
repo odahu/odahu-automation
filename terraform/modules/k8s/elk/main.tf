@@ -268,7 +268,7 @@ resource "kubernetes_job" "kibana_loader" {
           command = ["/opt/bin/import.sh"]
           env {
             name = "KIBANA_URL"
-            value = format("http://kibana.%s.svc:5601",
+            value = format("http://kibana.%s.svc.cluster.local:5601",
               kubernetes_namespace.elk[0].metadata[0].annotations.name
             )
           }
