@@ -72,7 +72,7 @@ resource "helm_release" "prometheus" {
   chart      = "prometheus-operator"
   version    = "9.3.1"
   namespace  = kubernetes_namespace.monitoring.metadata[0].annotations.name
-  repository = "https://kubernetes-charts.storage.googleapis.com"
+  repository = var.helm_repo
   timeout    = var.helm_timeout
 
   values = [
@@ -117,7 +117,7 @@ resource "helm_release" "grafana" {
   chart      = "grafana"
   version    = "5.5.5"
   namespace  = kubernetes_namespace.monitoring.metadata[0].annotations.name
-  repository = "https://kubernetes-charts.storage.googleapis.com"
+  repository = var.helm_repo
   timeout    = var.helm_timeout
 
   values = [

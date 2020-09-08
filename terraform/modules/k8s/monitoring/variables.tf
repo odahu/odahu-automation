@@ -3,7 +3,8 @@
 ##################
 variable "helm_repo" {
   type        = string
-  description = "ODAHU flow helm repo"
+  default     = "https://kubernetes-charts.storage.googleapis.com"
+  description = "URL of used Helm chart repository"
 }
 
 variable "helm_timeout" {
@@ -24,11 +25,6 @@ variable "monitoring_namespace" {
   type        = string
   default     = "kube-monitoring"
   description = "Clusterwide namespace for monitoring stuff"
-}
-
-variable "odahu_infra_version" {
-  type        = string
-  description = "ODAHU flow infra release version"
 }
 
 variable "grafana_admin" {

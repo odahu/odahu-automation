@@ -38,15 +38,12 @@ module "auth" {
 }
 
 module "monitoring" {
-  source              = "../../../../modules/k8s/monitoring"
-  cluster_domain      = var.cluster_domain_name
-  helm_repo           = var.helm_repo
-  helm_timeout        = 25 * 60
-  odahu_infra_version = var.odahu_infra_version
-  grafana_admin       = var.grafana_admin
-  grafana_pass        = var.grafana_pass
-  tls_secret_key      = var.tls_key
-  tls_secret_crt      = var.tls_crt
+  source         = "../../../../modules/k8s/monitoring"
+  cluster_domain = var.cluster_domain_name
+  grafana_admin  = var.grafana_admin
+  grafana_pass   = var.grafana_pass
+  tls_secret_key = var.tls_key
+  tls_secret_crt = var.tls_crt
 }
 
 module "istio" {
