@@ -83,6 +83,11 @@ variable "odahuflow_version" {
   description = "ODAHU flow release version"
 }
 
+variable "odahu_automation_version" {
+  type        = string
+  description = "ODAHU flow automation image version"
+}
+
 variable "odahuflow_training_timeout" {
   type        = string
   default     = ""
@@ -299,4 +304,20 @@ variable "node_selector_webhook_settings" {
       }))
     })
   })
+}
+
+variable "backup_settings" {
+  type = object({
+    enabled     = bool
+    bucket_name = string
+    schedule    = string
+    retention   = string
+  })
+  default = {
+    enabled     = false
+    bucket_name = ""
+    schedule    = ""
+    retention   = ""
+  }
+  description = "Configuration for PostgreSQL backups"
 }

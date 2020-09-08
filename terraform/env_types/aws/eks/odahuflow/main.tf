@@ -2,13 +2,28 @@ module "postgresql" {
   source = "../../../../modules/k8s/postgresql"
 
   configuration = var.postgres
-  databases = [
-    var.odahu_database,
-    "airflow",
-    "jupyterhub",
-    "mlflow",
-    "vault"
-  ]
+  databases     = local.databases
+}
+
+module "pg_backup_prereqs" {
+  source = "../../../../modules/k8s/postgresql-backup/prereqs/eks"
+
+  backup_settings = var.backup_settings
+  cluster_name    = var.cluster_name
+}
+
+module "pg_backup" {
+  source = "../../../../modules/k8s/postgresql-backup/main"
+
+  backup_settings   = var.backup_settings
+  backup_job_config = module.pg_backup_prereqs.backup_job_config
+
+  pg_endpoint     = module.postgresql.pgsql_endpoint
+  pg_databases    = local.databases
+  docker_repo     = var.docker_repo
+  docker_tag      = var.odahu_automation_version
+  docker_username = var.docker_username
+  docker_password = var.docker_password
 }
 
 module "odahuflow_prereqs" {
