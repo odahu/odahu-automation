@@ -1,0 +1,99 @@
+image:
+  tag: "${grafana_image_tag}"
+
+adminUser: "${grafana_admin}"
+adminPassword: "${grafana_pass}"
+
+defaultDashboardsEnabled: true
+
+deploymentStrategy:
+  type: Recreate
+
+persistence:
+  enabled: true
+  initChownData: true
+  accessModes:
+  - ReadWriteOnce
+  size: "${grafana_storage_size}"
+
+ingress:
+  enabled: true
+  path: "/grafana"
+  hosts:
+  - "${cluster_domain}"
+  tls:
+  - secretName: "${ingress_tls_secret_name}"
+    hosts: ["${cluster_domain}"]
+  ${indent(2, nginx_annotations)}
+
+grafana.ini:
+  auth.anonymous:
+    enabled: true
+  security:
+    disable_gravatar: true
+    allow_embedding: true
+  analytics:
+    reporting_enabled: false
+  server:
+    domain: ${cluster_domain}
+    root_url: "%(protocol)s://%(domain)s/grafana"
+    serve_from_sub_path: true
+  dashboards:
+    default_home_dashboard_path: /tmp/dashboards/k8s/nodes.json
+
+serviceMonitor:
+  selfMonitor: true
+
+sidecar:
+  dashboards:
+    enabled: true
+    label: grafana_dashboard
+    searchNamespace: ALL
+  datasources:
+    enabled: true
+    label: grafana_datasource
+
+dashboardProviders:
+  dashboardproviders.yaml:
+    apiVersion: 1
+    providers:
+    - name: 'Istio'
+      orgId: 1
+      folder: 'Istio'
+      type: file
+      disableDeletion: false
+      editable: true
+      options:
+        path: /tmp/dashboards/istio
+    - name: 'Knative'
+      orgId: 1
+      folder: 'Knative'
+      type: file
+      disableDeletion: false
+      editable: true
+      options:
+        path: /tmp/dashboards/knative
+    - name: 'Monitoring'
+      orgId: 1
+      folder: 'Monitoring'
+      type: file
+      disableDeletion: false
+      editable: true
+      options:
+        path: /tmp/dashboards/monitoring
+    - name: 'odahuflow'
+      orgId: 1
+      folder: 'odahuflow'
+      type: file
+      disableDeletion: false
+      editable: true
+      options:
+        path: /tmp/dashboards/odahu-flow
+    - name: 'Kubernetes'
+      orgId: 1
+      folder: 'Kubernetes'
+      type: file
+      disableDeletion: false
+      editable: true
+      options:
+        path: /tmp/dashboards/k8s
