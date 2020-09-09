@@ -56,7 +56,7 @@ pipeline {
         // CI/CD repo branch (tag or branch name)
         param_cicd_branch = "${params.LegionCicdBranch}"
         param_cicd_key = "${params.legionCicdGitlabKey}"
-        param_cicd_shared_lib = "legion-cicd/pipelines/legionPipeline.groovy"
+        param_cicd_shared_lib = "${params.cicdSharedLibPath}"
     }
 
     stages {
@@ -70,10 +70,10 @@ pipeline {
                         print("Checkout CI/CD repo")
                         sh """#!/bin/bash -ex
                             export GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
-                            if [ ! -d "legion-cicd" ]; then
-                                git clone ${env.param_cicd_repo} legion-cicd
+                            if [ ! -d "cicd" ]; then
+                                git clone ${env.param_cicd_repo} cicd
                             fi
-                            cd legion-cicd && git checkout ${env.param_cicd_branch}
+                            cd cicd && git checkout ${env.param_cicd_branch}
                         """
 
                         print("Load common CI/CD library")
@@ -83,7 +83,7 @@ pipeline {
                     def verFiles = [
                         'version.info'
                     ]
-                    cicdLibrary.setBuildMeta(verFiles)
+                    cicdLibrary.setBuildMeta(verFiles, 'cicd')
                 }
             }
         }
@@ -93,6 +93,15 @@ pipeline {
                 script {
                     cicdLibrary.buildDockerImage('odahu-flow-automation', ".", "containers/terraform/Dockerfile")
                     cicdLibrary.uploadDockerImage('odahu-flow-automation', false)
+                }
+            }
+        }
+
+        stage("Build PostgreSQL backup Docker image") {
+            steps {
+                script {
+                    cicdLibrary.buildDockerImage('odahu-flow-pg-backup', ".", "containers/pg-backup/Dockerfile")
+                    cicdLibrary.uploadDockerImage('odahu-flow-pg-backup', false)
                 }
             }
         }

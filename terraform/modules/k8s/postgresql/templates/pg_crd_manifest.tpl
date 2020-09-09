@@ -18,6 +18,13 @@ spec:
 %{ endfor ~}
   postgresql:
     version: "12"
+  resources:
+    limits:
+      cpu: "2"
+      memory: 2Gi
+    requests:
+      cpu: 250m
+      memory: 256Mi
   sidecars:
     - name: "exporter"
       image: "wrouesnel/postgres_exporter"
