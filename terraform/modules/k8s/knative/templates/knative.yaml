@@ -6,6 +6,10 @@ knative:
       config:
         deployment:
           progressDeadline: "500s"
+        features:
+          kubernetes.podspec-affinity: "enabled"
+          kubernetes.podspec-nodeselector: "enabled"
+          kubernetes.podspec-tolerations: "enabled"
     # spec:
     #   config:
     #     defaults:
