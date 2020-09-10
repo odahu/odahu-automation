@@ -112,10 +112,13 @@ locals {
 
       nodePools = length(local.training_node_pools) != 0 ? [
         for k, v in var.node_pools :
-          merge(
-            {nodeSelector = {for key, value in v.labels : key => value}},
-            {tags = try(v.tags,[])})
-          if contains(local.training_node_pools, k)
+        merge(
+          { nodeSelector = { for key, value in v.labels : key => value } },
+          { tags = compact(distinct(concat(
+            try(v["tags"], []),
+          [k, try(v["machine_type"], ""), try(v["preemptible"], "") == true ? "preemptible" : ""]))) }
+        )
+        if contains(local.training_node_pools, k)
       ] : null
 
       gpuTolerations = length(local.gpu_training_node_pools) != 0 ? [
@@ -130,7 +133,10 @@ locals {
         for k, v in var.node_pools :
         merge(
           { nodeSelector = { for key, value in v.labels : key => value } },
-          { tags = try(v.tags, []) })
+          { tags = compact(distinct(concat(
+            try(v["tags"], []),
+          [k, try(v["machine_type"], ""), try(v["preemptible"], "") == true ? "preemptible" : ""]))) }
+        )
         if contains(local.gpu_training_node_pools, k)
       ] : null
 
@@ -170,7 +176,7 @@ locals {
           { nodeSelector = { for key, value in v.labels : key => value } },
           { tags = compact(distinct(concat(
             try(v["tags"], []),
-            [k, try(v["machine_type"], ""), try(v["preemptible"], "") == true ? "preemptible" : ""]))) }
+          [k, try(v["machine_type"], ""), try(v["preemptible"], "") == true ? "preemptible" : ""]))) }
         )
         if contains(local.packaging_node_pools, k)
       ] : null
