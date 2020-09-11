@@ -1,4 +1,9 @@
 locals {
+  training_node_pools     = flatten([for k, v in var.node_pools : [for i in try(v["taints"], []) : k if i.value == "training"]])
+  gpu_training_node_pools = flatten([for k, v in var.node_pools : [for i in try(v["taints"], []) : k if i.value == "training-gpu"]])
+  deployment_node_pools   = flatten([for k, v in var.node_pools : [for i in try(v["taints"], []) : k if i.value == "deployment"]])
+  packaging_node_pools    = flatten([for k, v in var.node_pools : [for i in try(v["taints"], []) : k if i.value == "packaging"]])
+
   ingress_tls_enabled     = var.tls_secret_crt != "" && var.tls_secret_key != ""
   url_schema              = local.ingress_tls_enabled ? "https" : "http"
   ingress_tls_secret_name = "odahu-flow-tls"
@@ -97,29 +102,43 @@ locals {
       }
     }
     training = {
-      tolerations = contains(keys(var.node_pools), "training") ? [
-        for taint in lookup(var.node_pools["training"], "taints", []) : {
+      tolerations = length(local.training_node_pools) != 0 ? [
+        for taint in lookup(var.node_pools[local.training_node_pools[0]], "taints", []) : {
           Key      = taint.key
           Operator = "Equal"
           Value    = taint.value
           Effect   = replace(taint.effect, "/(?i)no_?schedule/", "NoSchedule")
       }] : null
 
-      nodeSelector = contains(keys(var.node_pools), "training") ? {
-        for key, value in var.node_pools["training"].labels : key => value
-      } : null
+      nodePools = length(local.training_node_pools) != 0 ? [
+        for k, v in var.node_pools :
+        merge(
+          { nodeSelector = { for key, value in v.labels : key => value } },
+          { tags = compact(distinct(concat(
+            try(v["tags"], []),
+          [k, try(v["machine_type"], ""), try(v["preemptible"], "") == true ? "preemptible" : ""]))) }
+        )
+        if contains(local.training_node_pools, k)
+      ] : null
 
-      gpuTolerations = contains(keys(var.node_pools), "training_gpu") ? [
-        for taint in lookup(var.node_pools["training_gpu"], "taints", []) : {
+      gpuTolerations = length(local.gpu_training_node_pools) != 0 ? [
+        for taint in lookup(var.node_pools[local.gpu_training_node_pools[0]], "taints", []) : {
           Key      = taint.key
           Operator = "Equal"
           Value    = taint.value
           Effect   = replace(taint.effect, "/(?i)no_?schedule/", "NoSchedule")
       }] : null
 
-      gpuNodeSelector = contains(keys(var.node_pools), "training_gpu") ? {
-        for key, value in var.node_pools["training_gpu"].labels : key => value
-      } : null
+      gpuNodePools = length(local.gpu_training_node_pools) != 0 ? [
+        for k, v in var.node_pools :
+        merge(
+          { nodeSelector = { for key, value in v.labels : key => value } },
+          { tags = compact(distinct(concat(
+            try(v["tags"], []),
+          [k, try(v["machine_type"], ""), try(v["preemptible"], "") == true ? "preemptible" : ""]))) }
+        )
+        if contains(local.gpu_training_node_pools, k)
+      ] : null
 
       namespace          = var.odahuflow_training_namespace
       outputConnectionID = "models-output"
@@ -143,17 +162,24 @@ locals {
       }
     }
     packaging = {
-      tolerations = contains(keys(var.node_pools), "packaging") ? [
-        for taint in lookup(var.node_pools["packaging"], "taints", []) : {
+      tolerations = length(local.packaging_node_pools) != 0 ? [
+        for taint in lookup(var.node_pools[local.packaging_node_pools[0]], "taints", []) : {
           Key      = taint.key
           Operator = "Equal"
           Value    = taint.value
           Effect   = replace(taint.effect, "/(?i)no_?schedule/", "NoSchedule")
       }] : null
 
-      nodeSelector = contains(keys(var.node_pools), "packaging") ? {
-        for key, value in var.node_pools["packaging"].labels : key => value
-      } : null
+      nodePools = length(local.packaging_node_pools) != 0 ? [
+        for k, v in var.node_pools :
+        merge(
+          { nodeSelector = { for key, value in v.labels : key => value } },
+          { tags = compact(distinct(concat(
+            try(v["tags"], []),
+          [k, try(v["machine_type"], ""), try(v["preemptible"], "") == true ? "preemptible" : ""]))) }
+        )
+        if contains(local.packaging_node_pools, k)
+      ] : null
 
       namespace          = var.odahuflow_packaging_namespace
       outputConnectionID = "models-output"
