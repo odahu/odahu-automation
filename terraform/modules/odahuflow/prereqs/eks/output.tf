@@ -8,8 +8,12 @@ output "extra_external_urls" {
   ]
 }
 
-output "odahu_bucket_name" {
-  value = aws_s3_bucket.this.bucket
+output "odahu_data_bucket_name" {
+  value = aws_s3_bucket.data.bucket
+}
+
+output "odahu_log_bucket_name" {
+  value = var.log_bucket == "" ? "" : aws_s3_bucket.logs[0].bucket
 }
 
 output "odahuflow_connections" {
@@ -31,8 +35,8 @@ output "odahuflow_connections" {
         type        = "s3"
         keyID       = base64encode(aws_iam_access_key.collector.id)
         keySecret   = base64encode(aws_iam_access_key.collector.secret)
-        uri         = "s3://${aws_s3_bucket.this.id}/output"
-        region      = aws_s3_bucket.this.region
+        uri         = "s3://${aws_s3_bucket.data.id}/output"
+        region      = aws_s3_bucket.data.region
         description = ""
         webUILink   = "Storage for trained artifacts"
       }
@@ -42,8 +46,8 @@ output "odahuflow_connections" {
 
 output "fluent_helm_values" {
   value = templatefile("${path.module}/templates/fluentd.yaml", {
-    data_bucket        = aws_s3_bucket.this.id
-    data_bucket_region = aws_s3_bucket.this.region
+    data_bucket        = aws_s3_bucket.data.id
+    data_bucket_region = aws_s3_bucket.data.region
     collector_iam_role = aws_iam_role.collector.name
   })
 }
@@ -51,8 +55,8 @@ output "fluent_helm_values" {
 output "fluent_daemonset_helm_values" {
   value = {
     config = templatefile("${path.module}/templates/fluentd_ds_cloud.tpl", {
-      data_bucket        = aws_s3_bucket.this.id
-      data_bucket_region = aws_s3_bucket.this.region
+      data_bucket        = local.log_bucket
+      data_bucket_region = local.log_bucket_region
     })
 
     annotations = {
@@ -68,8 +72,8 @@ output "fluent_daemonset_helm_values" {
 
 output "logstash_input_config" {
   value = templatefile("${path.module}/templates/logstash.yaml", {
-    bucket = aws_s3_bucket.this.id
-    region = aws_s3_bucket.this.region
+    bucket = local.log_bucket
+    region = local.log_bucket_region
   })
 }
 
@@ -81,4 +85,3 @@ output "logstash_annotations" {
     }
   }
 }
-

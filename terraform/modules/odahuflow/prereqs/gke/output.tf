@@ -4,7 +4,7 @@ output "extra_external_urls" {
       name = "Feedback storage"
       url = format(
         "https://console.cloud.google.com/storage/browser/%s/model_log?project=%s",
-        google_storage_bucket.this.name,
+        google_storage_bucket.data.name,
         var.project_id
       )
       imageUrl = "/img/logo/gcs.png"
@@ -12,8 +12,12 @@ output "extra_external_urls" {
   ]
 }
 
-output "odahu_bucket_name" {
-  value = google_storage_bucket.this.name
+output "odahu_data_bucket_name" {
+  value = google_storage_bucket.data.name
+}
+
+output "odahu_log_bucket_name" {
+  value = google_storage_bucket.log.name
 }
 
 output "odahu_collector_sa_key" {
@@ -38,12 +42,12 @@ output "odahuflow_connections" {
       spec = {
         type        = "gcs"
         keySecret   = google_service_account_key.collector_sa_key.private_key
-        uri         = "${google_storage_bucket.this.url}/output"
+        uri         = "${google_storage_bucket.data.url}/output"
         region      = var.project_id
         description = "Storage for trained artifacts"
         webUILink = format(
           "https://console.cloud.google.com/storage/browser/%s/output?project=%s",
-          google_storage_bucket.this.name,
+          google_storage_bucket.data.name,
           var.project_id
         )
       }
@@ -53,7 +57,7 @@ output "odahuflow_connections" {
 
 output "fluent_helm_values" {
   value = templatefile("${path.module}/templates/fluentd.yaml", {
-    data_bucket  = google_storage_bucket.this.name,
+    data_bucket  = google_storage_bucket.data.name,
     collector_sa = google_service_account.collector_sa.email
   })
 }
@@ -61,7 +65,7 @@ output "fluent_helm_values" {
 output "fluent_daemonset_helm_values" {
   value = {
     config = templatefile("${path.module}/templates/fluentd_ds_cloud.tpl", {
-      data_bucket = google_storage_bucket.this.name
+      data_bucket = google_storage_bucket.log.name
     })
 
     annotations = {
@@ -77,6 +81,6 @@ output "fluent_daemonset_helm_values" {
 
 output "logstash_input_config" {
   value = templatefile("${path.module}/templates/logstash.yaml", {
-    bucket = google_storage_bucket.this.name
+    bucket = google_storage_bucket.log.name
   })
 }
