@@ -1,5 +1,5 @@
 output "helm_chart" {
-  value = helm_release.monitoring
+  value = helm_release.grafana
 }
 
 output "namespace" {

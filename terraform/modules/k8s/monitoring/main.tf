@@ -32,6 +32,8 @@ locals {
       }
     EOT
   }
+
+  grafana_dashboards = fileset("${path.module}/files/dashboards", "**")
 }
 
 ########################################################
@@ -43,7 +45,7 @@ resource "kubernetes_namespace" "monitoring" {
       name = var.monitoring_namespace
     }
     labels = {
-      project       = "odahuflow"
+      project       = "odahu-flow"
       k8s-component = "monitoring"
     }
     name = var.monitoring_namespace
@@ -65,25 +67,64 @@ resource "kubernetes_secret" "tls_monitoring" {
   type = "kubernetes.io/tls"
 }
 
-resource "helm_release" "monitoring" {
+resource "helm_release" "prometheus" {
   name       = "monitoring"
-  chart      = "odahu-flow-monitoring"
-  version    = var.odahu_infra_version
+  chart      = "prometheus-operator"
+  version    = "9.3.1"
   namespace  = kubernetes_namespace.monitoring.metadata[0].annotations.name
   repository = var.helm_repo
   timeout    = var.helm_timeout
 
   values = [
-    templatefile("${path.module}/templates/monitoring.yaml", {
-      monitoring_namespace = kubernetes_namespace.monitoring.metadata[0].annotations.name
-      odahu_infra_version  = var.odahu_infra_version
-
+    templatefile("${path.module}/templates/prometheus_operator.yaml", {
       nginx_annotations = yamlencode({ annotations = local.ingress_nginx_annotations })
 
+      name                    = "monitoring"
       cluster_domain          = var.cluster_domain
       prom_retention_time     = var.prom_retention_time
       prom_retention_size     = var.prom_retention_size
       prom_storage_size       = var.prom_storage_size
+      ingress_tls_secret_name = local.ingress_tls_secret_name
+    })
+  ]
+  depends_on = [kubernetes_secret.tls_monitoring]
+}
+
+resource "local_file" "prometheus_stuff" {
+  content = templatefile("${path.module}/templates/prometheus_cr.yaml", {
+    prometheus_name = helm_release.prometheus.name
+    namespace       = var.monitoring_namespace
+  })
+  filename = "/tmp/.odahu/prometheus_stuff.yml"
+
+  file_permission      = 0644
+  directory_permission = 0755
+
+  depends_on = [helm_release.prometheus]
+}
+
+resource "null_resource" "prometheus_stuff" {
+  provisioner "local-exec" {
+    interpreter = ["timeout", "1m", "bash", "-c"]
+
+    command = "until kubectl apply -f ${local_file.prometheus_stuff.filename}; do sleep 5; done"
+  }
+  depends_on = [local_file.prometheus_stuff]
+}
+
+resource "helm_release" "grafana" {
+  name       = "grafana"
+  chart      = "grafana"
+  version    = "5.5.5"
+  namespace  = kubernetes_namespace.monitoring.metadata[0].annotations.name
+  repository = var.helm_repo
+  timeout    = var.helm_timeout
+
+  values = [
+    templatefile("${path.module}/templates/grafana.yaml", {
+      nginx_annotations = yamlencode({ annotations = local.ingress_nginx_annotations })
+
+      cluster_domain          = var.cluster_domain
       grafana_admin           = var.grafana_admin
       grafana_pass            = var.grafana_pass
       grafana_storage_size    = var.grafana_storage_size
@@ -91,5 +132,26 @@ resource "helm_release" "monitoring" {
       ingress_tls_secret_name = local.ingress_tls_secret_name
     })
   ]
-  depends_on = [kubernetes_secret.tls_monitoring]
+  depends_on = [null_resource.prometheus_stuff]
+}
+
+resource "kubernetes_config_map" "dashboard" {
+  for_each = toset(local.grafana_dashboards)
+
+  metadata {
+    name      = basename(each.value)
+    namespace = kubernetes_namespace.monitoring.metadata[0].annotations.name
+    annotations = {
+      "k8s-sidecar-target-directory" = "/tmp/dashboards/${dirname(each.value)}"
+    }
+    labels = {
+      "grafana_dashboard" = "1"
+    }
+  }
+
+  data = {
+    basename(each.value) = file("${path.module}/files/dashboards/${each.value}")
+  }
+
+  depends_on = [helm_release.grafana]
 }
