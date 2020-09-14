@@ -29,18 +29,20 @@ module "pg_backup" {
 }
 
 module "odahuflow_prereqs" {
-  source       = "../../../../modules/odahuflow/prereqs/gke"
-  project_id   = var.project_id
-  region       = var.region
-  cluster_name = var.cluster_name
-  data_bucket  = var.data_bucket
+  source              = "../../../../modules/odahuflow/prereqs/gke"
+  project_id          = var.project_id
+  region              = var.region
+  cluster_name        = var.cluster_name
+  data_bucket         = var.data_bucket
+  log_bucket          = var.log_bucket
+  log_expiration_days = var.log_expiration_days
 }
 
 module "airflow_prereqs" {
   source = "../../../../modules/k8s/airflow/prereqs/gke"
 
   project_id      = var.project_id
-  wine_bucket     = module.odahuflow_prereqs.odahu_bucket_name
+  wine_bucket     = module.odahuflow_prereqs.odahu_data_bucket_name
   cluster_name    = var.cluster_name
   dag_bucket      = local.dag_bucket
   dag_bucket_path = local.dag_bucket_path
@@ -50,7 +52,7 @@ module "airflow_prereqs" {
 module "airflow_test_data" {
   source = "../../../../modules/k8s/airflow/test_data/gke"
 
-  wine_bucket      = module.odahuflow_prereqs.odahu_bucket_name
+  wine_bucket      = module.odahuflow_prereqs.odahu_data_bucket_name
   examples_version = var.examples_version
   wine_data_url    = var.wine_data_url
 }
