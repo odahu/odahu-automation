@@ -505,34 +505,3 @@ resource "helm_release" "odahu_ui" {
     helm_release.odahuflow
   ]
 }
-
-########################################################
-# Install Node Selector Webhook helm
-########################################################
-
-//resource "helm_release" "node_selector_webhook" {
-//  name       = "node-selector-webhook"
-//  chart      = "node-selector-webhook"
-//  version    = var.node_selector_webhook_version
-//  namespace  = var.odahuflow_namespace
-//  repository = var.helm_repo
-//  timeout    = var.helm_timeout
-//
-//  values = [
-//    templatefile("${path.module}/templates/nodeselector.yaml", {
-//      docker_repo = var.docker_repo
-//      config = yamlencode({
-//        config = var.node_selector_webhook_settings.config
-//      })
-//      certs = yamlencode({
-//        certs = var.node_selector_webhook_settings.certs
-//      })
-//      image_version = var.node_selector_webhook_version
-//      docker_secret = var.docker_secret_name
-//    })
-//  ]
-//
-//  depends_on = [
-//    kubernetes_namespace.odahuflow
-//  ]
-//}
