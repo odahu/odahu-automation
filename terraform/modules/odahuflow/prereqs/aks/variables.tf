@@ -25,6 +25,18 @@ variable "data_bucket" {
   description = "ODAHU flow data storage bucket"
 }
 
+variable "log_bucket" {
+  type        = string
+  default     = ""
+  description = "ODAHU flow logs storage bucket"
+}
+
+variable "log_expiration_days" {
+  type        = number
+  default     = 1
+  description = "ODAHU flow logs expiration days"
+}
+
 variable "allowed_ips" {
   type        = list(string)
   description = "CIDRs to allow access from"
