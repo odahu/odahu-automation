@@ -7,7 +7,7 @@ output "backup_job_config" {
     bucket = var.backup_settings.bucket_name
 
     annotations = {
-      "iam.amazonaws.com/role" = aws_iam_role.backup[0].name
+      "iam.amazonaws.com/role" = var.backup_settings.enabled ? aws_iam_role.backup[0].name : ""
     }
   }
   sensitive = true
