@@ -1,7 +1,6 @@
-
 locals {
-  storage_account   = split("/", var.backup_settings.bucket_name)[0]
-  storage_container = split("/", var.backup_settings.bucket_name)[1]
+  storage_account   = try(split("/", var.backup_settings.bucket_name)[0],"")
+  storage_container = try(split("/", var.backup_settings.bucket_name)[1],"")
   sas_token_period  = "8760h"
 }
 
