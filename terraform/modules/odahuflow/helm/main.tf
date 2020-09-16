@@ -116,7 +116,8 @@ locals {
           { nodeSelector = { for key, value in v.labels : key => value } },
           { tags = compact(distinct(concat(
             try(v["tags"], []),
-          [k, try(v["machine_type"], ""), try(v["preemptible"], "") == true ? "preemptible" : ""]))) }
+            [k, try(v["machine_type"], ""), try(v["preemptible"], "") == true ? "preemptible" : ""]
+          ))) }
         )
         if contains(local.training_node_pools, k)
       ] : null
@@ -135,7 +136,8 @@ locals {
           { nodeSelector = { for key, value in v.labels : key => value } },
           { tags = compact(distinct(concat(
             try(v["tags"], []),
-          [k, try(v["machine_type"], ""), try(v["preemptible"], "") == true ? "preemptible" : ""]))) }
+            [k, "gpu", try(v["machine_type"], ""), try(v["preemptible"], "") == true ? "preemptible" : ""]
+          ))) }
         )
         if contains(local.gpu_training_node_pools, k)
       ] : null
@@ -176,7 +178,8 @@ locals {
           { nodeSelector = { for key, value in v.labels : key => value } },
           { tags = compact(distinct(concat(
             try(v["tags"], []),
-          [k, try(v["machine_type"], ""), try(v["preemptible"], "") == true ? "preemptible" : ""]))) }
+            [k, try(v["machine_type"], ""), try(v["preemptible"], "") == true ? "preemptible" : ""]
+          ))) }
         )
         if contains(local.packaging_node_pools, k)
       ] : null
