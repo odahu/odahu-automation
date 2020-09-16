@@ -307,9 +307,9 @@ resource "kubernetes_namespace" "odahuflow_deployment" {
       name = var.odahuflow_deployment_namespace
     }
     labels = {
-      project                       = "odahu-flow"
-      istio-injection               = "enabled"
-      modeldeployment-webhook       = "enabled"
+      project                 = "odahu-flow"
+      istio-injection         = "enabled"
+      modeldeployment-webhook = "enabled"
     }
     name = var.odahuflow_deployment_namespace
   }
