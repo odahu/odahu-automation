@@ -4,17 +4,69 @@ data "aws_iam_role" "node" {
 }
 
 ########################################################
-# S3 bucket
+# S3 data bucket
 ########################################################
 
-resource "aws_s3_bucket" "this" {
+resource "aws_s3_bucket" "data" {
   bucket        = var.data_bucket
   acl           = "private"
   region        = var.region
   force_destroy = true
 
+  dynamic "lifecycle_rule" {
+    for_each = var.log_bucket == "" ? [1] : []
+    content {
+      id      = "${var.cluster_name}-logs"
+      enabled = true
+      prefix  = "logs/"
+
+      tags = {
+        "rule"      = "${var.cluster_name}-logs"
+        "autoclean" = "true"
+      }
+
+      expiration {
+        days = var.log_expiration_days
+      }
+    }
+  }
+
   tags = {
     Name = var.data_bucket
+    Env  = var.cluster_name
+  }
+}
+
+########################################################
+# S3 logs bucket
+########################################################
+
+resource "aws_s3_bucket" "logs" {
+  count = var.log_bucket == "" ? 0 : 1
+
+  bucket        = var.log_bucket
+  acl           = "private"
+  region        = var.region
+  force_destroy = true
+
+  lifecycle_rule {
+    id      = "${var.cluster_name}-logs"
+    enabled = true
+
+    prefix = "logs/"
+
+    tags = {
+      "rule"      = "${var.cluster_name}-logs"
+      "autoclean" = "true"
+    }
+
+    expiration {
+      days = var.log_expiration_days
+    }
+  }
+
+  tags = {
+    Name = var.log_bucket
     Env  = var.cluster_name
   }
 }
@@ -31,7 +83,7 @@ data "aws_iam_policy_document" "collector" {
   statement {
     actions   = ["s3:*"]
     effect    = "Allow"
-    resources = ["${aws_s3_bucket.this.arn}*"]
+    resources = var.log_bucket == "" ? ["${aws_s3_bucket.data.arn}*"] : ["${aws_s3_bucket.logs[0].arn}*"]
   }
 
   statement {

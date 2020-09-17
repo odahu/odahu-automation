@@ -20,3 +20,15 @@ variable "data_bucket" {
   type        = string
   description = "ODAHU flow data storage bucket name"
 }
+
+variable "log_bucket" {
+  type        = string
+  default     = ""
+  description = "ODAHU flow logs storage bucket"
+}
+
+variable "log_expiration_days" {
+  type        = number
+  default     = 1
+  description = "ODAHU flow logs expiration days"
+}
