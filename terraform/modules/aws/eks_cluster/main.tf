@@ -82,6 +82,7 @@ resource "null_resource" "populate_auth_map" {
     command = "timeout 90 bash -c 'until kubectl apply -f ${local_file.aws_auth_cm.filename}; do sleep 5; done'"
   }
   depends_on = [
+    null_resource.setup_calico,
     null_resource.setup_kubectl,
     local_file.aws_auth_cm
   ]
@@ -93,6 +94,7 @@ resource "null_resource" "setup_cluster_autoscaler" {
   }
   depends_on = [
     null_resource.setup_calico,
+    null_resource.populate_auth_map,
     local_file.cluster_autoscaler
   ]
 }
