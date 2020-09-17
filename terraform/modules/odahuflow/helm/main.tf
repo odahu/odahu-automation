@@ -77,17 +77,24 @@ locals {
       }
     }
     deployment = {
-      tolerations = contains(keys(var.node_pools), "model_deployment") ? [
-        for taint in lookup(var.node_pools["model_deployment"], "taints", []) : {
+      tolerations = length(local.deployment_node_pools) != 0 ? [
+        for taint in lookup(var.node_pools[local.deployment_node_pools[0]], "taints", []) : {
           Key      = taint.key
           Operator = "Equal"
           Value    = taint.value
           Effect   = replace(taint.effect, "/(?i)no_?schedule/", "NoSchedule")
       }] : null
 
-      nodeSelector = contains(keys(var.node_pools), "model_deployment") ? {
-        for key, value in var.node_pools["model_deployment"].labels : key => value
-      } : null
+      nodePools = length(local.deployment_node_pools) != 0 ? [
+        for k, v in var.node_pools :
+        merge(
+          { nodeSelector = { for key, value in v.labels : key => value } },
+          { tags = compact(distinct(concat(
+            try(v["tags"], []),
+          [k, try(v["machine_type"], ""), try(v["preemptible"], "") == true ? "preemptible" : ""]))) }
+        )
+        if contains(local.deployment_node_pools, k)
+      ] : null
 
       defaultDockerPullConnName = local.default_model_docker_connection_id
 
@@ -303,10 +310,9 @@ resource "kubernetes_namespace" "odahuflow_deployment" {
       name = var.odahuflow_deployment_namespace
     }
     labels = {
-      project                       = "odahu-flow"
-      istio-injection               = "enabled"
-      modeldeployment-webhook       = "enabled"
-      "odahu/node-selector-webhook" = "enabled"
+      project                 = "odahu-flow"
+      istio-injection         = "enabled"
+      modeldeployment-webhook = "enabled"
     }
     name = var.odahuflow_deployment_namespace
   }
@@ -499,36 +505,5 @@ resource "helm_release" "odahu_ui" {
 
   depends_on = [
     helm_release.odahuflow
-  ]
-}
-
-########################################################
-# Install Node Selector Webhook helm
-########################################################
-
-resource "helm_release" "node_selector_webhook" {
-  name       = "node-selector-webhook"
-  chart      = "node-selector-webhook"
-  version    = var.node_selector_webhook_version
-  namespace  = var.odahuflow_namespace
-  repository = var.helm_repo
-  timeout    = var.helm_timeout
-
-  values = [
-    templatefile("${path.module}/templates/nodeselector.yaml", {
-      docker_repo = var.docker_repo
-      config = yamlencode({
-        config = var.node_selector_webhook_settings.config
-      })
-      certs = yamlencode({
-        certs = var.node_selector_webhook_settings.certs
-      })
-      image_version = var.node_selector_webhook_version
-      docker_secret = var.docker_secret_name
-    })
-  ]
-
-  depends_on = [
-    kubernetes_namespace.odahuflow
   ]
 }
