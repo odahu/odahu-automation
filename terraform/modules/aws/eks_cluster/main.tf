@@ -74,7 +74,10 @@ resource "null_resource" "setup_calico" {
   provisioner "local-exec" {
     command = "timeout 90 bash -c 'until kubectl apply -f ${path.module}/files/calico-1.5.yml; do sleep 5; done'"
   }
-  depends_on = [null_resource.setup_kubectl]
+  depends_on = [
+    aws_launch_template.this,
+    null_resource.populate_auth_map
+  ]
 }
 
 resource "null_resource" "populate_auth_map" {
@@ -83,6 +86,7 @@ resource "null_resource" "populate_auth_map" {
   }
   depends_on = [
     null_resource.setup_kubectl,
+    null_resource.kube_api_check,
     local_file.aws_auth_cm
   ]
 }
@@ -92,10 +96,18 @@ resource "null_resource" "setup_cluster_autoscaler" {
     command = "timeout 90 bash -c 'until kubectl apply -f ${local_file.cluster_autoscaler.filename}; do sleep 5; done'"
   }
   depends_on = [
-    null_resource.setup_calico,
-    local_file.cluster_autoscaler
+    null_resource.setup_calico
   ]
 }
+
+resource "null_resource" "verify_cluster_autoscaler" {
+  provisioner "local-exec" {
+    interpreter = ["timeout", "5m", "bash", "-c"]
+    command     = "until [[ $(kubectl -n kube-system get deployments cluster-autoscaler -ojsonpath='{.status.readyReplicas}') = '1' ]]; do sleep 5; done"
+  }
+  depends_on = [null_resource.setup_cluster_autoscaler]
+}
+
 
 # Node pools
 resource "aws_launch_template" "this" {
