@@ -103,7 +103,7 @@ resource "null_resource" "setup_cluster_autoscaler" {
 resource "null_resource" "verify_cluster_autoscaler" {
   provisioner "local-exec" {
     interpreter = ["timeout", "5m", "bash", "-c"]
-    command = "until [[ $(kubectl -n kube-system get deployments cluster-autoscaler -ojsonpath='{.status.readyReplicas}') = '1' ]]; do sleep 5; done"
+    command     = "until [[ $(kubectl -n kube-system get deployments cluster-autoscaler -ojsonpath='{.status.readyReplicas}') = '1' ]]; do sleep 5; done"
   }
   depends_on = [null_resource.setup_cluster_autoscaler]
 }
