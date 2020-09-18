@@ -158,6 +158,12 @@ function SetupCloudAccess() {
 			local creds_gcp
 			creds_gcp=$(GetParam 'cloud.gcp.credentials.GOOGLE_CREDENTIALS')
 			if [[ "${creds_gcp}" != "null" ]]; then
+				backend_creds_gcp=$(GetParam 'tfstate_bucket.credentials')
+				if [[ "${backend_creds_gcp}" != "null" ]]; then
+					echo "${backend_creds_gcp}" > "${MODULES_ROOT}"/backend_credentials.json
+				else
+					echo "${creds_gcp}" > "${MODULES_ROOT}"/backend_credentials.json
+				fi
 				echo -e "INFO :\tUsing GCP cloud credentials from cluster profile"
 				GOOGLE_CREDENTIALS="${creds_gcp}"
 				export GOOGLE_CREDENTIALS
