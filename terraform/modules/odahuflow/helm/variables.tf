@@ -56,11 +56,6 @@ variable "odahu_ui_version" {
   description = "Version of odahu-ui helm chart"
 }
 
-variable "node_selector_webhook_version" {
-  type        = string
-  description = "Version of Node Selector Webhook helm chart"
-}
-
 ###############
 ### Ingress ###
 ###############
@@ -251,24 +246,4 @@ variable "pgsql" {
     db_password = ""
   }
   description = "PostgreSQL settings for ODAHU flow services"
-}
-
-variable "node_selector_webhook_settings" {
-  description = "Settings for installation of Node selector webhook settings"
-  type = object({
-    certs = object({
-      crt = string
-      key = string
-      ca  = string
-    })
-    config = object({
-      nodeSelector = map(string)
-      tolerations = list(object({
-        key      = string
-        operator = string
-        value    = string
-        effect   = string
-      }))
-    })
-  })
 }
