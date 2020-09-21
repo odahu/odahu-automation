@@ -34,7 +34,7 @@ variable "pod_prefixes" {
     "**_odahu-flow-training_**",
     "**_odahu-flow-packaging_**",
     "**_odahu-flow-deployment_**",
-    "**_nginx-ingress_**"
+    "nginx-ingress_**"
   ]
   description = <<EOF
     List of pod names prefixes to be matched in Fluent daemonset for further processing.
