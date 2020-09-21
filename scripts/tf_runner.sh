@@ -157,9 +157,9 @@ function SetupCloudAccess() {
 		"gcp")
 			local creds_gcp
 			creds_gcp=$(GetParam 'cloud.gcp.credentials.GOOGLE_CREDENTIALS')
-			if [[ "${creds_gcp}" != "null" ]]; then
+			if [[ "${creds_gcp}" != "" ]]; then
 				backend_creds_gcp=$(GetParam 'tfstate_bucket.credentials')
-				if [[ "${backend_creds_gcp}" != "null" ]]; then
+				if [[ "${backend_creds_gcp}" != "" ]]; then
 					echo "${backend_creds_gcp}" > "${MODULES_ROOT}"/backend_credentials.json
 				else
 					echo "${creds_gcp}" > "${MODULES_ROOT}"/backend_credentials.json
@@ -436,11 +436,11 @@ function ResumeCluster() {
 ##################
 
 ReadArguments "$@"
+MODULES_ROOT="/opt/odahu-flow/terraform/env_types/$(GetParam 'cluster_type')"
 SetupCloudAccess
 
 export TF_IN_AUTOMATION=true
 export TF_PLUGIN_CACHE_DIR=/tmp/.terraform/cache && mkdir -p $TF_PLUGIN_CACHE_DIR
-MODULES_ROOT="/opt/odahu-flow/terraform/env_types/$(GetParam 'cluster_type')"
 export MODULES_ROOT
 
 if [[ $COMMAND == 'create' ]]; then
