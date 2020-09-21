@@ -88,10 +88,10 @@ resource "kubernetes_job" "vault_pgsql_init" {
             "--file=/opt/vault/vault-pgsql-init.sql"
           ]
         }
-        restart_policy = "Never"
+        restart_policy = "OnFailure"
       }
     }
-    backoff_limit = 0
+    backoff_limit = 3
 
     ttl_seconds_after_finished = 180
   }
