@@ -157,7 +157,7 @@ function SetupCloudAccess() {
 		"gcp")
 			local creds_gcp
 			creds_gcp=$(GetParam 'cloud.gcp.credentials.GOOGLE_CREDENTIALS')
-			if [[ "${creds_gcp}" != "" ]]; then
+			if [[ "${creds_gcp}" != "null" ]]; then
 				backend_creds_gcp=$(GetParam 'tfstate_bucket.credentials')
 				if [[ "${backend_creds_gcp}" != "" ]]; then
 					echo "${backend_creds_gcp}" > "${MODULES_ROOT}"/"${BACKEND_FILENAME}"
