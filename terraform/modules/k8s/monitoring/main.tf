@@ -51,6 +51,8 @@ resource "kubernetes_namespace" "monitoring" {
   timeouts {
     delete = "15m"
   }
+
+  depends_on = [var.module_dependency]
 }
 
 resource "kubernetes_secret" "tls_monitoring" {
@@ -63,6 +65,8 @@ resource "kubernetes_secret" "tls_monitoring" {
     "tls.crt" = var.tls_secret_crt
   }
   type = "kubernetes.io/tls"
+
+  depends_on = [kubernetes_namespace.monitoring]
 }
 
 resource "helm_release" "monitoring" {

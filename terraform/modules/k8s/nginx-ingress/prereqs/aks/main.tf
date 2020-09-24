@@ -1,5 +1,6 @@
 locals {
   ingress_tags = merge(var.tags, { "purpose" = "Kubernetes cluster ingress" })
+  script_path  = "${path.module}/../../../../../../scripts"
 }
 
 data "azurerm_subnet" "aks_subnet" {
@@ -23,8 +24,13 @@ resource "azurerm_public_ip" "ingress" {
   }
 
   provisioner "local-exec" {
-    when    = destroy
-    command = "timeout 300 bash ${path.module}/../../../../../../scripts/azure_lb_checker.sh destroy \"${self.resource_group_name}-k8s\" \"${self.name}\""
+    when = destroy
+    command = format(
+      "timeout 5m bash %s/azure_lb_checker.sh destroy \"%s\" \"%s\"",
+      local.script_path,
+      "${self.resource_group_name}-k8s",
+      self.name
+    )
   }
 }
 
@@ -76,7 +82,11 @@ resource "azurerm_subnet_network_security_group_association" "ingress" {
 # and detached on 'destroy'
 resource "null_resource" "lb_check" {
   provisioner "local-exec" {
-    command = "timeout 900 bash ${path.module}/../../../../../../scripts/azure_lb_checker.sh apply \"${azurerm_public_ip.ingress.ip_address}\""
+    command = format(
+      "timeout 15m bash %s/azure_lb_checker.sh apply \"%s\"",
+      local.script_path,
+      azurerm_public_ip.ingress.ip_address
+    )
   }
   depends_on = [
     azurerm_public_ip.ingress,

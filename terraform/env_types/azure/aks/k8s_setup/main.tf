@@ -37,16 +37,26 @@ module "auth" {
   oauth_oidc_scope      = var.oauth_oidc_scope
 }
 
+# module "csi_driver" {
+#   source = "../../../../modules/k8s/drivers_csi/aks"
+# }
+
 module "monitoring" {
   source              = "../../../../modules/k8s/monitoring"
   cluster_domain      = var.cluster_domain_name
   helm_repo           = var.helm_repo
-  helm_timeout        = 25 * 60
   odahu_infra_version = var.odahu_infra_version
   grafana_admin       = var.grafana_admin
   grafana_pass        = var.grafana_pass
   tls_secret_key      = var.tls_key
   tls_secret_crt      = var.tls_crt
+  module_dependency   = module.nfs.helm_chart
+}
+
+module "nfs" {
+  source = "../../../../modules/k8s/nfs"
+
+  configuration = var.nfs
 }
 
 module "istio" {
@@ -86,10 +96,4 @@ module "tekton" {
   source              = "../../../../modules/k8s/tekton"
   helm_repo           = var.helm_repo
   odahu_infra_version = var.odahu_infra_version
-}
-
-module "nfs" {
-  source = "../../../../modules/k8s/nfs"
-
-  configuration = var.nfs
 }

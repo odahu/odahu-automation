@@ -46,8 +46,14 @@ module "monitoring" {
   tls_secret_crt      = var.tls_crt
 }
 
+module "nfs" {
+  source = "../../../../modules/k8s/nfs"
+
+  configuration = var.nfs
+}
+
 module "gpu_drivers" {
-  source = "../../../../modules/k8s/gpu_drivers_setup"
+  source = "../../../../modules/k8s/drivers_gpu/gke"
 
   module_dependency    = module.monitoring.helm_chart
   monitoring_namespace = module.monitoring.namespace
@@ -97,10 +103,4 @@ module "tekton" {
   source              = "../../../../modules/k8s/tekton"
   helm_repo           = var.helm_repo
   odahu_infra_version = var.odahu_infra_version
-}
-
-module "nfs" {
-  source = "../../../../modules/k8s/nfs"
-
-  configuration = var.nfs
 }
