@@ -93,29 +93,4 @@ data "aws_iam_policy_document" "node_autoscaling" {
 
     resources = ["*"]
   }
-
-  statement {
-    sid    = "eksWorkerAutoscalingOwn"
-    effect = "Allow"
-
-    actions = [
-      "autoscaling:SetDesiredCapacity",
-      "autoscaling:TerminateInstanceInAutoScalingGroup",
-      "autoscaling:UpdateAutoScalingGroup",
-    ]
-
-    resources = ["*"]
-
-    condition {
-      test     = "StringEquals"
-      variable = "autoscaling:ResourceTag/kubernetes.io/cluster/${var.cluster_name}"
-      values   = ["owned"]
-    }
-
-    condition {
-      test     = "StringEquals"
-      variable = "autoscaling:ResourceTag/k8s.io/cluster-autoscaler/enabled"
-      values   = ["true"]
-    }
-  }
 }

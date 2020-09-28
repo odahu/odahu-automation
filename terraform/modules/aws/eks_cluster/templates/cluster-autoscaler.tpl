@@ -50,15 +50,18 @@ rules:
     resources: ["statefulsets", "replicasets", "daemonsets"]
     verbs: ["watch", "list", "get"]
   - apiGroups: ["storage.k8s.io"]
-    resources: ["storageclasses"]
-    verbs: ["watch", "list", "get"]
-  - apiGroups: ["storage.k8s.io"]
-    resources: ["csinodes"]
+    resources: ["storageclasses", "csinodes"]
     verbs: ["watch", "list", "get"]
   - apiGroups: ["batch", "extensions"]
     resources: ["jobs"]
     verbs: ["get", "list", "watch", "patch"]
-    
+  - apiGroups: ["coordination.k8s.io"]
+    resources: ["leases"]
+    verbs: ["create"]
+  - apiGroups: ["coordination.k8s.io"]
+    resourceNames: ["cluster-autoscaler"]
+    resources: ["leases"]
+    verbs: ["get", "update"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
@@ -129,10 +132,13 @@ spec:
     metadata:
       labels:
         app: cluster-autoscaler
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: '8085'
     spec:
       serviceAccountName: cluster-autoscaler
       containers:
-        - image: eu.gcr.io/k8s-artifacts-prod/autoscaling/cluster-autoscaler:v${k8s_version}
+        - image: k8s.gcr.io/autoscaling/cluster-autoscaler:v1.16.6
           name: cluster-autoscaler
           resources:
             limits:
@@ -144,12 +150,13 @@ spec:
           command:
             - ./cluster-autoscaler
             - --v=4
+            - --cluster-name=eks-test
             - --stderrthreshold=info
             - --cloud-provider=aws
             - --skip-nodes-with-local-storage=false
             - --skip-nodes-with-system-pods=false
             - --expander=least-waste
-            - --node-group-auto-discovery=asg:tag=k8s.io/cluster-autoscaler/enabled,k8s.io/cluster-autoscaler/${cluster_name}
+            - --node-group-auto-discovery=asg:tag=k8s.io/cluster-autoscaler/enabled,k8s.io/cluster-autoscaler/eks-test
             - --balance-similar-node-groups
             - --cores-total=2:${cpu_max_limit}
             - --memory-total=8:${mem_max_limit}
