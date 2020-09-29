@@ -1,11 +1,12 @@
 FROM golang:alpine AS terraform-bundler
 
 ENV TERRAFORM_VERSION=0.12.29
+ENV CGO_ENABLED=0
 
 RUN apk --no-cache add git unzip && \
-    go get -d -v github.com/hashicorp/terraform && \
-    cd ./src/github.com/hashicorp/terraform && \
-    git checkout v${TERRAFORM_VERSION} && \
+    git clone -b v${TERRAFORM_VERSION} https://github.com/hashicorp/terraform && \
+    cd terraform && \
+    go install . && \
     go install ./tools/terraform-bundle
 
 COPY containers/terraform/terraform-bundle.hcl .
@@ -43,7 +44,7 @@ RUN wget -qO /usr/local/bin/kubectl "https://storage.googleapis.com/kubernetes-r
     chmod a+x /usr/local/bin/kubectl
 
 # Install Terraform and provider plugins
-COPY --from=terraform-bundler /go/terraform-bundle/terraform /usr/local/bin/
+COPY --from=terraform-bundler /go/bin/terraform /usr/local/bin/
 COPY --from=terraform-bundler /go/terraform-bundle/terraform-provider-* ${TF_PLUGIN_CACHE_DIR}/linux_amd64/
 
 # Install Terragrunt

@@ -8,6 +8,10 @@ class Globals {
 }
 
 def chartNames = null
+def DefCheckoutTimeout = 5
+def DefBuildTimeout = 10
+def DefBuildBackupTimeout = 5
+def DefUpdateTimeout = 5
 
 pipeline {
     agent { label 'ec2builder' }
@@ -21,6 +25,10 @@ pipeline {
         */
         //Git Branch to build package from
         param_git_branch = "${params.GitBranch}"
+        param_checkout_timeout = "${params.CheckoutTimeout ?: DefCheckoutTimeout}"
+        param_build_timeout = "${params.BuildTimeout ?: DefBuildTimeout}"
+        param_build_backup_timeout = "${params.BuildBackupTimeout ?: DefBuildBackupTimeout}"
+        param_update_timeout = "${params.UpdateTimeout ?: DefUpdateTimeout}"
 
         /*
         Release parameters
@@ -62,60 +70,68 @@ pipeline {
     stages {
         stage('Checkout and set build vars') {
             steps {
-                cleanWs()
-                checkout scm
-                script {
-                    // import CI/CD components
-                    sshagent(["${env.param_cicd_key}"]) {
-                        print("Checkout CI/CD repo")
-                        sh """#!/bin/bash -ex
-                            export GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
-                            if [ ! -d "cicd" ]; then
-                                git clone ${env.param_cicd_repo} cicd
-                            fi
-                            cd cicd && git checkout ${env.param_cicd_branch}
-                        """
+                timeout(time: param_checkout_timeout, unit: 'MINUTES') {
+                    cleanWs()
+                    checkout scm
+                    script {
+                        // import CI/CD components
+                        sshagent(["${env.param_cicd_key}"]) {
+                            print("Checkout CI/CD repo")
+                            sh """#!/bin/bash -ex
+                                export GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
+                                if [ ! -d "cicd" ]; then
+                                    git clone ${env.param_cicd_repo} cicd
+                                fi
+                                cd cicd && git checkout ${env.param_cicd_branch}
+                            """
 
-                        print("Load common CI/CD library")
-                        cicdLibrary = load "${env.param_cicd_shared_lib}"
+                            print("Load common CI/CD library")
+                            cicdLibrary = load "${env.param_cicd_shared_lib}"
+                        }
+
+                        def verFiles = [
+                            'version.info'
+                        ]
+                        cicdLibrary.setBuildMeta(verFiles, 'cicd')
                     }
-
-                    def verFiles = [
-                        'version.info'
-                    ]
-                    cicdLibrary.setBuildMeta(verFiles, 'cicd')
                 }
             }
         }
 
         stage("Build Terraform Docker image") {
             steps {
-                script {
-                    cicdLibrary.buildDockerImage('odahu-flow-automation', ".", "containers/terraform/Dockerfile")
-                    cicdLibrary.uploadDockerImage('odahu-flow-automation', false)
+                timeout(time: param_build_timeout, unit: 'MINUTES') {
+                    script {
+                        cicdLibrary.buildDockerImage('odahu-flow-automation', ".", "containers/terraform/Dockerfile")
+                        cicdLibrary.uploadDockerImage('odahu-flow-automation', false)
+                    }
                 }
             }
         }
 
         stage("Build PostgreSQL backup Docker image") {
             steps {
-                script {
-                    cicdLibrary.buildDockerImage('odahu-flow-pg-backup', ".", "containers/pg-backup/Dockerfile")
-                    cicdLibrary.uploadDockerImage('odahu-flow-pg-backup', false)
+                timeout(time: param_build_backup_timeout, unit: 'MINUTES') {
+                    script {
+                        cicdLibrary.buildDockerImage('odahu-flow-pg-backup', ".", "containers/pg-backup/Dockerfile")
+                        cicdLibrary.uploadDockerImage('odahu-flow-pg-backup', false)
+                    }
                 }
             }
         }
 
         stage("Update branch") {
             steps {
-                script {
-                    cicdLibrary.updateReleaseBranches(
-                        env.param_stable_release.toBoolean(),
-                        env.param_push_git_tag.toBoolean(),
-                        env.param_update_version_string.toBoolean(),
-                        env.param_update_master.toBoolean(),
-                        env.param_git_deploy_key
-                    )
+                timeout(time: param_update_timeout, unit: 'MINUTES') {
+                    script {
+                        cicdLibrary.updateReleaseBranches(
+                            env.param_stable_release.toBoolean(),
+                            env.param_push_git_tag.toBoolean(),
+                            env.param_update_version_string.toBoolean(),
+                            env.param_update_master.toBoolean(),
+                            env.param_git_deploy_key
+                        )
+                    }
                 }
             }
         }
