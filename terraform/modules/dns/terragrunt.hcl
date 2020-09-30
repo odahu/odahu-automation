@@ -45,7 +45,7 @@ locals {
 
 inputs = {
   records         = local.records
-  tfstate_bucket  = local.config.tfstate_bucket
+  tfstate_bucket  = local.config.tfstate_bucket.tfstate_bucket_name
   managed_zone    = lookup(local.config.dns, "zone_name", "")
   domain          = local.cluster_fqdn
   gcp_project_id  = local.gcp_dns_project_id
