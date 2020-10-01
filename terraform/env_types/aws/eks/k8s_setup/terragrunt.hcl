@@ -23,7 +23,7 @@ locals {
 remote_state {
   backend = "s3"
   config = {
-    bucket = local.config.tfstate_bucket
+    bucket = local.config.tfstate_bucket.tfstate_bucket_name
     region = local.aws_region
     key    = "${basename(get_terragrunt_dir())}/default.tfstate"
   }
