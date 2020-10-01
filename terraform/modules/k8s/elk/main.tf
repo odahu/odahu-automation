@@ -288,6 +288,11 @@ resource "kubernetes_job" "kibana_loader" {
   }
   wait_for_completion = true
 
+  timeouts {
+    create = "2m"
+    update = "2m"
+  }
+
   depends_on = [
     helm_release.kibana[0],
     kubernetes_config_map.kibana_loader_data[0]
