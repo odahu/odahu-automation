@@ -289,8 +289,8 @@ resource "kubernetes_job" "kibana_loader" {
   wait_for_completion = true
 
   timeouts {
-    create = "2m"
-    update = "2m"
+    create = "5m"
+    update = "5m"
   }
 
   depends_on = [
