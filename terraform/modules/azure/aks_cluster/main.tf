@@ -197,8 +197,6 @@ resource "azurerm_kubernetes_cluster_node_pool" "aks" {
   )
 
   tags = var.aks_tags
-
-  depends_on = [azurerm_kubernetes_cluster.aks]
 }
 
 resource "null_resource" "bastion_kubeconfig" {
