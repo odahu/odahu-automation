@@ -1,10 +1,17 @@
-terraform_version_constraint = ">= 0.12.21"
+terraform_version_constraint = ">= 0.13.4"
 
 locals {
   profile = get_env("PROFILE", "${get_terragrunt_dir()}//profile.json")
   config  = jsondecode(file(local.profile))
 
-  cluster_name     = lookup(local.config, "cluster_name", "")
+  cloud_type    = lookup(local.config.cloud, "type", "")
+  dns_provider  = lookup(local.config.dns, "provider", "gcp")
+  cluster_name  = lookup(local.config, "cluster_name", "")
+  cluster_fqdn  = lookup(local.config.dns, "domain", "")
+  dns_zone      = replace(local.cluster_fqdn, "/^[a-zA-Z0-9-_]+\\./", "")
+  records       = lookup(local.config.dns, "records", get_env("TF_VAR_records", "[]"))
+  records_str   = join(" ", [for rec in jsondecode(local.records) : "${rec.name}:${rec.value}" if rec.value != "null"])
+
   vpc_name         = lookup(local.config, "vpc_name", "${local.cluster_name}-vpc")
   gcp_project_id   = lookup(lookup(local.config.cloud, "gcp", {}), "project_id", "")
   gcp_region       = lookup(lookup(local.config.cloud, "gcp", {}), "region", "us-east1")
@@ -23,11 +30,13 @@ locals {
 
   scripts_dir             = "${get_terragrunt_dir()}/../../../../../scripts"
   cmd_k8s_fwrules_cleanup = "${local.scripts_dir}/gcp_k8s_fw_cleanup.sh"
+  cmd_k8s_config_fetch    = "gcloud container clusters get-credentials \"${local.cluster_name}\" --region \"${local.gcp_region}\" --project \"${local.gcp_project_id}\""
+  cmd_check_dns           = "${local.scripts_dir}/check_dns.sh"
 }
 
 remote_state {
   backend = "gcs"
-  config = {
+  config  = {
     bucket      = local.config.tfstate_bucket.tfstate_bucket_name
     credentials = "${get_terragrunt_dir()}/../backend_credentials.json"
     prefix      = basename(get_terragrunt_dir())
@@ -48,6 +57,17 @@ terraform {
     ]
   }
 
+  after_hook "check_dns" {
+    commands     = ["apply"]
+    execute      = ["bash", local.cmd_check_dns, local.dns_zone, local.records_str]
+    run_on_error = false
+  }
+
+  before_hook "k8s_config_fetch" {
+    commands = ["destroy"]
+    execute  = ["bash", "-c", local.cmd_k8s_config_fetch]
+  }
+
   after_hook "k8s_ingress_fwrules_cleanup" {
     commands = ["destroy"]
     execute  = ["bash", "-c", local.cmd_k8s_fwrules_cleanup]
@@ -59,9 +79,12 @@ inputs = {
   region     = local.gcp_region
   zone       = local.gcp_zone
   vpc_name   = local.vpc_name
+  records    = local.records
 
   config_context_auth_info = local.config_context_auth_info
   config_context_cluster   = local.config_context_cluster
 
   cluster_domain_name = local.cluster_domain_name
+  managed_zone        = lookup(local.config.dns, "zone_name", "")
+  domain              = local.cluster_fqdn
 }

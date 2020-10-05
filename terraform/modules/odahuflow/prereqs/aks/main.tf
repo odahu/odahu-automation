@@ -111,7 +111,6 @@ resource "azurerm_storage_container" "odahuflow_data_bucket" {
   name                  = var.data_bucket
   storage_account_name  = azurerm_storage_account.odahuflow_data.name
   container_access_type = "private"
-  metadata              = local.storage_tags
   depends_on            = [azurerm_storage_account.odahuflow_data]
 }
 

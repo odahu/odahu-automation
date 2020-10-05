@@ -1,4 +1,9 @@
 locals {
+  pg_credentials_plain = ((length(var.pgsql.secret_namespace) != 0) && (length(var.pgsql.secret_name) != 0)) ? 0 : 1
+
+  pg_username = local.pg_credentials_plain == 1 ? var.pgsql.db_password : lookup(lookup(data.kubernetes_secret.pg[0], "data", {}), "username", "")
+  pg_password = local.pg_credentials_plain == 1 ? var.pgsql.db_user : lookup(lookup(data.kubernetes_secret.pg[0], "data", {}), "password", "")
+
   ingress_tls_enabled     = var.tls_secret_crt != "" && var.tls_secret_key != ""
   url_schema              = local.ingress_tls_enabled ? "https" : "http"
   ingress_tls_secret_name = "jupyterhub-tls"
@@ -57,6 +62,14 @@ resource "random_string" "secret" {
   number      = true
   min_numeric = 32
   special     = false
+}
+
+data "kubernetes_secret" "pg" {
+  count = local.pg_credentials_plain == 0 ? 1 : 0
+  metadata {
+    name      = var.pgsql.secret_name
+    namespace = var.pgsql.secret_namespace
+  }
 }
 
 resource "kubernetes_namespace" "jupyterhub" {
@@ -123,10 +136,10 @@ resource "helm_release" "jupyterhub" {
       docker_repo  = var.docker_repo
 
       pgsql_enabled  = var.pgsql.enabled
-      pgsql_password = var.pgsql.db_password
+      pgsql_password = local.pg_password
       pgsql_url = format(
         "postgres+psycopg2://%s@%s/%s",
-        var.pgsql.db_user,
+        local.pg_username,
         var.pgsql.db_host,
         var.pgsql.db_name
       )

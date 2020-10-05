@@ -5,6 +5,9 @@ resource "kubernetes_namespace" "knative" {
       istio-injection = "enabled"
     }
   }
+  timeouts {
+    delete = "15m"
+  }
 }
 
 resource "helm_release" "knative" {

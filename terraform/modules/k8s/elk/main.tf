@@ -211,8 +211,8 @@ resource "helm_release" "kibana" {
   ]
 
   depends_on = [
-    kubernetes_namespace.elk[0],
-    helm_release.elasticsearch[0]
+    helm_release.elasticsearch[0],
+    helm_release.logstash[0]
   ]
 }
 
@@ -227,7 +227,8 @@ resource "kubernetes_config_map" "kibana_loader_data" {
     "kibana_loader_script" = file("${path.module}/files/kibana_loader.sh")
   }
   depends_on = [
-    kubernetes_namespace.elk[0]
+    kubernetes_namespace.elk[0],
+    helm_release.kibana[0]
   ]
 }
 

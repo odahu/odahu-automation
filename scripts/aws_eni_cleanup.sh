@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+
+set -x
+
 CLUSTER_NAME=$1
 REGION=$2
 

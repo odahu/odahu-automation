@@ -1,4 +1,9 @@
 locals {
+  pg_credentials_plain = ((length(var.pgsql.secret_namespace) != 0) && (length(var.pgsql.secret_name) != 0)) ? 0 : 1
+
+  pg_username = local.pg_credentials_plain == 1 ? var.pgsql.db_password : lookup(lookup(data.kubernetes_secret.pg[0], "data", {}), "username", "")
+  pg_password = local.pg_credentials_plain == 1 ? var.pgsql.db_user : lookup(lookup(data.kubernetes_secret.pg[0], "data", {}), "password", "")
+
   training_node_pools     = flatten([for k, v in var.node_pools : [for i in try(v["taints"], []) : k if i.value == "training"]])
   gpu_training_node_pools = flatten([for k, v in var.node_pools : [for i in try(v["taints"], []) : k if i.value == "training-gpu"]])
   deployment_node_pools   = flatten([for k, v in var.node_pools : [for i in try(v["taints"], []) : k if i.value == "deployment"]])
@@ -48,7 +53,7 @@ locals {
     urlencode("${local.url_schema}://${var.cluster_domain}/dashboard")
   )
 
-  db_connection_string = var.pgsql.enabled ? "postgresql://${var.pgsql.db_user}:${var.pgsql.db_password}@${var.pgsql.db_host}/${var.pgsql.db_name}" : null
+  db_connection_string = var.pgsql.enabled ? "postgresql://${local.pg_username}:${local.pg_password}@${var.pgsql.db_host}/${var.pgsql.db_name}" : null
 
   odahuflow_config = {
     common = {
@@ -274,6 +279,14 @@ locals {
 # ODAHU flow namespaces
 ########################################################
 
+data "kubernetes_secret" "pg" {
+  count = local.pg_credentials_plain == 0 ? 1 : 0
+  metadata {
+    name      = var.pgsql.secret_name
+    namespace = var.pgsql.secret_namespace
+  }
+}
+
 resource "kubernetes_namespace" "odahuflow" {
   metadata {
     annotations = {
@@ -418,8 +431,7 @@ resource "helm_release" "odahuflow" {
     kubernetes_namespace.odahuflow,
     kubernetes_namespace.odahuflow_training,
     kubernetes_namespace.odahuflow_deployment,
-    kubernetes_namespace.odahuflow_packaging,
-    kubernetes_secret.odahuflow_vault_tls
+    kubernetes_namespace.odahuflow_packaging
   ]
 }
 

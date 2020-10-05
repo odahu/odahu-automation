@@ -5,13 +5,21 @@ resource "aws_vpc" "default" {
   enable_dns_hostnames = true
 
   tags = {
-    Name                                        = var.cluster_name,
-    "kubernetes.io/cluster/${var.cluster_name}" = "shared",
+    Name                                        = var.cluster_name
+    "kubernetes.io/cluster/${var.cluster_name}" = "shared"
   }
+  depends_on = [null_resource.aws_sg_cleanup]
+}
 
+resource "null_resource" "aws_sg_cleanup" {
+  triggers = {
+    cluster_name = var.cluster_name
+    aws_region = var.aws_region
+  }
   provisioner "local-exec" {
-    when    = destroy
-    command = "bash ../../../../../scripts/aws_sg_cleanup.sh \"${var.cluster_name}\" \"${var.aws_region}\""
+    when       = destroy
+    on_failure = continue
+    command    = "bash ../../../../../scripts/aws_sg_cleanup.sh \"${self.triggers.cluster_name}\" \"${self.triggers.aws_region}\""
   }
 }
 
@@ -64,6 +72,7 @@ data "aws_eip" "nat" {
     name   = "tag:Name"
     values = [var.cluster_name]
   }
+  depends_on = [aws_vpc.default]
 }
 
 resource "aws_internet_gateway" "default" {
@@ -71,6 +80,7 @@ resource "aws_internet_gateway" "default" {
   tags = {
     Name = var.cluster_name
   }
+  depends_on = [aws_vpc.default]
 }
 
 resource "aws_route_table" "default" {
@@ -94,5 +104,5 @@ resource "aws_route_table_association" "default" {
 resource "aws_nat_gateway" "default" {
   subnet_id     = aws_subnet.nat.id
   allocation_id = data.aws_eip.nat.id
-  depends_on    = [aws_internet_gateway.default]
+  depends_on    = [aws_internet_gateway.default, aws_subnet.nat]
 }

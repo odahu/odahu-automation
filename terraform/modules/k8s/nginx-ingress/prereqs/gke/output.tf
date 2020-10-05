@@ -6,3 +6,7 @@ output "helm_values" {
     "controller.service.loadBalancerSourceRanges" = "{${join(",", formatlist("%s", var.allowed_ips))}}"
   }
 }
+
+output "load_balancer_ip" {
+  value = google_compute_address.ingress_lb_address.address
+}
