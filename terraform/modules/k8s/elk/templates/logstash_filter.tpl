@@ -1,5 +1,5 @@
 filter {
-  if [kubernetes][namespace_name] in [ "odahu-flow-training", "odahu-flow-packaging", "odahu-flow-deployment"] {
+  if [kubernetes][namespace_name] in [ "odahu-flow-training", "odahu-flow-packaging", "odahu-flow-deployment" ] {
     mutate {
       add_field => { "[@metadata][target_index]" => "odahu-flow" }
     }
