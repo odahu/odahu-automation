@@ -199,6 +199,13 @@ locals {
     migrate = {
       enabled = var.pgsql.enabled
     }
+    serviceCatalog = {
+      auth = {
+        oauthOidcTokenEndpoint = var.oauth_oidc_token_endpoint
+        clientId               = var.service_catalog_sa.client_id
+        clientSecret           = var.service_catalog_sa.client_secret
+      }
+    }
   }
   api_vault_volume = {
     name       = "vault-tls"

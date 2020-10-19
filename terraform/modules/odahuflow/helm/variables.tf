@@ -200,6 +200,13 @@ variable "operator_sa" {
   })
 }
 
+variable "service_catalog_sa" {
+  type = object({
+    client_id     = string
+    client_secret = string
+  })
+}
+
 variable "oauth_oidc_issuer_url" {
   type        = string
   description = "OpenID Provider URL"

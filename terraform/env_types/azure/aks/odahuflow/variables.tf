@@ -215,6 +215,10 @@ variable "service_accounts" {
       client_id     = string
       client_secret = string
     })
+    service_catalog = object({
+      client_id     = string
+      client_secret = string
+    })
   })
   description = "Service accounts credentials"
 }
