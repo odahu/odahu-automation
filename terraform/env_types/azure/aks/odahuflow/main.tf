@@ -198,6 +198,7 @@ module "odahuflow_helm" {
   odahuflow_training_timeout  = var.odahuflow_training_timeout
   resource_uploader_sa        = var.service_accounts.resource_uploader
   operator_sa                 = var.service_accounts.operator
+  service_catalog_sa          = var.service_accounts.service_catalog
   oauth_oidc_token_endpoint   = var.oauth_oidc_token_endpoint
   oauth_oidc_signout_endpoint = var.oauth_oidc_signout_endpoint
   oauth_oidc_issuer_url       = var.oauth_oidc_issuer_url
