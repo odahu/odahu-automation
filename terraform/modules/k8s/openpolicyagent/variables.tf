@@ -80,6 +80,15 @@ variable "authz_uri" {
   description = "External authorization service uri"
 }
 
+variable "authz_certs" {
+  description = "Certs from webhook server that injects opa sidecars"
+  type = object({
+    cert = string
+    key  = string
+    ca   = string
+  })
+}
+
 variable "opa_policies" {
   type        = map(string)
   default     = {}

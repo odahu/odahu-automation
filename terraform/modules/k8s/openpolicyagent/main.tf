@@ -31,6 +31,9 @@ resource "helm_release" "opa" {
       oauth_oidc_port       = var.oauth_oidc_port
       oauth_local_jwks      = base64decode(var.oauth_local_jwks)
       opa_policies          = yamlencode({ policies = var.opa_policies })
+      ca                    = var.authz_certs.ca
+      key                   = var.authz_certs.key
+      cert                  = var.authz_certs.cert
     })
   ]
 }

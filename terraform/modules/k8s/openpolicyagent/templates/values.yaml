@@ -20,5 +20,11 @@ authz:
 
 resources: {}
 
+tls:
+  ca: ${ca}
+  key: ${key}
+  cert: ${cert}
+
+protectedNamespaces: ["odahu-flow", "odahu-flow-deployment"]
 
 

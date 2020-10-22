@@ -194,6 +194,15 @@ variable "opa_policies" {
   description = "Opa .rego policies"
 }
 
+variable "authz_certs" {
+  description = "Certs from webhook server that injects opa sidecars"
+  type = object({
+    cert = string
+    key  = string
+    ca   = string
+  })
+}
+
 ########################
 # Istio
 ########################

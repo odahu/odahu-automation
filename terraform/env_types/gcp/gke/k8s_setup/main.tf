@@ -85,6 +85,7 @@ module "openpolicyagent" {
   authz_dry_run         = var.authz_dry_run
   authz_uri             = var.authz_uri
   opa_policies          = var.opa_policies
+  authz_certs           = var.authz_certs
 }
 
 module "gke-saa" {
