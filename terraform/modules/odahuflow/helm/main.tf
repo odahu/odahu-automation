@@ -269,7 +269,7 @@ locals {
     }
   }
   opa = {
-    namespace     = "odahu-flow-opa"
+    namespace = "odahu-flow-opa"
   }
 }
 
@@ -546,11 +546,11 @@ resource "helm_release" "opa" {
   ]
   values = [
     templatefile("${path.module}/templates/opa.yaml", {
-      authz_dry_run         = var.opa.dry_run
-      authn_enabled    = var.opa.authn.enabled
-      ca                    = var.opa.webhook_certs.ca
-      key                   = var.opa.webhook_certs.key
-      cert                  = var.opa.webhook_certs.cert
+      authz_dry_run = var.opa.dry_run
+      authn_enabled = var.opa.authn.enabled
+      ca            = var.opa.webhook_certs.ca
+      key           = var.opa.webhook_certs.key
+      cert          = var.opa.webhook_certs.cert
 
       oauth_oidc_jwks_url   = var.opa.authn.jwks_remote.jwks_url
       oauth_oidc_issuer_url = var.opa.authn.jwks_remote.issuer_url
