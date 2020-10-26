@@ -1,0 +1,26 @@
+# Default values for odahu-flow-authorization.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+opa:
+  config:
+    dryRun: ${authz_dry_run}
+
+authn:
+  enabled: ${authn_enabled}
+  oidcIssuer: ${oauth_oidc_issuer_url}
+  oidcJwks: ${oauth_oidc_jwks_url}
+  oidcHost: ${oauth_oidc_host}
+  oidcPort: ${oauth_oidc_port}
+  localJwks: '${oauth_local_jwks}'
+
+resources: {}
+
+tls:
+  ca: ${ca}
+  key: ${key}
+  cert: ${cert}
+
+protectedNamespaces: ["odahu-flow", "odahu-flow-deployment"]
+
+
