@@ -296,16 +296,14 @@ variable "opa" {
   description = "Configuration of OpenPolicyAgent chart"
 
   type = object({
-    chart_version = string
     authn = object({
       enabled = bool
       # Either local or remote JWKS can be used. localJwks has a priority (is used if not it is not empty)
       jwks_local = string
       jwks_remote = object({
-        jwks_url   = string
-        issuer_url = string
-        host       = number
-        port       = string
+        jwks_url = string
+        host     = string
+        port     = number
       })
     })
     dry_run = bool
@@ -321,11 +319,15 @@ variable "opa" {
       enabled    = true
       jwks_local = ""
       jwks_remote = {
-        jwks_url   = ""
-        issuer_url = ""
-        host       = ""
-        port       = 443
+        jwks_url = ""
+        host     = ""
+        port     = 443
       }
+    }
+    webhook_certs = {
+      ca: "",
+      cert: "",
+      key: ""
     }
   }
 }

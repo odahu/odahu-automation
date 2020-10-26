@@ -536,7 +536,7 @@ resource "helm_release" "odahu_ui" {
 resource "helm_release" "opa" {
   name       = "odahu-flow-opa"
   chart      = "odahu-flow-opa"
-  version    = var.opa.chart_version
+  version    = var.opa_chart_version
   namespace  = local.opa.namespace
   repository = var.helm_repo
   timeout    = var.helm_timeout
@@ -553,7 +553,7 @@ resource "helm_release" "opa" {
       cert          = var.opa.webhook_certs.cert
 
       oauth_oidc_jwks_url   = var.opa.authn.jwks_remote.jwks_url
-      oauth_oidc_issuer_url = var.opa.authn.jwks_remote.issuer_url
+      oauth_oidc_issuer_url = var.oauth_oidc_issuer_url
       oauth_oidc_host       = var.opa.authn.jwks_remote.host
       oauth_oidc_port       = var.opa.authn.jwks_remote.port
       oauth_local_jwks      = base64decode(var.opa.authn.jwks_local)

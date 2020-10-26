@@ -202,6 +202,7 @@ module "odahuflow_helm" {
   oauth_oidc_token_endpoint   = var.oauth_oidc_token_endpoint
   oauth_oidc_signout_endpoint = var.oauth_oidc_signout_endpoint
   oauth_oidc_issuer_url       = var.oauth_oidc_issuer_url
+  opa_chart_version           = var.odahu_infra_version
   opa                         = var.opa
   oauth_mesh_enabled          = var.opa.authn.enabled
   vault_enabled               = var.vault.enabled
