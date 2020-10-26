@@ -286,3 +286,46 @@ variable "backup_settings" {
   }
   description = "Configuration for PostgreSQL backups"
 }
+
+########################
+# OpenPolicyAgent
+########################
+
+variable "opa" {
+
+  description = "Configuration of OpenPolicyAgent chart"
+
+  type = object({
+    chart_version = string
+    authn = object({
+      enabled = bool
+      # Either local or remote JWKS can be used. localJwks has a priority (is used if not it is not empty)
+      jwks_local = string
+      jwks_remote = object({
+        jwks_url   = string
+        issuer_url = string
+        host       = number
+        port       = string
+      })
+    })
+    dry_run = bool
+    webhook_certs = object({
+      ca   = string
+      cert = string
+      key  = string
+    })
+  })
+  default = {
+    dry_run = false
+    authn = {
+      enabled    = true
+      jwks_local = ""
+      jwks_remote = {
+        jwks_url   = ""
+        issuer_url = ""
+        host       = ""
+        port       = 443
+      }
+    }
+  }
+}
