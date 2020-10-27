@@ -205,11 +205,6 @@ variable "service_accounts" {
   description = "Service accounts credentials"
 }
 
-variable "oauth_mesh_enabled" {
-  type        = bool
-  description = "OAuth2 inside service mesh via Envoy filter"
-}
-
 variable "vault" {
   default = {
     enabled = false
