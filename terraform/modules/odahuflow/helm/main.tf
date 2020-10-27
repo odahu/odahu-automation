@@ -432,7 +432,8 @@ resource "helm_release" "odahuflow" {
     kubernetes_namespace.odahuflow_training,
     kubernetes_namespace.odahuflow_deployment,
     kubernetes_namespace.odahuflow_packaging,
-    kubernetes_secret.odahuflow_vault_tls
+    kubernetes_secret.odahuflow_vault_tls,
+    helm_release.opa
   ]
 }
 
@@ -542,7 +543,6 @@ resource "helm_release" "opa" {
   timeout    = var.helm_timeout
   depends_on = [
     kubernetes_namespace.opa,
-    helm_release.odahuflow,
   ]
   values = [
     templatefile("${path.module}/templates/opa.yaml", {
