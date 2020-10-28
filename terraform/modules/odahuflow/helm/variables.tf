@@ -254,3 +254,53 @@ variable "pgsql" {
   }
   description = "PostgreSQL settings for ODAHU flow services"
 }
+
+########################
+# OpenPolicyAgent
+########################
+
+variable "opa_chart_version" {
+  type        = string
+  description = "Version of opa helm chart"
+}
+
+variable "opa" {
+
+  description = "Configuration of OpenPolicyAgent chart"
+
+  type = object({
+    authn = object({
+      enabled = bool
+      # Either local or remote JWKS can be used. localJwks has a priority (is used if not it is not empty)
+      jwks_local = string
+      jwks_remote = object({
+        jwks_url = string
+        host     = string
+        port     = number
+      })
+    })
+    dry_run = bool
+    webhook_certs = object({
+      ca   = string
+      cert = string
+      key  = string
+    })
+  })
+  default = {
+    dry_run = false
+    authn = {
+      enabled    = true
+      jwks_local = ""
+      jwks_remote = {
+        jwks_url = ""
+        host     = ""
+        port     = 443
+      }
+    }
+    webhook_certs = {
+      ca: "",
+      cert: "",
+      key: ""
+    }
+  }
+}
