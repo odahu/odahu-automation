@@ -117,63 +117,6 @@ variable "oauth_oidc_scope" {
   description = "OAuth2 scope"
 }
 
-variable "oauth_mesh_enabled" {
-  type        = bool
-  default     = true
-  description = "OAuth2 inside service mesh via Envoy filter"
-}
-
-variable "oauth_oidc_jwks_url" {
-  type        = string
-  default     = ""
-  description = "Remote jwks url"
-}
-
-variable "oauth_oidc_host" {
-  type        = string
-  default     = ""
-  description = "OIDC FQDN name"
-}
-
-variable "oauth_oidc_port" {
-  type        = number
-  default     = 443
-  description = "OIDC service port"
-}
-
-variable "oauth_local_jwks" {
-  type        = string
-  default     = ""
-  description = "local jwks"
-}
-
-##########################
-#  Authorization
-##########################
-variable "authorization_enabled" {
-  type        = bool
-  default     = true
-  description = "Whether authorization module should be deployed"
-}
-
-variable "authz_dry_run" {
-  type        = bool
-  default     = true
-  description = "Dry run for forcing authorization policies"
-}
-
-variable "authz_uri" {
-  type        = string
-  default     = ""
-  description = "External authorization service uri"
-}
-
-variable "opa_policies" {
-  type        = map(string)
-  default     = {}
-  description = "Opa .rego policies"
-}
-
 ########################
 # Istio
 ########################
@@ -434,4 +377,49 @@ variable "backup_settings" {
     retention   = ""
   }
   description = "Configuration for PostgreSQL backups"
+}
+
+########################
+# OpenPolicyAgent
+########################
+
+variable "opa" {
+
+  description = "Configuration of OpenPolicyAgent chart"
+
+  type = object({
+    authn = object({
+      enabled = bool
+      # Either local or remote JWKS can be used. localJwks has a priority (is used if not it is not empty)
+      jwks_local = string
+      jwks_remote = object({
+        jwks_url = string
+        host     = string
+        port     = number
+      })
+    })
+    dry_run = bool
+    webhook_certs = object({
+      ca   = string
+      cert = string
+      key  = string
+    })
+  })
+  default = {
+    dry_run = false
+    authn = {
+      enabled    = true
+      jwks_local = ""
+      jwks_remote = {
+        jwks_url = ""
+        host     = ""
+        port     = 443
+      }
+    }
+    webhook_certs = {
+      ca: "",
+      cert: "",
+      key: ""
+    }
+  }
 }

@@ -273,6 +273,9 @@ locals {
       }
     }
   }
+  opa = {
+    namespace = "odahu-flow-opa"
+  }
 }
 
 ########################################################
@@ -337,6 +340,16 @@ resource "kubernetes_namespace" "odahuflow_deployment" {
     name = var.odahuflow_deployment_namespace
   }
 }
+
+resource "kubernetes_namespace" "opa" {
+  metadata {
+    annotations = {
+      name = local.opa.namespace
+    }
+    name = local.opa.namespace
+  }
+}
+
 
 ########################################################
 # ODAHU flow secrets
@@ -431,7 +444,9 @@ resource "helm_release" "odahuflow" {
     kubernetes_namespace.odahuflow,
     kubernetes_namespace.odahuflow_training,
     kubernetes_namespace.odahuflow_deployment,
-    kubernetes_namespace.odahuflow_packaging
+    kubernetes_namespace.odahuflow_packaging,
+    kubernetes_secret.odahuflow_vault_tls,
+    helm_release.opa
   ]
 }
 
@@ -524,5 +539,37 @@ resource "helm_release" "odahu_ui" {
 
   depends_on = [
     helm_release.odahuflow
+  ]
+}
+
+
+########################################################
+# Install OpenPolicyAgent
+########################################################
+
+resource "helm_release" "opa" {
+  name       = "odahu-flow-opa"
+  chart      = "odahu-flow-opa"
+  version    = var.opa_chart_version
+  namespace  = local.opa.namespace
+  repository = var.helm_repo
+  timeout    = var.helm_timeout
+  depends_on = [
+    kubernetes_namespace.opa,
+  ]
+  values = [
+    templatefile("${path.module}/templates/opa.yaml", {
+      authz_dry_run = var.opa.dry_run
+      authn_enabled = var.opa.authn.enabled
+      ca            = var.opa.webhook_certs.ca
+      key           = var.opa.webhook_certs.key
+      cert          = var.opa.webhook_certs.cert
+
+      oauth_oidc_jwks_url   = var.opa.authn.jwks_remote.jwks_url
+      oauth_oidc_issuer_url = var.oauth_oidc_issuer_url
+      oauth_oidc_host       = var.opa.authn.jwks_remote.host
+      oauth_oidc_port       = var.opa.authn.jwks_remote.port
+      oauth_local_jwks      = base64decode(var.opa.authn.jwks_local)
+    })
   ]
 }

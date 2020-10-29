@@ -74,24 +74,6 @@ module "knative" {
   depends_on          = [module.istio]
 }
 
-module "openpolicyagent" {
-  source                = "../../../../modules/k8s/openpolicyagent"
-  helm_repo             = var.helm_repo
-  odahu_infra_version   = var.odahu_infra_version
-  module_dependency     = module.istio.helm_chart
-  oauth_mesh_enabled    = var.oauth_mesh_enabled
-  oauth_oidc_jwks_url   = var.oauth_oidc_jwks_url
-  oauth_oidc_host       = var.oauth_oidc_host
-  oauth_oidc_port       = var.oauth_oidc_port
-  oauth_local_jwks      = var.oauth_local_jwks
-  oauth_oidc_issuer_url = var.oauth_oidc_issuer_url
-  authorization_enabled = var.authorization_enabled
-  authz_dry_run         = var.authz_dry_run
-  authz_uri             = var.authz_uri
-  opa_policies          = var.opa_policies
-  depends_on            = [module.istio]
-}
-
 module "tekton" {
   source              = "../../../../modules/k8s/tekton"
   helm_repo           = var.helm_repo
@@ -139,7 +121,6 @@ module "postgresql" {
     module.auth,
     module.monitoring,
     module.knative,
-    module.openpolicyagent,
     module.tekton,
     module.nfs
   ]
@@ -158,7 +139,6 @@ module "pg_backup_prereqs" {
     module.auth,
     module.monitoring,
     module.knative,
-    module.openpolicyagent,
     module.tekton,
     module.nfs
   ]
@@ -183,7 +163,6 @@ module "pg_backup" {
     module.auth,
     module.monitoring,
     module.knative,
-    module.openpolicyagent,
     module.tekton,
     module.nfs,
     module.pg_backup_prereqs, module.postgresql
@@ -209,7 +188,6 @@ module "odahuflow_prereqs" {
     module.auth,
     module.monitoring,
     module.knative,
-    module.openpolicyagent,
     module.tekton,
     module.nfs
   ]
@@ -232,7 +210,6 @@ module "airflow_prereqs" {
     module.auth,
     module.monitoring,
     module.knative,
-    module.openpolicyagent,
     module.tekton,
     module.nfs,
     module.odahuflow_prereqs,
@@ -275,7 +252,6 @@ module "airflow" {
     module.auth,
     module.monitoring,
     module.knative,
-    module.openpolicyagent,
     module.tekton,
     module.nfs,
     module.postgresql,
@@ -297,7 +273,6 @@ module "storage-syncer" {
     module.auth,
     module.monitoring,
     module.knative,
-    module.openpolicyagent,
     module.tekton,
     module.nfs,
     module.airflow
@@ -320,7 +295,6 @@ module "fluentd" {
     module.auth,
     module.monitoring,
     module.knative,
-    module.openpolicyagent,
     module.tekton,
     module.nfs,
     module.odahuflow_prereqs
@@ -344,7 +318,6 @@ module "fluentd-daemonset" {
     module.auth,
     module.monitoring,
     module.knative,
-    module.openpolicyagent,
     module.tekton,
     module.nfs,
     module.odahuflow_prereqs
@@ -410,7 +383,6 @@ module "vault" {
     module.auth,
     module.monitoring,
     module.knative,
-    module.openpolicyagent,
     module.tekton,
     module.nfs,
     module.postgresql
@@ -435,7 +407,6 @@ module "elasticsearch" {
     module.auth,
     module.monitoring,
     module.knative,
-    module.openpolicyagent,
     module.tekton,
     module.nfs,
     module.odahuflow_prereqs,
@@ -481,7 +452,9 @@ module "odahuflow_helm" {
   oauth_oidc_token_endpoint   = var.oauth_oidc_token_endpoint
   oauth_oidc_signout_endpoint = var.oauth_oidc_signout_endpoint
   oauth_oidc_issuer_url       = var.oauth_oidc_issuer_url
-  oauth_mesh_enabled          = var.oauth_mesh_enabled
+  opa_chart_version           = var.odahu_infra_version
+  opa                         = var.opa
+  oauth_mesh_enabled          = var.opa.authn.enabled
   vault_enabled               = var.vault.enabled
   vault_namespace             = module.vault.namespace
   vault_tls_secret_name       = module.vault.tls_secret
@@ -502,7 +475,6 @@ module "odahuflow_helm" {
     module.auth,
     module.monitoring,
     module.knative,
-    module.openpolicyagent,
     module.tekton,
     module.nfs,
     module.postgresql,

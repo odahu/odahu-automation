@@ -72,24 +72,6 @@ module "knative" {
   depends_on          = [module.istio]
 }
 
-module "openpolicyagent" {
-  source                = "../../../../modules/k8s/openpolicyagent"
-  helm_repo             = var.helm_repo
-  odahu_infra_version   = var.odahu_infra_version
-  module_dependency     = module.istio.helm_chart
-  oauth_mesh_enabled    = var.oauth_mesh_enabled
-  oauth_oidc_jwks_url   = var.oauth_oidc_jwks_url
-  oauth_oidc_host       = var.oauth_oidc_host
-  oauth_oidc_port       = var.oauth_oidc_port
-  oauth_local_jwks      = var.oauth_local_jwks
-  oauth_oidc_issuer_url = var.oauth_oidc_issuer_url
-  authorization_enabled = var.authorization_enabled
-  authz_dry_run         = var.authz_dry_run
-  authz_uri             = var.authz_uri
-  opa_policies          = var.opa_policies
-  depends_on            = [module.istio]
-}
-
 module "gke-saa" {
   source              = "../../../../modules/k8s/gke-saa"
   cluster_type        = var.cluster_type
@@ -144,7 +126,6 @@ module "postgresql" {
     module.auth,
     module.gpu_drivers,
     module.knative,
-    module.openpolicyagent,
     module.gke-saa,
     module.tekton,
     module.nfs
@@ -165,7 +146,6 @@ module "pg_backup_prereqs" {
     module.auth,
     module.gpu_drivers,
     module.knative,
-    module.openpolicyagent,
     module.gke-saa,
     module.tekton,
     module.nfs
@@ -193,7 +173,6 @@ module "pg_backup" {
     module.auth,
     module.gpu_drivers,
     module.knative,
-    module.openpolicyagent,
     module.gke-saa,
     module.tekton,
     module.nfs
@@ -215,7 +194,6 @@ module "odahuflow_prereqs" {
     module.auth,
     module.gpu_drivers,
     module.knative,
-    module.openpolicyagent,
     module.gke-saa,
     module.tekton,
     module.nfs
@@ -238,7 +216,6 @@ module "airflow_prereqs" {
     module.auth,
     module.gpu_drivers,
     module.knative,
-    module.openpolicyagent,
     module.gke-saa,
     module.tekton,
     module.nfs,
@@ -259,7 +236,6 @@ module "airflow_test_data" {
     module.auth,
     module.gpu_drivers,
     module.knative,
-    module.openpolicyagent,
     module.gke-saa,
     module.tekton,
     module.nfs,
@@ -300,7 +276,6 @@ module "airflow" {
     module.auth,
     module.gpu_drivers,
     module.knative,
-    module.openpolicyagent,
     module.gke-saa,
     module.tekton,
     module.nfs,
@@ -323,7 +298,6 @@ module "storage-syncer" {
     module.auth,
     module.gpu_drivers,
     module.knative,
-    module.openpolicyagent,
     module.gke-saa,
     module.tekton,
     module.nfs,
@@ -348,7 +322,6 @@ module "fluentd" {
     module.auth,
     module.gpu_drivers,
     module.knative,
-    module.openpolicyagent,
     module.gke-saa,
     module.tekton,
     module.nfs,
@@ -373,7 +346,6 @@ module "fluentd-daemonset" {
     module.auth,
     module.gpu_drivers,
     module.knative,
-    module.openpolicyagent,
     module.gke-saa,
     module.tekton,
     module.nfs,
@@ -414,7 +386,6 @@ module "jupyterhub" {
     module.auth,
     module.gpu_drivers,
     module.knative,
-    module.openpolicyagent,
     module.gke-saa,
     module.tekton,
     module.nfs,
@@ -440,7 +411,6 @@ module "vault" {
     module.auth,
     module.gpu_drivers,
     module.knative,
-    module.openpolicyagent,
     module.gke-saa,
     module.tekton,
     module.nfs,
@@ -468,7 +438,6 @@ module "elasticsearch" {
     module.auth,
     module.gpu_drivers,
     module.knative,
-    module.openpolicyagent,
     module.gke-saa,
     module.tekton,
     module.nfs,
@@ -513,7 +482,9 @@ module "odahuflow_helm" {
   oauth_oidc_token_endpoint   = var.oauth_oidc_token_endpoint
   oauth_oidc_signout_endpoint = var.oauth_oidc_signout_endpoint
   oauth_oidc_issuer_url       = var.oauth_oidc_issuer_url
-  oauth_mesh_enabled          = var.oauth_mesh_enabled
+  opa_chart_version           = var.odahu_infra_version
+  opa                         = var.opa
+  oauth_mesh_enabled          = var.opa.authn.enabled
   vault_enabled               = var.vault.enabled
   vault_namespace             = module.vault.namespace
   vault_tls_secret_name       = module.vault.tls_secret
@@ -539,7 +510,6 @@ module "odahuflow_helm" {
     module.auth,
     module.gpu_drivers,
     module.knative,
-    module.openpolicyagent,
     module.gke-saa,
     module.tekton,
     module.nfs
