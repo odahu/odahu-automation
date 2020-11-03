@@ -10,7 +10,14 @@ variable "cloud_settings" {
   })
   default = {
     type = "gcp"
-    settings = {}
+    settings = {
+      credentials  = ""
+      account_name = ""
+      sas_token    = ""
+      project_id   = ""
+      key_id       = ""
+      key_secret   = ""
+    }
   }
 }
 
@@ -107,7 +114,7 @@ variable "tls_secret_key" {
 
 variable "helm_chart_version" {
   type        = string
-  default     = "0.8.2"
+  default     = "0.9.0"
   description = "JupyterHub chart version"
 }
 
