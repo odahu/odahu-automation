@@ -57,15 +57,11 @@ prePuller:
 singleuser:
   startTimeout: 900
   extraEnv:
-    - name: API_AUTH_ENABLED
-      value: "false"
-    - name: DEFAULT_API_ENDPOINT
-      value: "http://odahu-flow-api.odahu-flow.svc.cluster.local:80"
+    API_AUTH_ENABLED: "false"
+    DEFAULT_API_ENDPOINT: "http://odahu-flow-api.odahu-flow.svc.cluster.local:80"
 %{ if cloud_type == "gcp" }
-    - name: GOOGLE_APPLICATION_CREDENTIALS
-      value: /tmp/sa/jupyterhub-sa.json
-    - name: CLOUDSDK_CORE_PROJECT
-      value: ${project_id}
+    GOOGLE_APPLICATION_CREDENTIALS: /tmp/sa/jupyterhub-sa.json
+    CLOUDSDK_CORE_PROJECT: ${project_id}
 %{ endif ~}
 %{ if cloud_type == "aws" }
     - name: AWS_ACCESS_KEY_ID
