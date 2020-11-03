@@ -179,3 +179,80 @@ resource "aws_iam_user_policy_attachment" "collector" {
 resource "aws_iam_access_key" "collector" {
   user = aws_iam_user.collector.name
 }
+
+########################################################
+# AWS IAM User for Jupyterhub
+########################################################
+
+data "aws_iam_policy_document" "jupyterhub" {
+  statement {
+    actions   = ["s3:GetObject", "s3:GetObjectVersion", "s3:ListBucket", "s3:GetBucketLocation", "s3:GetObjectAcl", "s3:PutObjectAcl"]
+    effect    = "Allow"
+    resources = ["${aws_s3_bucket.data.arn}*"]
+  }
+
+  statement {
+    actions   = ["ecr:GetDownloadUrlForLayer", "ecr:BatchGetImage"]
+    effect    = "Allow"
+    resources = ["*"]
+  }
+}
+
+resource "aws_iam_role" "jupyterhub" {
+  name               = "${var.cluster_name}-jupyterhub"
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": "sts:AssumeRole",
+      "Principal": {
+        "Service": "ec2.amazonaws.com"
+      },
+      "Effect": "Allow",
+      "Sid": ""
+    },
+    {
+      "Action": "sts:AssumeRole",
+      "Principal": {
+        "AWS": "${data.aws_iam_role.node.arn}"
+      },
+      "Effect": "Allow",
+      "Sid": ""
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_policy" "jupyterhub" {
+  name   = "${var.cluster_name}-jupyterhub"
+  policy = data.aws_iam_policy_document.jupyterhub.json
+}
+
+resource "aws_iam_policy_attachment" "jupyterhub" {
+  name       = "${var.cluster_name}-jupyterhub"
+  roles      = [aws_iam_role.jupyterhub.name]
+  policy_arn = aws_iam_policy.jupyterhub.arn
+}
+
+
+resource "aws_iam_user" "jupyterhub" {
+  name = "${var.cluster_name}-jupyterhub"
+  path = "/odahuflow/"
+
+  tags = {
+    Name        = "${var.cluster_name}-jupyterhub"
+    ClusterName = var.cluster_name
+  }
+}
+
+resource "aws_iam_user_policy" "jupyterhub" {
+  name   = "jupyterhub"
+  user   = aws_iam_user.jupyterhub.name
+  policy = data.aws_iam_policy_document.jupyterhub.json
+}
+
+resource "aws_iam_access_key" "jupyterhub" {
+  user = aws_iam_user.jupyterhub.name
+}

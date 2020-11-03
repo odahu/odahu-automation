@@ -87,3 +87,14 @@ output "logstash_annotations" {
     }
   }
 }
+
+output "jupyterhub_cloud_settings" {
+  value = {
+    type = "aws",
+    settings = {
+      key_id     = aws_iam_access_key.jupyterhub.id
+      key_secret = aws_iam_access_key.jupyterhub.secret
+    }
+  }
+}
+

@@ -59,7 +59,52 @@ singleuser:
   extraEnv:
     API_AUTH_ENABLED: "false"
     DEFAULT_API_ENDPOINT: "http://odahu-flow-api.odahu-flow.svc.cluster.local:80"
+%{ if cloud_type == "gcp" }
+    GOOGLE_APPLICATION_CREDENTIALS: /tmp/sa/jupyterhub-sa.json
+    CLOUDSDK_CORE_PROJECT: ${project_id}
+%{ endif ~}
+%{ if cloud_type == "aws" }
+    - name: AWS_ACCESS_KEY_ID
+      valueFrom:
+        secretKeyRef:
+          name: jupyterhub-access-key
+          key: id
+    - name: AWS_SECRET_ACCESS_KEY
+      valueFrom:
+        secretKeyRef:
+          name: jupyterhub-access-key
+          key: key
+%{ endif ~}
+%{ if cloud_type == "azure" }
+    - name: AZURE_STORAGE_ACCOUNT
+      valueFrom:
+        secretKeyRef:
+          name: jupyterhub-sas
+          key: account_name
+    - name: AZURE_STORAGE_SAS_TOKEN
+      valueFrom:
+        secretKeyRef:
+          name: jupyterhub-sas
+          key: sas_token
+%{ endif ~}
   defaultUrl: "/lab"
+%{ if cloud_type == "gcp" }
+  cmd: gcloud auth activate-service-account --key-file=/tmp/sa/jupyterhub-sa.json && jupyterhub-singleuser
+  storage:
+    extraVolumes:
+      - name: sa
+        secret:
+          secretName: jupyterhub-sa
+          items:
+          - key: key
+            path: jupyterhub-sa.json
+    extraVolumeMounts:
+      - name: sa
+        mountPath: "/tmp/sa"
+        readOnly: true
+%{ else ~}
+  cmd: jupyterhub-singleuser
+%{ end }
   image:
     name: ${docker_repo}/base-notebook
     tag: ${docker_tag}

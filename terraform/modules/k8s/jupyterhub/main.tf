@@ -108,6 +108,50 @@ resource "kubernetes_secret" "jupyterhub_tls" {
   depends_on = [kubernetes_namespace.jupyterhub[0]]
 }
 
+resource "kubernetes_secret" "jupyterhub_sa" {
+  count = ((var.cloud_settings.type == "gcp") && (length(try(var.cloud_settings.settings.credentials, "")) != 0)) ? 1 : 0
+  metadata {
+    name      = "jupyterhub-sa"
+    namespace = var.jupyterhub_namespace
+  }
+  data = {
+    "key" = try(var.cloud_settings.settings.credentials, "")
+  }
+  type = "kubernetes.io/opaque"
+
+  depends_on = [kubernetes_namespace.jupyterhub[0]]
+}
+
+resource "kubernetes_secret" "jupyterhub_sas" {
+  count = ((var.cloud_settings.type == "azure") && (length(try(var.cloud_settings.settings.account_name, "")) != 0)) ? 1 : 0
+  metadata {
+    name      = "jupyterhub-sas"
+    namespace = var.jupyterhub_namespace
+  }
+  data = {
+    "account_name" = try(var.cloud_settings.settings.account_name, "")
+    "sas_token"    = try(var.cloud_settings.settings.sas_token, "")
+  }
+  type = "kubernetes.io/opaque"
+
+  depends_on = [kubernetes_namespace.jupyterhub[0]]
+}
+
+resource "kubernetes_secret" "jupyterhub_key" {
+  count = ((var.cloud_settings.type == "aws") && (length(try(var.cloud_settings.settings.key_id, "")) != 0)) ? 1 : 0
+  metadata {
+    name      = "jupyterhub-access-key"
+    namespace = var.jupyterhub_namespace
+  }
+  data = {
+    "id"  = try(var.cloud_settings.settings.key_id, "")
+    "key" = try(var.cloud_settings.settings.key_secret, "")
+  }
+  type = "kubernetes.io/opaque"
+
+  depends_on = [kubernetes_namespace.jupyterhub[0]]
+}
+
 resource "helm_release" "jupyterhub" {
   count      = var.jupyterhub_enabled ? 1 : 0
   name       = "jupyterhub"
@@ -123,6 +167,9 @@ resource "helm_release" "jupyterhub" {
       ingress_tls_secret_name = local.ingress_tls_secret_name
       jupyterhub_secret_token = var.jupyterhub_secret_token == "" ? random_string.secret[0].result : var.jupyterhub_secret_token
       debug_enabled           = local.jupyterhub_debug
+
+      cloud_type = var.cloud_settings.type
+      project_id = try(var.cloud_settings.settings.project_id, "")
 
       oauth_client_id       = var.oauth_client_id
       oauth_client_secret   = var.oauth_client_secret
@@ -146,5 +193,10 @@ resource "helm_release" "jupyterhub" {
     })
   ]
 
-  depends_on = [kubernetes_secret.jupyterhub_tls[0]]
+  depends_on = [
+    kubernetes_secret.jupyterhub_tls[0],
+    kubernetes_secret.jupyterhub_sa[0],
+    kubernetes_secret.jupyterhub_key[0],
+    kubernetes_secret.jupyterhub_sas[0]
+  ]
 }

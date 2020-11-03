@@ -3,6 +3,17 @@ variable "docker_repo" {
   description = "ODAHU flow Docker repo url"
 }
 
+variable "cloud_settings" {
+  type = object({
+    type = string
+    settings = any
+  })
+  default = {
+    type = "gcp"
+    settings = {}
+  }
+}
+
 variable "docker_username" {
   type        = string
   default     = ""
