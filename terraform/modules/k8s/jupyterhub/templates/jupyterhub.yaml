@@ -104,7 +104,7 @@ singleuser:
         readOnly: true
 %{ else ~}
   cmd: jupyterhub-singleuser
-%{ end }
+%{ endif ~}
   image:
     name: ${docker_repo}/base-notebook
     tag: ${docker_tag}
