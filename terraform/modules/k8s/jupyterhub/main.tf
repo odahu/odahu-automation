@@ -109,7 +109,7 @@ resource "kubernetes_secret" "jupyterhub_tls" {
 }
 
 resource "kubernetes_secret" "jupyterhub_sa" {
-  count = ((var.cloud_settings.type == "gcp") && (length(try(var.cloud_settings.settings.credentials, "")) != 0)) ? 1 : 0
+  count = var.jupyterhub_enabled && var.cloud_settings.type == "gcp" ? 1 : 0
   metadata {
     name      = "jupyterhub-sa"
     namespace = var.jupyterhub_namespace
@@ -123,7 +123,7 @@ resource "kubernetes_secret" "jupyterhub_sa" {
 }
 
 resource "kubernetes_secret" "jupyterhub_sas" {
-  count = ((var.cloud_settings.type == "azure") && (length(try(var.cloud_settings.settings.account_name, "")) != 0)) ? 1 : 0
+  count = var.jupyterhub_enabled && var.cloud_settings.type == "azure" ? 1 : 0
   metadata {
     name      = "jupyterhub-sas"
     namespace = var.jupyterhub_namespace
@@ -138,7 +138,7 @@ resource "kubernetes_secret" "jupyterhub_sas" {
 }
 
 resource "kubernetes_secret" "jupyterhub_key" {
-  count = ((var.cloud_settings.type == "aws") && (length(try(var.cloud_settings.settings.key_id, "")) != 0)) ? 1 : 0
+  count = var.jupyterhub_enabled && var.cloud_settings.type == "aws" ? 1 : 0
   metadata {
     name      = "jupyterhub-access-key"
     namespace = var.jupyterhub_namespace
