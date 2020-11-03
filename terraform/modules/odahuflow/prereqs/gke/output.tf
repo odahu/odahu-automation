@@ -64,7 +64,7 @@ output "fluent_helm_values" {
 
 output "jupyterhub_cloud_settings" {
   value = {
-    type = "gcs",
+    type = "gcp",
     settings = {
       credentials = local.jupyterhub_sa_key_one_line,
       project_id  = var.project_id
