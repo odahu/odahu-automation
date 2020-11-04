@@ -169,8 +169,6 @@ resource "helm_release" "jupyterhub" {
 
   depends_on = [
     kubernetes_secret.jupyterhub_tls[0],
-    kubernetes_secret.jupyterhub_sa[0],
-    kubernetes_secret.jupyterhub_key[0],
-    kubernetes_secret.jupyterhub_sas[0]
+    kubernetes_secret.jupyterhub_sa[0]
   ]
 }
