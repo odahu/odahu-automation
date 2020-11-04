@@ -122,36 +122,6 @@ resource "kubernetes_secret" "jupyterhub_sa" {
   depends_on = [kubernetes_namespace.jupyterhub[0]]
 }
 
-resource "kubernetes_secret" "jupyterhub_sas" {
-  count = var.jupyterhub_enabled && var.cloud_settings.type == "azure" ? 1 : 0
-  metadata {
-    name      = "jupyterhub-sas"
-    namespace = var.jupyterhub_namespace
-  }
-  data = {
-    "account_name" = try(var.cloud_settings.settings.account_name, "")
-    "sas_token"    = try(var.cloud_settings.settings.sas_token, "")
-  }
-  type = "kubernetes.io/opaque"
-
-  depends_on = [kubernetes_namespace.jupyterhub[0]]
-}
-
-resource "kubernetes_secret" "jupyterhub_key" {
-  count = var.jupyterhub_enabled && var.cloud_settings.type == "aws" ? 1 : 0
-  metadata {
-    name      = "jupyterhub-access-key"
-    namespace = var.jupyterhub_namespace
-  }
-  data = {
-    "id"  = try(var.cloud_settings.settings.key_id, "")
-    "key" = try(var.cloud_settings.settings.key_secret, "")
-  }
-  type = "kubernetes.io/opaque"
-
-  depends_on = [kubernetes_namespace.jupyterhub[0]]
-}
-
 resource "helm_release" "jupyterhub" {
   count      = var.jupyterhub_enabled ? 1 : 0
   name       = "jupyterhub"
@@ -168,8 +138,12 @@ resource "helm_release" "jupyterhub" {
       jupyterhub_secret_token = var.jupyterhub_secret_token == "" ? random_string.secret[0].result : var.jupyterhub_secret_token
       debug_enabled           = local.jupyterhub_debug
 
-      cloud_type = var.cloud_settings.type
-      project_id = try(var.cloud_settings.settings.project_id, "")
+      cloud_type         = var.cloud_settings.type
+      aws_key_id         = try(var.cloud_settings.settings.key_id, "")
+      aws_key            = try(var.cloud_settings.settings.key_secret, "")
+      azure_account_name = try(var.cloud_settings.settings.account_name, "")
+      azure_sas_token    = try(var.cloud_settings.settings.sas_token, "")
+      project_id         = try(var.cloud_settings.settings.project_id, "")
 
       oauth_client_id       = var.oauth_client_id
       oauth_client_secret   = var.oauth_client_secret
