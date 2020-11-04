@@ -73,7 +73,6 @@ singleuser:
 %{ endif ~}
   defaultUrl: "/lab"
 %{ if cloud_type == "gcp" ~}
-  cmd: gcloud auth activate-service-account --key-file=/tmp/sa/jupyterhub-sa.json && jupyterhub-singleuser
   storage:
     extraVolumes:
       - name: sa
@@ -86,8 +85,6 @@ singleuser:
       - name: sa
         mountPath: "/tmp/sa"
         readOnly: true
-%{ else ~}
-  cmd: jupyterhub-singleuser
 %{ endif ~}
   image:
     name: ${docker_repo}/base-notebook
