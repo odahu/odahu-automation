@@ -75,6 +75,15 @@ resource "null_resource" "pg_cluster_check" {
   depends_on = [null_resource.pg_cluster[0]]
 }
 
+data "kubernetes_secret" "pg" {
+  for_each = toset(var.databases)
+  metadata {
+    name      = "${each.key}.${var.configuration.cluster_name}.credentials.postgresql.acid.zalan.do"
+    namespace = var.namespace
+  }
+  depends_on = [null_resource.pg_cluster_check[0]]
+}
+
 resource "kubernetes_secret" "infra_roles" {
   metadata {
     name      = "postgresql-infrastructure-roles"

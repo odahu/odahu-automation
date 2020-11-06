@@ -1,9 +1,4 @@
 locals {
-  pg_credentials_plain = ((length(var.pgsql.secret_namespace) != 0) && (length(var.pgsql.secret_name) != 0)) ? 0 : 1
-
-  pg_username = local.pg_credentials_plain == 1 ? var.pgsql.db_password : lookup(lookup(data.kubernetes_secret.pg[0], "data", {}), "username", "")
-  pg_password = local.pg_credentials_plain == 1 ? var.pgsql.db_user : lookup(lookup(data.kubernetes_secret.pg[0], "data", {}), "password", "")
-
   airflow_helm_version = "7.1.0"
   debug_log_level      = "true"
 
@@ -66,14 +61,6 @@ locals {
   }
 }
 
-data "kubernetes_secret" "pg" {
-  count = local.pg_credentials_plain == 0 ? 1 : 0
-  metadata {
-    name      = var.pgsql.secret_name
-    namespace = var.pgsql.secret_namespace
-  }
-}
-
 resource "kubernetes_namespace" "airflow" {
   count = var.configuration.enabled ? 1 : 0
   metadata {
@@ -92,7 +79,7 @@ resource "kubernetes_secret" "postgres" {
     namespace = var.namespace
   }
   data = {
-   "postgresql-password" = local.pg_password
+    "postgresql-password" = var.pgsql.db_password
   }
   type = "Opaque"
 
@@ -150,7 +137,7 @@ resource "helm_release" "airflow" {
 
       pgsql_enabled = var.pgsql.enabled
       pgsql_db      = var.pgsql.db_name
-      pgsql_user    = local.pg_username
+      pgsql_user    = var.pgsql.db_user
       pgsql_host    = var.pgsql.db_host
     })
   ]

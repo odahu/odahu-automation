@@ -76,13 +76,11 @@ module "airflow" {
   tls_secret_key               = var.tls_key
 
   pgsql = {
-    enabled          = var.postgres.enabled
-    db_host          = module.postgresql.pgsql_endpoint
-    db_name          = "airflow"
-    db_user          = ""
-    db_password      = ""
-    secret_namespace = module.postgresql.pgsql_credentials["airflow"].namespace
-    secret_name      = module.postgresql.pgsql_credentials["airflow"].secret
+    enabled     = var.postgres.enabled
+    db_host     = module.postgresql.pgsql_endpoint
+    db_name     = "airflow"
+    db_user     = module.postgresql.pgsql_credentials["airflow"].username
+    db_password = module.postgresql.pgsql_credentials["airflow"].password
   }
 }
 
@@ -137,13 +135,11 @@ module "jupyterhub" {
   oauth_oidc_issuer_url = var.oauth_oidc_issuer_url
 
   pgsql = {
-    enabled          = var.postgres.enabled
-    db_host          = module.postgresql.pgsql_endpoint
-    db_name          = "jupyterhub"
-    db_user          = ""
-    db_password      = ""
-    secret_namespace = module.postgresql.pgsql_credentials["jupyterhub"].namespace
-    secret_name      = module.postgresql.pgsql_credentials["jupyterhub"].secret
+    enabled     = var.postgres.enabled
+    db_host     = module.postgresql.pgsql_endpoint
+    db_name     = "jupyterhub"
+    db_user     = module.postgresql.pgsql_credentials["jupyterhub"].username
+    db_password = module.postgresql.pgsql_credentials["jupyterhub"].password
   }
 }
 
@@ -151,13 +147,11 @@ module "vault" {
   source        = "../../../../modules/k8s/vault"
   configuration = var.vault
   pgsql = {
-    enabled          = var.postgres.enabled
-    db_host          = module.postgresql.pgsql_endpoint
-    db_name          = "vault"
-    db_user          = ""
-    db_password      = ""
-    secret_namespace = module.postgresql.pgsql_credentials["vault"].namespace
-    secret_name      = module.postgresql.pgsql_credentials["vault"].secret
+    enabled     = var.postgres.enabled
+    db_host     = module.postgresql.pgsql_endpoint
+    db_name     = "vault"
+    db_user     = module.postgresql.pgsql_credentials["vault"].username
+    db_password = module.postgresql.pgsql_credentials["vault"].password
   }
 }
 
@@ -221,21 +215,17 @@ module "odahuflow_helm" {
   vault_tls_secret_name       = module.vault.tls_secret
   airflow_enabled             = var.airflow.enabled
   pgsql_odahu = {
-    enabled          = var.postgres.enabled
-    db_host          = module.postgresql.pgsql_endpoint
-    db_name          = var.odahu_database
-    db_user          = ""
-    db_password      = ""
-    secret_namespace = module.postgresql.pgsql_credentials[var.odahu_database].namespace
-    secret_name      = module.postgresql.pgsql_credentials[var.odahu_database].secret
+    enabled     = var.postgres.enabled
+    db_host     = module.postgresql.pgsql_endpoint
+    db_name     = var.odahu_database
+    db_user     = module.postgresql.pgsql_credentials[var.odahu_database].username
+    db_password = module.postgresql.pgsql_credentials[var.odahu_database].password
   }
   pgsql_mlflow = {
-    enabled          = var.postgres.enabled
-    db_host          = module.postgresql.pgsql_endpoint
-    db_name          = "mlflow"
-    db_user          = ""
-    db_password      = ""
-    secret_namespace = module.postgresql.pgsql_credentials["mlflow"].namespace
-    secret_name      = module.postgresql.pgsql_credentials["mlflow"].secret
+    enabled     = var.postgres.enabled
+    db_host     = module.postgresql.pgsql_endpoint
+    db_name     = var.odahu_database
+    db_user     = module.postgresql.pgsql_credentials["mlflow"].username
+    db_password = module.postgresql.pgsql_credentials["mlflow"].password
   }
 }

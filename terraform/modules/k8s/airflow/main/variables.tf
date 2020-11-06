@@ -106,22 +106,18 @@ variable "helm_timeout" {
 
 variable "pgsql" {
   type = object({
-    enabled          = bool
-    db_host          = string
-    db_name          = string
-    db_user          = string
-    db_password      = string
-    secret_namespace = string
-    secret_name      = string
+    enabled     = bool
+    db_host     = string
+    db_name     = string
+    db_user     = string
+    db_password = string
   })
   default = {
-    enabled          = false
-    db_host          = ""
-    db_name          = ""
-    db_user          = ""
-    db_password      = ""
-    secret_namespace = ""
-    secret_name      = ""
+    enabled     = false
+    db_host     = ""
+    db_name     = ""
+    db_user     = ""
+    db_password = ""
   }
   description = "PostgreSQL settings for Airflow"
 }

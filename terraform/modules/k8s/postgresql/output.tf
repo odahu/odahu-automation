@@ -2,8 +2,8 @@ output "pgsql_credentials" {
   value = var.configuration.enabled ? {
     for db in var.databases :
     db => {
-       namespace = var.namespace
-       secret    = "${db}.${var.configuration.cluster_name}.credentials.postgresql.acid.zalan.do"
+      username = lookup(lookup(lookup(data.kubernetes_secret.pg, db, {}), "data", {}), "username", "")
+      password = lookup(lookup(lookup(data.kubernetes_secret.pg, db, {}), "data", {}), "password", "")
     }
   } : {}
   sensitive = true

@@ -245,22 +245,18 @@ variable "mlflow_artifact_root" {
 
 variable "pgsql_odahu" {
   type = object({
-    enabled          = bool
-    db_host          = string
-    db_name          = string
-    db_user          = string
-    db_password      = string
-    secret_namespace = string
-    secret_name      = string
+    enabled     = bool
+    db_host     = string
+    db_name     = string
+    db_user     = string
+    db_password = string
   })
   default = {
-    enabled          = false
-    db_host          = ""
-    db_name          = ""
-    db_user          = ""
-    db_password      = ""
-    secret_namespace = ""
-    secret_name      = ""
+    enabled     = false
+    db_host     = ""
+    db_name     = ""
+    db_user     = ""
+    db_password = ""
   }
   description = "PostgreSQL settings for ODAHU flow services"
 }
@@ -272,8 +268,6 @@ variable "pgsql_mlflow" {
     db_name          = string
     db_user          = string
     db_password      = string
-    secret_namespace = string
-    secret_name      = string
   })
   default = {
     enabled          = false
@@ -281,8 +275,6 @@ variable "pgsql_mlflow" {
     db_name          = ""
     db_user          = ""
     db_password      = ""
-    secret_namespace = ""
-    secret_name      = ""
   }
   description = "PostgreSQL settings for mlflow"
 }
