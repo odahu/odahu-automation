@@ -20,7 +20,7 @@ module "nginx_ingress_prereqs" {
 module "nginx_ingress_helm" {
   source      = "../../../../modules/k8s/nginx-ingress/helm"
   helm_values = module.nginx_ingress_prereqs.helm_values
-  depends_on  = [module.nginx_ingress_prereqs]
+  depends_on  = [module.nginx_ingress_prereqs, module.nginx_ingress_tls]
 }
 
 module "auth" {
@@ -108,7 +108,7 @@ module "odahu-dns" {
     "ttl"   = var.lb_record.ttl
   }
 
-  depends_on  = [module.nginx_ingress_prereqs]
+  depends_on = [module.nginx_ingress_helm]
 }
 
 ########################################################
@@ -121,14 +121,9 @@ module "postgresql" {
   databases     = local.databases
 
   depends_on = [
-    module.nginx_ingress_tls,
-    module.nginx_ingress_helm,
-    module.auth,
-    module.gpu_drivers,
-    module.knative,
     module.gke-saa,
-    module.tekton,
-    module.nfs
+    module.nfs,
+    module.monitoring
   ]
 }
 
@@ -140,16 +135,7 @@ module "pg_backup_prereqs" {
   gcp_project_id  = var.project_id
   gcp_region      = var.region
 
-  depends_on = [
-    module.nginx_ingress_tls,
-    module.nginx_ingress_helm,
-    module.auth,
-    module.gpu_drivers,
-    module.knative,
-    module.gke-saa,
-    module.tekton,
-    module.nfs
-  ]
+  depends_on = [module.postgresql]
 }
 
 module "pg_backup" {
@@ -165,18 +151,7 @@ module "pg_backup" {
   docker_username = var.docker_username
   docker_password = var.docker_password
 
-  depends_on = [
-    module.pg_backup_prereqs,
-    module.postgresql,
-    module.nginx_ingress_tls,
-    module.nginx_ingress_helm,
-    module.auth,
-    module.gpu_drivers,
-    module.knative,
-    module.gke-saa,
-    module.tekton,
-    module.nfs
-  ]
+  depends_on = [module.pg_backup_prereqs]
 }
 
 module "odahuflow_prereqs" {
@@ -187,17 +162,6 @@ module "odahuflow_prereqs" {
   data_bucket         = var.data_bucket
   log_bucket          = var.log_bucket
   log_expiration_days = var.log_expiration_days
-
-  depends_on = [
-    module.nginx_ingress_tls,
-    module.nginx_ingress_helm,
-    module.auth,
-    module.gpu_drivers,
-    module.knative,
-    module.gke-saa,
-    module.tekton,
-    module.nfs
-  ]
 }
 
 module "airflow_prereqs" {
@@ -210,17 +174,7 @@ module "airflow_prereqs" {
   dag_bucket_path = local.dag_bucket_path
   region          = var.region
 
-  depends_on = [
-    module.nginx_ingress_tls,
-    module.nginx_ingress_helm,
-    module.auth,
-    module.gpu_drivers,
-    module.knative,
-    module.gke-saa,
-    module.tekton,
-    module.nfs,
-    module.odahuflow_prereqs
-  ]
+  depends_on = [module.odahuflow_prereqs]
 }
 
 module "airflow_test_data" {
@@ -230,17 +184,7 @@ module "airflow_test_data" {
   examples_version = var.examples_version
   wine_data_url    = var.wine_data_url
 
-  depends_on = [
-    module.nginx_ingress_tls,
-    module.nginx_ingress_helm,
-    module.auth,
-    module.gpu_drivers,
-    module.knative,
-    module.gke-saa,
-    module.tekton,
-    module.nfs,
-    module.odahuflow_prereqs
-  ]
+  depends_on = [module.odahuflow_prereqs]
 }
 
 module "airflow" {
@@ -270,18 +214,7 @@ module "airflow" {
     secret_name      = module.postgresql.pgsql_credentials["airflow"].secret
   }
 
-  depends_on = [
-    module.nginx_ingress_tls,
-    module.nginx_ingress_helm,
-    module.auth,
-    module.gpu_drivers,
-    module.knative,
-    module.gke-saa,
-    module.tekton,
-    module.nfs,
-    module.odahuflow_prereqs,
-    module.postgresql
-  ]
+  depends_on = [module.airflow_prereqs, module.postgresql]
 }
 
 module "storage-syncer" {
@@ -292,17 +225,7 @@ module "storage-syncer" {
   extra_helm_values   = module.airflow_prereqs.syncer_helm_values
   odahu_infra_version = var.odahu_infra_version
 
-  depends_on = [
-    module.nginx_ingress_tls,
-    module.nginx_ingress_helm,
-    module.auth,
-    module.gpu_drivers,
-    module.knative,
-    module.gke-saa,
-    module.tekton,
-    module.nfs,
-    module.airflow
-  ]
+  depends_on = [module.airflow]
 }
 
 module "fluentd" {
@@ -316,17 +239,7 @@ module "fluentd" {
   helm_repo         = var.helm_repo
   extra_helm_values = module.odahuflow_prereqs.fluent_helm_values
 
-  depends_on = [
-    module.nginx_ingress_tls,
-    module.nginx_ingress_helm,
-    module.auth,
-    module.gpu_drivers,
-    module.knative,
-    module.gke-saa,
-    module.tekton,
-    module.nfs,
-    module.odahuflow_prereqs
-  ]
+  depends_on = [module.gke-saa, module.odahuflow_prereqs]
 }
 
 module "fluentd-daemonset" {
@@ -340,17 +253,7 @@ module "fluentd-daemonset" {
   helm_repo         = var.helm_repo
   extra_helm_values = module.odahuflow_prereqs.fluent_daemonset_helm_values
 
-  depends_on = [
-    module.nginx_ingress_tls,
-    module.nginx_ingress_helm,
-    module.auth,
-    module.gpu_drivers,
-    module.knative,
-    module.gke-saa,
-    module.tekton,
-    module.nfs,
-    module.odahuflow_prereqs
-  ]
+  depends_on = [module.gke-saa, module.odahuflow_prereqs]
 }
 
 module "jupyterhub" {
@@ -380,17 +283,7 @@ module "jupyterhub" {
     secret_name      = module.postgresql.pgsql_credentials["jupyterhub"].secret
   }
 
-  depends_on = [
-    module.nginx_ingress_tls,
-    module.nginx_ingress_helm,
-    module.auth,
-    module.gpu_drivers,
-    module.knative,
-    module.gke-saa,
-    module.tekton,
-    module.nfs,
-    module.postgresql
-  ]
+  depends_on = [module.postgresql, module.odahuflow_prereqs]
 }
 
 module "vault" {
@@ -405,17 +298,7 @@ module "vault" {
     secret_namespace = module.postgresql.pgsql_credentials["vault"].namespace
     secret_name      = module.postgresql.pgsql_credentials["vault"].secret
   }
-  depends_on = [
-    module.nginx_ingress_tls,
-    module.nginx_ingress_helm,
-    module.auth,
-    module.gpu_drivers,
-    module.knative,
-    module.gke-saa,
-    module.tekton,
-    module.nfs,
-    module.postgresql
-  ]
+  depends_on = [module.postgresql]
 }
 
 module "elasticsearch" {
@@ -432,17 +315,7 @@ module "elasticsearch" {
   odahu_infra_version   = var.odahu_infra_version
   odahu_helm_repo       = var.helm_repo
 
-  depends_on = [
-    module.nginx_ingress_tls,
-    module.nginx_ingress_helm,
-    module.auth,
-    module.gpu_drivers,
-    module.knative,
-    module.gke-saa,
-    module.tekton,
-    module.nfs,
-    module.odahuflow_prereqs
-  ]
+  depends_on = [module.nginx_ingress_helm, module.gke-saa, module.odahuflow_prereqs]
 }
 
 module "odahuflow_helm" {
@@ -498,20 +371,5 @@ module "odahuflow_helm" {
     secret_namespace = module.postgresql.pgsql_credentials[var.odahu_database].namespace
     secret_name      = module.postgresql.pgsql_credentials[var.odahu_database].secret
   }
-  depends_on = [
-    module.postgresql,
-    module.jupyterhub,
-    module.airflow,
-    module.elasticsearch,
-    module.odahuflow_prereqs,
-    module.vault,
-    module.nginx_ingress_tls,
-    module.nginx_ingress_helm,
-    module.auth,
-    module.gpu_drivers,
-    module.knative,
-    module.gke-saa,
-    module.tekton,
-    module.nfs
-  ]
+  depends_on = [module.postgresql, module.odahuflow_prereqs, module.vault, module.nginx_ingress_helm, module.auth]
 }
