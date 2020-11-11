@@ -159,6 +159,8 @@ module "odahuflow_prereqs" {
   ip_egress_name      = var.aks_egress_ip_name
   allowed_ips         = var.allowed_ips
   log_expiration_days = var.log_expiration_days
+
+  depends_on = [module.monitoring]
 }
 
 module "airflow_prereqs" {
