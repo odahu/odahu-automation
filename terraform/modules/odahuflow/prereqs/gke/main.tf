@@ -61,7 +61,7 @@ resource "google_storage_bucket" "log" {
 }
 
 ########################################################
-# Google Cloud Service Account
+# Google Cloud Collector Service Account
 ########################################################
 resource "google_service_account" "collector_sa" {
   account_id   = local.gsa_collector_name
@@ -116,31 +116,7 @@ resource "google_kms_crypto_key_iam_member" "collector_kms_encrypt_decrypt" {
 }
 
 ########################################################
-# Google Cloud Registry
-########################################################
-data "google_container_registry_repository" "odahuflow_registry" {
-  project = var.project_id
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-########################################################
-# Google Cloud Service Account
+# Google Cloud Jupyterhub Service Account
 ########################################################
 resource "google_service_account" "jupyterhub_sa" {
   account_id   = local.gsa_jupyterhub_name
@@ -162,4 +138,11 @@ resource "google_storage_bucket_iam_member" "odahuflow_registry_viewer" {
   bucket = local.gcp_bucket_registry_name
   member = "serviceAccount:${google_service_account.jupyterhub_sa.email}"
   role   = "roles/storage.objectViewer"
+}
+
+########################################################
+# Google Cloud Registry
+########################################################
+data "google_container_registry_repository" "odahuflow_registry" {
+  project = var.project_id
 }
