@@ -263,18 +263,18 @@ variable "pgsql_odahu" {
 
 variable "pgsql_mlflow" {
   type = object({
-    enabled          = bool
-    db_host          = string
-    db_name          = string
-    db_user          = string
-    db_password      = string
+    enabled     = bool
+    db_host     = string
+    db_name     = string
+    db_user     = string
+    db_password = string
   })
   default = {
-    enabled          = false
-    db_host          = ""
-    db_name          = ""
-    db_user          = ""
-    db_password      = ""
+    enabled     = false
+    db_host     = ""
+    db_name     = ""
+    db_user     = ""
+    db_password = ""
   }
   description = "PostgreSQL settings for mlflow"
 }
@@ -322,9 +322,9 @@ variable "opa" {
       }
     }
     webhook_certs = {
-      ca: "",
-      cert: "",
-      key: ""
+      ca : "",
+      cert : "",
+      key : ""
     }
   }
 }
