@@ -51,7 +51,8 @@ module "monitoring" {
 
   depends_on = [
     module.nginx_ingress_helm,
-    module.tekton
+    module.tekton,
+    module.nfs
   ]
 }
 
