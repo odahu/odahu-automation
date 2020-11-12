@@ -29,7 +29,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
 # install system utilities
 RUN mkdir -p ${TF_PLUGIN_CACHE_DIR} && \
     apt-get update -qqy && apt-get install -y \
-    apt-transport-https bash curl tar openssh-client gnupg python3=3.6.7-1~18.04 python3-distutils mc nano \
+    apt-transport-https bash curl tar openssh-client gnupg python3=3.6.7-1~18.04 python3-distutils \
     sshpass git ca-certificates apt-utils locales wget jq unzip dnsutils make && \
     rm -rf /var/lib/apt/lists/*
 

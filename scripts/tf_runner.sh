@@ -89,6 +89,7 @@ function GetParam() {
 function TerragruntRun() {
 	TF_MODULE=$1
 	TF_COMMAND=$2
+	TF_PARALLELISM=${3:-10}
 	WORK_DIR=$MODULES_ROOT/$TF_MODULE
 
 	cd "${WORK_DIR}"
@@ -102,7 +103,6 @@ function TerragruntRun() {
 			terragrunt "${TF_COMMAND}" -no-color -json > "${OUTPUT_FILE}"
 			;;
 		*)
-			TF_PARALLELISM=$3
 			terragrunt "${TF_COMMAND}" -parallelism="${TF_PARALLELISM}" -auto-approve "-var-file=${PROFILE}"
 			;;
 	esac
