@@ -20,6 +20,10 @@ resource "google_storage_bucket" "data" {
   storage_class = "REGIONAL"
   force_destroy = true
 
+  encryption {
+    default_kms_key_name = var.kms_key_id
+  }
+
   labels = {
     project = "odahuflow"
     env     = var.cluster_name
@@ -34,6 +38,10 @@ resource "google_storage_bucket" "log" {
   location      = var.region
   storage_class = "REGIONAL"
   force_destroy = true
+
+  encryption {
+    default_kms_key_name = var.kms_key_id
+  }
 
   labels = {
     project = "odahuflow"
@@ -91,6 +99,12 @@ resource "google_storage_bucket_iam_member" "odahuflow_registry" {
   bucket = local.gcp_bucket_registry_name
   member = "serviceAccount:${google_service_account.collector_sa.email}"
   role   = "roles/storage.admin"
+}
+
+resource "google_kms_crypto_key_iam_member" "collector_kms_encrypt_decrypt" {
+  crypto_key_id = var.kms_key_id
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member        = "serviceAccount:${google_service_account.collector_sa.email}"
 }
 
 ########################################################

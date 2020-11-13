@@ -118,6 +118,10 @@ variable "db_namespace" {
   type        = string
   default     = "postgresql"
   description = "Database namespace"
+
+variable "kms_key_id" {
+  type        = string
+  description = "The id of a Cloud KMS key that will be used to encrypt cluster disks"
 }
 
 ##################
@@ -449,9 +453,9 @@ variable "opa" {
       }
     }
     webhook_certs = {
-      ca: "",
-      cert: "",
-      key: ""
+      ca : "",
+      cert : "",
+      key : ""
     }
   }
 }

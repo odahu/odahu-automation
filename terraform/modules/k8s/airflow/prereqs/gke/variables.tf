@@ -29,3 +29,9 @@ variable "region" {
   type        = string
   description = "DAGs bucket region"
 }
+
+variable "kms_key_id" {
+  type        = string
+  description = "The id of a Cloud KMS key that will be used to encrypt cluster disks"
+}
+

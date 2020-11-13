@@ -69,6 +69,7 @@ module "gke_cluster" {
   node_gcp_tags  = local.node_gcp_tags
   node_labels    = var.node_labels
   ssh_public_key = var.ssh_key
+  kms_key_id     = var.kms_key_id
 
   bastion_enabled      = var.bastion_enabled
   bastion_hostname     = var.bastion_hostname

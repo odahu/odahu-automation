@@ -68,6 +68,11 @@ variable "ssh_public_key" {
   description = "SSH public key for Odahuflow cluster nodes and bastion host"
 }
 
+variable "kms_key_id" {
+  type        = string
+  description = "The id of a Cloud KMS key that will be used to encrypt cluster disks"
+}
+
 variable "master_ipv4_cidr_block" {
   type        = string
   default     = "172.25.100.0/28"

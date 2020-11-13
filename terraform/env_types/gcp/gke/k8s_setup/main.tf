@@ -173,6 +173,7 @@ module "odahuflow_prereqs" {
   project_id          = var.project_id
   region              = var.region
   cluster_name        = var.cluster_name
+  kms_key_id          = var.kms_key_id
   data_bucket         = var.data_bucket
   log_bucket          = var.log_bucket
   log_expiration_days = var.log_expiration_days
@@ -183,6 +184,7 @@ module "airflow_prereqs" {
 
   project_id      = var.project_id
   wine_bucket     = module.odahuflow_prereqs.odahu_data_bucket_name
+  kms_key_id      = var.kms_key_id
   cluster_name    = var.cluster_name
   dag_bucket      = local.dag_bucket
   dag_bucket_path = local.dag_bucket_path
