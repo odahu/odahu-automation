@@ -1,7 +1,6 @@
 ########################################################
 # K8S setup
 ########################################################
-
 module "nginx_ingress_tls" {
   source         = "../../../../modules/k8s/nginx-ingress/tls"
   cluster_name   = var.cluster_name
@@ -70,7 +69,10 @@ module "knative" {
   module_dependency   = module.istio.helm_chart
   odahu_infra_version = var.odahu_infra_version
   helm_timeout        = 600
+<<<<<<< HEAD
   depends_on          = [module.istio]
+=======
+>>>>>>> develop
 }
 
 module "gke-saa" {
