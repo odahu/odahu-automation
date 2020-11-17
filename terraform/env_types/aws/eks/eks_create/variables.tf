@@ -54,6 +54,11 @@ variable "nat_subnet_cidr" {
   description = "AWS NAT network CIDR, will be used to place bastion host"
 }
 
+variable "kms_key_id" {
+  type        = string
+  description = "The ARN of the AWS Key Management Service (AWS KMS) customer master key (CMK) to use when creating the encrypted volume"
+}
+
 #############
 # Node pool
 #############

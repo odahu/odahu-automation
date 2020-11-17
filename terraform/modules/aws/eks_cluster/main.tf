@@ -151,6 +151,8 @@ resource "aws_launch_template" "this" {
     content {
       device_name = "/dev/xvda"
       ebs {
+        kms_key_id            = var.kms_key_id
+        encrypted             = true
         volume_type           = "standard"
         volume_size           = size.value
         delete_on_termination = true

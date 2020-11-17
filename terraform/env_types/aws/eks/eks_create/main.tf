@@ -44,6 +44,7 @@ module "eks" {
   subnet_ids                           = module.vpc.private_subnet_ids
   nat_subnet_id                        = module.vpc.nat_subnet_id
   aws_region                           = var.aws_region
+  kms_key_id                           = var.kms_key_id
   cluster_autoscaling_cpu_max_limit    = var.cluster_autoscaling_cpu_max_limit
   cluster_autoscaling_memory_max_limit = var.cluster_autoscaling_memory_max_limit
 
