@@ -30,3 +30,12 @@ resource "google_dns_record_set" "this" {
   managed_zone = local.managed_zone
   rrdatas      = [lookup(each.value, "value")]
 }
+
+resource "google_dns_record_set" "lb" {
+  project      = var.gcp_project_id
+  name         = "${var.lb_record.name}.${local.domain}"
+  type         = var.lb_record.type
+  ttl          = var.lb_record.ttl
+  managed_zone = local.managed_zone
+  rrdatas      = [var.lb_record.value]
+}

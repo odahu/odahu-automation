@@ -20,6 +20,8 @@ module "firewall" {
 
   bastion_enabled  = var.bastion_enabled
   bastion_gcp_tags = local.bastion_gcp_tags
+
+  depends_on = [module.vpc]
 }
 
 module "vpc_peering_gcp" {
@@ -29,6 +31,11 @@ module "vpc_peering_gcp" {
   gcp_network_1_range = [var.gcp_cidr, module.gke_cluster.k8s_pods_cidr]
   gcp_network_2_name  = var.infra_vpc_name
   gcp_network_2_range = var.infra_cidr == "" ? [] : [var.infra_cidr]
+
+  depends_on = [
+    module.vpc,
+    module.gke_cluster
+  ]
 }
 
 ########################################################
@@ -68,4 +75,9 @@ module "gke_cluster" {
   bastion_machine_type = var.bastion_machine_type
   bastion_gcp_tags     = local.bastion_gcp_tags
   bastion_labels       = var.bastion_labels
+
+  depends_on = [
+    module.iam,
+    module.vpc
+  ]
 }

@@ -3,16 +3,16 @@ terraform {
 }
 
 providers {
-  aws         = ["2.52.0"]
-  azurerm     = ["2.21.0"]
-  external    = ["1.2.0"]
-  google-beta = ["2.20.2"]
-  google      = ["2.20.2"]
-  helm        = ["1.2.4"]
-  kubernetes  = ["1.11.4"]
-  local       = ["1.4.0"]
-  null        = ["2.1.2"]
-  random      = ["2.2.1"]
-  template    = ["2.1.2"]
-  tls         = ["2.1.1"]
+  aws         = { versions = ["2.70.0"] }
+  azurerm     = { versions = ["2.29.0"] }
+  external    = { versions = ["1.2.0"] }
+  google-beta = { versions = ["2.20.3"] }
+  google      = { versions = ["2.20.3"] }
+  helm        = { versions = ["1.3.1"] }
+  kubernetes  = { versions = ["1.13.2"] }
+  local       = { versions = ["1.4.0"] }
+  null        = { versions = ["2.1.2"] }
+  random      = { versions = ["2.2.1"] }
+  template    = { versions = ["2.1.2"] }
+  tls         = { versions = ["2.1.1"] }
 }

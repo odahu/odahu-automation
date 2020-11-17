@@ -53,10 +53,18 @@ resource "aws_eks_cluster" "default" {
     security_group_ids = [var.master_sg_id]
     subnet_ids         = var.subnet_ids
   }
+  depends_on = [null_resource.aws_eni_cleanup]
+}
 
+resource "null_resource" "aws_eni_cleanup" {
+  triggers = {
+    cluster_name = var.cluster_name
+    aws_region   = var.aws_region
+  }
   provisioner "local-exec" {
-    when    = destroy
-    command = "bash ../../../../../scripts/aws_eni_cleanup.sh \"${self.name}\" \"${var.aws_region}\""
+    when       = destroy
+    on_failure = continue
+    command    = "bash ../../../../../scripts/aws_eni_cleanup.sh \"${self.triggers.cluster_name}\" \"${self.triggers.aws_region}\""
   }
 }
 
@@ -156,7 +164,7 @@ resource "aws_launch_template" "this" {
 
   network_interfaces {
     associate_public_ip_address = false
-    security_groups             = ["${var.node_sg_id}"]
+    security_groups             = [var.node_sg_id]
     delete_on_termination       = true
   }
 

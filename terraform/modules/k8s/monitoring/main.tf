@@ -91,5 +91,8 @@ resource "helm_release" "monitoring" {
       ingress_tls_secret_name = local.ingress_tls_secret_name
     })
   ]
-  depends_on = [kubernetes_secret.tls_monitoring]
+  depends_on = [
+    kubernetes_secret.tls_monitoring,
+    kubernetes_namespace.monitoring
+  ]
 }

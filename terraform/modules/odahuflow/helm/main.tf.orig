@@ -572,4 +572,8 @@ resource "helm_release" "opa" {
       oauth_local_jwks      = base64decode(var.opa.authn.jwks_local)
     })
   ]
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> develop

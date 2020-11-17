@@ -65,21 +65,12 @@ resource "azurerm_network_security_group" "ingress" {
     source_address_prefix      = "Internet"
     destination_address_prefix = azurerm_public_ip.ingress.ip_address
   }
+  depends_on = [azurerm_public_ip.ingress]
 }
 
 resource "azurerm_subnet_network_security_group_association" "ingress" {
   subnet_id                 = data.azurerm_subnet.aks_subnet.id
   network_security_group_id = azurerm_network_security_group.ingress.id
-}
-
-# Enterprise sleep to ensure that dynamic ingress IP is attached to AKS load balacer is up on 'apply'
-# and detached on 'destroy'
-resource "null_resource" "lb_check" {
-  provisioner "local-exec" {
-    command = "timeout 900 bash ${path.module}/../../../../../../scripts/azure_lb_checker.sh apply \"${azurerm_public_ip.ingress.ip_address}\""
-  }
-  depends_on = [
-    azurerm_public_ip.ingress,
-    azurerm_subnet_network_security_group_association.ingress
-  ]
+  
+  depends_on = [azurerm_network_security_group.ingress]
 }
