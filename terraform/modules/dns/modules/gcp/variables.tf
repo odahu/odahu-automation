@@ -27,3 +27,13 @@ variable "records" {
   type    = list(map(string))
   default = []
 }
+
+variable "lb_record" {
+  type    = map(string)
+  default = {
+    "name"  = ""
+    "value" = ""
+    "type"  = ""
+    "ttl"   = "300"
+  }
+}

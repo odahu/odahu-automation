@@ -1,8 +1,133 @@
+########################################################
+# K8S setup
+########################################################
+module "nginx_ingress_tls" {
+  source         = "../../../../modules/k8s/nginx-ingress/tls"
+  cluster_name   = var.cluster_name
+  tls_secret_key = var.tls_key
+  tls_secret_crt = var.tls_crt
+}
+
+module "nginx_ingress_prereqs" {
+  source       = "../../../../modules/k8s/nginx-ingress/prereqs/gke"
+  region       = var.region
+  project_id   = var.project_id
+  cluster_name = var.cluster_name
+  allowed_ips  = concat(var.allowed_ips, [var.pods_cidr])
+  network_name = var.vpc_name
+}
+
+module "nginx_ingress_helm" {
+  source      = "../../../../modules/k8s/nginx-ingress/helm"
+  helm_values = module.nginx_ingress_prereqs.helm_values
+  depends_on  = [module.nginx_ingress_prereqs, module.nginx_ingress_tls]
+}
+
+module "auth" {
+  source                = "../../../../modules/k8s/auth"
+  domain_name           = var.cluster_domain_name
+  oauth_client_id       = var.oauth_client_id
+  oauth_client_secret   = var.oauth_client_secret
+  oauth_oidc_issuer_url = var.oauth_oidc_issuer_url
+  oauth_oidc_audience   = var.oauth_oidc_audience
+  oauth_cookie_expire   = "168h0m0s"
+  oauth_cookie_secret   = var.oauth_cookie_secret
+  oauth_oidc_scope      = var.oauth_oidc_scope
+}
+
+module "monitoring" {
+  source              = "../../../../modules/k8s/monitoring"
+  cluster_domain      = var.cluster_domain_name
+  helm_repo           = var.helm_repo
+  odahu_infra_version = var.odahu_infra_version
+  grafana_admin       = var.grafana_admin
+  grafana_pass        = var.grafana_pass
+  tls_secret_key      = var.tls_key
+  tls_secret_crt      = var.tls_crt
+}
+
+module "gpu_drivers" {
+  source = "../../../../modules/k8s/gpu_drivers_setup"
+
+  module_dependency    = module.monitoring.helm_chart
+  monitoring_namespace = module.monitoring.namespace
+  depends_on           = [module.monitoring]
+}
+
+module "istio" {
+  source          = "../../../../modules/k8s/istio"
+  tls_secret_key  = var.tls_key
+  tls_secret_crt  = var.tls_crt
+  docker_repo     = var.docker_repo
+  docker_username = var.docker_username
+  docker_password = var.docker_password
+}
+
+module "knative" {
+  source              = "../../../../modules/k8s/knative"
+  helm_repo           = var.helm_repo
+  module_dependency   = module.istio.helm_chart
+  odahu_infra_version = var.odahu_infra_version
+  helm_timeout        = 600
+<<<<<<< HEAD
+  depends_on          = [module.istio]
+=======
+>>>>>>> develop
+}
+
+module "gke-saa" {
+  source              = "../../../../modules/k8s/gke-saa"
+  cluster_type        = var.cluster_type
+  helm_repo           = var.helm_repo
+  odahu_infra_version = var.odahu_infra_version
+}
+
+module "tekton" {
+  source              = "../../../../modules/k8s/tekton"
+  helm_repo           = var.helm_repo
+  odahu_infra_version = var.odahu_infra_version
+}
+
+module "nfs" {
+  source = "../../../../modules/k8s/nfs"
+
+  configuration = var.nfs
+}
+
+########################################################
+# DNS setup
+########################################################
+module "odahu-dns" {
+  source = "../../../../modules/dns/modules/gcp"
+
+  domain       = var.domain
+  managed_zone = var.managed_zone
+  records      = var.records
+
+  lb_record = {
+    "name"  = regex("^[^.]*", var.domain)
+    "value" = local.is_lb_an_ip ? module.nginx_ingress_prereqs.helm_values["controller.service.loadBalancerIP"] : "${module.nginx_ingress_prereqs.helm_values["controller.service.loadBalancerIP"]}."
+    "type"  = local.is_lb_an_ip ? "A" : "CNAME"
+    "ttl"   = var.lb_record.ttl
+  }
+
+  depends_on = [module.nginx_ingress_helm]
+}
+
+########################################################
+# ODAHU flow setup
+########################################################
 module "postgresql" {
   source = "../../../../modules/k8s/postgresql"
 
   configuration = var.postgres
   databases     = local.databases
+
+  depends_on = [
+    module.gke-saa,
+    module.nfs,
+    module.monitoring
+  ]
 }
 
 module "pg_backup_prereqs" {
@@ -12,6 +137,8 @@ module "pg_backup_prereqs" {
   cluster_name    = var.cluster_name
   gcp_project_id  = var.project_id
   gcp_region      = var.region
+
+  depends_on = [module.postgresql]
 }
 
 module "pg_backup" {
@@ -26,6 +153,8 @@ module "pg_backup" {
   docker_tag      = var.odahu_automation_version
   docker_username = var.docker_username
   docker_password = var.docker_password
+
+  depends_on = [module.pg_backup_prereqs]
 }
 
 module "odahuflow_prereqs" {
@@ -47,6 +176,8 @@ module "airflow_prereqs" {
   dag_bucket      = local.dag_bucket
   dag_bucket_path = local.dag_bucket_path
   region          = var.region
+
+  depends_on = [module.odahuflow_prereqs]
 }
 
 module "airflow_test_data" {
@@ -55,6 +186,8 @@ module "airflow_test_data" {
   wine_bucket      = module.odahuflow_prereqs.odahu_data_bucket_name
   examples_version = var.examples_version
   wine_data_url    = var.wine_data_url
+
+  depends_on = [module.odahuflow_prereqs]
 }
 
 module "airflow" {
@@ -74,14 +207,17 @@ module "airflow" {
   odahu_airflow_plugin_version = var.odahu_airflow_plugin_version
   tls_secret_crt               = var.tls_crt
   tls_secret_key               = var.tls_key
-
   pgsql = {
-    enabled     = var.postgres.enabled
-    db_host     = module.postgresql.pgsql_endpoint
-    db_name     = "airflow"
-    db_user     = module.postgresql.pgsql_credentials["airflow"].username
-    db_password = module.postgresql.pgsql_credentials["airflow"].password
+    enabled          = var.postgres.enabled
+    db_host          = module.postgresql.pgsql_endpoint
+    db_name          = "airflow"
+    db_user          = ""
+    db_password      = ""
+    secret_namespace = module.postgresql.pgsql_credentials["airflow"].namespace
+    secret_name      = module.postgresql.pgsql_credentials["airflow"].secret
   }
+
+  depends_on = [module.airflow_prereqs, module.postgresql]
 }
 
 module "storage-syncer" {
@@ -91,6 +227,8 @@ module "storage-syncer" {
   helm_repo           = var.helm_repo
   extra_helm_values   = module.airflow_prereqs.syncer_helm_values
   odahu_infra_version = var.odahu_infra_version
+
+  depends_on = [module.airflow]
 }
 
 module "fluentd" {
@@ -103,6 +241,8 @@ module "fluentd" {
 
   helm_repo         = var.helm_repo
   extra_helm_values = module.odahuflow_prereqs.fluent_helm_values
+
+  depends_on = [module.gke-saa, module.odahuflow_prereqs]
 }
 
 module "fluentd-daemonset" {
@@ -115,6 +255,8 @@ module "fluentd-daemonset" {
 
   helm_repo         = var.helm_repo
   extra_helm_values = module.odahuflow_prereqs.fluent_daemonset_helm_values
+
+  depends_on = [module.gke-saa, module.odahuflow_prereqs]
 }
 
 module "jupyterhub" {
@@ -135,24 +277,31 @@ module "jupyterhub" {
   oauth_oidc_issuer_url = var.oauth_oidc_issuer_url
 
   pgsql = {
-    enabled     = var.postgres.enabled
-    db_host     = module.postgresql.pgsql_endpoint
-    db_name     = "jupyterhub"
-    db_user     = module.postgresql.pgsql_credentials["jupyterhub"].username
-    db_password = module.postgresql.pgsql_credentials["jupyterhub"].password
+    enabled          = var.postgres.enabled
+    db_host          = module.postgresql.pgsql_endpoint
+    db_name          = "jupyterhub"
+    db_user          = ""
+    db_password      = ""
+    secret_namespace = module.postgresql.pgsql_credentials["jupyterhub"].namespace
+    secret_name      = module.postgresql.pgsql_credentials["jupyterhub"].secret
   }
+
+  depends_on = [module.postgresql, module.odahuflow_prereqs]
 }
 
 module "vault" {
   source        = "../../../../modules/k8s/vault"
   configuration = var.vault
   pgsql = {
-    enabled     = var.postgres.enabled
-    db_host     = module.postgresql.pgsql_endpoint
-    db_name     = "vault"
-    db_user     = module.postgresql.pgsql_credentials["vault"].username
-    db_password = module.postgresql.pgsql_credentials["vault"].password
+    enabled          = var.postgres.enabled
+    db_host          = module.postgresql.pgsql_endpoint
+    db_name          = "vault"
+    db_user          = ""
+    db_password      = ""
+    secret_namespace = module.postgresql.pgsql_credentials["vault"].namespace
+    secret_name      = module.postgresql.pgsql_credentials["vault"].secret
   }
+  depends_on = [module.postgresql]
 }
 
 module "elasticsearch" {
@@ -168,6 +317,8 @@ module "elasticsearch" {
   logstash_input_config = module.odahuflow_prereqs.logstash_input_config
   odahu_infra_version   = var.odahu_infra_version
   odahu_helm_repo       = var.helm_repo
+
+  depends_on = [module.nginx_ingress_helm, module.gke-saa, module.odahuflow_prereqs]
 }
 
 module "odahuflow_helm" {
@@ -214,18 +365,14 @@ module "odahuflow_helm" {
   vault_namespace             = module.vault.namespace
   vault_tls_secret_name       = module.vault.tls_secret
   airflow_enabled             = var.airflow.enabled
-  pgsql_odahu = {
-    enabled     = var.postgres.enabled
-    db_host     = module.postgresql.pgsql_endpoint
-    db_name     = var.odahu_database
-    db_user     = module.postgresql.pgsql_credentials[var.odahu_database].username
-    db_password = module.postgresql.pgsql_credentials[var.odahu_database].password
+  pgsql = {
+    enabled          = var.postgres.enabled
+    db_host          = module.postgresql.pgsql_endpoint
+    db_name          = var.odahu_database
+    db_user          = ""
+    db_password      = ""
+    secret_namespace = module.postgresql.pgsql_credentials[var.odahu_database].namespace
+    secret_name      = module.postgresql.pgsql_credentials[var.odahu_database].secret
   }
-  pgsql_mlflow = {
-    enabled     = var.postgres.enabled
-    db_host     = module.postgresql.pgsql_endpoint
-    db_name     = var.odahu_database
-    db_user     = module.postgresql.pgsql_credentials["mlflow"].username
-    db_password = module.postgresql.pgsql_credentials["mlflow"].password
-  }
+  depends_on = [module.postgresql, module.odahuflow_prereqs, module.vault, module.nginx_ingress_helm, module.auth]
 }

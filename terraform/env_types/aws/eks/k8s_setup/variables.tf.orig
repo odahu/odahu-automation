@@ -1,39 +1,27 @@
-variable "azure_location" {
-  type        = string
-  description = "Azure base resource group location"
-}
-
-variable "azure_resource_group" {
-  type        = string
-  description = "Azure base resource group name"
-}
-
-variable "azure_storage_account" {
-  type        = string
-  description = "Azure storage account name"
-}
-
-variable "aks_common_tags" {
-  type = map(string)
-  default = {
-    env = "Development"
-  }
-  description = "Set of common tags assigned to all cluster resources"
-}
-
-variable "aks_egress_ip_name" {
-  type        = string
-  description = "Name of AKS cluster egress IP-address"
-}
-
-variable "aks_cidr" {
-  type        = string
-  description = "CIDR of AKS subnet used for nodes/pods networking"
-}
-
 ##################
 # Common
 ##################
+variable "cluster_type" {
+  type        = string
+  description = "Cloud provider"
+}
+
+variable "tls_key" {
+  type        = string
+  description = "TLS key for ODAHU flow cluster"
+}
+
+variable "tls_crt" {
+  type        = string
+  description = "TLS certificate file for ODAHU flow cluster"
+}
+
+variable "aws_region" {
+  type        = string
+  default     = "eu-central-1"
+  description = "Region of AWS resources"
+}
+
 variable "cluster_name" {
   type        = string
   default     = "odahuflow"
@@ -55,29 +43,147 @@ variable "helm_repo" {
   description = "ODAHU flow helm repo"
 }
 
-variable "cluster_domain_name" {
+variable "odahu_infra_version" {
   type        = string
+  description = "ODAHU flow infra release version"
+}
+
+variable "docker_repo" {
+  type        = string
+  description = "ODAHU flow Docker repo url"
+}
+
+variable "docker_username" {
+  type        = string
+  default     = ""
+  description = "ODAHU flow Docker repo username"
+}
+
+variable "docker_password" {
+  type        = string
+  default     = ""
+  description = "ODAHU flow Docker repo password"
+}
+
+########################
+# Prometheus monitoring
+########################
+variable "allowed_ips" {
+  type        = list(string)
+  description = "CIDR to allow access from"
+}
+
+variable "grafana_admin" {
+  type        = string
+  default     = "grafana_admin"
+  description = "Grafana admin username"
+}
+
+variable "grafana_pass" {
+  type        = string
+  description = "Grafana admin password"
+}
+
+##################
+# OAuth2
+##################
+variable "oauth_client_id" {
+  type        = string
+  description = "OAuth2 Client ID"
+}
+
+variable "oauth_client_secret" {
+  type        = string
+  description = "OAuth2 Client Secret"
+}
+
+variable "oauth_cookie_secret" {
+  type        = string
+  description = "OAuth2 Cookie Secret"
+}
+
+variable "oauth_oidc_issuer_url" {
+  type        = string
+  description = "OAuth2/OIDC provider Issuer URL"
+}
+
+variable "oauth_oidc_audience" {
+  type        = string
+  description = "Oauth2 access token audience"
+}
+
+variable "oauth_oidc_scope" {
+  type        = string
+  description = "OAuth2 scope"
+}
+
+<<<<<<< HEAD
+########################
+# Istio
+########################
+variable "istio_namespace" {
+  type        = string
+  default     = "istio-system"
+  description = "istio namespace"
+}
+
+########################
+# NFS
+########################
+variable "nfs" {
+  type = object({
+    enabled      = bool
+    storage_size = string
+  })
+  default = {
+    enabled      = false
+    storage_size = "10Gi"
+  }
+  description = "NFS configuration"
+}
+
+#######################
+# DNS
+########################
+variable "domain" {
+  type    = string
+  default = ""
   description = "ODAHU flow cluster FQDN"
 }
 
-variable "tls_key" {
-  type        = string
-  description = "TLS key for ODAHU flow cluster"
+variable "managed_zone" {
+  type    = string
+  default = ""
 }
 
-variable "tls_crt" {
-  type        = string
-  description = "TLS certificate for ODAHU flow cluster"
+variable "records" {
+  type    = list(map(string))
+  default = []
 }
 
-variable "allowed_ips" {
-  type        = list(string)
-  description = "CIDRs to allow access from"
+variable "lb_record" {
+  type    = map(string)
+  default = {
+    "name"  = ""
+    "value" = ""
+    "type"  = ""
+    "ttl"   = "300"
+  }
 }
 
-##################
-# ODAHU flow app
-##################
+variable "gcp_project_id" {
+  type    = string
+  default = ""
+}
+
+variable "gcp_credentials" {
+  type    = string
+  default = ""
+}
+
+###################################################################################
+# ODAHU flow required
+###################################################################################
 variable "odahuflow_version" {
   type        = string
   description = "ODAHU flow release version"
@@ -97,23 +203,6 @@ variable "odahuflow_training_timeout" {
 variable "odahu_ui_version" {
   type        = string
   description = "Version of odahu-ui helm chart"
-}
-
-variable "docker_repo" {
-  type        = string
-  description = "ODAHU flow Docker repo url"
-}
-
-variable "docker_username" {
-  type        = string
-  default     = ""
-  description = "ODAHU flow Docker repo username"
-}
-
-variable "docker_password" {
-  type        = string
-  default     = ""
-  description = "ODAHU flow Docker repo password"
 }
 
 variable "data_bucket" {
@@ -138,11 +227,6 @@ variable "mlflow_toolchain_version" {
   description = "Version of odahuflow-mlflow helm chart"
 }
 
-variable "oauth_oidc_issuer_url" {
-  type        = string
-  description = "OAuth2/OIDC provider Issuer URL"
-}
-
 variable "oauth_oidc_token_endpoint" {
   type        = string
   description = "OpenID Provider Token URL"
@@ -153,33 +237,15 @@ variable "oauth_oidc_signout_endpoint" {
   description = "OpenID end_session_endpoint URL"
 }
 
-variable "oauth_client_id" {
-  type        = string
-  description = "OAuth2 Client ID"
-}
-
-variable "oauth_client_secret" {
-  type        = string
-  description = "OAuth2 Client Secret"
-}
-
-variable "odahu_infra_version" {
-  type        = string
-  description = "ODAHU flow infra release version"
-}
-
 variable "odahuflow_connections" {
   type        = any
   default     = []
   description = "Initial list of ODAHU flow connections (https://docs.odahu.org/ref_connections.html)"
 }
 
-variable "node_pools" {
-  type        = any
-  default     = {}
-  description = "Default node pools configuration"
-}
-
+###################################################################################
+# ODAHU flow optional
+###################################################################################
 variable "jupyterhub_enabled" {
   type        = bool
   default     = false
@@ -195,6 +261,12 @@ variable "jupyterlab_version" {
 variable "packager_version" {
   type        = string
   description = "Version of ODAHU flow model packager"
+}
+
+variable "node_pools" {
+  type        = any
+  default     = {}
+  description = "Default node pools configuration"
 }
 
 variable "service_accounts" {
@@ -233,6 +305,8 @@ variable "vault" {
   description = "Vault configuration"
 }
 
+=======
+>>>>>>> develop
 ########################
 # Airflow
 ########################

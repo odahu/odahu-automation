@@ -1,12 +1,12 @@
 provider "google" {
-  version = "2.20.2"
+  version = "2.20.3"
   region  = var.region
   zone    = var.zone
   project = var.project_id
 }
 
 provider "helm" {
-  version = "1.2.4"
+  version = "1.3.1"
 
   kubernetes {
     config_context = var.config_context_auth_info
@@ -14,7 +14,7 @@ provider "helm" {
 }
 
 provider "kubernetes" {
-  version                  = "1.11.4"
+  version                  = "1.13.2"
   config_context_auth_info = var.config_context_auth_info
   config_context_cluster   = var.config_context_cluster
 }
@@ -29,4 +29,8 @@ provider "null" {
 
 provider "template" {
   version = "2.1.2"
+}
+
+provider "random" {
+  version = "2.2.1"
 }

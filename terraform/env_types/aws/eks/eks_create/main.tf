@@ -19,6 +19,7 @@ module "firewall" {
   vpc_id          = module.vpc.vpc_id
   vpc_sg_id       = module.vpc.vpc_sg_id
   bastion_enabled = var.bastion_enabled
+  depends_on      = [module.vpc]
 }
 
 module "iam" {
@@ -45,4 +46,10 @@ module "eks" {
   aws_region                           = var.aws_region
   cluster_autoscaling_cpu_max_limit    = var.cluster_autoscaling_cpu_max_limit
   cluster_autoscaling_memory_max_limit = var.cluster_autoscaling_memory_max_limit
+
+  depends_on = [
+    module.vpc,
+    module.iam,
+    module.firewall
+  ]
 }

@@ -9,3 +9,7 @@ output "helm_values" {
 output "resource" {
   value = azurerm_public_ip.ingress
 }
+
+output "load_balancer_ip" {
+  value = azurerm_public_ip.ingress.ip_address
+}

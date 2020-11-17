@@ -1,6 +1,6 @@
 FROM golang:alpine AS terraform-bundler
 
-ENV TERRAFORM_VERSION=0.12.29
+ENV TERRAFORM_VERSION=0.13.4
 ENV CGO_ENABLED=0
 
 RUN apk --no-cache add git unzip && \
@@ -22,7 +22,7 @@ FROM ubuntu:18.04
 
 ENV DEBIAN_FRONTEND=noninteractive \
     KUBECTL_VERSION=v1.16.10 \
-    TERRAGRUNT_VERSION=v0.23.27 \
+    TERRAGRUNT_VERSION=v0.25.1 \
     HELM_VERSION=v3.2.4 \
     TF_PLUGIN_CACHE_DIR=/tmp/.terraform/cache
 
@@ -44,8 +44,8 @@ RUN wget -qO /usr/local/bin/kubectl "https://storage.googleapis.com/kubernetes-r
     chmod a+x /usr/local/bin/kubectl
 
 # Install Terraform and provider plugins
-COPY --from=terraform-bundler /go/bin/terraform /usr/local/bin/
-COPY --from=terraform-bundler /go/terraform-bundle/terraform-provider-* ${TF_PLUGIN_CACHE_DIR}/linux_amd64/
+COPY --from=terraform-bundler /go/terraform-bundle/terraform /usr/local/bin/
+COPY --from=terraform-bundler /go/terraform-bundle/plugins ${TF_PLUGIN_CACHE_DIR}/
 
 # Install Terragrunt
 RUN wget -qO /tmp/terragrunt "https://github.com/gruntwork-io/terragrunt/releases/download/${TERRAGRUNT_VERSION}/terragrunt_linux_amd64" && \

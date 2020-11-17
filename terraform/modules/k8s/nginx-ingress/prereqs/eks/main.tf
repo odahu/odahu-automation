@@ -1,5 +1,5 @@
 # Data
-data "aws_vpc" "default" {
+data "aws_vpc" "default_k8s" {
   filter {
     name   = "tag:Name"
     values = [var.cluster_name]
@@ -7,13 +7,13 @@ data "aws_vpc" "default" {
 }
 
 data "aws_subnet_ids" "public" {
-  vpc_id = data.aws_vpc.default.id
+  vpc_id = data.aws_vpc.default_k8s.id
   tags = {
     Tier = "Public"
   }
 }
 data "aws_security_group" "lb" {
-  vpc_id = data.aws_vpc.default.id
+  vpc_id = data.aws_vpc.default_k8s.id
   name   = "tf-${var.cluster_name}-lb"
 }
 

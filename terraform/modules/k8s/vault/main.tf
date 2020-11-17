@@ -1,10 +1,23 @@
 locals {
+  pg_credentials_plain = ((length(var.pgsql.secret_namespace) != 0) && (length(var.pgsql.secret_name) != 0)) ? 0 : 1
+
+  pg_username = local.pg_credentials_plain == 1 ? var.pgsql.db_password : lookup(lookup(data.kubernetes_secret.pg[0], "data", {}), "username", "")
+  pg_password = local.pg_credentials_plain == 1 ? var.pgsql.db_user : lookup(lookup(data.kubernetes_secret.pg[0], "data", {}), "password", "")
+
   vault_helm_version     = "1.4.0"
   vault_version          = "1.5.0"
   vault_unsealer_version = "1.4.0"
   vault_debug_log_level  = "true"
   vault_pvc_name         = "vault-file"
   pg_client_image        = "postgres:12-alpine"
+}
+
+data "kubernetes_secret" "pg" {
+  count = local.pg_credentials_plain == 0 ? 1 : 0
+  metadata {
+    name      = var.pgsql.secret_name
+    namespace = var.pgsql.secret_namespace
+  }
 }
 
 resource "kubernetes_namespace" "vault" {
@@ -24,7 +37,7 @@ resource "kubernetes_secret" "postgres" {
     namespace = var.namespace
   }
   data = {
-    "postgresql-password" = var.pgsql.db_password
+    "postgresql-password" = local.pg_password
   }
   type = "Opaque"
 
@@ -83,7 +96,7 @@ resource "kubernetes_job" "vault_pgsql_init" {
           image = local.pg_client_image
           command = [
             "psql",
-            "--username=${var.pgsql.db_user}",
+            "--username=${local.pg_username}",
             "${var.pgsql.db_name}",
             "--file=/opt/vault/vault-pgsql-init.sql"
           ]
@@ -123,8 +136,8 @@ resource "helm_release" "vault" {
       pgsql_enabled = var.pgsql.enabled
       pgsql_url = format(
         "postgres://%s:%s@%s:%s/%s",
-        var.pgsql.db_user,
-        var.pgsql.db_password,
+        local.pg_username,
+        local.pg_password,
         var.pgsql.db_host,
         "5432",
         var.pgsql.db_name

@@ -89,6 +89,7 @@ function GetParam() {
 function TerragruntRun() {
 	TF_MODULE=$1
 	TF_COMMAND=$2
+	TF_PARALLELISM=${3:-10}
 	WORK_DIR=$MODULES_ROOT/$TF_MODULE
 
 	cd "${WORK_DIR}"
@@ -102,7 +103,7 @@ function TerragruntRun() {
 			terragrunt "${TF_COMMAND}" -no-color -json > "${OUTPUT_FILE}"
 			;;
 		*)
-			terragrunt "${TF_COMMAND}" -auto-approve "-var-file=${PROFILE}"
+			terragrunt "${TF_COMMAND}" -parallelism="${TF_PARALLELISM}" -auto-approve "-var-file=${PROFILE}"
 			;;
 	esac
 }
@@ -197,84 +198,61 @@ function SetupCloudAccess() {
 
 # Create Odahuflow cluster
 function TerraformCreate() {
-	case $(GetParam "cluster_type") in
-		"aws/eks")
-			TerragruntRun eks_create apply
-			;;
-		"gcp/gke")
-			TerragruntRun gke_create apply
-			;;
-		"azure/aks")
-			TerragruntRun aks_create apply
-			;;
-	esac
-	TerragruntRun k8s_setup apply
-	echo 'INFO : Create Odahuflow DNS records'
-	TerragruntRun k8s_setup output
-	case $(GetParam "cluster_type") in
-		"aws/eks")
-			LB_IP="$(GetParam 'load_balancer_ip.value' "$OUTPUT_FILE")."
-			;;
-		"gcp/gke")
-			LB_IP=$(GetParam 'helm_values.value["controller.service.loadBalancerIP"]' "$OUTPUT_FILE")
-			;;
-		"azure/aks")
-			LB_IP=$(GetParam 'helm_values.value["controller.service.loadBalancerIP"]' "$OUTPUT_FILE")
-			;;
-	esac
 	CLUSTER_FQDN="$(GetParam 'dns.domain')"
 	# shellcheck disable=SC2001
 	DOMAIN="$(sed 's/^[0-9a-zA-Z-]*.//' <<< "$CLUSTER_FQDN")"
 	CLUSTER_SUBDOMAIN="${CLUSTER_FQDN/%.${DOMAIN}/}"
 	case $(GetParam "cluster_type") in
 		"aws/eks")
+			TerragruntRun eks_create apply 10
 			TerragruntRun eks_create output
 			K8S_API_IP="$(GetParam 'k8s_api_address.value' "$OUTPUT_FILE" | sed -e 's/https:\/\///')."
 			BASTION_IP=$(GetParam 'bastion_address.value' "$OUTPUT_FILE")
-			TF_VAR_records=$(jq -rn "[{name: \"bastion.$CLUSTER_SUBDOMAIN\", value: \"$BASTION_IP\"}, {name: \"$CLUSTER_SUBDOMAIN\", value: \"$LB_IP\", type: \"CNAME\"}, {name: \"api.$CLUSTER_SUBDOMAIN\", value: \"$K8S_API_IP\", type: \"CNAME\"}]")
+			TF_VAR_records=$(jq -rn "[{name: \"bastion.$CLUSTER_SUBDOMAIN\", value: \"$BASTION_IP\"}, {name: \"api.$CLUSTER_SUBDOMAIN\", value: \"$K8S_API_IP\", type: \"CNAME\"}]")
+			export TF_VAR_records
+			TerragruntRun k8s_setup apply 10
 			;;
 		"gcp/gke")
+			TerragruntRun gke_create apply 10
 			TerragruntRun gke_create output
 			K8S_API_IP=$(GetParam 'k8s_api_address.value' "$OUTPUT_FILE")
 			BASTION_IP=$(GetParam 'bastion_address.value' "$OUTPUT_FILE")
-			TF_VAR_records=$(jq -rn "[{name: \"bastion.$CLUSTER_SUBDOMAIN\", value: \"$BASTION_IP\"}, {name: \"$CLUSTER_SUBDOMAIN\", value: \"$LB_IP\"}, {name: \"api.$CLUSTER_SUBDOMAIN\", value: \"$K8S_API_IP\"}]")
+			TF_VAR_records=$(jq -rn "[{name: \"bastion.$CLUSTER_SUBDOMAIN\", value: \"$BASTION_IP\"}, {name: \"api.$CLUSTER_SUBDOMAIN\", value: \"$K8S_API_IP\"}]")
+			export TF_VAR_records
+			TerragruntRun k8s_setup apply 10
 			;;
 		"azure/aks")
+			TerragruntRun aks_create apply 5
 			TerragruntRun aks_create output
 			K8S_API_IP="$(GetParam 'k8s_api_address.value' "$OUTPUT_FILE" | sed -e 's/^https:\/\///'| sed -e 's/:443//')."
 			BASTION_IP=$(GetParam 'bastion_address.value' "$OUTPUT_FILE")
-			TF_VAR_records=$(jq -rn "[{name: \"bastion.$CLUSTER_SUBDOMAIN\", value: \"$BASTION_IP\"}, {name: \"$CLUSTER_SUBDOMAIN\", value: \"$LB_IP\"}, {name: \"api.$CLUSTER_SUBDOMAIN\", value: \"$K8S_API_IP\", type: \"CNAME\"}]")
+			TF_VAR_records=$(jq -rn "[{name: \"bastion.$CLUSTER_SUBDOMAIN\", value: \"$BASTION_IP\"}, {name: \"api.$CLUSTER_SUBDOMAIN\", value: \"$K8S_API_IP\", type: \"CNAME\"}]")
+			export TF_VAR_records
+			TerragruntRun k8s_setup apply 3
 			;;
 	esac
-	export TF_VAR_records
 
-	TerragruntRun odahu_dns apply
-	TerragruntRun odahuflow apply
 	echo "INFO : Save cluster info to ${OUTPUT_FILE}"
-	TerragruntRun odahuflow output
+	TerragruntRun k8s_setup output
 }
 
 # Destroy Odahuflow cluster
 function TerraformDestroy() {
 	if CheckCluster; then
-		TerragruntRun odahuflow destroy
-
+		TerragruntRun k8s_setup destroy 10
 		export TF_VAR_records='[]'
-		TerragruntRun odahu_dns destroy
-
-		TerragruntRun k8s_setup destroy
 	else
 		echo -e "ERROR:\tThere is no cluster found with name \"$(GetParam 'cluster_name')\""
 	fi
 	case $(GetParam 'cluster_type') in
 		"aws/eks")
-			TerragruntRun eks_create destroy
+			TerragruntRun eks_create destroy 10
 			;;
 		"gcp/gke")
-			TerragruntRun gke_create destroy
+			TerragruntRun gke_create destroy 10
 			;;
 		"azure/aks")
-			TerragruntRun aks_create destroy
+			TerragruntRun aks_create destroy 1
 			;;
 	esac
 }
