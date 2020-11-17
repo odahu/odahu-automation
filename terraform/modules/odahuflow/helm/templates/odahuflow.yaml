@@ -5,6 +5,9 @@ logLevel: debug
 
 edge:
   knative_namespace: "${knative_namespace}"
+  ingress:
+    annotations:
+      nginx.ingress.kubernetes.io/proxy-body-size: "1024m"
 
 ingress:
   enabled: true
