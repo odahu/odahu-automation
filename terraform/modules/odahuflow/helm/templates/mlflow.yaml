@@ -33,3 +33,6 @@ resource_uploader_sa:
   client_secret: ${resource_uploader_sa.client_secret}
 
 oauth_oidc_issuer_url: ${oauth_oidc_issuer_url}
+
+mlflow_backend_store: "${mlflow_backend_store}"
+mlflow_artifact_root: "${mlflow_artifact_root}"

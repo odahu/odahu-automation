@@ -237,7 +237,13 @@ variable "airflow_enabled" {
   description = "Is Airflow deployment enabled"
 }
 
-variable "pgsql" {
+variable "mlflow_artifact_root" {
+  type        = string
+  default     = "/mlflow"
+  description = "Mlflow artifact path"
+}
+
+variable "pgsql_odahu" {
   type = object({
     enabled          = bool
     db_host          = string
@@ -257,6 +263,28 @@ variable "pgsql" {
     secret_name      = ""
   }
   description = "PostgreSQL settings for ODAHU flow services"
+}
+
+variable "pgsql_mlflow" {
+  type = object({
+    enabled          = bool
+    db_host          = string
+    db_name          = string
+    db_user          = string
+    db_password      = string
+    secret_namespace = string
+    secret_name      = string
+  })
+  default = {
+    enabled          = false
+    db_host          = ""
+    db_name          = ""
+    db_user          = ""
+    db_password      = ""
+    secret_namespace = ""
+    secret_name      = ""
+  }
+  description = "PostgreSQL settings for mlflow"
 }
 
 ########################
@@ -302,9 +330,9 @@ variable "opa" {
       }
     }
     webhook_certs = {
-      ca: "",
-      cert: "",
-      key: ""
+      ca : "",
+      cert : "",
+      key : ""
     }
   }
 }

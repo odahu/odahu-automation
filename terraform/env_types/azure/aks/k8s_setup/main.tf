@@ -356,7 +356,7 @@ module "odahuflow_helm" {
   vault_namespace             = module.vault.namespace
   vault_tls_secret_name       = module.vault.tls_secret
   airflow_enabled             = var.airflow.enabled
-  pgsql = {
+  pgsql_odahu = {
     enabled          = var.postgres.enabled
     db_host          = module.postgresql.pgsql_endpoint
     db_name          = var.odahu_database
@@ -364,6 +364,15 @@ module "odahuflow_helm" {
     db_password      = ""
     secret_namespace = module.postgresql.pgsql_credentials[var.odahu_database].namespace
     secret_name      = module.postgresql.pgsql_credentials[var.odahu_database].secret
+  }
+  pgsql_mlflow = {
+    enabled          = var.postgres.enabled
+    db_host          = module.postgresql.pgsql_endpoint
+    db_name          = var.odahu_database
+    db_user          = ""
+    db_password      = ""
+    secret_namespace = module.postgresql.pgsql_credentials["mlflow"].namespace
+    secret_name      = module.postgresql.pgsql_credentials["mlflow"].secret
   }
 
   depends_on = [module.postgresql, module.odahuflow_prereqs, module.vault, module.nginx_ingress_helm, module.auth]

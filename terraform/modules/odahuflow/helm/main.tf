@@ -53,13 +53,15 @@ locals {
     urlencode("${local.url_schema}://${var.cluster_domain}/dashboard")
   )
 
-  db_connection_string = var.pgsql.enabled ? "postgresql://${local.pg_username}:${local.pg_password}@${var.pgsql.db_host}/${var.pgsql.db_name}" : null
+  odahu_db_connection_string  = var.pgsql_odahu.enabled ? "postgresql://${var.pgsql_odahu.db_user}:${var.pgsql_odahu.db_password}@${var.pgsql_odahu.db_host}/${var.pgsql_odahu.db_name}" : null
+  mlflow_db_connection_string = var.pgsql_mlflow.enabled ? "postgresql://${var.pgsql_mlflow.db_user}:${var.pgsql_mlflow.db_password}@${var.pgsql_mlflow.db_host}/${var.pgsql_mlflow.db_name}" : null
+  mlflow_artifact_root        = var.mlflow_artifact_root
 
   odahuflow_config = {
     common = {
       version                  = var.odahuflow_version
       externalUrls             = concat(local.default_external_urls, var.extra_external_urls)
-      databaseConnectionString = local.db_connection_string
+      databaseConnectionString = local.odahu_db_connection_string
       oauthOidcTokenEndpoint   = var.oauth_oidc_token_endpoint
     }
     users = {
@@ -159,7 +161,7 @@ locals {
       metricUrl          = "${local.url_schema}://${var.cluster_domain}/mlflow"
       timeout            = length(var.odahuflow_training_timeout) == 0 ? null : var.odahuflow_training_timeout
 
-      toolchainIntegrationRepositoryType = var.pgsql.enabled ? "postgres" : "kubernetes"
+      toolchainIntegrationRepositoryType = var.pgsql_odahu.enabled ? "postgres" : "kubernetes"
     }
     trainer = {
       auth = {
@@ -199,10 +201,10 @@ locals {
       namespace          = var.odahuflow_packaging_namespace
       outputConnectionID = "models-output"
 
-      packagingIntegrationRepositoryType = var.pgsql.enabled ? "postgres" : "kubernetes"
+      packagingIntegrationRepositoryType = var.pgsql_odahu.enabled ? "postgres" : "kubernetes"
     }
     migrate = {
-      enabled = var.pgsql.enabled
+      enabled = var.pgsql_odahu.enabled
     }
     serviceCatalog = {
       auth = {
@@ -475,6 +477,8 @@ resource "helm_release" "mlflow" {
       resource_uploader_sa  = var.resource_uploader_sa
       oauth_oidc_issuer_url = var.oauth_oidc_issuer_url
       oauth_mesh_enabled    = var.oauth_mesh_enabled
+      mlflow_backend_store  = local.mlflow_db_connection_string
+      mlflow_artifact_root  = local.mlflow_artifact_root
     })
   ]
 
