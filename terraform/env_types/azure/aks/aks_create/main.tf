@@ -33,6 +33,8 @@ module "aks_cluster" {
   aks_tags        = local.common_tags
   location        = var.azure_location
   resource_group  = var.azure_resource_group
+  kms_key_id      = var.kms_key_id
+  kms_vault_id    = var.kms_vault_id
   aks_dns_prefix  = local.aks_dns_prefix
   aks_subnet_id   = module.aks_networking.subnet_id
   aks_subnet_cidr = var.aks_cidr

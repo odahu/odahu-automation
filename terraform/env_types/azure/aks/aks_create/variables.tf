@@ -78,6 +78,16 @@ variable "ssh_key" {
   description = "SSH public key for ODAHU flow cluster nodes and bastion host"
 }
 
+variable "kms_key_id" {
+  type        = string
+  description = "The ID of the Key Vault Key"
+}
+
+variable "kms_vault_id" {
+  type        = string
+  description = "Specifies the ID of the Key Vault instance where the Secret resides"
+}
+
 ################
 # Bastion host
 ################

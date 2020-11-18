@@ -253,3 +253,14 @@ resource "null_resource" "kube_api_check" {
 
   depends_on = [aws_eks_cluster.default]
 }
+
+resource "null_resource" "set_default_storage_class" {
+  triggers = {
+    build_number = timestamp()
+  }
+
+  provisioner "local-exec" {
+    command    = "bash ../../../../../scripts/set_default_storage_class.sh \"${self.triggers.cluster_name}\" \"${self.triggers.aws_region}\""
+  }
+}
+

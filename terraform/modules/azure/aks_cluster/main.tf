@@ -8,6 +8,16 @@ data "external" "egress_ip" {
   ]
 }
 
+resource "local_file" "storage_class" {
+  content = templatefile("${path.module}/templates/storage-class.tpl", {
+    disk_encryption_set_id = azurerm_disk_encryption_set.this.id
+  })
+  filename = "/tmp/.odahu/azure_storage_class.yml"
+
+  file_permission      = 0644
+  directory_permission = 0755
+}
+
 locals {
   bastion_ip = length(var.bastion_ip) != 0 ? ["${var.bastion_ip}/32"] : []
 
@@ -48,6 +58,34 @@ locals {
 }
 
 ########################################################
+# Disk encryption set
+########################################################
+
+resource "azurerm_disk_encryption_set" "this" {
+  name                = "${var.cluster_name}-encyption-set"
+  resource_group_name = var.resource_group
+  location            = var.location
+  key_vault_key_id    = var.kms_key_id
+
+  identity {
+    type = "SystemAssigned"
+  }
+}
+
+resource "azurerm_key_vault_access_policy" "encrypt-disk" {
+  key_vault_id = var.kms_vault_id
+
+  tenant_id = azurerm_disk_encryption_set.this.identity.0.tenant_id
+  object_id = azurerm_disk_encryption_set.this.identity.0.principal_id
+
+  key_permissions = [
+    "get",
+    "unwrapKey",
+    "wrapKey"
+  ]
+}
+
+########################################################
 # Deploy AKS cluster
 ########################################################
 
@@ -60,6 +98,7 @@ resource "azurerm_kubernetes_cluster" "aks" {
   # k8s cluster resources. We only can set a name for it.
   node_resource_group = "${var.resource_group}-k8s"
   kubernetes_version  = var.k8s_version
+  disk_encryption_set_id = azurerm_disk_encryption_set.this.id
 
   private_cluster_enabled    = false
   enable_pod_security_policy = false
@@ -153,6 +192,8 @@ resource "azurerm_kubernetes_cluster" "aks" {
   }
 
   tags = var.aks_tags
+
+  depends_on = [azurerm_disk_encryption_set.this]
 }
 
 resource "azurerm_kubernetes_cluster_node_pool" "aks" {
@@ -222,3 +263,52 @@ resource "null_resource" "bastion_kubeconfig" {
 
   depends_on = [azurerm_kubernetes_cluster.aks]
 }
+
+
+
+
+
+
+
+
+
+
+
+resource "null_resource" "setup_kubectl" {
+  triggers = {
+    build_number = timestamp()
+  }
+  provisioner "local-exec" {
+    command = "bash -c 'az aks get-credentials --name ${var.cluster_name} --resource-group ${var.resource_group} --overwrite-existing'"
+  }
+  depends_on = [azurerm_kubernetes_cluster.aks]
+}
+
+resource "null_resource" "kube_api_check" {
+  triggers = {
+    build_number = timestamp()
+  }
+
+  provisioner "local-exec" {
+    command = "timeout 1200 bash -c 'until curl -sk https://${azurerm_kubernetes_cluster.aks.fqdn}; do sleep 20; done'"
+  }
+
+  depends_on = [null_resource.setup_kubectl]
+}
+
+resource "null_resource" "create_encrypted_storage_class" {
+  provisioner "local-exec" {
+    command = "timeout 90 bash -c 'until kubectl apply -f ${local_file.storage_class.filename}; do sleep 5; done'"
+  }
+
+  depends_on = [null_resource.kube_api_check]
+}
+
+
+resource "null_resource" "setup_storage_class" {
+  provisioner "local-exec" {
+    command    = "bash ../../../../../scripts/set_default_storage_class.sh azure-encrypted-disk"
+  }
+  depends_on = [null_resource.create_encrypted_storage_class]
+}
+
