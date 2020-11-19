@@ -108,6 +108,12 @@ variable "grafana_pass" {
   description = "Grafana admin password"
 }
 
+variable "monitoring_namespace" {
+  type        = string
+  default     = "kube-monitoring"
+  description = "Clusterwide namespace for monitoring stuff"
+}
+
 ##################
 # OAuth2
 ##################

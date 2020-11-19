@@ -88,22 +88,3 @@ resource "kubernetes_secret" "infra_roles" {
   type       = "Opaque"
   depends_on = [kubernetes_namespace.pgsql]
 }
-
-resource "kubernetes_config_map" "grafana_dashboard" {
-  metadata {
-    annotations = {
-      k8s-sidecar-target-directory = "/tmp/dashboards/k8s"
-    }
-    labels = {
-      grafana_dashboard = "1"
-    }
-    name      = "psql-dashboard.json"
-    namespace = var.monitoring_namespace
-  }
-
-  data = {
-    "psql-dashboard.json" = file("${path.module}/files/grafana-psql-dashboard.json")
-  }
-
-  depends_on = [helm_release.pg_operator[0]]
-}

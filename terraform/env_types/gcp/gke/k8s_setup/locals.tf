@@ -10,6 +10,7 @@ locals {
     "mlflow",
     "jupyterhub",
     "vault",
-    var.odahu_database
+    var.odahu_database,
+    "grafana"
   ]
 }

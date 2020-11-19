@@ -1,5 +1,5 @@
 provider "helm" {
-  version = "1.3.1"
+  version = "1.3.2"
 
   kubernetes {
     config_context = var.config_context_auth_info
