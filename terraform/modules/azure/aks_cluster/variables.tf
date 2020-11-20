@@ -123,3 +123,8 @@ variable "kms_vault_id" {
   type        = string
   description = "Specifies the ID of the Key Vault instance where the Secret resides"
 }
+
+variable "storage_class_name" {
+  default     = "azure-encrypted-disk"
+  description = "Name of created storage class"
+}

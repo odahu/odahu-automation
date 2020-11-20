@@ -59,6 +59,7 @@ resource "azurerm_storage_account" "odahuflow_data" {
   account_kind             = "StorageV2"
   account_tier             = "Standard"
   account_replication_type = "LRS"
+  min_tls_version          = "TLS1_2"
 
   network_rules {
     default_action = "Allow"
@@ -73,6 +74,12 @@ resource "azurerm_storage_account" "odahuflow_data" {
 
   tags       = local.storage_tags
   depends_on = [azurerm_container_registry.odahuflow]
+}
+
+resource "azurerm_storage_account_customer_managed_key" "data" {
+  storage_account_id = azurerm_storage_account.odahuflow_data.id
+  key_vault_id       = var.kms_vault_id
+  key_name           = basename(var.kms_key_id)
 }
 
 data "azurerm_storage_account_sas" "odahuflow_data" {
@@ -141,6 +148,12 @@ resource "azurerm_storage_account" "odahuflow_logs" {
 
   tags       = local.storage_tags
   depends_on = [azurerm_container_registry.odahuflow]
+}
+
+resource "azurerm_storage_account_customer_managed_key" "logs" {
+  storage_account_id = azurerm_storage_account.odahuflow_logs.id
+  key_vault_id       = var.kms_vault_id
+  key_name           = basename(var.kms_key_id)
 }
 
 data "azurerm_storage_account_sas" "odahuflow_logs" {

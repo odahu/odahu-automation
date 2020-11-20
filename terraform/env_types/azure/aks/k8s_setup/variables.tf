@@ -1,6 +1,7 @@
 ##################
 # Common
 ##################
+
 variable "azure_resource_group" {
   type        = string
   description = "Azure base resource group name"
@@ -469,4 +470,14 @@ variable "opa" {
       key: ""
     }
   }
+}
+
+variable "kms_key_id" {
+  type        = string
+  description = "The ID of the Key Vault Key"
+}
+
+variable "kms_vault_id" {
+  type        = string
+  description = "Specifies the ID of the Key Vault instance where the Secret resides"
 }

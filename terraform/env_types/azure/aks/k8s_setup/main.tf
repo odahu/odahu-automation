@@ -170,6 +170,8 @@ module "odahuflow_prereqs" {
   ip_egress_name      = var.aks_egress_ip_name
   allowed_ips         = var.allowed_ips
   log_expiration_days = var.log_expiration_days
+  kms_key_id = var.kms-key_id
+  kms_vault_id = var.kms_vault_id
 
   depends_on = [module.monitoring]
 }

@@ -10,6 +10,7 @@ data "external" "egress_ip" {
 
 resource "local_file" "storage_class" {
   content = templatefile("${path.module}/templates/storage-class.tpl", {
+    storage_class_name     = var.storage_class_name
     disk_encryption_set_id = azurerm_disk_encryption_set.this.id
   })
   filename = "/tmp/.odahu/azure_storage_class.yml"
@@ -96,8 +97,8 @@ resource "azurerm_kubernetes_cluster" "aks" {
   # https://github.com/Azure/AKS/issues/3
   # There's additional resource group created, that used to represent and hold the lifecycle of 
   # k8s cluster resources. We only can set a name for it.
-  node_resource_group = "${var.resource_group}-k8s"
-  kubernetes_version  = var.k8s_version
+  node_resource_group    = "${var.resource_group}-k8s"
+  kubernetes_version     = var.k8s_version
   disk_encryption_set_id = azurerm_disk_encryption_set.this.id
 
   private_cluster_enabled    = false
@@ -264,16 +265,7 @@ resource "null_resource" "bastion_kubeconfig" {
   depends_on = [azurerm_kubernetes_cluster.aks]
 }
 
-
-
-
-
-
-
-
-
-
-
+# Setup kubectl
 resource "null_resource" "setup_kubectl" {
   triggers = {
     build_number = timestamp()
@@ -296,6 +288,7 @@ resource "null_resource" "kube_api_check" {
   depends_on = [null_resource.setup_kubectl]
 }
 
+# Setup default encrypted storage class
 resource "null_resource" "create_encrypted_storage_class" {
   provisioner "local-exec" {
     command = "timeout 90 bash -c 'until kubectl apply -f ${local_file.storage_class.filename}; do sleep 5; done'"
@@ -307,7 +300,7 @@ resource "null_resource" "create_encrypted_storage_class" {
 
 resource "null_resource" "setup_storage_class" {
   provisioner "local-exec" {
-    command    = "bash ../../../../../scripts/set_default_storage_class.sh azure-encrypted-disk"
+    command = "bash ../../../../../scripts/set_default_storage_class.sh \"${var.storage_class_name}\""
   }
   depends_on = [null_resource.create_encrypted_storage_class]
 }
