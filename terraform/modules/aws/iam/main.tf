@@ -26,6 +26,17 @@ resource "aws_iam_role_policy_attachment" "AmazonEKSServicePolicy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSServicePolicy"
   role       = aws_iam_role.master.name
 }
+
+resource "aws_iam_role_policy_attachment" "eks_kms_encryption" {
+  policy_arn = aws_iam_policy.eks_kms_encryption.arn
+  role       = aws_iam_role.master.name
+}
+
+resource "aws_iam_role_policy_attachment" "encrypted_ebs_attach" {
+  policy_arn = aws_iam_policy.encrypted_ebs_attach.arn
+  role       = aws_iam_role.master.name
+}
+
 resource "aws_iam_role" "node" {
   name = "tf-${var.cluster_name}-node"
 
@@ -116,6 +127,55 @@ data "aws_iam_policy_document" "node_autoscaling" {
       test     = "StringEquals"
       variable = "autoscaling:ResourceTag/k8s.io/cluster-autoscaler/enabled"
       values   = ["true"]
+    }
+  }
+}
+
+resource "aws_iam_policy" "eks_kms_encryption" {
+  name_prefix = "kms-${var.cluster_name}"
+  description = "EKS KMS Encryption policy for cluster ${var.cluster_name}"
+  policy      = data.aws_iam_policy_document.eks_kms_encryption.json
+}
+
+resource "aws_iam_policy" "encrypted_ebs_attach" {
+  name_prefix = "volume-attachment-${var.cluster_name}"
+  description = "EKS cluster manager IAM encrypted EBS attachment policy for cluster ${var.cluster_name}"
+  policy      = data.aws_iam_policy_document.encrypted_ebs_attach.json
+}
+
+data "aws_iam_policy_document" "eks_kms_encryption" {
+  statement {
+    sid    = "eksKmsEncryption"
+    effect = "Allow"
+
+    actions = [
+      "kms:ReEncrypt",
+      "kms:Decrypt",
+      "kms:Encrypt",
+      "kms:DescribeKey",
+      "kms:GenerateDataKey",
+      "kms:GenerateDataKeyWithoutPlaintext"
+    ]
+    resources = ["*"]
+  }
+}
+
+data "aws_iam_policy_document" "encrypted_ebs_attach" {
+  statement {
+    sid    = "encryptedEbsAttachment"
+    effect = "Allow"
+
+    actions = [
+      "kms:CreateGrant",
+      "kms:ListGrants",
+      "kms:RevokeGrant"
+    ]
+    resources = ["*"]
+    condition {
+      test     = "Bool"
+      variable = "kms:GrantIsForAWSResource"
+
+      values = ["true"]
     }
   }
 }

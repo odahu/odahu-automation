@@ -13,6 +13,15 @@ resource "aws_s3_bucket" "data" {
   region        = var.region
   force_destroy = true
 
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        kms_master_key_id = var.kms_key_id
+        sse_algorithm     = "aws:kms"
+      }
+    }
+  }
+
   dynamic "lifecycle_rule" {
     for_each = var.log_bucket == "" ? [1] : []
     content {
@@ -49,6 +58,15 @@ resource "aws_s3_bucket" "logs" {
   region        = var.region
   force_destroy = true
 
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        kms_master_key_id = var.kms_key_id
+        sse_algorithm     = "aws:kms"
+      }
+    }
+  }
+
   lifecycle_rule {
     id      = "${var.cluster_name}-logs"
     enabled = true
@@ -81,13 +99,23 @@ resource "aws_ecr_repository" "this" {
 
 data "aws_iam_policy_document" "collector" {
   statement {
-    actions   = ["s3:*"]
+    actions = ["s3:*"]
     effect    = "Allow"
     resources = var.log_bucket == "" ? ["${aws_s3_bucket.data.arn}*"] : ["${aws_s3_bucket.logs[0].arn}*"]
   }
 
   statement {
     actions   = ["ecr:*"]
+    effect    = "Allow"
+    resources = ["*"]
+  }
+
+  statement {
+    actions = [
+      "kms:Encrypt",
+      "kms:Decrypt",
+      "kms:GenerateDataKey"
+    ]
     effect    = "Allow"
     resources = ["*"]
   }

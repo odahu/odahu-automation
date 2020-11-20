@@ -68,6 +68,18 @@ resource "null_resource" "aws_eni_cleanup" {
   }
 }
 
+resource "null_resource" "kube_api_check" {
+  triggers = {
+    build_number = timestamp()
+  }
+
+  provisioner "local-exec" {
+    command = "timeout 1200 bash -c 'until curl -sk ${aws_eks_cluster.default.endpoint}; do sleep 20; done'"
+  }
+
+  depends_on = [aws_eks_cluster.default]
+}
+
 resource "null_resource" "setup_kubectl" {
   triggers = {
     build_number = timestamp()
@@ -75,16 +87,9 @@ resource "null_resource" "setup_kubectl" {
   provisioner "local-exec" {
     command = "bash -c 'aws eks --region ${var.aws_region} update-kubeconfig --name ${var.cluster_name}'"
   }
-  depends_on = [aws_eks_cluster.default]
-}
-
-resource "null_resource" "setup_calico" {
-  provisioner "local-exec" {
-    command = "timeout 90 bash -c 'until kubectl apply -f ${path.module}/files/calico-1.5.yml; do sleep 5; done'"
-  }
   depends_on = [
-    aws_launch_template.this,
-    null_resource.populate_auth_map
+    aws_eks_cluster.default,
+    null_resource.kube_api_check
   ]
 }
 
@@ -94,8 +99,17 @@ resource "null_resource" "populate_auth_map" {
   }
   depends_on = [
     null_resource.setup_kubectl,
-    null_resource.kube_api_check,
     local_file.aws_auth_cm
+  ]
+}
+
+resource "null_resource" "setup_calico" {
+  provisioner "local-exec" {
+    command = "timeout 90 bash -c 'until kubectl apply -f ${path.module}/files/calico-1.5.yml; do sleep 5; done'"
+  }
+  depends_on = [
+    null_resource.setup_kubectl,
+    null_resource.populate_auth_map
   ]
 }
 
@@ -240,27 +254,3 @@ resource "aws_autoscaling_group" "this" {
     ignore_changes        = [desired_capacity]
   }
 }
-
-# Wait for cluster startup
-resource "null_resource" "kube_api_check" {
-  triggers = {
-    build_number = timestamp()
-  }
-
-  provisioner "local-exec" {
-    command = "timeout 1200 bash -c 'until curl -sk ${aws_eks_cluster.default.endpoint}; do sleep 20; done'"
-  }
-
-  depends_on = [aws_eks_cluster.default]
-}
-
-resource "null_resource" "set_default_storage_class" {
-  triggers = {
-    build_number = timestamp()
-  }
-
-  provisioner "local-exec" {
-    command    = "bash ../../../../../scripts/set_default_storage_class.sh \"${self.triggers.cluster_name}\" \"${self.triggers.aws_region}\""
-  }
-}
-

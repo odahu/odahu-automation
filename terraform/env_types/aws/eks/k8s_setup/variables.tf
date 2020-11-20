@@ -1,6 +1,11 @@
 ##################
 # Common
 ##################
+variable "kms_key_id" {
+  type        = string
+  description = "The ARN of the AWS Key Management Service (AWS KMS) customer master key (CMK) to use when creating the encrypted volume"
+}
+
 variable "cluster_type" {
   type        = string
   description = "Cloud provider"
@@ -157,8 +162,8 @@ variable "nfs" {
 # DNS
 ########################
 variable "domain" {
-  type    = string
-  default = ""
+  type        = string
+  default     = ""
   description = "ODAHU flow cluster FQDN"
 }
 
@@ -173,7 +178,7 @@ variable "records" {
 }
 
 variable "lb_record" {
-  type    = map(string)
+  type = map(string)
   default = {
     "name"  = ""
     "value" = ""
@@ -429,9 +434,9 @@ variable "opa" {
       }
     }
     webhook_certs = {
-      ca: "",
-      cert: "",
-      key: ""
+      ca : "",
+      cert : "",
+      key : ""
     }
   }
 }

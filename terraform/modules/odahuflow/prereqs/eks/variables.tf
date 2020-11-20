@@ -26,3 +26,8 @@ variable "log_expiration_days" {
   default     = 1
   description = "ODAHU flow logs expiration days"
 }
+variable "kms_key_id" {
+  type        = string
+  description = "The ARN of the AWS Key Management Service (AWS KMS) customer master key (CMK) to use when creating the encrypted volume"
+}
+

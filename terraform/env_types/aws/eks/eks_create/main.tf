@@ -54,3 +54,12 @@ module "eks" {
     module.firewall
   ]
 }
+
+module "kms_storage_class" {
+  source       = "../../../../modules/aws/storage"
+  kms_key_id   = var.kms_key_id
+  cluster_name = var.cluster_name
+
+  depends_on = [module.eks]
+}
+

@@ -16,13 +16,24 @@ data "aws_s3_bucket" "dags" {
 
 data "aws_iam_policy_document" "syncer" {
   statement {
-    #    actions   = ["s3:GetObject", "s3:ListBucket"]
-    actions   = ["s3:*"]
+    actions = [
+      "s3:GetObject",
+      "s3:ListBucket"
+    ]
     effect    = "Allow"
     resources = ["${data.aws_s3_bucket.dags.arn}*"]
   }
   statement {
     actions   = ["ecr:*"]
+    effect    = "Allow"
+    resources = ["*"]
+  }
+
+  statement {
+    actions = [
+      "kms:Decrypt",
+      "kms:GenerateDataKey"
+    ]
     effect    = "Allow"
     resources = ["*"]
   }

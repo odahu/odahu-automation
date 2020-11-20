@@ -1,6 +1,7 @@
 ########################################################
 # K8S setup
 ########################################################
+
 module "nginx_ingress_tls" {
   source         = "../../../../modules/k8s/nginx-ingress/tls"
   cluster_name   = var.cluster_name
@@ -157,6 +158,7 @@ module "odahuflow_prereqs" {
   source              = "../../../../modules/odahuflow/prereqs/eks"
   region              = var.aws_region
   cluster_name        = var.cluster_name
+  kms_key_id          = var.kms_key_id
   data_bucket         = var.data_bucket
   log_bucket          = var.log_bucket
   log_expiration_days = var.log_expiration_days
@@ -302,7 +304,11 @@ module "elasticsearch" {
   odahu_infra_version   = var.odahu_infra_version
   odahu_helm_repo       = var.helm_repo
 
-  depends_on = [module.nginx_ingress_helm, module.kube2iam, module.odahuflow_prereqs]
+  depends_on = [
+    module.nginx_ingress_helm,
+    module.kube2iam,
+    module.odahuflow_prereqs
+  ]
 }
 
 module "odahuflow_helm" {
