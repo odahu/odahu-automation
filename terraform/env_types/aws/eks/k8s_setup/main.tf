@@ -32,15 +32,28 @@ module "auth" {
 }
 
 module "monitoring" {
-  source              = "../../../../modules/k8s/monitoring"
-  cluster_domain      = var.domain
-  helm_repo           = var.helm_repo
-  helm_timeout        = 25 * 60
-  odahu_infra_version = var.odahu_infra_version
-  grafana_admin       = var.grafana_admin
-  grafana_pass        = var.grafana_pass
-  tls_secret_key      = var.tls_key
-  tls_secret_crt      = var.tls_crt
+  source               = "../../../../modules/k8s/monitoring"
+  cluster_domain       = var.domain
+  helm_repo            = var.helm_repo
+  helm_timeout         = 25 * 60
+  odahu_infra_version  = var.odahu_infra_version
+  grafana_admin        = var.grafana_admin
+  grafana_pass         = var.grafana_pass
+  tls_secret_key       = var.tls_key
+  tls_secret_crt       = var.tls_crt
+  monitoring_namespace = var.monitoring_namespace
+
+  pgsql_grafana = {
+    enabled          = var.postgres.enabled
+    db_host          = module.postgresql.pgsql_endpoint
+    db_name          = "grafana"
+    db_user          = ""
+    db_password      = ""
+    secret_namespace = module.postgresql.pgsql_credentials["grafana"].namespace
+    secret_name      = module.postgresql.pgsql_credentials["grafana"].secret
+  }
+
+  depends_on = [module.postgresql]
 }
 
 module "istio" {
@@ -110,8 +123,7 @@ module "postgresql" {
 
   depends_on = [
     module.kube2iam,
-    module.nfs,
-    module.monitoring
+    module.nfs
   ]
 }
 

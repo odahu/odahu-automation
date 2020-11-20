@@ -136,7 +136,7 @@ resource "kubernetes_config_map" "grafana_dashboard" {
 
 resource "local_file" "grafana_pg_dashboard" {
   count = var.pgsql.enabled ? 1 : 0
-  content = templatefile("${path.module}/templates/grafana_pg_dashboard_manifest.tpl", {
+  content = templatefile("${path.module}/templates/pg_exporter_monitor.tpl", {
     namespace    = var.db_namespace
   })
   filename = "/tmp/.odahu/grafana_pg_dashboard.yml"
