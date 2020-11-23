@@ -73,6 +73,18 @@ variable "kms_key_id" {
   description = "The id of a Cloud KMS key that will be used to encrypt cluster disks"
 }
 
+variable "storage_type" {
+  type        = string
+  default     = "pd-standard"
+  description = "Default encrypted storage class storage type"
+}
+
+variable "storage_class_name" {
+  type        = string
+  default     = "standard-encrypted"
+  description = "Default encrypted storage class name"
+}
+
 variable "master_ipv4_cidr_block" {
   type        = string
   default     = "172.25.100.0/28"

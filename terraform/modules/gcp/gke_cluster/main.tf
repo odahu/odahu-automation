@@ -261,6 +261,8 @@ resource "null_resource" "setup_kubectl" {
 resource "local_file" "storage_class" {
   content = templatefile("${path.module}/templates/storage_class.tpl", {
     kms_key_id = var.kms_key_id
+    storage_type = var.storage_type
+    storage_class_name = var.storage_class_name
   })
   filename = "/tmp/.odahu/storage_class.yml"
 
@@ -280,7 +282,7 @@ resource "null_resource" "create_storage_class" {
 
 resource "null_resource" "set_default_storage_class" {
   provisioner "local-exec" {
-    command = "bash ../../../../../scripts/set_default_storage_class.sh csi-gce-pd-cmek"
+    command = "bash ../../../../../scripts/set_default_storage_class.sh \"${var.storage_class_name}\""
   }
 
   depends_on = [null_resource.create_storage_class]
