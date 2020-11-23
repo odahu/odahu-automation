@@ -87,7 +87,7 @@ variable "tls_secret_key" {
   description = "ODAHU flow cluster TLS key"
 }
 
-variable "pgsql" {
+variable "pgsql_grafana" {
   type = object({
     enabled          = bool
     db_host          = string
