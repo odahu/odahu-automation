@@ -118,10 +118,11 @@ variable "db_namespace" {
   type        = string
   default     = "postgresql"
   description = "Database namespace"
+}
 
 variable "kms_key_id" {
   type        = string
-  description = "The id of a Cloud KMS key that will be used to encrypt cluster disks"
+  description = "The ID of a Cloud KMS key that will be used to encrypt cluster disks"
 }
 
 ##################
@@ -406,7 +407,7 @@ variable "records" {
 }
 
 variable "lb_record" {
-  type    = map(string)
+  type = map(string)
   default = {
     "name"  = ""
     "value" = ""

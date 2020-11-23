@@ -260,8 +260,8 @@ resource "null_resource" "setup_kubectl" {
 ########################################################
 resource "local_file" "storage_class" {
   content = templatefile("${path.module}/templates/storage_class.tpl", {
-    kms_key_id = var.kms_key_id
-    storage_type = var.storage_type
+    kms_key_id         = var.kms_key_id
+    storage_type       = var.storage_type
     storage_class_name = var.storage_class_name
   })
   filename = "/tmp/.odahu/storage_class.yml"

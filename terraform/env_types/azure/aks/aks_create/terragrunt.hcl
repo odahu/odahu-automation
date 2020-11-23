@@ -11,6 +11,8 @@ locals {
   resource_group  = lookup(lookup(local.config.cloud, "azure", {}), "resource_group", "")
   location        = lookup(lookup(local.config.cloud, "azure", {}), "location", "")
   storage_account = lookup(lookup(local.config.cloud, "azure", {}), "storage_account", "")
+  kms_key_id      = lookup(lookup(local.config.cloud, "azure", {}), "kms_key_id", "")
+  kms_vault_id    = lookup(lookup(local.config.cloud, "azure", {}), "kms_vault_id", "")
 
   cmd_k8s_config_fetch = "az aks get-credentials --overwrite-existing --name \"${local.cluster_name}\" --resource-group \"${local.resource_group}\""
 }
@@ -51,4 +53,6 @@ inputs = {
   azure_resource_group = local.resource_group
   aks_sp_client_id     = local.sp_client_id
   aks_sp_secret        = local.sp_secret
+  kms_key_id           = local.kms_key_id
+  kms_vault_id         = local.kms_vault_id
 }

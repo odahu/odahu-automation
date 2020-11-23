@@ -9,6 +9,7 @@ locals {
   cluster_name  = lookup(local.config, "cluster_name", "")
   cluster_fqdn  = lookup(local.config.dns, "domain", "")
   dns_zone      = replace(local.cluster_fqdn, "/^[a-zA-Z0-9-_]+\\./", "")
+  kms_key_id    = lookup(lookup(local.config.cloud, "gcp", {}), "kms_key_id", "")
   records       = lookup(local.config.dns, "records", get_env("TF_VAR_records", "[]"))
   records_str   = join(" ", [for rec in jsondecode(local.records) : "${rec.name}:${rec.value}" if rec.value != "null"])
 
@@ -80,6 +81,7 @@ inputs = {
   zone       = local.gcp_zone
   vpc_name   = local.vpc_name
   records    = local.records
+  kms_key_id = local.kms_key_id
 
   config_context_auth_info = local.config_context_auth_info
   config_context_cluster   = local.config_context_cluster

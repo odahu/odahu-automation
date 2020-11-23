@@ -196,8 +196,8 @@ variable "nfs" {
 # DNS
 ########################
 variable "domain" {
-  type    = string
-  default = ""
+  type        = string
+  default     = ""
   description = "ODAHU flow cluster FQDN"
 }
 
@@ -212,7 +212,7 @@ variable "records" {
 }
 
 variable "lb_record" {
-  type    = map(string)
+  type = map(string)
   default = {
     "name"  = ""
     "value" = ""
@@ -465,9 +465,9 @@ variable "opa" {
       }
     }
     webhook_certs = {
-      ca: "",
-      cert: "",
-      key: ""
+      ca : "",
+      cert : "",
+      key : ""
     }
   }
 }
