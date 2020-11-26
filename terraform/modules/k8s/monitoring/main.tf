@@ -103,7 +103,7 @@ resource "helm_release" "monitoring" {
       grafana_image_tag       = var.grafana_image_tag
       ingress_tls_secret_name = local.ingress_tls_secret_name
 
-      grafana_pgsql_enabled  = var.pgsql_grafana.enabled
+      grafana_pgsql_enabled = var.pgsql_grafana.enabled
       grafana_pgsql_url = format(
         "postgres://%s:%s@%s:%s/%s",
         local.grafana_pg_username,
@@ -137,7 +137,7 @@ resource "kubernetes_config_map" "grafana_dashboard" {
 resource "local_file" "grafana_pg_dashboard" {
   count = var.pgsql_grafana.enabled ? 1 : 0
   content = templatefile("${path.module}/templates/pg_exporter_monitor.tpl", {
-    namespace    = var.db_namespace
+    namespace = var.db_namespace
   })
   filename = "/tmp/.odahu/grafana_pg_dashboard.yml"
 
