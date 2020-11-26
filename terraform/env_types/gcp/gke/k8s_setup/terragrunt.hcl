@@ -28,6 +28,9 @@ locals {
   config_context_cluster   = lookup(local.config, "config_context_cluster", local.kube_context_user)
   cluster_domain_name      = lookup(local.config.dns, "domain", null)
 
+  google_credentials  = replace(replace(lookup(local.config.cloud.gcp.credentials, "GOOGLE_CREDENTIALS", {}), "\"", "\\\""), "\\n", "\\\\n")
+  gke_backend_credentials = lookup(local.config.tfstate_bucket, "credentials", "") == "" ? local.google_credentials : replace(replace(lookup(local.config.tfstate_bucket, "credentials", {}), "\"", "\\\""), "\\n", "\\\\n")
+
   scripts_dir             = "${get_terragrunt_dir()}/../../../../../scripts"
   cmd_k8s_fwrules_cleanup = "${local.scripts_dir}/gcp_k8s_fw_cleanup.sh"
   cmd_k8s_config_fetch    = "gcloud container clusters get-credentials \"${local.cluster_name}\" --region \"${local.gcp_region}\" --project \"${local.gcp_project_id}\""
@@ -38,7 +41,7 @@ remote_state {
   backend = "gcs"
   config  = {
     bucket      = local.config.tfstate_bucket.tfstate_bucket_name
-    credentials = "${get_terragrunt_dir()}/../backend_credentials.json"
+    credentials = "/tmp/gke_backend_credentials.json"
     prefix      = basename(get_terragrunt_dir())
   }
 }
@@ -57,6 +60,11 @@ terraform {
     ]
   }
 
+  after_hook "pass_gke_backend_credentials" {
+    commands = ["terragrunt-read-config"]
+    execute  = ["bash", "-c", "echo ${local.gke_backend_credentials} > /tmp/gke_backend_credentials.json"]
+  }
+
   after_hook "check_dns" {
     commands     = ["apply"]
     execute      = ["bash", local.cmd_check_dns, local.dns_zone, local.records_str]
@@ -71,6 +79,17 @@ terraform {
   after_hook "k8s_ingress_fwrules_cleanup" {
     commands = ["destroy"]
     execute  = ["bash", "-c", local.cmd_k8s_fwrules_cleanup]
+  }
+
+  after_hook "remove_gke_backend_credentials" {
+    commands = [
+      "apply",
+      "plan",
+      "output",
+      "destroy"
+    ]
+    execute = ["bash", "-c", "rm -f /tmp/gke_backend_credentials.json"]
+    run_on_error = true
   }
 }
 

@@ -159,12 +159,6 @@ function SetupCloudAccess() {
 			local creds_gcp
 			creds_gcp=$(GetParam 'cloud.gcp.credentials.GOOGLE_CREDENTIALS')
 			if [[ "${creds_gcp}" != "null" ]]; then
-				backend_creds_gcp=$(GetParam 'tfstate_bucket.credentials')
-				if [[ "${backend_creds_gcp}" != "" ]]; then
-					echo "${backend_creds_gcp}" > "${MODULES_ROOT}"/"${BACKEND_FILENAME}"
-				else
-					echo "${creds_gcp}" > "${MODULES_ROOT}"/"${BACKEND_FILENAME}"
-				fi
 				echo -e "INFO :\tUsing GCP cloud credentials from cluster profile"
 				GOOGLE_CREDENTIALS="${creds_gcp}"
 				export GOOGLE_CREDENTIALS
@@ -408,17 +402,12 @@ function ResumeCluster() {
 	esac
 }
 
-function CleanUp() {
-         rm -f "${MODULES_ROOT}"/"${BACKEND_FILENAME}"
-}
-
 ##################
 ### Do the job
 ##################
 
 ReadArguments "$@"
 MODULES_ROOT="/opt/odahu-flow/terraform/env_types/$(GetParam 'cluster_type')"
-BACKEND_FILENAME="backend_credentials.json"
 SetupCloudAccess
 
 export TF_IN_AUTOMATION=true
@@ -434,5 +423,3 @@ elif [[ $COMMAND == 'suspend' ]]; then
 elif [[ $COMMAND == 'resume' ]]; then
 	ResumeCluster
 fi
-
-CleanUp
