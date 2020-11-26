@@ -58,9 +58,9 @@ locals {
     urlencode("${local.url_schema}://${var.cluster_domain}/dashboard")
   )
 
-  odahu_db_connection_string = var.pgsql_odahu.enabled ? "postgresql://${local.pg_odahu_username}:${local.pg_odahu_password}@${var.pgsql_odahu.db_host}/${var.pgsql_odahu.db_name}" : null
+  odahu_db_connection_string  = var.pgsql_odahu.enabled ? "postgresql://${local.pg_odahu_username}:${local.pg_odahu_password}@${var.pgsql_odahu.db_host}/${var.pgsql_odahu.db_name}" : null
   mlflow_db_connection_string = var.pgsql_mlflow.enabled ? "postgresql://${local.pg_mlflow_username}:${local.pg_mlflow_password}@${var.pgsql_mlflow.db_host}/${var.pgsql_mlflow.db_name}" : null
-  mlflow_artifact_root = var.mlflow_artifact_root
+  mlflow_artifact_root        = var.mlflow_artifact_root
 
   odahuflow_config = {
     common = {
