@@ -23,7 +23,7 @@ remote_state {
   backend = "gcs"
   config  = {
     bucket      = local.config.tfstate_bucket.tfstate_bucket_name
-    credentials = "/tmp/gke_backend_credentials.json"
+    credentials = "${get_terragrunt_dir()}/gke_backend_credentials.json"
     prefix      = basename(get_terragrunt_dir())
   }
 }
@@ -44,7 +44,7 @@ terraform {
 
   after_hook "pass_gke_backend_credentials" {
     commands = ["terragrunt-read-config"]
-    execute  = ["bash", "-c", "echo ${local.gke_backend_credentials} > /tmp/gke_backend_credentials.json"]
+    execute  = ["bash", "-c", "echo ${local.gke_backend_credentials} > ${get_terragrunt_dir()}/gke_backend_credentials.json"]
   }
 
   after_hook "k8s_fwrules_cleanup" {
@@ -65,7 +65,7 @@ terraform {
       "output",
       "destroy"
     ]
-    execute = ["bash", "-c", "rm -f /tmp/gke_backend_credentials.json"]
+    execute = ["bash", "-c", "rm -f ${get_terragrunt_dir()}/gke_backend_credentials.json"]
     run_on_error = true
   }
 }
