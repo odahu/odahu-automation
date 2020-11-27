@@ -49,6 +49,7 @@ module "monitoring" {
   tls_secret_key       = var.tls_key
   tls_secret_crt       = var.tls_crt
   monitoring_namespace = var.monitoring_namespace
+  db_namespace         = var.db_namespace
 
   pgsql_grafana = {
     enabled          = var.postgres.enabled

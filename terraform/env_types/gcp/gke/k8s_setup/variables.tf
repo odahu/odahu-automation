@@ -114,6 +114,12 @@ variable "monitoring_namespace" {
   description = "Clusterwide namespace for monitoring stuff"
 }
 
+variable "db_namespace" {
+  type        = string
+  default     = "postgresql"
+  description = "Database namespace"
+}
+
 ##################
 # OAuth2
 ##################
