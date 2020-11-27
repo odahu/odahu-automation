@@ -1,8 +1,13 @@
 locals {
-  pg_credentials_plain = ((length(var.pgsql.secret_namespace) != 0) && (length(var.pgsql.secret_name) != 0)) ? 0 : 1
+  pg_odahu_credentials_plain = ((length(var.pgsql_odahu.secret_namespace) != 0) && (length(var.pgsql_odahu.secret_name) != 0)) ? 0 : 1
 
-  pg_username = local.pg_credentials_plain == 1 ? var.pgsql.db_password : lookup(lookup(data.kubernetes_secret.pg[0], "data", {}), "username", "")
-  pg_password = local.pg_credentials_plain == 1 ? var.pgsql.db_user : lookup(lookup(data.kubernetes_secret.pg[0], "data", {}), "password", "")
+  pg_odahu_username = local.pg_odahu_credentials_plain == 1 ? var.pgsql_odahu.db_password : lookup(lookup(data.kubernetes_secret.pg_odahu[0], "data", {}), "username", "")
+  pg_odahu_password = local.pg_odahu_credentials_plain == 1 ? var.pgsql_odahu.db_user : lookup(lookup(data.kubernetes_secret.pg_odahu[0], "data", {}), "password", "")
+
+  pg_mlflow_credentials_plain = ((length(var.pgsql_mlflow.secret_namespace) != 0) && (length(var.pgsql_mlflow.secret_name) != 0)) ? 0 : 1
+
+  pg_mlflow_username = local.pg_mlflow_credentials_plain == 1 ? var.pgsql_mlflow.db_password : lookup(lookup(data.kubernetes_secret.pg_mlflow[0], "data", {}), "username", "")
+  pg_mlflow_password = local.pg_mlflow_credentials_plain == 1 ? var.pgsql_mlflow.db_user : lookup(lookup(data.kubernetes_secret.pg_mlflow[0], "data", {}), "password", "")
 
   training_node_pools     = flatten([for k, v in var.node_pools : [for i in try(v["taints"], []) : k if i.value == "training"]])
   gpu_training_node_pools = flatten([for k, v in var.node_pools : [for i in try(v["taints"], []) : k if i.value == "training-gpu"]])
@@ -53,13 +58,15 @@ locals {
     urlencode("${local.url_schema}://${var.cluster_domain}/dashboard")
   )
 
-  db_connection_string = var.pgsql.enabled ? "postgresql://${local.pg_username}:${local.pg_password}@${var.pgsql.db_host}/${var.pgsql.db_name}" : null
+  odahu_db_connection_string  = var.pgsql_odahu.enabled ? "postgresql://${local.pg_odahu_username}:${local.pg_odahu_password}@${var.pgsql_odahu.db_host}/${var.pgsql_odahu.db_name}" : null
+  mlflow_db_connection_string = var.pgsql_mlflow.enabled ? "postgresql://${local.pg_mlflow_username}:${local.pg_mlflow_password}@${var.pgsql_mlflow.db_host}/${var.pgsql_mlflow.db_name}" : null
+  mlflow_artifact_root        = var.mlflow_artifact_root
 
   odahuflow_config = {
     common = {
       version                  = var.odahuflow_version
       externalUrls             = concat(local.default_external_urls, var.extra_external_urls)
-      databaseConnectionString = local.db_connection_string
+      databaseConnectionString = local.odahu_db_connection_string
       oauthOidcTokenEndpoint   = var.oauth_oidc_token_endpoint
     }
     users = {
@@ -162,7 +169,7 @@ locals {
       metricUrl          = "${local.url_schema}://${var.cluster_domain}/mlflow"
       timeout            = length(var.odahuflow_training_timeout) == 0 ? null : var.odahuflow_training_timeout
 
-      toolchainIntegrationRepositoryType = var.pgsql.enabled ? "postgres" : "kubernetes"
+      toolchainIntegrationRepositoryType = var.pgsql_odahu.enabled ? "postgres" : "kubernetes"
     }
     trainer = {
       auth = {
@@ -203,10 +210,10 @@ locals {
       namespace          = var.odahuflow_packaging_namespace
       outputConnectionID = "models-output"
 
-      packagingIntegrationRepositoryType = var.pgsql.enabled ? "postgres" : "kubernetes"
+      packagingIntegrationRepositoryType = var.pgsql_odahu.enabled ? "postgres" : "kubernetes"
     }
     migrate = {
-      enabled = var.pgsql.enabled
+      enabled = var.pgsql_odahu.enabled
     }
     serviceCatalog = {
       auth = {
@@ -286,11 +293,19 @@ locals {
 # ODAHU flow namespaces
 ########################################################
 
-data "kubernetes_secret" "pg" {
-  count = local.pg_credentials_plain == 0 ? 1 : 0
+data "kubernetes_secret" "pg_odahu" {
+  count = local.pg_odahu_credentials_plain == 0 ? 1 : 0
   metadata {
-    name      = var.pgsql.secret_name
-    namespace = var.pgsql.secret_namespace
+    name      = var.pgsql_odahu.secret_name
+    namespace = var.pgsql_odahu.secret_namespace
+  }
+}
+
+data "kubernetes_secret" "pg_mlflow" {
+  count = local.pg_mlflow_credentials_plain == 0 ? 1 : 0
+  metadata {
+    name      = var.pgsql_mlflow.secret_name
+    namespace = var.pgsql_mlflow.secret_namespace
   }
 }
 
@@ -479,6 +494,8 @@ resource "helm_release" "mlflow" {
       resource_uploader_sa  = var.resource_uploader_sa
       oauth_oidc_issuer_url = var.oauth_oidc_issuer_url
       oauth_mesh_enabled    = var.oauth_mesh_enabled
+      mlflow_backend_store  = local.mlflow_db_connection_string
+      mlflow_artifact_root  = local.mlflow_artifact_root
     })
   ]
 
