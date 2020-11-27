@@ -64,23 +64,23 @@ resource "aws_security_group_rule" "node-ingress-self" {
 }
 
 resource "aws_security_group_rule" "node-ingress-dns" {
-  description       = "Allow node to communicate with each other"
-  from_port         = 53
-  protocol          = "udp"
-  security_group_id = aws_security_group.node.id
-  cidr_blocks       = ["0.0.0.0/0"]
-  to_port           = 53
-  type              = "ingress"
+  description              = "Allow node to communicate with each other"
+  from_port                = 53
+  protocol                 = "udp"
+  security_group_id        = aws_security_group.node.id
+  source_security_group_id = aws_security_group.node.id
+  to_port                  = 53
+  type                     = "ingress"
 }
 
 resource "aws_security_group_rule" "node-ingress-dns-ephemeral" {
-  description       = "Allow node to communicate with each other"
-  from_port         = 1025
-  protocol          = "udp"
-  security_group_id = aws_security_group.node.id
-  cidr_blocks       = ["0.0.0.0/0"]
-  to_port           = 65535
-  type              = "ingress"
+  description              = "Allow node to communicate with each other"
+  from_port                = 1025
+  protocol                 = "udp"
+  security_group_id        = aws_security_group.node.id
+  source_security_group_id = aws_security_group.node.id
+  to_port                  = 65535
+  type                     = "ingress"
 }
 
 resource "aws_security_group_rule" "node-ingress-bastion" {
