@@ -75,12 +75,14 @@ odahuflow-grafana:
   adminPassword: "${grafana_pass}"
   deploymentStrategy:
     type: Recreate
+%{ if ! grafana_pgsql_enabled }
   persistence:
     enabled: true
     initChownData: true
     accessModes:
     - ReadWriteOnce
     size: "${grafana_storage_size}"
+%{ endif ~}
   ingress:
     path: "/grafana"
     hosts:
@@ -90,6 +92,12 @@ odahuflow-grafana:
       hosts: ["${cluster_domain}"]
     ${indent(4, nginx_annotations)}
   grafana.ini:
+%{ if grafana_pgsql_enabled }
+    database:
+      type: postgres
+      url: ${grafana_pgsql_url}
+      ssl_mode: require
+%{ endif ~}
     auth.anonymous:
       enabled: true
     security:

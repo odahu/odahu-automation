@@ -26,6 +26,12 @@ variable "monitoring_namespace" {
   description = "Clusterwide namespace for monitoring stuff"
 }
 
+variable "db_namespace" {
+  type        = string
+  default     = "postgresql"
+  description = "Database namespace for dashboard deployment"
+}
+
 variable "odahu_infra_version" {
   type        = string
   description = "ODAHU flow infra release version"
@@ -79,4 +85,26 @@ variable "tls_secret_crt" {
 variable "tls_secret_key" {
   type        = string
   description = "ODAHU flow cluster TLS key"
+}
+
+variable "pgsql_grafana" {
+  type = object({
+    enabled          = bool
+    db_host          = string
+    db_name          = string
+    db_user          = string
+    db_password      = string
+    secret_namespace = string
+    secret_name      = string
+  })
+  default = {
+    enabled          = false
+    db_host          = ""
+    db_name          = ""
+    db_user          = ""
+    db_password      = ""
+    secret_namespace = ""
+    secret_name      = ""
+  }
+  description = "PostgreSQL settings for Grafana"
 }

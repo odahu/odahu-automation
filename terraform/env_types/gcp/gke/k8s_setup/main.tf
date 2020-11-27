@@ -37,21 +37,35 @@ module "auth" {
 }
 
 module "monitoring" {
-  source              = "../../../../modules/k8s/monitoring"
-  cluster_domain      = var.cluster_domain_name
-  helm_repo           = var.helm_repo
-  odahu_infra_version = var.odahu_infra_version
-  grafana_admin       = var.grafana_admin
-  grafana_pass        = var.grafana_pass
-  tls_secret_key      = var.tls_key
-  tls_secret_crt      = var.tls_crt
+  source               = "../../../../modules/k8s/monitoring"
+  cluster_domain       = var.cluster_domain_name
+  helm_repo            = var.helm_repo
+  odahu_infra_version  = var.odahu_infra_version
+  grafana_admin        = var.grafana_admin
+  grafana_pass         = var.grafana_pass
+  tls_secret_key       = var.tls_key
+  tls_secret_crt       = var.tls_crt
+  monitoring_namespace = var.monitoring_namespace
+  db_namespace         = var.db_namespace
+
+  pgsql_grafana = {
+    enabled          = var.postgres.enabled
+    db_host          = module.postgresql.pgsql_endpoint
+    db_name          = "grafana"
+    db_user          = ""
+    db_password      = ""
+    secret_namespace = module.postgresql.pgsql_credentials["grafana"].namespace
+    secret_name      = module.postgresql.pgsql_credentials["grafana"].secret
+  }
+
+  depends_on = [module.postgresql]
 }
 
 module "gpu_drivers" {
   source = "../../../../modules/k8s/gpu_drivers_setup"
 
   module_dependency    = module.monitoring.helm_chart
-  monitoring_namespace = module.monitoring.namespace
+  monitoring_namespace = var.monitoring_namespace
   depends_on           = [module.monitoring]
 }
 
@@ -123,8 +137,7 @@ module "postgresql" {
 
   depends_on = [
     module.gke-saa,
-    module.nfs,
-    module.monitoring
+    module.nfs
   ]
 }
 

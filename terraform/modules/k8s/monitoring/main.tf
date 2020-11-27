@@ -1,4 +1,9 @@
 locals {
+  grafana_pg_credentials_plain = ((length(var.pgsql_grafana.secret_namespace) != 0) && (length(var.pgsql_grafana.secret_name) != 0)) ? 0 : 1
+
+  grafana_pg_username = local.grafana_pg_credentials_plain == 1 ? var.pgsql_grafana.db_password : lookup(lookup(data.kubernetes_secret.pg[0], "data", {}), "username", "")
+  grafana_pg_password = local.grafana_pg_credentials_plain == 1 ? var.pgsql_grafana.db_user : lookup(lookup(data.kubernetes_secret.pg[0], "data", {}), "password", "")
+
   ingress_tls_secret_name = "odahu-flow-tls"
 
   ingress_auth_signin = format(
@@ -37,6 +42,14 @@ locals {
 ########################################################
 # Prometheus monitoring
 ########################################################
+data "kubernetes_secret" "pg" {
+  count = local.grafana_pg_credentials_plain == 0 ? 1 : 0
+  metadata {
+    name      = var.pgsql_grafana.secret_name
+    namespace = var.pgsql_grafana.secret_namespace
+  }
+}
+
 resource "kubernetes_namespace" "monitoring" {
   metadata {
     annotations = {
@@ -89,10 +102,57 @@ resource "helm_release" "monitoring" {
       grafana_storage_size    = var.grafana_storage_size
       grafana_image_tag       = var.grafana_image_tag
       ingress_tls_secret_name = local.ingress_tls_secret_name
+
+      grafana_pgsql_enabled = var.pgsql_grafana.enabled
+      grafana_pgsql_url = format(
+        "postgres://%s:%s@%s:%s/%s",
+        local.grafana_pg_username,
+        local.grafana_pg_password,
+        var.pgsql_grafana.db_host,
+        "5432",
+        var.pgsql_grafana.db_name
+      )
     })
   ]
-  depends_on = [
-    kubernetes_secret.tls_monitoring,
-    kubernetes_namespace.monitoring
-  ]
+  depends_on = [kubernetes_secret.tls_monitoring]
+}
+
+resource "kubernetes_config_map" "grafana_dashboard" {
+  metadata {
+    annotations = {
+      k8s-sidecar-target-directory = "/tmp/dashboards/k8s"
+    }
+    labels = {
+      grafana_dashboard = "1"
+    }
+    name      = "psql-dashboard.json"
+    namespace = var.monitoring_namespace
+  }
+
+  data = {
+    "psql-dashboard.json" = file("${path.module}/files/grafana-psql-dashboard.json")
+  }
+}
+
+resource "local_file" "grafana_pg_dashboard" {
+  count = var.pgsql_grafana.enabled ? 1 : 0
+  content = templatefile("${path.module}/templates/pg_exporter_monitor.tpl", {
+    namespace = var.db_namespace
+  })
+  filename = "/tmp/.odahu/grafana_pg_dashboard.yml"
+
+  file_permission      = 0644
+  directory_permission = 0755
+
+  depends_on = [helm_release.monitoring]
+}
+
+resource "null_resource" "grafana_pg_dashboard" {
+  count = var.pgsql_grafana.enabled ? 1 : 0
+  provisioner "local-exec" {
+    interpreter = ["timeout", "1m", "bash", "-c"]
+
+    command = "until kubectl apply -f ${local_file.grafana_pg_dashboard[0].filename}; do sleep 5; done"
+  }
+  depends_on = [local_file.grafana_pg_dashboard[0]]
 }
