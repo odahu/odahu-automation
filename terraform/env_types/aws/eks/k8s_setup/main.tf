@@ -369,6 +369,6 @@ module "odahuflow_helm" {
     secret_name      = module.postgresql.pgsql_credentials["mlflow"].secret
   }
 
-  depends_on = [module.nginx_ingress_helm, module.auth, module.postgresql, module.odahuflow_prereqs, module.vault]
+  depends_on = [module.nginx_ingress_helm, module.auth, module.postgresql, module.odahuflow_prereqs, module.vault, module.knative]
 }
 
