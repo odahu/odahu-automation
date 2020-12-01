@@ -132,6 +132,7 @@ resource "kubernetes_config_map" "grafana_dashboard" {
   data = {
     "psql-dashboard.json" = file("${path.module}/files/grafana-psql-dashboard.json")
   }
+  depends_on = [kubernetes_namespace.monitoring]
 }
 
 resource "local_file" "grafana_pg_dashboard" {
