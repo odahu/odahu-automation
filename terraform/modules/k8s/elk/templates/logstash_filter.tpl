@@ -4,8 +4,14 @@ filter {
       add_field => { "[@metadata][target_index]" => "odahu-flow" }
     }
   } else {
-    mutate {
-      add_field => { "[@metadata][target_index]" => "logstash" }
+    if [kubernetes][labels][odahu-flow-authorization] == "enabled" {
+      mutate {
+        add_field => { "[@metadata][target_index]" => "opa" }
+      }
+    } else {
+      mutate {
+        add_field => { "[@metadata][target_index]" => "logstash" }
+      }
     }
   }
 
