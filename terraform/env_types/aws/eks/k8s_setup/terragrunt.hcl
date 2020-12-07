@@ -9,6 +9,7 @@ locals {
   az_list             = lookup(lookup(local.config.cloud, "aws", {}), "az_list", [])
   cluster_domain_name = lookup(local.config.dns, "domain", null)
   context_name        = "arn:aws:eks:${local.aws_region}:505502776526:cluster/${local.cluster_name}"
+  kms_key_arn         = lookup(lookup(local.config.cloud, "aws", {}), "kms_key_arn", "")
 
   # If "config_context_auth_info", "config_context_cluster" variables are defined in $PROFILE, then we should use it,
   # otherwise we should parse kubeconfig (if exists)
@@ -73,6 +74,7 @@ inputs = {
   aws_region   = local.aws_region
   az_list      = local.az_list
   domain       = local.cluster_domain_name
+  kms_key_arn  = local.kms_key_arn
   managed_zone = lookup(local.config.dns, "zone_name", "")
 
   config_context_auth_info = local.config_context_auth_info

@@ -54,7 +54,7 @@ variable "nat_subnet_cidr" {
   description = "AWS NAT network CIDR, will be used to place bastion host"
 }
 
-variable "kms_key_id" {
+variable "kms_key_arn" {
   type        = string
   description = "The ARN of the AWS Key Management Service (AWS KMS) customer master key (CMK) to use when creating the encrypted volume"
 }
@@ -70,13 +70,13 @@ variable "node_pools" {
 
 variable "cluster_autoscaling_cpu_max_limit" {
   type        = number
-  default     = 32
+  default     = 48
   description = "Maximum CPU limit for autoscaling if it is enabled."
 }
 
 variable "cluster_autoscaling_memory_max_limit" {
   type        = number
-  default     = 86
+  default     = 160
   description = "Maximum memory limit for autoscaling if it is enabled."
 }
 

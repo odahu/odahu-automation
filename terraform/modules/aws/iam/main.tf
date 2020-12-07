@@ -1,3 +1,8 @@
+resource "aws_iam_service_linked_role" "autoscaling" {
+  custom_suffix    = "${var.cluster_name}"
+  aws_service_name = "autoscaling.amazonaws.com"
+}
+
 resource "aws_iam_role" "master" {
   name = "tf-${var.cluster_name}"
 
@@ -27,12 +32,12 @@ resource "aws_iam_role_policy_attachment" "AmazonEKSServicePolicy" {
   role       = aws_iam_role.master.name
 }
 
-resource "aws_iam_role_policy_attachment" "eks_kms_encryption" {
-  policy_arn = aws_iam_policy.eks_kms_encryption.arn
+resource "aws_iam_role_policy_attachment" "kms_encryption" {
+  policy_arn = aws_iam_policy.kms_encryption.arn
   role       = aws_iam_role.master.name
 }
 
-resource "aws_iam_role_policy_attachment" "encrypted_ebs_attach" {
+resource "aws_iam_role_policy_attachment" "master_encrypted_ebs_attach" {
   policy_arn = aws_iam_policy.encrypted_ebs_attach.arn
   role       = aws_iam_role.master.name
 }
@@ -47,7 +52,8 @@ resource "aws_iam_role" "node" {
     {
       "Effect": "Allow",
       "Principal": {
-        "Service": "ec2.amazonaws.com"
+        "Service": "ec2.amazonaws.com",
+        "Service": "autoscaling.amazonaws.com"
       },
       "Action": "sts:AssumeRole"
     }
@@ -131,10 +137,10 @@ data "aws_iam_policy_document" "node_autoscaling" {
   }
 }
 
-resource "aws_iam_policy" "eks_kms_encryption" {
+resource "aws_iam_policy" "kms_encryption" {
   name_prefix = "kms-${var.cluster_name}"
   description = "EKS KMS Encryption policy for cluster ${var.cluster_name}"
-  policy      = data.aws_iam_policy_document.eks_kms_encryption.json
+  policy      = data.aws_iam_policy_document.kms_encryption.json
 }
 
 resource "aws_iam_policy" "encrypted_ebs_attach" {
@@ -143,20 +149,19 @@ resource "aws_iam_policy" "encrypted_ebs_attach" {
   policy      = data.aws_iam_policy_document.encrypted_ebs_attach.json
 }
 
-data "aws_iam_policy_document" "eks_kms_encryption" {
+data "aws_iam_policy_document" "kms_encryption" {
   statement {
     sid    = "eksKmsEncryption"
     effect = "Allow"
 
     actions = [
-      "kms:ReEncrypt",
-      "kms:Decrypt",
       "kms:Encrypt",
+      "kms:Decrypt",
+      "kms:ReEncrypt*",
       "kms:DescribeKey",
-      "kms:GenerateDataKey",
-      "kms:GenerateDataKeyWithoutPlaintext"
+      "kms:GenerateDataKey*",
     ]
-    resources = ["*"]
+    resources = [var.kms_key_arn]
   }
 }
 
@@ -170,7 +175,7 @@ data "aws_iam_policy_document" "encrypted_ebs_attach" {
       "kms:ListGrants",
       "kms:RevokeGrant"
     ]
-    resources = ["*"]
+    resources = [var.kms_key_arn]
     condition {
       test     = "Bool"
       variable = "kms:GrantIsForAWSResource"
@@ -178,4 +183,20 @@ data "aws_iam_policy_document" "encrypted_ebs_attach" {
       values = ["true"]
     }
   }
+}
+
+resource "aws_kms_grant" "kms_encrypt" {
+  name              = "${var.cluster_name}_kms_encrypt"
+  key_id            = basename(var.kms_key_arn)
+  grantee_principal = aws_iam_service_linked_role.autoscaling.arn
+  operations = [
+    "Encrypt",
+    "Decrypt",
+    "ReEncryptTo",
+    "ReEncryptFrom",
+    "DescribeKey",
+    "CreateGrant",
+    "GenerateDataKey",
+    "GenerateDataKeyWithoutPlaintext"
+  ]
 }

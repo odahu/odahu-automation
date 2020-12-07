@@ -16,7 +16,7 @@ resource "aws_s3_bucket" "data" {
   server_side_encryption_configuration {
     rule {
       apply_server_side_encryption_by_default {
-        kms_master_key_id = var.kms_key_id
+        kms_master_key_id = basename(var.kms_key_arn)
         sse_algorithm     = "aws:kms"
       }
     }
@@ -61,7 +61,7 @@ resource "aws_s3_bucket" "logs" {
   server_side_encryption_configuration {
     rule {
       apply_server_side_encryption_by_default {
-        kms_master_key_id = var.kms_key_id
+        kms_master_key_id = basename(var.kms_key_arn)
         sse_algorithm     = "aws:kms"
       }
     }
@@ -99,7 +99,7 @@ resource "aws_ecr_repository" "this" {
 
 data "aws_iam_policy_document" "collector" {
   statement {
-    actions = ["s3:*"]
+    actions   = ["s3:*"]
     effect    = "Allow"
     resources = var.log_bucket == "" ? ["${aws_s3_bucket.data.arn}*"] : ["${aws_s3_bucket.logs[0].arn}*"]
   }
@@ -117,7 +117,7 @@ data "aws_iam_policy_document" "collector" {
       "kms:GenerateDataKey"
     ]
     effect    = "Allow"
-    resources = ["*"]
+    resources = [var.kms_key_arn]
   }
 }
 

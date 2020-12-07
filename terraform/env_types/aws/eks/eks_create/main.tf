@@ -25,6 +25,7 @@ module "firewall" {
 module "iam" {
   source       = "../../../../modules/aws/iam"
   cluster_name = var.cluster_name
+  kms_key_arn  = var.kms_key_arn
 }
 
 module "eks" {
@@ -44,7 +45,8 @@ module "eks" {
   subnet_ids                           = module.vpc.private_subnet_ids
   nat_subnet_id                        = module.vpc.nat_subnet_id
   aws_region                           = var.aws_region
-  kms_key_id                           = var.kms_key_id
+  kms_key_arn                          = var.kms_key_arn
+  service_linked_role_arn              = module.iam.service_role_arn
   cluster_autoscaling_cpu_max_limit    = var.cluster_autoscaling_cpu_max_limit
   cluster_autoscaling_memory_max_limit = var.cluster_autoscaling_memory_max_limit
 
@@ -57,7 +59,7 @@ module "eks" {
 
 module "kms_storage_class" {
   source       = "../../../../modules/aws/storage"
-  kms_key_id   = var.kms_key_id
+  kms_key_arn  = var.kms_key_arn
   cluster_name = var.cluster_name
 
   depends_on = [module.eks]

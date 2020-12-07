@@ -1,3 +1,11 @@
+output "service_role_arn" {
+  value = aws_iam_service_linked_role.autoscaling.arn
+}
+
+output "service_role_id" {
+  value = aws_iam_service_linked_role.autoscaling.id
+}
+
 output "master_role_arn" {
   value = aws_iam_role.master.arn
 }

@@ -158,7 +158,7 @@ module "odahuflow_prereqs" {
   source              = "../../../../modules/odahuflow/prereqs/eks"
   region              = var.aws_region
   cluster_name        = var.cluster_name
-  kms_key_id          = var.kms_key_id
+  kms_key_arn         = var.kms_key_arn
   data_bucket         = var.data_bucket
   log_bucket          = var.log_bucket
   log_expiration_days = var.log_expiration_days
@@ -172,6 +172,7 @@ module "airflow_prereqs" {
   dag_bucket      = local.dag_bucket
   dag_bucket_path = local.dag_bucket_path
   region          = var.aws_region
+  kms_key_arn     = var.kms_key_arn
 
   depends_on = [module.odahuflow_prereqs]
 }

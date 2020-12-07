@@ -160,14 +160,14 @@ resource "aws_launch_template" "this" {
   }
 
   dynamic "block_device_mappings" {
-    for_each = flatten([lookup(each.value, "disk_size_gb", [])])
+    for_each = flatten([lookup(each.value, "disk_size_gb", "40")])
     iterator = size
     content {
       device_name = "/dev/xvda"
       ebs {
-        kms_key_id            = var.kms_key_id
+        kms_key_id            = var.kms_key_arn
         encrypted             = true
-        volume_type           = "standard"
+        volume_type           = lookup(each.value, "disk_type", "standard")
         volume_size           = size.value
         delete_on_termination = true
       }
@@ -194,11 +194,12 @@ resource "aws_launch_template" "this" {
 resource "aws_autoscaling_group" "this" {
   for_each = var.node_pools
 
-  desired_capacity    = lookup(each.value, "init_node_count", 0)
-  min_size            = lookup(each.value, "min_node_count", "0")
-  max_size            = lookup(each.value, "max_node_count", "2")
-  name                = "tf-${var.cluster_name}-${substr(replace(each.key, "/[_\\W]/", "-"), 0, 40)}"
-  vpc_zone_identifier = var.subnet_ids
+  desired_capacity        = lookup(each.value, "init_node_count", 0)
+  min_size                = lookup(each.value, "min_node_count", "0")
+  max_size                = lookup(each.value, "max_node_count", "2")
+  name                    = "tf-${var.cluster_name}-${substr(replace(each.key, "/[_\\W]/", "-"), 0, 40)}"
+  vpc_zone_identifier     = var.subnet_ids
+  service_linked_role_arn = var.service_linked_role_arn
 
   launch_template {
     id      = aws_launch_template.this[each.key].id

@@ -1,7 +1,7 @@
 ##################
 # Common
 ##################
-variable "kms_key_id" {
+variable "kms_key_arn" {
   type        = string
   description = "The ARN of the AWS Key Management Service (AWS KMS) customer master key (CMK) to use when creating the encrypted volume"
 }

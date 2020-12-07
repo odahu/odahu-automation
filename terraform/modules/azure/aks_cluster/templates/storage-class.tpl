@@ -1,5 +1,5 @@
 kind: StorageClass
-apiVersion: storage.k8s.io/v1  
+apiVersion: storage.k8s.io/v1
 metadata:
   name: ${storage_class_name}
 provisioner: kubernetes.io/azure-disk

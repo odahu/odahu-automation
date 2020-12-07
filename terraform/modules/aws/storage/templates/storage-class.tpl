@@ -7,4 +7,4 @@ parameters:
   type: ${storage_type}
   fstype: ${fs_type}
   encrypted: "true"
-  kmsKeyId: ${kms_key_id}
+  kmsKeyId: ${kms_key_arn}
