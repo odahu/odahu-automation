@@ -1,4 +1,4 @@
-terraform_version_constraint = ">= 0.12.21"
+terraform_version_constraint = "= 0.12.29"
 
 locals {
   profile = get_env("PROFILE", "${get_terragrunt_dir()}//profile.json")
