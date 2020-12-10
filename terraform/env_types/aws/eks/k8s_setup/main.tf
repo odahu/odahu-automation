@@ -362,7 +362,7 @@ module "odahuflow_helm" {
   pgsql_mlflow = {
     enabled          = var.postgres.enabled
     db_host          = module.postgresql.pgsql_endpoint
-    db_name          = var.odahu_database
+    db_name          = "mlflow"
     db_user          = ""
     db_password      = ""
     secret_namespace = module.postgresql.pgsql_credentials["mlflow"].namespace
