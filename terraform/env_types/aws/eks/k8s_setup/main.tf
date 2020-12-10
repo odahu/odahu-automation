@@ -2,6 +2,11 @@
 # K8S setup
 ########################################################
 
+module "kube2iam" {
+  source       = "../../../../modules/k8s/kube2iam"
+  cluster_type = var.cluster_type
+}
+
 module "nginx_ingress_tls" {
   source         = "../../../../modules/k8s/nginx-ingress/tls"
   cluster_name   = var.cluster_name
@@ -12,12 +17,15 @@ module "nginx_ingress_tls" {
 module "nginx_ingress_prereqs" {
   source       = "../../../../modules/k8s/nginx-ingress/prereqs/eks"
   cluster_name = var.cluster_name
+
+  depends_on   = [module.kube2iam]
 }
 
 module "nginx_ingress_helm" {
   source      = "../../../../modules/k8s/nginx-ingress/helm"
   helm_values = module.nginx_ingress_prereqs.helm_values
-  depends_on  = [module.nginx_ingress_prereqs]
+
+  depends_on = [module.nginx_ingress_prereqs]
 }
 
 module "auth" {
@@ -30,6 +38,8 @@ module "auth" {
   oauth_oidc_scope      = var.oauth_oidc_scope
   oauth_cookie_expire   = "168h0m0s"
   oauth_cookie_secret   = var.oauth_cookie_secret
+
+  depends_on = [module.kube2iam]
 }
 
 module "monitoring" {
@@ -65,6 +75,8 @@ module "istio" {
   docker_repo     = var.docker_repo
   docker_username = var.docker_username
   docker_password = var.docker_password
+
+  depends_on = [module.kube2iam]
 }
 
 module "knative" {
@@ -76,21 +88,20 @@ module "knative" {
   depends_on          = [module.istio]
 }
 
-module "kube2iam" {
-  source       = "../../../../modules/k8s/kube2iam"
-  cluster_type = var.cluster_type
-}
-
 module "tekton" {
   source              = "../../../../modules/k8s/tekton"
   helm_repo           = var.helm_repo
   odahu_infra_version = var.odahu_infra_version
+
+  depends_on = [module.kube2iam]
 }
 
 module "nfs" {
   source = "../../../../modules/k8s/nfs"
 
   configuration = var.nfs
+
+  depends_on = [module.kube2iam]
 }
 
 ########################################################
