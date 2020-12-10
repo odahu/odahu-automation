@@ -8,8 +8,14 @@ variable "cluster_name" {
 
 variable "k8s_version" {
   type        = string
-  default     = "1.13.10"
+  default     = "1.16"
   description = "Kubernetes master version"
+}
+
+variable "autoscaler_version" {
+  type        = string
+  default     = "1.16.5"
+  description = "Kubernetes Cluster Autoscaler version"
 }
 
 variable "allowed_ips" {
