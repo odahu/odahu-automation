@@ -55,6 +55,11 @@ variable "es_index_settings" {
       size   = "1GB"
       age    = "25d"
       shards = 1
+    },
+    "deployment" = {
+      size   = "1GB"
+      age    = "25d"
+      shards = 1
     }
   }
   description = "Settings to configure Elasticsearch index templates and index lifecycle policies"
