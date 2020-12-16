@@ -76,7 +76,7 @@ variable "oauth_cookie_secret" {
 
 variable "helm_repo" {
   type        = string
-  default     = "https://kubernetes-charts.storage.googleapis.com"
+  default     = "https://charts.helm.sh/stable"
   description = "URL of used Helm chart repository"
 }
 
