@@ -9,7 +9,7 @@ filter {
     match => { "msg" => "\"modelName\":\"(?<ModelName>[a-zA-F0-9_-]+)\"" }
   }
   grok {
-    match => { "knative.dev\/key" => "odahu-flow-deployment\/(?<ModelName>[a-zA-F0-9_-]+)" }
+    match => { "log" => "knative.dev\/key\":\"odahu-flow-deployment\/(?<ModelName>[a-zA-F0-9_-]+)" }
   }
   grok {
     match => { "log" => " \/model\/(?<ModelName>[a-zA-F0-9_-]+)\/api\/model\/" }
@@ -21,7 +21,7 @@ filter {
   } else {
     if [md_id] {
       mutate {
-        rename => ["md_id", "ModelName" ]
+        rename => [ "md_id", "ModelName" ]
       }
     } 
     if [ModelName] {
