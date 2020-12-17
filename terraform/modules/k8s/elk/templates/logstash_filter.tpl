@@ -3,6 +3,10 @@ filter {
     mutate {
       add_field => { "[@metadata][target_index]" => "odahu-flow" }
     }
+  } elseif [kubernetes][labels][odahu-flow-authorization] == "enabled" {
+    mutate {
+      add_field => { "[@metadata][target_index]" => "opa" }
+    }
   } else {
     if [kubernetes][labels][odahu-flow-authorization] == "enabled" {
       mutate {
