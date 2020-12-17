@@ -10,7 +10,7 @@ variable "tls_secret_key" {
 
 variable "istio_version" {
   type    = string
-  default = "1.4.4"
+  default = "1.4.10"
 }
 
 variable "istio_namespace" {
@@ -39,7 +39,7 @@ variable "docker_password" {
 
 variable "helm_repo" {
   type        = string
-  default     = "https://storage.googleapis.com/istio-release/releases/1.4.4/charts"
+  default     = "https://storage.googleapis.com/istio-release/releases/1.4.10/charts"
   description = "URL of used Helm chart repository"
 }
 
