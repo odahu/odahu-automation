@@ -30,3 +30,20 @@ variable "kms_key_arn" {
   description = "The ARN of the AWS Key Management Service (AWS KMS) customer master key (CMK) to use when creating the encrypted volume"
 }
 
+variable "syncer_sa_list" {
+  type        = list
+  description = "List of syncer service accounts that should be allowed to use `syncer` IAM role"
+}
+
+variable "openid_connect_provider" {
+  type = object({
+    url = string
+    arn = string
+  })
+  default = ({
+    url = ""
+    arn = ""
+  })
+  description = "OpenID connect provider for IRSA"
+}
+
