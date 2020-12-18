@@ -1,4 +1,6 @@
 locals {
+  sa_annotations = length(try(var.extra_helm_values, "sa_annotations", {})) == 0 ? {} : { "serviceAccount" = { "annotations" = var.extra_helm_values.sa_annotations } }
+
   fluentd_daemonset_values = {
     "extraAnnotations" = var.extra_helm_values.annotations
     "extraEnvs"        = var.extra_helm_values.envs
@@ -45,6 +47,7 @@ resource "helm_release" "fluentd-daemonset" {
       odahu_infra_version = var.odahu_infra_version
 
       fluentd_daemonset_values = yamlencode({ "fluentd" = local.fluentd_daemonset_values })
+      sa_annotations           = yamlencode(local.sa_annotations)
     })
   ]
 
