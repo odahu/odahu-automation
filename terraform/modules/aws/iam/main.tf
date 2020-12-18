@@ -1,5 +1,5 @@
 resource "aws_iam_service_linked_role" "autoscaling" {
-  custom_suffix    = "${var.cluster_name}"
+  custom_suffix    = var.cluster_name
   aws_service_name = "autoscaling.amazonaws.com"
 }
 
@@ -52,8 +52,7 @@ resource "aws_iam_role" "node" {
     {
       "Effect": "Allow",
       "Principal": {
-        "Service": "ec2.amazonaws.com",
-        "Service": "autoscaling.amazonaws.com"
+        "Service": "ec2.amazonaws.com"
       },
       "Action": "sts:AssumeRole"
     }
@@ -80,61 +79,6 @@ resource "aws_iam_role_policy_attachment" "AmazonEC2ContainerRegistryReadOnly" {
 resource "aws_iam_instance_profile" "node" {
   name = "tf-${var.cluster_name}-node"
   role = aws_iam_role.node.name
-}
-
-resource "aws_iam_role_policy_attachment" "node_autoscaling" {
-  policy_arn = aws_iam_policy.node_autoscaling.arn
-  role       = aws_iam_role.node.name
-}
-
-resource "aws_iam_policy" "node_autoscaling" {
-  name_prefix = "eks-worker-autoscaling-${var.cluster_name}"
-  description = "EKS worker node autoscaling policy for cluster ${var.cluster_name}"
-  policy      = data.aws_iam_policy_document.node_autoscaling.json
-}
-
-data "aws_iam_policy_document" "node_autoscaling" {
-  statement {
-    sid    = "eksWorkerAutoscalingAll"
-    effect = "Allow"
-
-    actions = [
-      "autoscaling:DescribeAutoScalingGroups",
-      "autoscaling:DescribeAutoScalingInstances",
-      "autoscaling:DescribeLaunchConfigurations",
-      "autoscaling:DescribeTags",
-      "autoscaling:SetDesiredCapacity",
-      "autoscaling:TerminateInstanceInAutoScalingGroup",
-      "ec2:DescribeLaunchTemplateVersions",
-    ]
-
-    resources = ["*"]
-  }
-
-  statement {
-    sid    = "eksWorkerAutoscalingOwn"
-    effect = "Allow"
-
-    actions = [
-      "autoscaling:SetDesiredCapacity",
-      "autoscaling:TerminateInstanceInAutoScalingGroup",
-      "autoscaling:UpdateAutoScalingGroup",
-    ]
-
-    resources = ["*"]
-
-    condition {
-      test     = "StringEquals"
-      variable = "autoscaling:ResourceTag/kubernetes.io/cluster/${var.cluster_name}"
-      values   = ["owned"]
-    }
-
-    condition {
-      test     = "StringEquals"
-      variable = "autoscaling:ResourceTag/k8s.io/cluster-autoscaler/enabled"
-      values   = ["true"]
-    }
-  }
 }
 
 resource "aws_iam_policy" "kms_encryption" {
