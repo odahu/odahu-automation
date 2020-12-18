@@ -56,10 +56,11 @@ variable "helm_timeout" {
 
 variable "extra_helm_values" {
   type = object({
-    config      = string
-    annotations = map(string)
-    envs        = list(any)
-    secrets     = list(any)
+    config         = string
+    annotations    = map(string)
+    sa_annotations = map(string)
+    envs           = list(any)
+    secrets        = list(any)
   })
   description = "Set of input extra variables with Helm chart values"
 }
