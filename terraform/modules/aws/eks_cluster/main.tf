@@ -8,19 +8,6 @@ resource "local_file" "aws_auth_cm" {
   directory_permission = 0755
 }
 
-resource "local_file" "cluster_autoscaler" {
-  content = templatefile("${path.module}/templates/cluster-autoscaler.tpl", {
-    cluster_name  = var.cluster_name
-    k8s_version   = var.autoscaler_version
-    cpu_max_limit = var.cluster_autoscaling_cpu_max_limit
-    mem_max_limit = var.cluster_autoscaling_memory_max_limit
-  })
-  filename = "/tmp/.odahu/aws_cluster_autoscaler.yml"
-
-  file_permission      = 0644
-  directory_permission = 0755
-}
-
 ########################################################
 # Bastion
 ########################################################
@@ -112,24 +99,6 @@ resource "null_resource" "setup_calico" {
     null_resource.populate_auth_map
   ]
 }
-
-resource "null_resource" "setup_cluster_autoscaler" {
-  provisioner "local-exec" {
-    command = "timeout 90 bash -c 'until kubectl apply -f ${local_file.cluster_autoscaler.filename}; do sleep 5; done'"
-  }
-  depends_on = [
-    null_resource.setup_calico
-  ]
-}
-
-resource "null_resource" "verify_cluster_autoscaler" {
-  provisioner "local-exec" {
-    interpreter = ["timeout", "5m", "bash", "-c"]
-    command     = "until [[ $(kubectl -n kube-system get deployments cluster-autoscaler -ojsonpath='{.status.readyReplicas}') = '1' ]]; do sleep 5; done"
-  }
-  depends_on = [null_resource.setup_cluster_autoscaler]
-}
-
 
 # Node pools
 resource "aws_launch_template" "this" {

@@ -2,9 +2,22 @@
 # K8S setup
 ########################################################
 
-module "kube2iam" {
-  source       = "../../../../modules/k8s/kube2iam"
-  cluster_type = var.cluster_type
+module "irsa" {
+  source       = "../../../../modules/aws/irsa"
+  cluster_name = var.cluster_name
+}
+
+module "cluster_autoscaler" {
+  source = "../../../../modules/k8s/cluster_autoscaler"
+
+  aws_region         = var.aws_region
+  iam_role_arn       = module.irsa.autoscaler_role_arn
+  cluster_name       = var.cluster_name
+  cpu_max_limit      = var.cluster_autoscaling_cpu_max_limit
+  mem_max_limit      = var.cluster_autoscaling_memory_max_limit
+  autoscaler_version = var.autoscaler_version
+
+  depends_on = [module.irsa]
 }
 
 module "nginx_ingress_tls" {
@@ -17,8 +30,6 @@ module "nginx_ingress_tls" {
 module "nginx_ingress_prereqs" {
   source       = "../../../../modules/k8s/nginx-ingress/prereqs/eks"
   cluster_name = var.cluster_name
-
-  depends_on   = [module.kube2iam]
 }
 
 module "nginx_ingress_helm" {
@@ -39,7 +50,7 @@ module "auth" {
   oauth_cookie_expire   = "168h0m0s"
   oauth_cookie_secret   = var.oauth_cookie_secret
 
-  depends_on = [module.kube2iam]
+  depends_on = [module.cluster_autoscaler]
 }
 
 module "monitoring" {
@@ -76,7 +87,7 @@ module "istio" {
   docker_username = var.docker_username
   docker_password = var.docker_password
 
-  depends_on = [module.kube2iam]
+  depends_on = [module.cluster_autoscaler]
 }
 
 module "knative" {
@@ -93,7 +104,7 @@ module "tekton" {
   helm_repo           = var.helm_repo
   odahu_infra_version = var.odahu_infra_version
 
-  depends_on = [module.kube2iam]
+  depends_on = [module.cluster_autoscaler]
 }
 
 module "nfs" {
@@ -101,12 +112,12 @@ module "nfs" {
 
   configuration = var.nfs
 
-  depends_on = [module.kube2iam]
+  depends_on = [module.cluster_autoscaler]
 }
 
-########################################################
-# DNS setup
-########################################################
+#########################################################
+## DNS setup
+#########################################################
 
 module "odahu-dns" {
   source = "../../../../modules/dns/modules/gcp"
@@ -135,7 +146,7 @@ module "postgresql" {
   databases     = local.databases
 
   depends_on = [
-    module.kube2iam,
+    module.cluster_autoscaler,
     module.nfs
   ]
 }
@@ -173,6 +184,12 @@ module "odahuflow_prereqs" {
   data_bucket         = var.data_bucket
   log_bucket          = var.log_bucket
   log_expiration_days = var.log_expiration_days
+  openid_connect_provider = module.irsa.openid_connect_provider
+  collector_sa_list   = [
+    "system:serviceaccount:${var.logging_namespace}:fluentd-daemonset",
+    "system:serviceaccount:${var.fluentd_namespace}:fluentd",
+    "system:serviceaccount:${var.elk_namespace}:logstash"
+  ]
 }
 
 module "airflow_prereqs" {
@@ -184,6 +201,7 @@ module "airflow_prereqs" {
   dag_bucket_path = local.dag_bucket_path
   region          = var.aws_region
   kms_key_arn     = var.kms_key_arn
+  openid_connect_provider = module.irsa.openid_connect_provider
 
   depends_on = [module.odahuflow_prereqs]
 }
@@ -222,7 +240,7 @@ module "airflow" {
 module "storage-syncer" {
   source = "../../../../modules/k8s/syncer"
 
-  namespace           = "airflow"
+  namespace           = var.airflow_namespace
   helm_repo           = var.helm_repo
   extra_helm_values   = module.airflow_prereqs.syncer_helm_values
   odahu_infra_version = var.odahu_infra_version
@@ -233,6 +251,7 @@ module "storage-syncer" {
 module "fluentd" {
   source = "../../../../modules/k8s/fluentd"
 
+  namespace           = var.fluentd_namespace
   docker_repo         = var.docker_repo
   docker_username     = var.docker_username
   docker_password     = var.docker_password
@@ -240,12 +259,13 @@ module "fluentd" {
   helm_repo           = var.helm_repo
   extra_helm_values   = module.odahuflow_prereqs.fluent_helm_values
 
-  depends_on = [module.kube2iam, module.odahuflow_prereqs]
+  depends_on = [module.irsa, module.odahuflow_prereqs]
 }
 
 module "fluentd-daemonset" {
   source = "../../../../modules/k8s/fluentd-daemonset"
 
+  namespace           = var.logging_namespace
   docker_repo         = var.docker_repo
   docker_username     = var.docker_username
   docker_password     = var.docker_password
@@ -253,7 +273,7 @@ module "fluentd-daemonset" {
   helm_repo           = var.helm_repo
   extra_helm_values   = module.odahuflow_prereqs.fluent_daemonset_helm_values
 
-  depends_on = [module.kube2iam, module.odahuflow_prereqs]
+  depends_on = [module.irsa, module.odahuflow_prereqs]
 }
 
 module "jupyterhub" {
@@ -300,12 +320,13 @@ module "vault" {
     secret_name      = module.postgresql.pgsql_credentials["vault"].secret
   }
 
-  depends_on = [module.kube2iam, module.postgresql]
+  depends_on = [module.irsa, module.postgresql]
 }
 
 module "elasticsearch" {
   source                = "../../../../modules/k8s/elk"
   cluster_domain        = var.domain
+  namespace             = var.elk_namespace
   tls_secret_key        = var.tls_key
   tls_secret_crt        = var.tls_crt
   docker_repo           = var.docker_repo
@@ -318,7 +339,8 @@ module "elasticsearch" {
 
   depends_on = [
     module.nginx_ingress_helm,
-    module.kube2iam,
+    module.irsa,
+    module.cluster_autoscaler,
     module.odahuflow_prereqs
   ]
 }
@@ -389,4 +411,3 @@ module "odahuflow_helm" {
 
   depends_on = [module.nginx_ingress_helm, module.auth, module.postgresql, module.odahuflow_prereqs, module.vault, module.knative]
 }
-

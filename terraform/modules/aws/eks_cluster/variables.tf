@@ -99,12 +99,6 @@ variable "k8s_version" {
   description = "Kubernetes master version"
 }
 
-variable "autoscaler_version" {
-  type        = string
-  default     = "1.16.5"
-  description = "Kubernetes Cluster Autoscaler component version"
-}
-
 variable "ssh_user" {
   type        = string
   default     = "ubuntu"

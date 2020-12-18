@@ -12,12 +12,6 @@ variable "k8s_version" {
   description = "Kubernetes master version"
 }
 
-variable "autoscaler_version" {
-  type        = string
-  default     = "1.16.5"
-  description = "Kubernetes Cluster Autoscaler version"
-}
-
 variable "allowed_ips" {
   type        = list(string)
   description = "CIDR list to allow access from"
@@ -73,19 +67,6 @@ variable "node_pools" {
   default     = {}
   description = "Default node pool configuration"
 }
-
-variable "cluster_autoscaling_cpu_max_limit" {
-  type        = number
-  default     = 48
-  description = "Maximum CPU limit for autoscaling if it is enabled."
-}
-
-variable "cluster_autoscaling_memory_max_limit" {
-  type        = number
-  default     = 160
-  description = "Maximum memory limit for autoscaling if it is enabled."
-}
-
 ################
 # Bastion host
 ################
