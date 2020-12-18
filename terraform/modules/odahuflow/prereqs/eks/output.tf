@@ -48,7 +48,7 @@ output "fluent_helm_values" {
   value = templatefile("${path.module}/templates/fluentd.yaml", {
     data_bucket        = aws_s3_bucket.data.id
     data_bucket_region = aws_s3_bucket.data.region
-    collector_iam_role = aws_iam_role.collector.name
+    collector_iam_role = aws_iam_role.collector.arn
   })
 }
 
@@ -59,9 +59,9 @@ output "fluent_daemonset_helm_values" {
       data_bucket_region = local.log_bucket_region
     })
 
-    annotations = {
-      "sidecar.istio.io/inject" = "false"
-      "iam.amazonaws.com/role"  = aws_iam_role.collector.name
+    annotations = {}
+    sa_annotations = {
+      "eks.amazonaws.com/role-arn" = aws_iam_role.collector.arn
     }
 
     envs = []
@@ -79,9 +79,8 @@ output "logstash_input_config" {
 
 output "logstash_annotations" {
   value = {
-    podAnnotations = {
-      "sidecar.istio.io/inject" = "false"
-      "iam.amazonaws.com/role"  = aws_iam_role.collector.name
+    sa_annotations = {
+      "eks.amazonaws.com/role-arn" = aws_iam_role.collector.arn
     }
   }
 }
