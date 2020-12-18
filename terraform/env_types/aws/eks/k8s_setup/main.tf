@@ -177,15 +177,15 @@ module "pg_backup" {
 }
 
 module "odahuflow_prereqs" {
-  source              = "../../../../modules/odahuflow/prereqs/eks"
-  region              = var.aws_region
-  cluster_name        = var.cluster_name
-  kms_key_arn         = var.kms_key_arn
-  data_bucket         = var.data_bucket
-  log_bucket          = var.log_bucket
-  log_expiration_days = var.log_expiration_days
+  source                  = "../../../../modules/odahuflow/prereqs/eks"
+  region                  = var.aws_region
+  cluster_name            = var.cluster_name
+  kms_key_arn             = var.kms_key_arn
+  data_bucket             = var.data_bucket
+  log_bucket              = var.log_bucket
+  log_expiration_days     = var.log_expiration_days
   openid_connect_provider = module.irsa.openid_connect_provider
-  collector_sa_list   = [
+  collector_sa_list = [
     "system:serviceaccount:${var.logging_namespace}:fluentd-daemonset",
     "system:serviceaccount:${var.fluentd_namespace}:fluentd",
     "system:serviceaccount:${var.elk_namespace}:logstash"
@@ -195,13 +195,13 @@ module "odahuflow_prereqs" {
 module "airflow_prereqs" {
   source = "../../../../modules/k8s/airflow/prereqs/eks"
 
-  wine_bucket     = module.odahuflow_prereqs.odahu_data_bucket_name
-  cluster_name    = var.cluster_name
-  syncer_sa_list  = ["system:serviceaccount:${var.airflow_namespace}:odahu-syncer"]
-  dag_bucket      = local.dag_bucket
-  dag_bucket_path = local.dag_bucket_path
-  region          = var.aws_region
-  kms_key_arn     = var.kms_key_arn
+  wine_bucket             = module.odahuflow_prereqs.odahu_data_bucket_name
+  cluster_name            = var.cluster_name
+  syncer_sa_list          = ["system:serviceaccount:${var.airflow_namespace}:odahu-syncer"]
+  dag_bucket              = local.dag_bucket
+  dag_bucket_path         = local.dag_bucket_path
+  region                  = var.aws_region
+  kms_key_arn             = var.kms_key_arn
   openid_connect_provider = module.irsa.openid_connect_provider
 
   depends_on = [module.odahuflow_prereqs]
