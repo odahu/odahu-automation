@@ -37,7 +37,7 @@ locals {
     },
     {
       name     = "Service Catalog",
-      url      = "${local.url_schema}://${var.cluster_domain}/service-catalog/swagger/index.html",
+      url      = "${local.url_schema}://${var.cluster_domain}/service-catalog/catalog/index.html",
       imageUrl = "/img/logo/swagger.png"
     },
     {
