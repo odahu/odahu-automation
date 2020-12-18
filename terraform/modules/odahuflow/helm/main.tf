@@ -221,6 +221,7 @@ locals {
         clientId               = var.service_catalog_sa.client_id
         clientSecret           = var.service_catalog_sa.client_secret
       }
+      edgeHost = var.cluster_domain
     }
   }
   api_vault_volume = {
