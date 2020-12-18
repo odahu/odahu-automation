@@ -4,7 +4,7 @@ variable "elk_enabled" {
   description = "Flag to install ELK stack (true) or not (false)"
 }
 
-variable "elk_namespace" {
+variable "namespace" {
   type        = string
   default     = "odahu-flow-elk"
   description = "ELK stack namespace name"
