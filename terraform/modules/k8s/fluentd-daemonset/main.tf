@@ -35,11 +35,10 @@ module "docker_credentials" {
 
 resource "helm_release" "fluentd-daemonset" {
   name       = "fluentd"
-#  chart      = "odahu-flow-fluentd-daemonset"
-  chart      = "/home/nuts/Work/EPAM/odahu/odahu-infra/helms/odahu-flow-fluentd-daemonset"
-#  version    = var.odahu_infra_version
+  chart      = "odahu-flow-fluentd-daemonset"
+  version    = var.odahu_infra_version
   namespace  = var.namespace
-#  repository = var.helm_repo
+  repository = var.helm_repo
   timeout    = var.helm_timeout
 
   values = [
