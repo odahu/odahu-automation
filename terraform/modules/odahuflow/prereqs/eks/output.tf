@@ -79,7 +79,6 @@ output "logstash_input_config" {
 
 output "logstash_annotations" {
   value = {
-    podAnnotations = {}
     sa_annotations = {
       "eks.amazonaws.com/role-arn" = aws_iam_role.collector.arn
     }

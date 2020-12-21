@@ -86,7 +86,6 @@ output "logstash_input_config" {
 
 output "logstash_annotations" {
   value = {
-    podAnnotations = {}
     sa_annotations = {
       "iam.gke.io/gcp-service-account" = google_service_account.collector_sa.name
     }

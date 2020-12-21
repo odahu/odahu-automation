@@ -12,7 +12,7 @@ locals {
     "rbac" = {
       "create"                    = "true",
       "serviceAccountName"        = "logstash",
-      "serviceAccountAnnotations" = try(var.logstash_annotations, "sa_annotations", {})
+      "serviceAccountAnnotations" = try(var.logstash_annotations["sa_annotations"], {})
     }
   }
 
@@ -322,7 +322,7 @@ resource "helm_release" "logstash" {
       secret_mounts      = yamlencode(local.secret_mounts)
       config             = yamlencode(local.logstash_config)
       replicas           = var.logstash_replicas
-      annotations        = length(try(var.logstash_annotations["podAnnotations"], [])) == 0 ? "" : yamlencode(var.logstash_annotations["podAnnotations"])
+      annotations        = length(try(var.logstash_annotations["podAnnotations"], {})) == 0 ? "" : yamlencode({podAnnotations = var.logstash_annotations["podAnnotations"]})
       rbac               = yamlencode(local.rbac)
       logstash_image     = "${var.docker_repo}/odahu-flow-logstash-oss"
       logstash_image_tag = var.odahu_infra_version
