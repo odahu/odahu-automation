@@ -35,3 +35,8 @@ variable "kms_key_id" {
   description = "The id of a Cloud KMS key that will be used to encrypt cluster disks"
 }
 
+variable "syncer_sa_list" {
+  type        = list
+  description = "List of syncer service accounts that should be allowed to use `syncer` IAM role"
+}
+
