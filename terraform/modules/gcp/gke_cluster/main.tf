@@ -61,6 +61,10 @@ resource "google_container_cluster" "cluster" {
     }
   }
 
+  workload_identity_config {
+    identity_namespace = "${var.project_id}.svc.id.goog"
+  }
+
   private_cluster_config {
     enable_private_endpoint = false
     enable_private_nodes    = true

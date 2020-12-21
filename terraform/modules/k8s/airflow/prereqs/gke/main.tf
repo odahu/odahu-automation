@@ -48,6 +48,13 @@ resource "google_service_account" "syncer_sa" {
   project      = var.project_id
 }
 
+resource "google_service_account_iam_binding" "collector_web_identity" {
+  service_account_id = google_service_account.syncer_sa.name
+  role               = "roles/iam.workloadIdentityUser"
+
+  members = ["serviceAccount:${var.project_id}.svc.id.goog[airflow/odahu-syncer]"]
+}
+
 resource "google_service_account_key" "syncer_sa_key" {
   service_account_id = google_service_account.syncer_sa.name
 }

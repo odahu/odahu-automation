@@ -210,6 +210,7 @@ module "airflow_prereqs" {
 module "airflow" {
   source = "../../../../modules/k8s/airflow/main"
 
+  namespace                    = var.airflow_namespace
   configuration                = var.airflow
   cluster_name                 = var.cluster_name
   cluster_domain               = var.domain

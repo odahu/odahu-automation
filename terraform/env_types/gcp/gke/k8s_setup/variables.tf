@@ -114,6 +114,30 @@ variable "monitoring_namespace" {
   description = "Clusterwide namespace for monitoring stuff"
 }
 
+variable "logging_namespace" {
+  type        = string
+  default     = "logging"
+  description = "Clusterwide namespace for log collection & processing stuff"
+}
+
+variable "elk_namespace" {
+  type        = string
+  default     = "odahu-flow-elk"
+  description = "Clusterwide namespace for log collection & processing stuff"
+}
+
+variable "airflow_namespace" {
+  type        = string
+  default     = "airflow"
+  description = "Namespace for Airflow"
+}
+
+variable "fluentd_namespace" {
+  type        = string
+  default     = "fluentd"
+  description = "Fluentd component namespace"
+}
+
 variable "db_namespace" {
   type        = string
   default     = "postgresql"

@@ -9,4 +9,3 @@ output "odahu_urls" {
 output "pg" {
   value = module.postgresql.pgsql_credentials
 }
-
