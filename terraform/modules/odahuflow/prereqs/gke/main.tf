@@ -70,12 +70,7 @@ resource "google_service_account" "collector_sa" {
 resource "google_service_account_iam_binding" "collector_web_identity" {
   service_account_id = google_service_account.collector_sa.name
   role               = "roles/iam.workloadIdentityUser"
-
-  collector_sa_list  = [
-    "serviceAccount:${var.project_id}.svc.id.goog[fluentd/fluentd]",
-    "serviceAccount:${var.project_id}.svc.id.goog[logging/fluentd-daemonset]",
-    "serviceAccount:${var.project_id}.svc.id.goog[odahu-elk/logstash]"
-  ]
+  members            = var.collector_sa_list
 }
 
 resource "google_service_account_key" "collector_sa_key" {
