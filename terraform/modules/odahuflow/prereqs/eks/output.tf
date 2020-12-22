@@ -57,6 +57,7 @@ output "fluent_daemonset_helm_values" {
     config = templatefile("${path.module}/templates/fluentd_ds_cloud.tpl", {
       data_bucket        = local.log_bucket
       data_bucket_region = local.log_bucket_region
+      iam_role_arn       = aws_iam_role.collector.arn
     })
 
     annotations = {}

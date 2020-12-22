@@ -26,11 +26,12 @@ resource "kubernetes_namespace" "fluentd" {
 }
 
 module "docker_credentials" {
-  source          = "../docker_auth"
-  docker_repo     = var.docker_repo
-  docker_username = var.docker_username
-  docker_password = var.docker_password
-  namespaces      = [kubernetes_namespace.fluentd.metadata[0].annotations.name]
+  source             = "../docker_auth"
+  docker_repo        = var.docker_repo
+  docker_username    = var.docker_username
+  docker_password    = var.docker_password
+  docker_secret_name = var.docker_secret_name
+  namespaces         = [kubernetes_namespace.fluentd.metadata[0].annotations.name]
 }
 
 resource "helm_release" "fluentd-daemonset" {
@@ -51,5 +52,5 @@ resource "helm_release" "fluentd-daemonset" {
     })
   ]
 
-  depends_on = [kubernetes_namespace.fluentd]
+  depends_on = [kubernetes_namespace.fluentd, module.docker_credentials]
 }
