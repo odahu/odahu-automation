@@ -15,6 +15,12 @@ variable "docker_password" {
   description = "ODAHU flow Docker repo password"
 }
 
+variable "docker_secret_name" {
+  type        = string
+  default     = "repo-json-key"
+  description = "Name of k8s secret in which Docker registry password is stored"
+}
+
 variable "odahu_infra_version" {
   type        = string
   description = "ODAHU flow infra release version"
