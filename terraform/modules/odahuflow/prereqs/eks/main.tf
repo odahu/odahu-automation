@@ -94,7 +94,10 @@ resource "aws_ecr_repository" "this" {
 
 data "aws_iam_policy_document" "collector" {
   statement {
-    actions   = ["s3:*"]
+    actions = [
+      "s3:ListBucket",
+      "s3:*Object"
+    ]
     effect    = "Allow"
     resources = var.log_bucket == "" ? ["${aws_s3_bucket.data.arn}*"] : ["${aws_s3_bucket.logs[0].arn}*"]
   }
