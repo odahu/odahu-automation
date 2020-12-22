@@ -375,7 +375,6 @@ module "odahuflow_helm" {
   extra_external_urls = concat(
     module.jupyterhub.external_url,
     module.airflow.external_url,
-    module.elasticsearch.external_url,
     module.odahuflow_prereqs.extra_external_urls
   )
 
