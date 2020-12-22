@@ -58,6 +58,7 @@ output "fluent_daemonset_helm_values" {
     })
 
     annotations = {}
+    sa_annotations = {}
 
     envs = [
       { name = "AZURE_STORAGE_ACCOUNT",
