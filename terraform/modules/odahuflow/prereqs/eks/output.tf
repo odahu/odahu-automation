@@ -73,8 +73,10 @@ output "fluent_daemonset_helm_values" {
 
 output "logstash_input_config" {
   value = templatefile("${path.module}/templates/logstash.yaml", {
-    bucket = local.log_bucket
-    region = local.log_bucket_region
+    bucket            = local.log_bucket
+    region            = local.log_bucket_region
+    access_key_id     = aws_iam_access_key.collector.id
+    secret_access_key = aws_iam_access_key.collector.secret
   })
 }
 
