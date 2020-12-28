@@ -24,7 +24,8 @@ ENV DEBIAN_FRONTEND=noninteractive \
     KUBECTL_VERSION=v1.16.10 \
     TERRAGRUNT_VERSION=v0.25.1 \
     HELM_VERSION=v3.2.4 \
-    TF_PLUGIN_CACHE_DIR=/tmp/.terraform/cache
+    TF_PLUGIN_CACHE_DIR=/tmp/.terraform/cache \
+    ISTIO_VERSION=1.6.14
 
 # install system utilities
 RUN mkdir -p ${TF_PLUGIN_CACHE_DIR} && \
@@ -69,6 +70,10 @@ RUN DIST="$(awk -F= '/VERSION_CODENAME/ {print $2}' /etc/os-release)" && \
 # Install AWS CLI
 RUN curl -sL https://bootstrap.pypa.io/get-pip.py | python3 && \
     pip3 install awscli
+
+# Install istioctl
+RUN wget -qO /tmp/istioctl.tar.gz https://github.com/istio/istio/releases/download/${ISTIO_VERSION}/istioctl-${ISTIO_VERSION}-linux-amd64.tar.gz && \
+    tar xzf /tmp/istioctl.tar.gz -C /tmp/ && mv /tmp/istioctl /usr/local/bin/istioctl && rm -f /tmp/istioctl*
 
 COPY terraform /opt/odahu-flow/terraform
 COPY scripts /opt/odahu-flow/scripts
