@@ -93,7 +93,6 @@ module "istio" {
 module "knative" {
   source              = "../../../../modules/k8s/knative"
   helm_repo           = var.helm_repo
-  module_dependency   = module.istio.helm_chart
   odahu_infra_version = var.odahu_infra_version
   helm_timeout        = 600
   depends_on          = [module.istio]

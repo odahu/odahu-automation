@@ -1,99 +1,82 @@
-global:
-  controlPlaneSecurityEnabled: false
-  mtls:
-    enabled: false
-  proxy:
-    accessLogFile: "/dev/stdout"
-    resources:
-      requests:
-        cpu: 50m
-        memory: 50Mi
-      limits:
-        cpu: 50m
-        memory: 100Mi
-
-  disablePolicyChecks: false
-
-  sidecarInjectorWebhook:
-    enabled: true
-    rewriteAppHTTPProbe: false
-
-pilot:
-  traceSampling: 100.0
-  resources:
-    requests:
-      cpu: 500m
-      memory: 200Mi
-    limits:
-      cpu: 500m
-      memory: 200Mi
-
-mixer:
-  policy:
-    enabled: true
-    resources:
-      requests:
-        cpu: 500m
-        memory: 200Mi
-      limits:
-        cpu: 500m
-        memory: 200Mi
-
-  telemetry:
-    enabled: true
-    resources:
-      requests:
-        cpu: 500m
-        memory: 200Mi
-      limits:
-        cpu: 500m
-        memory: 200Mi
-
-  adapters:
-    stdio:
+apiVersion: install.istio.io/v1alpha1
+kind: IstioOperator
+spec:
+  meshConfig:
+    accessLogFile: /dev/stdout
+  components:
+    egressGateways:
+    - name: istio-egressgateway
       enabled: true
+      k8s:
+        resources:
+          requests:
+            cpu: 10m
+            memory: 40Mi
+          limits:
+            cpu: 100m
+            memory: 128Mi
 
-grafana:
-  enabled: false
+    ingressGateways:
+    - name: istio-ingressgateway
+      enabled: true
+      k8s:
+        resources:
+          requests:
+            cpu: 258m
+            memory: 128Mi
+          limits:
+            cpu: 512m
+            memory: 256Mi
+        service:
+          ports:
+            - port: 80
+              targetPort: 80
+              name: http
+            - port: 443
+              targetPort: 443
+              name: https
+            - port: 15000
+              targetPort: 15000
+              name: administration
+            - port: 31400
+              targetPort: 31400
+              name: tcp
+            - port: 15443
+              targetPort: 15443
+              name: tls
 
-prometheus:
-  enabled: false
+    pilot:
+      k8s:
+        env:
+          - name: PILOT_TRACE_SAMPLING
+            value: "100"
+        resources:
+          requests:
+            cpu: 10m
+            memory: 100Mi
 
-tracing:
-  enabled: false
+  values:
+    global:
+      proxy:
+        resources:
+          requests:
+            cpu: 50m
+            memory: 50Mi
+          limits:
+            cpu: 50m
+            memory: 100Mi
 
-servicegraph:
-  enabled: false
+    pilot:
+      autoscaleEnabled: false
+      traceSampling: 100.0
+      resources:
+        requests:
+          cpu: 500m
+          memory: 200Mi
+        limits:
+          cpu: 500m
+          memory: 200Mi
 
-kiali:
-  enabled: false
-
-gateways:
-  istio-ingressgateway:
-    meshExpansionPorts: []
-    ports:
-      - port: 80
-        targetPort: 80
-        name: http
-      - port: 443
-        name: https
-      - port: 15000
-        name: administration
-    type: ClusterIP
-    resources:
-      requests:
-        cpu: 258m
-        memory: 128Mi
-      limits:
-        cpu: 512m
-        memory: 256Mi
-
-  istio-egressgateway:
-    enabled: true
-    resources:
-      requests:
-        cpu: 10m
-        memory: 40Mi
-      limits:
-        cpu: 100m
-        memory: 128Mi
+    gateways:
+      istio-ingressgateway:
+        runAsRoot: true
