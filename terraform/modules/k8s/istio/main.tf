@@ -35,39 +35,12 @@ resource "kubernetes_secret" "tls_istio" {
   depends_on = [kubernetes_namespace.istio]
 }
 
-resource "helm_release" "istio_init" {
-  name       = "istio-init"
-  chart      = "istio-init"
-  version    = var.istio_version
-  namespace  = var.istio_namespace
-  repository = var.helm_repo
-  timeout    = var.helm_timeout
-  depends_on = [kubernetes_namespace.istio]
-}
-
-resource "null_resource" "istio_crds_check" {
+resource "null_resource" "istio" {
   provisioner "local-exec" {
-    interpreter = ["timeout", "3m", "bash", "-c"]
-    command     = "until ${local.kubecmd_raw}; do sleep 5; done"
+    interpreter = ["timeout", "10m", "bash", "-c"]
+    command     = "istioctl install -f ../../../../modules/k8s/istio/templates/istio.yaml -y"
   }
-  depends_on = [helm_release.istio_init]
-}
-
-resource "helm_release" "istio" {
-  name       = "istio"
-  chart      = "istio"
-  version    = var.istio_version
-  namespace  = var.istio_namespace
-  repository = var.helm_repo
-  timeout    = var.helm_timeout
-
-  values = [
-    templatefile("${path.module}/templates/istio.yaml", {
-      ingress_tls_secret_name = local.ingress_tls_secret_name
-    })
-  ]
-
-  depends_on = [null_resource.istio_crds_check]
+  depends_on = [kubernetes_namespace.istio]
 }
 
 module "docker_credentials" {
@@ -75,7 +48,7 @@ module "docker_credentials" {
   docker_repo     = var.docker_repo
   docker_username = var.docker_username
   docker_password = var.docker_password
-  namespaces      = [helm_release.istio.namespace]
+  namespaces      = [kubernetes_namespace.istio.metadata[0].name]
   sa_list = [
     "istio-ingressgateway-service-account",
     "istio-citadel-service-account",
