@@ -61,7 +61,7 @@ variable "grafana_image_tag" {
 
 variable "prom_storage_size" {
   type        = string
-  default     = "20Gi"
+  default     = "30Gi"
   description = "Prometheus PVC size"
 }
 
