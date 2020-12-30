@@ -54,10 +54,10 @@ prometheus-operator:
       resources:
         limits:
           cpu: "2"
-          memory: "2.5Gi"
+          memory: "5.5Gi"
         requests:
           cpu: "1"
-          memory: "2Gi"
+          memory: "4.5Gi"
     ingress:
       paths:
       - "/prometheus"
