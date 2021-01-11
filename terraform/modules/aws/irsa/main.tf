@@ -34,7 +34,7 @@ data "aws_iam_policy_document" "autoscaler_assume" {
 data "aws_iam_policy_document" "autoscaler" {
   statement {
     sid    = "eksWorkerAutoscalingOwn"
-    effect  = "Allow"
+    effect = "Allow"
 
     actions = [
       "autoscaling:DescribeAutoScalingGroups",
