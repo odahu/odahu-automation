@@ -19,7 +19,7 @@ locals {
 
 remote_state {
   backend = "azurerm"
-  config  = {
+  config = {
     container_name       = local.config.tfstate_bucket.tfstate_bucket_name
     resource_group_name  = local.resource_group
     storage_account_name = local.storage_account

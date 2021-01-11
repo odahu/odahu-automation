@@ -4,14 +4,14 @@ locals {
   profile = get_env("PROFILE", "${get_terragrunt_dir()}//profile.json")
   config  = jsondecode(file(local.profile))
 
-  cloud_type    = lookup(local.config.cloud, "type", "")
-  dns_provider  = lookup(local.config.dns, "provider", "gcp")
-  cluster_name  = lookup(local.config, "cluster_name", "")
-  cluster_fqdn  = lookup(local.config.dns, "domain", "")
-  dns_zone      = replace(local.cluster_fqdn, "/^[a-zA-Z0-9-_]+\\./", "")
-  kms_key_id    = lookup(lookup(local.config.cloud, "gcp", {}), "kms_key_id", "")
-  records       = lookup(local.config.dns, "records", get_env("TF_VAR_records", "[]"))
-  records_str   = join(" ", [for rec in jsondecode(local.records) : "${rec.name}:${rec.value}" if rec.value != "null"])
+  cloud_type   = lookup(local.config.cloud, "type", "")
+  dns_provider = lookup(local.config.dns, "provider", "gcp")
+  cluster_name = lookup(local.config, "cluster_name", "")
+  cluster_fqdn = lookup(local.config.dns, "domain", "")
+  dns_zone     = replace(local.cluster_fqdn, "/^[a-zA-Z0-9-_]+\\./", "")
+  kms_key_id   = lookup(lookup(local.config.cloud, "gcp", {}), "kms_key_id", "")
+  records      = lookup(local.config.dns, "records", get_env("TF_VAR_records", "[]"))
+  records_str  = join(" ", [for rec in jsondecode(local.records) : "${rec.name}:${rec.value}" if rec.value != "null"])
 
   vpc_name         = lookup(local.config, "vpc_name", "${local.cluster_name}-vpc")
   gcp_project_id   = lookup(lookup(local.config.cloud, "gcp", {}), "project_id", "")
@@ -37,7 +37,7 @@ locals {
 
 remote_state {
   backend = "gcs"
-  config  = {
+  config = {
     bucket      = local.config.tfstate_bucket.tfstate_bucket_name
     credentials = "${get_terragrunt_dir()}/../backend_credentials.json"
     prefix      = basename(get_terragrunt_dir())

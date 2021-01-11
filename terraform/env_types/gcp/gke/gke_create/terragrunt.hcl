@@ -19,7 +19,7 @@ locals {
 
 remote_state {
   backend = "gcs"
-  config  = {
+  config = {
     bucket      = local.config.tfstate_bucket.tfstate_bucket_name
     credentials = "${get_terragrunt_dir()}/../backend_credentials.json"
     prefix      = basename(get_terragrunt_dir())

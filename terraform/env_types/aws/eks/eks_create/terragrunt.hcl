@@ -46,5 +46,5 @@ inputs = {
   aws_region   = local.aws_region
   az_list      = local.az_list
   cluster_name = local.cluster_name
-  kms_key_arn   = local.kms_key_arn
+  kms_key_arn  = local.kms_key_arn
 }
