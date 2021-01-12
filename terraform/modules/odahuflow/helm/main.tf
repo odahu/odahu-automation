@@ -37,7 +37,7 @@ locals {
     },
     {
       name     = "Service Catalog",
-      url      = "${local.url_schema}://${var.cluster_domain}/service-catalog/swagger/index.html",
+      url      = "${local.url_schema}://${var.cluster_domain}/service-catalog/catalog/index.html",
       imageUrl = "/img/logo/swagger.png"
     },
     {
@@ -221,6 +221,7 @@ locals {
         clientId               = var.service_catalog_sa.client_id
         clientSecret           = var.service_catalog_sa.client_secret
       }
+      edgeHost = var.cluster_domain
     }
   }
   api_vault_volume = {
