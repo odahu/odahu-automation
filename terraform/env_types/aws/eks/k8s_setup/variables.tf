@@ -407,12 +407,14 @@ variable "postgres" {
     enabled       = bool
     storage_size  = string
     replica_count = number
+    resync_period = number
   })
   default = {
     enabled       = true
     storage_size  = "8Gi"
     replica_count = 1
     cluster_name  = "odahu-db"
+    resync_period = "30m"
   }
   description = "PostgreSQL configuration"
 }
