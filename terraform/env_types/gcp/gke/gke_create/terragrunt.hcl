@@ -11,6 +11,9 @@ locals {
   gcp_zone       = lookup(lookup(local.config.cloud, "gcp", {}), "zone", "us-east1-b")
   node_locations = lookup(lookup(local.config.cloud, "gcp", {}), "node_locations", [])
 
+  google_credentials  = replace(replace(lookup(local.config.cloud.gcp.credentials, "GOOGLE_CREDENTIALS", {}), "\"", "\\\""), "\\n", "\\\\n")
+  gke_backend_credentials = lookup(local.config.tfstate_bucket, "credentials", "") == "" ? local.google_credentials : replace(replace(lookup(local.config.tfstate_bucket, "credentials", {}), "\"", "\\\""), "\\n", "\\\\n")
+
   scripts_dir             = "${get_terragrunt_dir()}/../../../../../scripts"
   cmd_k8s_fwrules_cleanup = "${local.scripts_dir}/gcp_k8s_fw_cleanup.sh"
   cmd_k8s_config_fetch    = "gcloud container clusters get-credentials \"${local.cluster_name}\" --region \"${local.gcp_region}\" --project \"${local.gcp_project_id}\""
@@ -20,7 +23,7 @@ remote_state {
   backend = "gcs"
   config  = {
     bucket      = local.config.tfstate_bucket.tfstate_bucket_name
-    credentials = "${get_terragrunt_dir()}/../backend_credentials.json"
+    credentials = "${get_terragrunt_dir()}/gke_backend_credentials.json"
     prefix      = basename(get_terragrunt_dir())
   }
 }
@@ -39,6 +42,11 @@ terraform {
     ]
   }
 
+  after_hook "pass_gke_backend_credentials" {
+    commands = ["terragrunt-read-config"]
+    execute  = ["bash", "-c", "echo ${local.gke_backend_credentials} > ${get_terragrunt_dir()}/gke_backend_credentials.json"]
+  }
+
   after_hook "k8s_fwrules_cleanup" {
     commands = ["destroy"]
     execute  = ["bash", local.cmd_k8s_fwrules_cleanup, local.vpc_name, local.gcp_project_id]
@@ -48,6 +56,17 @@ terraform {
     commands     = ["apply"]
     execute      = ["bash", "-c", local.cmd_k8s_config_fetch]
     run_on_error = false
+  }
+
+  after_hook "remove_gke_backend_credentials" {
+    commands = [
+      "apply",
+      "plan",
+      "output",
+      "destroy"
+    ]
+    execute = ["bash", "-c", "rm -f ${get_terragrunt_dir()}/gke_backend_credentials.json"]
+    run_on_error = true
   }
 }
 
