@@ -16,6 +16,12 @@ variable "docker_password" {
   description = "ODAHU flow Docker repo password"
 }
 
+variable "docker_secret_name" {
+  type        = string
+  default     = "repo-json-key"
+  description = "Name of k8s secret in which Docker registry password is stored"
+}
+
 variable "odahu_infra_version" {
   type        = string
   description = "ODAHU flow infra release version"
@@ -56,10 +62,11 @@ variable "helm_timeout" {
 
 variable "extra_helm_values" {
   type = object({
-    config      = string
-    annotations = map(string)
-    envs        = list(any)
-    secrets     = list(any)
+    config         = string
+    annotations    = map(string)
+    sa_annotations = map(string)
+    envs           = list(any)
+    secrets        = list(any)
   })
   description = "Set of input extra variables with Helm chart values"
 }

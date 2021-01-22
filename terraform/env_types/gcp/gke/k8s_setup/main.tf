@@ -87,13 +87,6 @@ module "knative" {
   depends_on          = [module.istio]
 }
 
-module "gke-saa" {
-  source              = "../../../../modules/k8s/gke-saa"
-  cluster_type        = var.cluster_type
-  helm_repo           = var.helm_repo
-  odahu_infra_version = var.odahu_infra_version
-}
-
 module "tekton" {
   source              = "../../../../modules/k8s/tekton"
   helm_repo           = var.helm_repo
@@ -136,7 +129,6 @@ module "postgresql" {
   databases     = local.databases
 
   depends_on = [
-    module.gke-saa,
     module.nfs
   ]
 }
@@ -173,9 +165,15 @@ module "odahuflow_prereqs" {
   project_id          = var.project_id
   region              = var.region
   cluster_name        = var.cluster_name
+  kms_key_id          = var.kms_key_id
   data_bucket         = var.data_bucket
   log_bucket          = var.log_bucket
   log_expiration_days = var.log_expiration_days
+  collector_sa_list = [
+    "serviceAccount:${var.project_id}.svc.id.goog[${var.logging_namespace}/fluentd-daemonset]",
+    "serviceAccount:${var.project_id}.svc.id.goog[${var.fluentd_namespace}/fluentd]",
+    "serviceAccount:${var.project_id}.svc.id.goog[${var.elk_namespace}/logstash]"
+  ]
 }
 
 module "airflow_prereqs" {
@@ -183,7 +181,9 @@ module "airflow_prereqs" {
 
   project_id      = var.project_id
   wine_bucket     = module.odahuflow_prereqs.odahu_data_bucket_name
+  kms_key_id      = var.kms_key_id
   cluster_name    = var.cluster_name
+  syncer_sa_list  = ["system:serviceaccount:${var.airflow_namespace}:odahu-syncer"]
   dag_bucket      = local.dag_bucket
   dag_bucket_path = local.dag_bucket_path
   region          = var.region
@@ -204,6 +204,7 @@ module "airflow_test_data" {
 module "airflow" {
   source = "../../../../modules/k8s/airflow/main"
 
+  namespace                    = var.airflow_namespace
   configuration                = var.airflow
   cluster_name                 = var.cluster_name
   cluster_domain               = var.cluster_domain_name
@@ -245,6 +246,7 @@ module "storage-syncer" {
 module "fluentd" {
   source = "../../../../modules/k8s/fluentd"
 
+  namespace           = var.fluentd_namespace
   docker_repo         = var.docker_repo
   docker_username     = var.docker_username
   docker_password     = var.docker_password
@@ -253,12 +255,13 @@ module "fluentd" {
   helm_repo         = var.helm_repo
   extra_helm_values = module.odahuflow_prereqs.fluent_helm_values
 
-  depends_on = [module.gke-saa, module.odahuflow_prereqs]
+  depends_on = [module.odahuflow_prereqs]
 }
 
 module "fluentd-daemonset" {
   source = "../../../../modules/k8s/fluentd-daemonset"
 
+  namespace           = var.logging_namespace
   docker_repo         = var.docker_repo
   docker_username     = var.docker_username
   docker_password     = var.docker_password
@@ -267,7 +270,7 @@ module "fluentd-daemonset" {
   helm_repo         = var.helm_repo
   extra_helm_values = module.odahuflow_prereqs.fluent_daemonset_helm_values
 
-  depends_on = [module.gke-saa, module.odahuflow_prereqs]
+  depends_on = [module.odahuflow_prereqs]
 }
 
 module "jupyterhub" {
@@ -317,6 +320,7 @@ module "vault" {
 
 module "elasticsearch" {
   source                = "../../../../modules/k8s/elk"
+  namespace             = var.elk_namespace
   cluster_domain        = var.cluster_domain_name
   tls_secret_key        = var.tls_key
   tls_secret_crt        = var.tls_crt
@@ -329,7 +333,7 @@ module "elasticsearch" {
   odahu_infra_version   = var.odahu_infra_version
   odahu_helm_repo       = var.helm_repo
 
-  depends_on = [module.nginx_ingress_helm, module.gke-saa, module.odahuflow_prereqs]
+  depends_on = [module.nginx_ingress_helm, module.odahuflow_prereqs]
 }
 
 module "odahuflow_helm" {

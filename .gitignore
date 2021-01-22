@@ -16,6 +16,8 @@
 keys/
 cover/
 
+
+*.json
 *.tmp.yml
 *.tmp.out
 

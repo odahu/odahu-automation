@@ -46,3 +46,14 @@ variable "ip_egress_name" {
   type        = string
   description = "Name of AKS cluster egress public IP-address"
 }
+
+variable "kms_key_id" {
+  type        = string
+  description = "The ID of the Key Vault Key"
+}
+
+variable "kms_vault_id" {
+  type        = string
+  description = "Specifies the ID of the Key Vault instance where the Secret resides"
+}
+

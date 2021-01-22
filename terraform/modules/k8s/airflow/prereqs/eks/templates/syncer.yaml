@@ -5,5 +5,9 @@ sync:
   s3:
     bucket: "${data_bucket_name}"
     region: "${data_bucket_region}"
-    customIAMRole: "${syncer_iam_role}"
+    authorization: "irsa"
+
+serviceAccount:
+  annotations:
+    eks.amazonaws.com/role-arn: "${iam_role_arn}"
 

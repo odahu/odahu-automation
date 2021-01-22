@@ -1,4 +1,6 @@
 locals {
+  sa_annotations = length(try(var.extra_helm_values, "sa_annotations", {})) == 0 ? {} : { "serviceAccount" = { "annotations" = var.extra_helm_values.sa_annotations } }
+
   fluentd_daemonset_values = {
     "extraAnnotations" = var.extra_helm_values.annotations
     "extraEnvs"        = var.extra_helm_values.envs
@@ -24,11 +26,12 @@ resource "kubernetes_namespace" "fluentd" {
 }
 
 module "docker_credentials" {
-  source          = "../docker_auth"
-  docker_repo     = var.docker_repo
-  docker_username = var.docker_username
-  docker_password = var.docker_password
-  namespaces      = [kubernetes_namespace.fluentd.metadata[0].annotations.name]
+  source             = "../docker_auth"
+  docker_repo        = var.docker_repo
+  docker_username    = var.docker_username
+  docker_password    = var.docker_password
+  docker_secret_name = var.docker_secret_name
+  namespaces         = [kubernetes_namespace.fluentd.metadata[0].annotations.name]
 }
 
 resource "helm_release" "fluentd-daemonset" {
@@ -45,8 +48,9 @@ resource "helm_release" "fluentd-daemonset" {
       odahu_infra_version = var.odahu_infra_version
 
       fluentd_daemonset_values = yamlencode({ "fluentd" = local.fluentd_daemonset_values })
+      sa_annotations           = yamlencode(local.sa_annotations)
     })
   ]
 
-  depends_on = [kubernetes_namespace.fluentd]
+  depends_on = [kubernetes_namespace.fluentd, module.docker_credentials]
 }

@@ -33,6 +33,12 @@ resource "google_storage_bucket_iam_member" "odahu_store" {
   depends_on = [google_service_account.airflow]
 }
 
+resource "google_kms_crypto_key_iam_member" "airflow_kms_decrypt" {
+  crypto_key_id = var.kms_key_id
+  role          = "roles/cloudkms.cryptoKeyDecrypter"
+  member        = "serviceAccount:${google_service_account.airflow.email}"
+}
+
 ########################################################
 # Dag syncer Google Cloud Service Account
 ########################################################
@@ -40,6 +46,13 @@ resource "google_service_account" "syncer_sa" {
   account_id   = local.gsa_syncer_name
   display_name = local.gsa_syncer_name
   project      = var.project_id
+}
+
+resource "google_service_account_iam_binding" "collector_web_identity" {
+  service_account_id = google_service_account.syncer_sa.name
+  role               = "roles/iam.workloadIdentityUser"
+
+  members = ["serviceAccount:${var.project_id}.svc.id.goog[airflow/odahu-syncer]"]
 }
 
 resource "google_service_account_key" "syncer_sa_key" {

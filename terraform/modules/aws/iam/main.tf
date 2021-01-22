@@ -1,3 +1,8 @@
+resource "aws_iam_service_linked_role" "autoscaling" {
+  custom_suffix    = var.cluster_name
+  aws_service_name = "autoscaling.amazonaws.com"
+}
+
 resource "aws_iam_role" "master" {
   name = "tf-${var.cluster_name}"
 
@@ -26,6 +31,17 @@ resource "aws_iam_role_policy_attachment" "AmazonEKSServicePolicy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSServicePolicy"
   role       = aws_iam_role.master.name
 }
+
+resource "aws_iam_role_policy_attachment" "kms_encryption" {
+  policy_arn = aws_iam_policy.kms_encryption.arn
+  role       = aws_iam_role.master.name
+}
+
+resource "aws_iam_role_policy_attachment" "master_encrypted_ebs_attach" {
+  policy_arn = aws_iam_policy.encrypted_ebs_attach.arn
+  role       = aws_iam_role.master.name
+}
+
 resource "aws_iam_role" "node" {
   name = "tf-${var.cluster_name}-node"
 
@@ -65,57 +81,66 @@ resource "aws_iam_instance_profile" "node" {
   role = aws_iam_role.node.name
 }
 
-resource "aws_iam_role_policy_attachment" "node_autoscaling" {
-  policy_arn = aws_iam_policy.node_autoscaling.arn
-  role       = aws_iam_role.node.name
+resource "aws_iam_policy" "kms_encryption" {
+  name_prefix = "kms-${var.cluster_name}"
+  description = "EKS KMS Encryption policy for cluster ${var.cluster_name}"
+  policy      = data.aws_iam_policy_document.kms_encryption.json
 }
 
-resource "aws_iam_policy" "node_autoscaling" {
-  name_prefix = "eks-worker-autoscaling-${var.cluster_name}"
-  description = "EKS worker node autoscaling policy for cluster ${var.cluster_name}"
-  policy      = data.aws_iam_policy_document.node_autoscaling.json
+resource "aws_iam_policy" "encrypted_ebs_attach" {
+  name_prefix = "volume-attachment-${var.cluster_name}"
+  description = "EKS cluster manager IAM encrypted EBS attachment policy for cluster ${var.cluster_name}"
+  policy      = data.aws_iam_policy_document.encrypted_ebs_attach.json
 }
 
-data "aws_iam_policy_document" "node_autoscaling" {
+data "aws_iam_policy_document" "kms_encryption" {
   statement {
-    sid    = "eksWorkerAutoscalingAll"
+    sid    = "eksKmsEncryption"
     effect = "Allow"
 
     actions = [
-      "autoscaling:DescribeAutoScalingGroups",
-      "autoscaling:DescribeAutoScalingInstances",
-      "autoscaling:DescribeLaunchConfigurations",
-      "autoscaling:DescribeTags",
-      "autoscaling:SetDesiredCapacity",
-      "autoscaling:TerminateInstanceInAutoScalingGroup",
-      "ec2:DescribeLaunchTemplateVersions",
+      "kms:Encrypt",
+      "kms:Decrypt",
+      "kms:ReEncrypt*",
+      "kms:DescribeKey",
+      "kms:GenerateDataKey*",
     ]
-
-    resources = ["*"]
+    resources = [var.kms_key_arn]
   }
+}
 
+data "aws_iam_policy_document" "encrypted_ebs_attach" {
   statement {
-    sid    = "eksWorkerAutoscalingOwn"
+    sid    = "encryptedEbsAttachment"
     effect = "Allow"
 
     actions = [
-      "autoscaling:SetDesiredCapacity",
-      "autoscaling:TerminateInstanceInAutoScalingGroup",
-      "autoscaling:UpdateAutoScalingGroup",
+      "kms:CreateGrant",
+      "kms:ListGrants",
+      "kms:RevokeGrant"
     ]
-
-    resources = ["*"]
-
+    resources = [var.kms_key_arn]
     condition {
-      test     = "StringEquals"
-      variable = "autoscaling:ResourceTag/kubernetes.io/cluster/${var.cluster_name}"
-      values   = ["owned"]
-    }
+      test     = "Bool"
+      variable = "kms:GrantIsForAWSResource"
 
-    condition {
-      test     = "StringEquals"
-      variable = "autoscaling:ResourceTag/k8s.io/cluster-autoscaler/enabled"
-      values   = ["true"]
+      values = ["true"]
     }
   }
+}
+
+resource "aws_kms_grant" "kms_encrypt" {
+  name              = "${var.cluster_name}_kms_encrypt"
+  key_id            = basename(var.kms_key_arn)
+  grantee_principal = aws_iam_service_linked_role.autoscaling.arn
+  operations = [
+    "Encrypt",
+    "Decrypt",
+    "ReEncryptTo",
+    "ReEncryptFrom",
+    "DescribeKey",
+    "CreateGrant",
+    "GenerateDataKey",
+    "GenerateDataKeyWithoutPlaintext"
+  ]
 }

@@ -3,4 +3,7 @@ output:
   s3:
     bucket: "${data_bucket}"
     region: "${data_bucket_region}"
-    customIAMRole: "${collector_iam_role}"
+    authorization: "irsa"
+serviceAccount:
+  annotations:
+    eks.amazonaws.com/role-arn: "${collector_iam_role}"

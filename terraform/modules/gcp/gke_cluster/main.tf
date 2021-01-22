@@ -61,6 +61,10 @@ resource "google_container_cluster" "cluster" {
     }
   }
 
+  workload_identity_config {
+    identity_namespace = "${var.project_id}.svc.id.goog"
+  }
+
   private_cluster_config {
     enable_private_endpoint = false
     enable_private_nodes    = true
@@ -79,12 +83,14 @@ resource "google_container_cluster" "cluster" {
   }
 
   ip_allocation_policy {
-    use_ip_aliases           = true
     cluster_ipv4_cidr_block  = var.pods_cidr
     services_ipv4_cidr_block = var.service_cidr
   }
 
   addons_config {
+    gce_persistent_disk_csi_driver_config {
+      enabled = true
+    }
     http_load_balancing {
       disabled = true
     }
@@ -110,7 +116,6 @@ resource "google_container_node_pool" "cluster_node_pools" {
   location           = var.location
   cluster            = var.cluster_name
   initial_node_count = lookup(each.value, "init_node_count", 0)
-  depends_on         = [google_container_cluster.cluster]
   version            = local.node_version
 
   autoscaling {
@@ -124,13 +129,14 @@ resource "google_container_node_pool" "cluster_node_pools" {
   }
 
   node_config {
-    preemptible     = lookup(each.value, "preemptible", "false")
-    machine_type    = lookup(each.value, "machine_type", "n1-standard-2")
-    disk_size_gb    = lookup(each.value, "disk_size_gb", "20")
-    disk_type       = lookup(each.value, "disk_type", "pd-standard")
-    service_account = var.nodes_sa
-    image_type      = lookup(each.value, "image", "COS")
-    tags            = concat(var.node_gcp_tags, lookup(each.value, "tags", []))
+    preemptible       = lookup(each.value, "preemptible", "false")
+    machine_type      = lookup(each.value, "machine_type", "n1-standard-2")
+    disk_size_gb      = lookup(each.value, "disk_size_gb", "20")
+    disk_type         = lookup(each.value, "disk_type", "pd-standard")
+    service_account   = var.nodes_sa
+    image_type        = lookup(each.value, "image", "COS")
+    tags              = concat(var.node_gcp_tags, lookup(each.value, "tags", []))
+    boot_disk_kms_key = var.kms_key_id
 
     metadata = {
       disable-legacy-endpoints = "true"
@@ -171,6 +177,8 @@ resource "google_container_node_pool" "cluster_node_pools" {
       version,
     ]
   }
+
+  depends_on = [google_container_cluster.cluster]
 }
 
 ########################################################
@@ -199,6 +207,7 @@ resource "google_compute_instance" "gke_bastion" {
 
   // Specify the Operating System Family and version.
   boot_disk {
+    kms_key_self_link = var.kms_key_id
     initialize_params {
       image = "ubuntu-1804-lts"
     }
@@ -229,7 +238,7 @@ resource "google_compute_instance" "gke_bastion" {
 }
 
 # Wait for cluster startup
-resource "null_resource" "kubectl_config" {
+resource "null_resource" "kube_api_check" {
   triggers = {
     build_number = timestamp()
   }
@@ -237,4 +246,48 @@ resource "null_resource" "kubectl_config" {
     command = "timeout 1200 bash -c 'until curl -sk https://${google_container_cluster.cluster.endpoint}; do sleep 20; done'"
   }
   depends_on = [google_container_node_pool.cluster_node_pools]
+}
+
+
+resource "null_resource" "setup_kubectl" {
+  triggers = {
+    build_number = timestamp()
+  }
+  provisioner "local-exec" {
+    command = "bash -c 'gcloud container clusters get-credentials ${var.cluster_name} --project ${var.project_id} --region ${var.location}'"
+  }
+  depends_on = [null_resource.kube_api_check]
+}
+
+########################################################
+# Storage class
+########################################################
+resource "local_file" "storage_class" {
+  content = templatefile("${path.module}/templates/storage_class.tpl", {
+    kms_key_id         = var.kms_key_id
+    storage_type       = var.storage_type
+    storage_class_name = var.storage_class_name
+  })
+  filename = "/tmp/.odahu/storage_class.yml"
+
+  file_permission      = 0644
+  directory_permission = 0755
+}
+
+resource "null_resource" "create_storage_class" {
+  provisioner "local-exec" {
+    command = "timeout 90 bash -c 'until kubectl apply -f ${local_file.storage_class.filename}; do sleep 5; done'"
+  }
+  depends_on = [
+    null_resource.setup_kubectl,
+    local_file.storage_class
+  ]
+}
+
+resource "null_resource" "set_default_storage_class" {
+  provisioner "local-exec" {
+    command = "bash ../../../../../scripts/set_default_storage_class.sh \"${var.storage_class_name}\""
+  }
+
+  depends_on = [null_resource.create_storage_class]
 }

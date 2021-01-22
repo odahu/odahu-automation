@@ -8,19 +8,6 @@ resource "local_file" "aws_auth_cm" {
   directory_permission = 0755
 }
 
-resource "local_file" "cluster_autoscaler" {
-  content = templatefile("${path.module}/templates/cluster-autoscaler.tpl", {
-    cluster_name  = var.cluster_name
-    k8s_version   = var.autoscaler_version
-    cpu_max_limit = var.cluster_autoscaling_cpu_max_limit
-    mem_max_limit = var.cluster_autoscaling_memory_max_limit
-  })
-  filename = "/tmp/.odahu/aws_cluster_autoscaler.yml"
-
-  file_permission      = 0644
-  directory_permission = 0755
-}
-
 ########################################################
 # Bastion
 ########################################################
@@ -68,6 +55,18 @@ resource "null_resource" "aws_eni_cleanup" {
   }
 }
 
+resource "null_resource" "kube_api_check" {
+  triggers = {
+    build_number = timestamp()
+  }
+
+  provisioner "local-exec" {
+    command = "timeout 1200 bash -c 'until curl -sk ${aws_eks_cluster.default.endpoint}; do sleep 20; done'"
+  }
+
+  depends_on = [aws_eks_cluster.default]
+}
+
 resource "null_resource" "setup_kubectl" {
   triggers = {
     build_number = timestamp()
@@ -75,16 +74,9 @@ resource "null_resource" "setup_kubectl" {
   provisioner "local-exec" {
     command = "bash -c 'aws eks --region ${var.aws_region} update-kubeconfig --name ${var.cluster_name}'"
   }
-  depends_on = [aws_eks_cluster.default]
-}
-
-resource "null_resource" "setup_calico" {
-  provisioner "local-exec" {
-    command = "timeout 90 bash -c 'until kubectl apply -f ${path.module}/files/calico-1.5.yml; do sleep 5; done'"
-  }
   depends_on = [
-    aws_launch_template.this,
-    null_resource.populate_auth_map
+    aws_eks_cluster.default,
+    null_resource.kube_api_check
   ]
 }
 
@@ -94,28 +86,19 @@ resource "null_resource" "populate_auth_map" {
   }
   depends_on = [
     null_resource.setup_kubectl,
-    null_resource.kube_api_check,
     local_file.aws_auth_cm
   ]
 }
 
-resource "null_resource" "setup_cluster_autoscaler" {
+resource "null_resource" "setup_calico" {
   provisioner "local-exec" {
-    command = "timeout 90 bash -c 'until kubectl apply -f ${local_file.cluster_autoscaler.filename}; do sleep 5; done'"
+    command = "timeout 90 bash -c 'until kubectl apply -f ${path.module}/files/calico-1.5.yml; do sleep 5; done'"
   }
   depends_on = [
-    null_resource.setup_calico
+    null_resource.setup_kubectl,
+    null_resource.populate_auth_map
   ]
 }
-
-resource "null_resource" "verify_cluster_autoscaler" {
-  provisioner "local-exec" {
-    interpreter = ["timeout", "5m", "bash", "-c"]
-    command     = "until [[ $(kubectl -n kube-system get deployments cluster-autoscaler -ojsonpath='{.status.readyReplicas}') = '1' ]]; do sleep 5; done"
-  }
-  depends_on = [null_resource.setup_cluster_autoscaler]
-}
-
 
 # Node pools
 resource "aws_launch_template" "this" {
@@ -146,12 +129,14 @@ resource "aws_launch_template" "this" {
   }
 
   dynamic "block_device_mappings" {
-    for_each = flatten([lookup(each.value, "disk_size_gb", [])])
+    for_each = flatten([lookup(each.value, "disk_size_gb", "40")])
     iterator = size
     content {
       device_name = "/dev/xvda"
       ebs {
-        volume_type           = "standard"
+        kms_key_id            = var.kms_key_arn
+        encrypted             = true
+        volume_type           = lookup(each.value, "disk_type", "standard")
         volume_size           = size.value
         delete_on_termination = true
       }
@@ -178,11 +163,12 @@ resource "aws_launch_template" "this" {
 resource "aws_autoscaling_group" "this" {
   for_each = var.node_pools
 
-  desired_capacity    = lookup(each.value, "init_node_count", 0)
-  min_size            = lookup(each.value, "min_node_count", "0")
-  max_size            = lookup(each.value, "max_node_count", "2")
-  name                = "tf-${var.cluster_name}-${substr(replace(each.key, "/[_\\W]/", "-"), 0, 40)}"
-  vpc_zone_identifier = var.subnet_ids
+  desired_capacity        = lookup(each.value, "init_node_count", 0)
+  min_size                = lookup(each.value, "min_node_count", "0")
+  max_size                = lookup(each.value, "max_node_count", "2")
+  name                    = "tf-${var.cluster_name}-${substr(replace(each.key, "/[_\\W]/", "-"), 0, 40)}"
+  vpc_zone_identifier     = var.subnet_ids
+  service_linked_role_arn = var.service_linked_role_arn
 
   launch_template {
     id      = aws_launch_template.this[each.key].id
@@ -237,17 +223,4 @@ resource "aws_autoscaling_group" "this" {
     create_before_destroy = true
     ignore_changes        = [desired_capacity]
   }
-}
-
-# Wait for cluster startup
-resource "null_resource" "kube_api_check" {
-  triggers = {
-    build_number = timestamp()
-  }
-
-  provisioner "local-exec" {
-    command = "timeout 1200 bash -c 'until curl -sk ${aws_eks_cluster.default.endpoint}; do sleep 20; done'"
-  }
-
-  depends_on = [aws_eks_cluster.default]
 }

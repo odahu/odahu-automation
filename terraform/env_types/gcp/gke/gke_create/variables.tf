@@ -92,6 +92,11 @@ variable "ssh_key" {
   description = "SSH public key for Odahuflow cluster nodes and bastion host"
 }
 
+variable "kms_key_id" {
+  type        = string
+  description = "The ID of a Cloud KMS key that will be used to encrypt cluster disks"
+}
+
 #############
 # Node pool
 #############

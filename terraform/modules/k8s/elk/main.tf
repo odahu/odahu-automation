@@ -8,6 +8,14 @@ locals {
     kubernetes_namespace.elk[0].metadata[0].annotations.name
   )
 
+  rbac = {
+    "rbac" = {
+      "create"                    = "true",
+      "serviceAccountName"        = "logstash",
+      "serviceAccountAnnotations" = try(var.logstash_annotations["sa_annotations"], {})
+    }
+  }
+
   secret_mounts = length(var.sa_key) == 0 ? { secretMounts = [] } : {
     secretMounts = [{
       name       = "logstash-gke-sa",
@@ -130,12 +138,12 @@ resource "kubernetes_namespace" "elk" {
   count = var.elk_enabled ? 1 : 0
   metadata {
     annotations = {
-      name = var.elk_namespace
+      name = var.namespace
     }
     labels = {
       project = "odahu-flow"
     }
-    name = var.elk_namespace
+    name = var.namespace
   }
 }
 
@@ -220,7 +228,7 @@ resource "kubernetes_config_map" "kibana_loader_data" {
   count = var.elk_enabled ? 1 : 0
   metadata {
     name      = "kibana-loader-data"
-    namespace = var.elk_namespace
+    namespace = var.namespace
   }
   data = {
     "kibana_odahu_stuff"   = file("${path.module}/files/kibana_odahu_stuff.ndjson")
@@ -236,7 +244,7 @@ resource "kubernetes_job" "kibana_loader" {
   count = var.elk_enabled ? 1 : 0
   metadata {
     name      = "kibana-loader"
-    namespace = var.elk_namespace
+    namespace = var.namespace
   }
   spec {
     template {
@@ -314,7 +322,8 @@ resource "helm_release" "logstash" {
       secret_mounts      = yamlencode(local.secret_mounts)
       config             = yamlencode(local.logstash_config)
       replicas           = var.logstash_replicas
-      annotations        = length(var.logstash_annotations) == 0 ? "" : yamlencode(var.logstash_annotations)
+      annotations        = length(try(var.logstash_annotations["podAnnotations"], {})) == 0 ? "" : yamlencode({ podAnnotations = var.logstash_annotations["podAnnotations"] })
+      rbac               = yamlencode(local.rbac)
       logstash_image     = "${var.docker_repo}/odahu-flow-logstash-oss"
       logstash_image_tag = var.odahu_infra_version
     })

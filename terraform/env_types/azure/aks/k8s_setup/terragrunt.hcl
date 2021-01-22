@@ -11,6 +11,8 @@ locals {
   resource_group  = lookup(lookup(local.config.cloud, "azure", {}), "resource_group", "")
   location        = lookup(lookup(local.config.cloud, "azure", {}), "location", "")
   storage_account = lookup(lookup(local.config.cloud, "azure", {}), "storage_account", "")
+  kms_key_id      = lookup(lookup(local.config.cloud, "azure", {}), "kms_key_id", "")
+  kms_vault_id    = lookup(lookup(local.config.cloud, "azure", {}), "kms_vault_id", "")
 
   config_context_auth_info = lookup(local.config, "config_context_auth_info", "")
   config_context_cluster   = lookup(local.config, "config_context_cluster", "")
@@ -70,6 +72,8 @@ inputs = {
   azure_resource_group  = local.resource_group
   azure_location        = local.location
   azure_storage_account = local.storage_account
+  kms_key_id            = local.kms_key_id
+  kms_vault_id          = local.kms_vault_id
 
   config_context_auth_info = local.config_context_auth_info
   config_context_cluster   = local.config_context_cluster

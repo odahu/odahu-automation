@@ -1,0 +1,26 @@
+language: bash 
+dist: bionic
+install: skip
+
+jobs:
+  include:
+    - stage: "Shellcheck"
+      before_script:
+        - sudo apt-get install shellcheck make
+      script:
+        - make shellcheck
+
+    - stage: "Lint"
+      env:
+      - AWS_DEFAULT_REGION=test-region
+      - TF_PLUGIN_CACHE_DIR="${HOME}/.terraform.d/plugin-cache"
+      before_script:
+        - wget https://github.com/gruntwork-io/terragrunt/releases/download/v0.26.3/terragrunt_linux_amd64 -O terragrunt
+        - wget https://releases.hashicorp.com/terraform/0.13.5/terraform_0.13.5_linux_amd64.zip -O terraform.zip
+        - sudo unzip -o terraform.zip terraform -d /usr/local/bin/
+        - sudo mv terragrunt /usr/local/bin/terragrunt && sudo chmod +x /usr/local/bin/terragrunt
+        - mkdir -vp "${TF_PLUGIN_CACHE_DIR}"
+      script:
+        - make terraform-fmt-check
+        - make terraform-validate
+        - make terragrunt-fmt-check

@@ -1,2 +1,5 @@
 fluentdVersion: "${odahu_infra_version}"
 imagesRegistry: "${docker_repo}/"
+imagePullSecrets:
+  - name: "${docker_secret_name}"
+

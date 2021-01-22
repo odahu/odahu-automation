@@ -1,6 +1,11 @@
 ##################
 # Common
 ##################
+variable "kms_key_arn" {
+  type        = string
+  description = "The ARN of the AWS Key Management Service (AWS KMS) customer master key (CMK) to use when creating the encrypted volume"
+}
+
 variable "cluster_type" {
   type        = string
   description = "Cloud provider"
@@ -26,6 +31,24 @@ variable "cluster_name" {
   type        = string
   default     = "odahuflow"
   description = "ODAHU flow cluster name"
+}
+
+variable "autoscaler_version" {
+  type        = string
+  default     = "1.16.5"
+  description = "Kubernetes Cluster Autoscaler component version"
+}
+
+variable "cluster_autoscaling_cpu_max_limit" {
+  type        = number
+  default     = 48
+  description = "Maximum CPU limit for autoscaling if it is enabled."
+}
+
+variable "cluster_autoscaling_memory_max_limit" {
+  type        = number
+  default     = 160
+  description = "Maximum memory limit for autoscaling if it is enabled."
 }
 
 variable "config_context_auth_info" {
@@ -88,6 +111,30 @@ variable "monitoring_namespace" {
   type        = string
   default     = "kube-monitoring"
   description = "Clusterwide namespace for monitoring stuff"
+}
+
+variable "logging_namespace" {
+  type        = string
+  default     = "logging"
+  description = "Clusterwide namespace for log collection & processing stuff"
+}
+
+variable "elk_namespace" {
+  type        = string
+  default     = "odahu-flow-elk"
+  description = "Clusterwide namespace for log collection & processing stuff"
+}
+
+variable "airflow_namespace" {
+  type        = string
+  default     = "airflow"
+  description = "Namespace for Airflow"
+}
+
+variable "fluentd_namespace" {
+  type        = string
+  default     = "fluentd"
+  description = "Fluentd component namespace"
 }
 
 variable "db_namespace" {
@@ -157,8 +204,8 @@ variable "nfs" {
 # DNS
 ########################
 variable "domain" {
-  type    = string
-  default = ""
+  type        = string
+  default     = ""
   description = "ODAHU flow cluster FQDN"
 }
 
@@ -173,7 +220,7 @@ variable "records" {
 }
 
 variable "lb_record" {
-  type    = map(string)
+  type = map(string)
   default = {
     "name"  = ""
     "value" = ""
@@ -429,9 +476,9 @@ variable "opa" {
       }
     }
     webhook_certs = {
-      ca: "",
-      cert: "",
-      key: ""
+      ca : "",
+      cert : "",
+      key : ""
     }
   }
 }
