@@ -13,6 +13,6 @@ output "syncer_helm_values" {
     data_bucket_name   = var.dag_bucket
     data_bucket_region = var.region
     subpath            = var.dag_bucket_path
-    syncer_iam_role    = aws_iam_role.syncer.name
+    iam_role_arn       = aws_iam_role.syncer.arn
   })
 }

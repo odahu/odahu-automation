@@ -29,7 +29,7 @@ variable "records" {
 }
 
 variable "lb_record" {
-  type    = map(string)
+  type = map(string)
   default = {
     "name"  = ""
     "value" = ""

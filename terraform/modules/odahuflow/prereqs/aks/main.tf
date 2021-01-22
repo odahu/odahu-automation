@@ -23,6 +23,9 @@ locals {
     var.tags
   )
 
+  kms_key_id_split = split("/", "https://aks-test-key-vault.vault.azure.net/keys/aks-test-key/219dbb3dc83a464e90b50340afaf9e90")
+  kms_key_name     = local.kms_key_id_split[length(local.kms_key_id_split) - 2]
+
   model_docker_user        = azurerm_container_registry.odahuflow.admin_username
   model_docker_password    = base64encode(azurerm_container_registry.odahuflow.admin_password)
   model_docker_repo        = "${azurerm_container_registry.odahuflow.login_server}/${var.cluster_name}"
@@ -59,6 +62,11 @@ resource "azurerm_storage_account" "odahuflow_data" {
   account_kind             = "StorageV2"
   account_tier             = "Standard"
   account_replication_type = "LRS"
+  min_tls_version          = "TLS1_2"
+
+  identity {
+    type = "SystemAssigned"
+  }
 
   network_rules {
     default_action = "Allow"
@@ -73,6 +81,29 @@ resource "azurerm_storage_account" "odahuflow_data" {
 
   tags       = local.storage_tags
   depends_on = [azurerm_container_registry.odahuflow]
+}
+
+resource "azurerm_key_vault_access_policy" "encrypt-data" {
+  key_vault_id = var.kms_vault_id
+
+  tenant_id = azurerm_storage_account.odahuflow_data.identity.0.tenant_id
+  object_id = azurerm_storage_account.odahuflow_data.identity.0.principal_id
+
+  key_permissions = [
+    "get",
+    "unwrapKey",
+    "wrapKey"
+  ]
+
+  depends_on = [azurerm_storage_account.odahuflow_data]
+}
+
+resource "azurerm_storage_account_customer_managed_key" "data" {
+  storage_account_id = azurerm_storage_account.odahuflow_data.id
+  key_vault_id       = var.kms_vault_id
+  key_name           = local.kms_key_name
+
+  depends_on = [azurerm_key_vault_access_policy.encrypt-data]
 }
 
 data "azurerm_storage_account_sas" "odahuflow_data" {
@@ -141,6 +172,33 @@ resource "azurerm_storage_account" "odahuflow_logs" {
 
   tags       = local.storage_tags
   depends_on = [azurerm_container_registry.odahuflow]
+}
+
+resource "azurerm_key_vault_access_policy" "encrypt-logs" {
+  count = var.log_bucket == "" ? 0 : 1
+
+  key_vault_id = var.kms_vault_id
+
+  tenant_id = azurerm_storage_account.odahuflow_logs[0].identity.0.tenant_id
+  object_id = azurerm_storage_account.odahuflow_logs[0].identity.0.principal_id
+
+  key_permissions = [
+    "get",
+    "unwrapKey",
+    "wrapKey"
+  ]
+
+  depends_on = [azurerm_storage_account.odahuflow_logs[0]]
+}
+
+resource "azurerm_storage_account_customer_managed_key" "logs" {
+  count = var.log_bucket == "" ? 0 : 1
+
+  storage_account_id = azurerm_storage_account.odahuflow_logs[0].id
+  key_vault_id       = var.kms_vault_id
+  key_name           = local.kms_key_name
+
+  depends_on = [azurerm_key_vault_access_policy.encrypt-logs[0]]
 }
 
 data "azurerm_storage_account_sas" "odahuflow_logs" {

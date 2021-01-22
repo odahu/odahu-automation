@@ -2,4 +2,8 @@ output:
   target: "gcs"
   gcs:
     bucket: "${data_bucket}"
-    customSA: "${collector_sa}"
+    authorization: "GWI"
+serviceAccount:
+  annotations:
+    iam.gke.io/gcp-service-account: "${collector_sa}"
+

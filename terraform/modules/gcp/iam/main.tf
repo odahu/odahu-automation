@@ -16,4 +16,3 @@ resource "google_project_iam_member" "iam" {
   project = var.project_id
   role    = var.service_account_iam_roles[count.index]
 }
-

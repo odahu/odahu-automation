@@ -14,7 +14,7 @@ resource "aws_vpc" "default" {
 resource "null_resource" "aws_sg_cleanup" {
   triggers = {
     cluster_name = var.cluster_name
-    aws_region = var.aws_region
+    aws_region   = var.aws_region
   }
   provisioner "local-exec" {
     when       = destroy

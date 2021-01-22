@@ -68,11 +68,10 @@ output "fluent_daemonset_helm_values" {
       data_bucket = google_storage_bucket.log.name
     })
 
-    annotations = {
-      "accounts.google.com/service-account" = google_service_account.collector_sa.email
-      "accounts.google.com/scopes"          = "https://www.googleapis.com/auth/devstorage.read_write"
+    annotations = {}
+    sa_annotations = {
+      "iam.gke.io/gcp-service-account" = google_service_account.collector_sa.email
     }
-
     envs = []
 
     secrets = []
@@ -84,3 +83,12 @@ output "logstash_input_config" {
     bucket = google_storage_bucket.log.name
   })
 }
+
+output "logstash_annotations" {
+  value = {
+    sa_annotations = {
+      "iam.gke.io/gcp-service-account" = google_service_account.collector_sa.name
+    }
+  }
+}
+

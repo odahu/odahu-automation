@@ -1,6 +1,7 @@
 ##################
 # Common
 ##################
+
 variable "azure_resource_group" {
   type        = string
   description = "Azure base resource group name"
@@ -195,8 +196,8 @@ variable "nfs" {
 # DNS
 ########################
 variable "domain" {
-  type    = string
-  default = ""
+  type        = string
+  default     = ""
   description = "ODAHU flow cluster FQDN"
 }
 
@@ -211,7 +212,7 @@ variable "records" {
 }
 
 variable "lb_record" {
-  type    = map(string)
+  type = map(string)
   default = {
     "name"  = ""
     "value" = ""
@@ -464,9 +465,19 @@ variable "opa" {
       }
     }
     webhook_certs = {
-      ca: "",
-      cert: "",
-      key: ""
+      ca : "",
+      cert : "",
+      key : ""
     }
   }
+}
+
+variable "kms_key_id" {
+  type        = string
+  description = "The ID of the Key Vault Key"
+}
+
+variable "kms_vault_id" {
+  type        = string
+  description = "Specifies the ID of the Key Vault instance where the Secret resides"
 }

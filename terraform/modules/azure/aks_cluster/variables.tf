@@ -113,3 +113,18 @@ variable "bastion_ip" {
   default     = ""
   description = "Bastion host IP-address"
 }
+
+variable "kms_key_id" {
+  type        = string
+  description = "The ID of the Key Vault Key"
+}
+
+variable "kms_vault_id" {
+  type        = string
+  description = "Specifies the ID of the Key Vault instance where the Secret resides"
+}
+
+variable "storage_class_name" {
+  default     = "azure-encrypted-disk"
+  description = "Name of created storage class"
+}

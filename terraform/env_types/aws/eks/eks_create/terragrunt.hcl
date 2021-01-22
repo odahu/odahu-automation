@@ -7,6 +7,7 @@ locals {
   cluster_name = lookup(local.config, "cluster_name", "odahuflow")
   aws_region   = lookup(lookup(local.config.cloud, "aws", {}), "region", "eu-central-1")
   az_list      = lookup(lookup(local.config.cloud, "aws", {}), "az_list", [])
+  kms_key_arn  = lookup(lookup(local.config.cloud, "aws", {}), "kms_key_arn", "")
 
   cmd_k8s_config_fetch = "aws eks update-kubeconfig --name \"${local.cluster_name}\" --region \"${local.aws_region}\""
 }
@@ -45,4 +46,5 @@ inputs = {
   aws_region   = local.aws_region
   az_list      = local.az_list
   cluster_name = local.cluster_name
+  kms_key_arn  = local.kms_key_arn
 }

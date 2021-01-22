@@ -114,10 +114,39 @@ variable "monitoring_namespace" {
   description = "Clusterwide namespace for monitoring stuff"
 }
 
+variable "logging_namespace" {
+  type        = string
+  default     = "logging"
+  description = "Clusterwide namespace for log collection & processing stuff"
+}
+
+variable "elk_namespace" {
+  type        = string
+  default     = "odahu-flow-elk"
+  description = "Clusterwide namespace for log collection & processing stuff"
+}
+
+variable "airflow_namespace" {
+  type        = string
+  default     = "airflow"
+  description = "Namespace for Airflow"
+}
+
+variable "fluentd_namespace" {
+  type        = string
+  default     = "fluentd"
+  description = "Fluentd component namespace"
+}
+
 variable "db_namespace" {
   type        = string
   default     = "postgresql"
   description = "Database namespace"
+}
+
+variable "kms_key_id" {
+  type        = string
+  description = "The ID of a Cloud KMS key that will be used to encrypt cluster disks"
 }
 
 ##################
@@ -402,7 +431,7 @@ variable "records" {
 }
 
 variable "lb_record" {
-  type    = map(string)
+  type = map(string)
   default = {
     "name"  = ""
     "value" = ""
@@ -449,9 +478,9 @@ variable "opa" {
       }
     }
     webhook_certs = {
-      ca: "",
-      cert: "",
-      key: ""
+      ca : "",
+      cert : "",
+      key : ""
     }
   }
 }

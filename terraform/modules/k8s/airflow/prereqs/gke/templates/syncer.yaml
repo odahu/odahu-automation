@@ -5,4 +5,9 @@ sync:
   gcs:
     bucket: "${data_bucket_name}"
     region: "${data_bucket_region}"
-    customSA: "${syncer_sa}"
+    authorization: "gwi"
+
+serviceAccount:
+  annotations:
+    iam.gke.io/gcp-service-account: "${syncer_sa}"
+

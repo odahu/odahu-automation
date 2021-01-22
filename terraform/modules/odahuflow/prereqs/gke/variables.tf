@@ -32,3 +32,14 @@ variable "log_expiration_days" {
   default     = 1
   description = "ODAHU flow logs expiration days"
 }
+
+variable "kms_key_id" {
+  type        = string
+  description = "The id of a Cloud KMS key that will be used to encrypt objects inserted into this bucket"
+}
+
+variable "collector_sa_list" {
+  type        = list
+  description = "List of service accounts that should be allowed to use `collector` IAM role"
+}
+

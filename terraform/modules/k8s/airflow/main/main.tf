@@ -92,7 +92,7 @@ resource "kubernetes_secret" "postgres" {
     namespace = var.namespace
   }
   data = {
-   "postgresql-password" = local.pg_password
+    "postgresql-password" = local.pg_password
   }
   type = "Opaque"
 

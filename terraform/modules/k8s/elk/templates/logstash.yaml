@@ -35,8 +35,7 @@ volumeClaimTemplate:
     requests:
       storage: "1Gi"
 
-rbac:
-  create: true
+${rbac}
 
 updateStrategy: "OnDelete"
 

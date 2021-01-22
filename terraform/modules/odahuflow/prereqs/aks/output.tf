@@ -57,7 +57,8 @@ output "fluent_daemonset_helm_values" {
       data_bucket = local.log_bucket
     })
 
-    annotations = {}
+    annotations    = {}
+    sa_annotations = {}
 
     envs = [
       { name = "AZURE_STORAGE_ACCOUNT",

@@ -8,7 +8,7 @@ variable "cluster_name" {
 
 variable "k8s_version" {
   type        = string
-  default     = "1.13.10"
+  default     = "1.16"
   description = "Kubernetes master version"
 }
 
@@ -54,6 +54,11 @@ variable "nat_subnet_cidr" {
   description = "AWS NAT network CIDR, will be used to place bastion host"
 }
 
+variable "kms_key_arn" {
+  type        = string
+  description = "The ARN of the AWS Key Management Service (AWS KMS) customer master key (CMK) to use when creating the encrypted volume"
+}
+
 #############
 # Node pool
 #############
@@ -62,19 +67,6 @@ variable "node_pools" {
   default     = {}
   description = "Default node pool configuration"
 }
-
-variable "cluster_autoscaling_cpu_max_limit" {
-  type        = number
-  default     = 32
-  description = "Maximum CPU limit for autoscaling if it is enabled."
-}
-
-variable "cluster_autoscaling_memory_max_limit" {
-  type        = number
-  default     = 86
-  description = "Maximum memory limit for autoscaling if it is enabled."
-}
-
 ################
 # Bastion host
 ################
