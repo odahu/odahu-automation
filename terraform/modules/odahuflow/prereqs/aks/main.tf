@@ -23,7 +23,7 @@ locals {
     var.tags
   )
 
-  kms_key_id_split = split("/", "https://aks-test-key-vault.vault.azure.net/keys/aks-test-key/219dbb3dc83a464e90b50340afaf9e90")
+  kms_key_id_split = split("/", var.kms_key_id)
   kms_key_name     = local.kms_key_id_split[length(local.kms_key_id_split) - 2]
 
   model_docker_user        = azurerm_container_registry.odahuflow.admin_username
