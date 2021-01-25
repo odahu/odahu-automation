@@ -1,5 +1,5 @@
 provider "google" {
-  version = "2.20.2"
+  version = "3.53.0"
   region  = var.region
   zone    = var.zone
   project = var.project_id

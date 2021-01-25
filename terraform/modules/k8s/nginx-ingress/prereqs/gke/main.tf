@@ -18,6 +18,11 @@ resource "google_compute_firewall" "ingress_access" {
   network       = var.network_name
   source_ranges = var.allowed_ips
   target_tags   = ["${var.cluster_name}-gke-node"]
+  source_tags   = ["${var.cluster_name}-gke-node"]
+
+  log_config {
+    metadata = "INCLUDE_ALL_METADATA"
+  }
 
   allow {
     protocol = "tcp"
