@@ -2,6 +2,9 @@ locals {
   gsa_syncer_name = "${var.cluster_name}-syncer"
 }
 
+########################################################
+# Airflow Google Cloud Service Account to use with pods and wine connection
+########################################################
 resource "google_service_account" "airflow" {
   account_id   = "${var.cluster_name}-airflow-sa"
   display_name = "${var.cluster_name}-airflow-sa"
@@ -33,14 +36,21 @@ resource "google_storage_bucket_iam_member" "odahu_store" {
   depends_on = [google_service_account.airflow]
 }
 
-resource "google_kms_crypto_key_iam_member" "airflow_kms_decrypt" {
+resource "google_kms_crypto_key_iam_member" "airflow_kms_encrypt_decrypt" {
   crypto_key_id = var.kms_key_id
-  role          = "roles/cloudkms.cryptoKeyDecrypter"
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
   member        = "serviceAccount:${google_service_account.airflow.email}"
 }
 
+resource "google_service_account_iam_binding" "airflow_web_identity" {
+  service_account_id = google_service_account.airflow.name
+  role               = "roles/iam.workloadIdentityUser"
+
+  members = ["serviceAccount:${var.project_id}.svc.id.goog[airflow/default]"]
+}
+
 ########################################################
-# Dag syncer Google Cloud Service Account
+# DAG syncer Google Cloud Service Account
 ########################################################
 resource "google_service_account" "syncer_sa" {
   account_id   = local.gsa_syncer_name
