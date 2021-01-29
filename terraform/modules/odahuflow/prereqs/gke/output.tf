@@ -62,17 +62,6 @@ output "fluent_helm_values" {
   })
 }
 
-output "jupyterhub_cloud_settings" {
-  value = {
-    type = "gcp",
-    settings = {
-      credentials = local.jupyterhub_sa_key_one_line,
-      project_id  = var.project_id
-    }
-  }
-}
-
-
 output "fluent_daemonset_helm_values" {
   value = {
     config = templatefile("${path.module}/templates/fluentd_ds_cloud.tpl", {
@@ -86,6 +75,12 @@ output "fluent_daemonset_helm_values" {
     envs = []
 
     secrets = []
+  }
+}
+
+output "jupyter_notebook_sa_annotations" {
+  value = {
+    "iam.gke.io/gcp-service-account" = google_service_account.jupyter_notebook.email
   }
 }
 

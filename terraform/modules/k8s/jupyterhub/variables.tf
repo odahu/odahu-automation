@@ -3,6 +3,10 @@ variable "docker_repo" {
   description = "ODAHU flow Docker repo url"
 }
 
+variable "notebook_sa_annotations" {
+  type = map
+}
+
 variable "cloud_settings" {
   type = object({
     type = string

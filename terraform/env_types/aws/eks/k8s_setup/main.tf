@@ -190,6 +190,7 @@ module "odahuflow_prereqs" {
     "system:serviceaccount:${var.fluentd_namespace}:fluentd",
     "system:serviceaccount:${var.elk_namespace}:logstash"
   ]
+  jupyter_notebook_sa_list = ["system:serviceaccount:jupyterhub:notebook"]
 }
 
 module "airflow_prereqs" {
@@ -282,6 +283,8 @@ module "jupyterhub" {
   source = "../../../../modules/k8s/jupyterhub"
 
   jupyterhub_enabled = var.jupyterhub_enabled
+  notebook_sa_annotations = module.odahuflow_prereqs.jupyter_notebook_sa_annotations
+
   cluster_domain     = var.domain
   tls_secret_crt     = var.tls_crt
   tls_secret_key     = var.tls_key

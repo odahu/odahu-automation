@@ -277,6 +277,8 @@ module "jupyterhub" {
   source = "../../../../modules/k8s/jupyterhub"
 
   jupyterhub_enabled = var.jupyterhub_enabled
+  notebook_sa_annotations = module.odahuflow_prereqs.jupyter_notebook_sa_annotations
+
   cluster_domain     = var.cluster_domain_name
   tls_secret_crt     = var.tls_crt
   tls_secret_key     = var.tls_key

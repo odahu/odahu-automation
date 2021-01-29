@@ -1,6 +1,5 @@
 locals {
   collector_sa_key_one_line  = jsonencode(jsondecode(base64decode(google_service_account_key.collector_sa_key.private_key)))
-  jupyterhub_sa_key_one_line = jsonencode(jsondecode(base64decode(google_service_account_key.jupyterhub_sa_key.private_key)))
 
   model_docker_user        = "_json_key"
   model_docker_password    = local.collector_sa_key_one_line
@@ -8,7 +7,7 @@ locals {
   model_docker_repo        = "${data.google_container_registry_repository.odahuflow_registry.repository_url}/${var.cluster_name}"
 
   gsa_collector_name       = "${var.cluster_name}-collector"
-  gsa_jupyterhub_name      = "${var.cluster_name}-jupyterhub"
+  gsa_jupyterhub_name      = "${var.cluster_name}-jupyter-notebook"
   gcp_bucket_registry_name = "artifacts.${var.project_id}.appspot.com"
   log_bucket_name          = var.log_bucket == "" ? "${var.cluster_name}-log-storage" : var.log_bucket
 }
@@ -118,26 +117,35 @@ resource "google_kms_crypto_key_iam_member" "collector_kms_encrypt_decrypt" {
 ########################################################
 # Google Cloud Jupyterhub Service Account
 ########################################################
-resource "google_service_account" "jupyterhub_sa" {
+
+resource "google_service_account" "jupyter_notebook" {
   account_id   = local.gsa_jupyterhub_name
   display_name = local.gsa_jupyterhub_name
   project      = var.project_id
 }
 
-resource "google_service_account_key" "jupyterhub_sa_key" {
-  service_account_id = google_service_account.jupyterhub_sa.name
-}
-
-resource "google_storage_bucket_iam_member" "odahuflow_data_store_viewer" {
+resource "google_storage_bucket_iam_member" "jupyter_notebook_store_viewer" {
   bucket = google_storage_bucket.data.name
-  member = "serviceAccount:${google_service_account.jupyterhub_sa.email}"
+  member = "serviceAccount:${google_service_account.jupyter_notebook.email}"
   role   = "roles/storage.objectViewer"
 }
 
-resource "google_storage_bucket_iam_member" "odahuflow_registry_viewer" {
+resource "google_storage_bucket_iam_member" "jupyter_notebook_registry_viewer" {
   bucket = local.gcp_bucket_registry_name
-  member = "serviceAccount:${google_service_account.jupyterhub_sa.email}"
+  member = "serviceAccount:${google_service_account.jupyter_notebook.email}"
   role   = "roles/storage.objectViewer"
+}
+
+resource "google_kms_crypto_key_iam_member" "jupyter_notebook_kms_encrypt_decrypt" {
+  crypto_key_id = var.kms_key_id
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member        = "serviceAccount:${google_service_account.jupyter_notebook.email}"
+}
+
+resource "google_service_account_iam_binding" "jupyter_notebook_web_identity" {
+  service_account_id = google_service_account.jupyter_notebook.name
+  role               = "roles/iam.workloadIdentityUser"
+  members            = ["serviceAccount:${var.project_id}.svc.id.goog[jupyterhub/notebook]"]
 }
 
 ########################################################

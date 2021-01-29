@@ -88,13 +88,8 @@ output "logstash_annotations" {
   }
 }
 
-output "jupyterhub_cloud_settings" {
+output "jupyter_notebook_sa_annotations" {
   value = {
-    type = "aws",
-    settings = {
-      key_id     = aws_iam_access_key.jupyterhub.id
-      key_secret = aws_iam_access_key.jupyterhub.secret
-    }
+    "eks.amazonaws.com/role-arn" = aws_iam_role.jupyter_notebook.arn
   }
 }
-

@@ -36,6 +36,11 @@ variable "collector_sa_list" {
   description = "List of service accounts that should be allowed to use `collector` IAM role"
 }
 
+variable "jupyter_notebook_sa_list" {
+  type        = list
+  description = "List of service accounts that should be allowed to use `collector` IAM role"
+}
+
 variable "openid_connect_provider" {
   type = object({
     url = string
