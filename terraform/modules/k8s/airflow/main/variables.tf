@@ -74,6 +74,11 @@ variable "service_account" {
   description = "Service account that Airflow should use to connect ODAHU"
 }
 
+variable "default_sa_annotations" {
+  type = map
+  default = {}
+}
+
 variable "configuration" {
   type = object({
     enabled          = bool

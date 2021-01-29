@@ -22,3 +22,8 @@ output "syncer_helm_values" {
   })
 }
 
+output "default_sa_annotations" {
+  value = {
+     "iam.gke.io/gcp-service-account" = google_service_account.airflow.email
+  }
+}

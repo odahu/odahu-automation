@@ -207,6 +207,7 @@ module "airflow" {
   cluster_name                 = var.cluster_name
   cluster_domain               = var.cluster_domain_name
   airflow_variables            = module.airflow_prereqs.airflow_variables
+  default_sa_annotations       = module.airflow_prereqs.default_sa_annotations
   examples_version             = var.examples_version
   oauth_oidc_token_endpoint    = var.oauth_oidc_token_endpoint
   wine_connection              = module.airflow_prereqs.wine_connection

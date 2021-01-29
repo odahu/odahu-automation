@@ -84,6 +84,15 @@ resource "kubernetes_namespace" "airflow" {
   }
 }
 
+resource "kubernetes_default_service_account" "default" {
+  count = length(var.default_sa_annotations) == 0 ? 0 : 1
+  metadata {
+    namespace = var.namespace
+  }
+  annotations = var.default_sa_annotations
+  depends_on = [kubernetes_namespace.airflow[0]]
+}
+
 resource "kubernetes_secret" "postgres" {
   count = var.configuration.enabled && var.pgsql.enabled ? 1 : 0
 
