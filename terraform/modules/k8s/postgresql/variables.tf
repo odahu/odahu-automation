@@ -10,7 +10,7 @@ variable "configuration" {
     enabled       = bool
     storage_size  = string
     replica_count = number
-    resync_period = number
+    resync_period = string
   })
   default = {
     cluster_name  = "odahu-db"

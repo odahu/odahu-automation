@@ -381,7 +381,7 @@ variable "postgres" {
     enabled       = bool
     storage_size  = string
     replica_count = number
-    resync_period = number
+    resync_period = string
   })
   default = {
     enabled       = true
