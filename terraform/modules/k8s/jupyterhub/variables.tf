@@ -4,12 +4,13 @@ variable "docker_repo" {
 }
 
 variable "notebook_sa_annotations" {
-  type = map
+  type    = map
+  default = {}
 }
 
 variable "cloud_settings" {
   type = object({
-    type = string
+    type     = string
     settings = any
   })
   default = {

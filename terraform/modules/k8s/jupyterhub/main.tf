@@ -8,7 +8,7 @@ locals {
   url_schema              = local.ingress_tls_enabled ? "https" : "http"
   ingress_tls_secret_name = "jupyterhub-tls"
 
-  jupyterhub_debug = "true"
+  jupyterhub_debug   = "true"
   docker_secret_name = "repo-json-key"
 
   ingress_common = {
@@ -87,12 +87,12 @@ resource "kubernetes_namespace" "jupyterhub" {
 }
 
 module "docker_credentials" {
-  source          = "../docker_auth"
-  docker_repo     = var.docker_repo
+  source             = "../docker_auth"
+  docker_repo        = var.docker_repo
   docker_secret_name = local.docker_secret_name
-  docker_username = var.docker_username
-  docker_password = var.docker_password
-  namespaces      = var.jupyterhub_enabled ? [kubernetes_namespace.jupyterhub[0].metadata[0].annotations.name] : []
+  docker_username    = var.docker_username
+  docker_password    = var.docker_password
+  namespaces         = var.jupyterhub_enabled ? [kubernetes_namespace.jupyterhub[0].metadata[0].annotations.name] : []
 }
 
 resource "kubernetes_secret" "jupyterhub_tls" {
@@ -112,13 +112,13 @@ resource "kubernetes_secret" "jupyterhub_tls" {
 
 resource "kubernetes_service_account" "single" {
   metadata {
-    name      = "notebook"
-    namespace = var.jupyterhub_namespace
+    name        = "notebook"
+    namespace   = var.jupyterhub_namespace
     annotations = var.notebook_sa_annotations
   }
 
   image_pull_secret {
-     name = local.docker_secret_name
+    name = local.docker_secret_name
   }
 
   depends_on = [kubernetes_namespace.jupyterhub[0]]
