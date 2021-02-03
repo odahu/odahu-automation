@@ -80,16 +80,16 @@ resource "kubernetes_secret" "tls_monitoring" {
 
 resource "helm_release" "monitoring" {
   name       = "monitoring"
-  chart      = "odahu-flow-monitoring"
-  version    = var.odahu_infra_version
+  chart      = "kube-prometheus-stack"
+  version    = var.monitoring_chart_version
   namespace  = kubernetes_namespace.monitoring.metadata[0].annotations.name
   repository = var.helm_repo
   timeout    = var.helm_timeout
 
   values = [
     templatefile("${path.module}/templates/monitoring.yaml", {
-      monitoring_namespace = kubernetes_namespace.monitoring.metadata[0].annotations.name
-      odahu_infra_version  = var.odahu_infra_version
+      db_namespace         = var.db_namespace
+      monitoring_namespace = var.monitoring_namespace
 
       nginx_annotations = yamlencode({ annotations = local.ingress_nginx_annotations })
 
@@ -100,7 +100,6 @@ resource "helm_release" "monitoring" {
       grafana_admin           = var.grafana_admin
       grafana_pass            = var.grafana_pass
       grafana_storage_size    = var.grafana_storage_size
-      grafana_image_tag       = var.grafana_image_tag
       ingress_tls_secret_name = local.ingress_tls_secret_name
 
       grafana_pgsql_enabled = var.pgsql_grafana.enabled
@@ -117,43 +116,78 @@ resource "helm_release" "monitoring" {
   depends_on = [kubernetes_secret.tls_monitoring]
 }
 
-resource "kubernetes_config_map" "grafana_dashboard" {
+resource "kubernetes_config_map" "pg_grafana_dashboard" {
+  for_each = fileset("${path.module}/dashboards/postgresql", "*")
   metadata {
     annotations = {
-      k8s-sidecar-target-directory = "/tmp/dashboards/k8s"
+      k8s-sidecar-target-directory = "/tmp/dashboards/postgresql"
     }
     labels = {
       grafana_dashboard = "1"
     }
-    name      = "psql-dashboard.json"
+    name      = each.value
     namespace = var.monitoring_namespace
   }
 
   data = {
-    "psql-dashboard.json" = file("${path.module}/files/grafana-psql-dashboard.json")
+    "${each.value}" = file("${path.module}/dashboards/postgresql/${each.value}")
   }
   depends_on = [kubernetes_namespace.monitoring]
 }
 
-resource "local_file" "grafana_pg_dashboard" {
-  count = var.pgsql_grafana.enabled ? 1 : 0
-  content = templatefile("${path.module}/templates/pg_exporter_monitor.tpl", {
-    namespace = var.db_namespace
-  })
-  filename = "/tmp/.odahu/grafana_pg_dashboard.yml"
+resource "kubernetes_config_map" "istio_grafana_dashboard" {
+  for_each = fileset("${path.module}/dashboards/istio", "*")
+  metadata {
+    annotations = {
+      k8s-sidecar-target-directory = "/tmp/dashboards/istio"
+    }
+    labels = {
+      grafana_dashboard = "1"
+    }
+    name      = each.value
+    namespace = var.monitoring_namespace
+  }
 
-  file_permission      = 0644
-  directory_permission = 0755
-
-  depends_on = [helm_release.monitoring]
+  data = {
+    "${each.value}" = file("${path.module}/dashboards/istio/${each.value}")
+  }
+  depends_on = [kubernetes_namespace.monitoring]
 }
 
-resource "null_resource" "grafana_pg_dashboard" {
-  count = var.pgsql_grafana.enabled ? 1 : 0
-  provisioner "local-exec" {
-    interpreter = ["timeout", "1m", "bash", "-c"]
-
-    command = "until kubectl apply -f ${local_file.grafana_pg_dashboard[0].filename}; do sleep 5; done"
+resource "kubernetes_config_map" "knative_grafana_dashboard" {
+  for_each = fileset("${path.module}/dashboards/knative", "*")
+  metadata {
+    annotations = {
+      k8s-sidecar-target-directory = "/tmp/dashboards/knative"
+    }
+    labels = {
+      grafana_dashboard = "1"
+    }
+    name      = each.value
+    namespace = var.monitoring_namespace
   }
-  depends_on = [local_file.grafana_pg_dashboard[0]]
+
+  data = {
+    "${each.value}" = file("${path.module}/dashboards/knative/${each.value}")
+  }
+  depends_on = [kubernetes_namespace.monitoring]
+}
+
+resource "kubernetes_config_map" "monitoring_grafana_dashboard" {
+  for_each = fileset("${path.module}/dashboards/monitoring", "*")
+  metadata {
+    annotations = {
+      k8s-sidecar-target-directory = "/tmp/dashboards/monitoring"
+    }
+    labels = {
+      grafana_dashboard = "1"
+    }
+    name      = each.value
+    namespace = var.monitoring_namespace
+  }
+
+  data = {
+    "${each.value}" = file("${path.module}/dashboards/monitoring/${each.value}")
+  }
+  depends_on = [kubernetes_namespace.monitoring]
 }
