@@ -155,10 +155,10 @@ prometheus:
     resources:
       limits:
         cpu: "2"
-        memory: "5.5Gi"
+        memory: "4Gi"
       requests:
         cpu: "1"
-        memory: "4.5Gi"
+        memory: "3Gi"
     additionalScrapeConfigs:
       # Controller endpoint
       - job_name: controller
@@ -406,10 +406,6 @@ grafana:
     dashboards:
       enabled: true
       label: grafana_dashboard
-      # searchNamespace: "${monitoring_namespace}"
-      # searchNamespace: 
-      # - odahu-flow
-      # - "${monitoring_namespace}"
       defaultFolderName: k8s
   grafana.ini:
 %{ if grafana_pgsql_enabled }

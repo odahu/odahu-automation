@@ -117,7 +117,7 @@ resource "helm_release" "monitoring" {
 }
 
 resource "kubernetes_config_map" "pg_grafana_dashboard" {
-  for_each = fileset("${path.module}/dashboards/postgresql", "*")
+  for_each = fileset("${path.module}/files/postgresql", "*")
   metadata {
     annotations = {
       k8s-sidecar-target-directory = "/tmp/dashboards/postgresql"
@@ -130,13 +130,13 @@ resource "kubernetes_config_map" "pg_grafana_dashboard" {
   }
 
   data = {
-    "${each.value}" = file("${path.module}/dashboards/postgresql/${each.value}")
+    trimsuffix("${each.value}", ".dashboard") = file("${path.module}/files/postgresql/${each.value}")
   }
   depends_on = [kubernetes_namespace.monitoring]
 }
 
 resource "kubernetes_config_map" "istio_grafana_dashboard" {
-  for_each = fileset("${path.module}/dashboards/istio", "*")
+  for_each = fileset("${path.module}/files/istio", "*")
   metadata {
     annotations = {
       k8s-sidecar-target-directory = "/tmp/dashboards/istio"
@@ -144,18 +144,18 @@ resource "kubernetes_config_map" "istio_grafana_dashboard" {
     labels = {
       grafana_dashboard = "1"
     }
-    name      = each.value
+    name      = trimsuffix(each.value, ".dashboard")
     namespace = var.monitoring_namespace
   }
 
   data = {
-    "${each.value}" = file("${path.module}/dashboards/istio/${each.value}")
+    trimsuffix("${each.value}", ".dashboard") = file("${path.module}/files/istio/${each.value}")
   }
   depends_on = [kubernetes_namespace.monitoring]
 }
 
 resource "kubernetes_config_map" "knative_grafana_dashboard" {
-  for_each = fileset("${path.module}/dashboards/knative", "*")
+  for_each = fileset("${path.module}/files/knative", "*")
   metadata {
     annotations = {
       k8s-sidecar-target-directory = "/tmp/dashboards/knative"
@@ -163,18 +163,18 @@ resource "kubernetes_config_map" "knative_grafana_dashboard" {
     labels = {
       grafana_dashboard = "1"
     }
-    name      = each.value
+    name      = trimsuffix(each.value, ".dashboard")
     namespace = var.monitoring_namespace
   }
 
   data = {
-    "${each.value}" = file("${path.module}/dashboards/knative/${each.value}")
+    trimsuffix("${each.value}", ".dashboard") = file("${path.module}/files/knative/${each.value}")
   }
   depends_on = [kubernetes_namespace.monitoring]
 }
 
 resource "kubernetes_config_map" "monitoring_grafana_dashboard" {
-  for_each = fileset("${path.module}/dashboards/monitoring", "*")
+  for_each = fileset("${path.module}/files/monitoring", "*")
   metadata {
     annotations = {
       k8s-sidecar-target-directory = "/tmp/dashboards/monitoring"
@@ -182,12 +182,12 @@ resource "kubernetes_config_map" "monitoring_grafana_dashboard" {
     labels = {
       grafana_dashboard = "1"
     }
-    name      = each.value
+    name      = trimsuffix(each.value, ".dashboard")
     namespace = var.monitoring_namespace
   }
 
   data = {
-    "${each.value}" = file("${path.module}/dashboards/monitoring/${each.value}")
+    trimsuffix("${each.value}", ".dashboard") = file("${path.module}/files/monitoring/${each.value}")
   }
   depends_on = [kubernetes_namespace.monitoring]
 }

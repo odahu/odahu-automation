@@ -55,12 +55,6 @@ variable "grafana_storage_size" {
   description = "Grafana PVC size"
 }
 
-variable "grafana_image_tag" {
-  type        = string
-  default     = "7.1.5"
-  description = "Default Grafana docker image tag"
-}
-
 variable "prom_storage_size" {
   type        = string
   default     = "30Gi"
