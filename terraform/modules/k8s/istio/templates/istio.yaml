@@ -3,6 +3,7 @@ kind: IstioOperator
 spec:
   meshConfig:
     accessLogFile: /dev/stdout
+    connectTimeout: 10m
   components:
     egressGateways:
     - name: istio-egressgateway
