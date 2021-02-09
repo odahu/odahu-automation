@@ -264,6 +264,7 @@ module "jupyterhub" {
   source = "../../../../modules/k8s/jupyterhub"
 
   jupyterhub_enabled = var.jupyterhub_enabled
+  cloud_settings     = module.odahuflow_prereqs.jupyterhub_cloud_settings
   cluster_domain     = var.domain
   tls_secret_crt     = var.tls_crt
   tls_secret_key     = var.tls_key

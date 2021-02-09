@@ -78,6 +78,12 @@ output "fluent_daemonset_helm_values" {
   }
 }
 
+output "jupyter_notebook_sa_annotations" {
+  value = {
+    "iam.gke.io/gcp-service-account" = google_service_account.jupyter_notebook.email
+  }
+}
+
 output "logstash_input_config" {
   value = templatefile("${path.module}/templates/logstash.yaml", {
     bucket = google_storage_bucket.log.name

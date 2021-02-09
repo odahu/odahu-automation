@@ -87,3 +87,9 @@ output "logstash_annotations" {
     }
   }
 }
+
+output "jupyter_notebook_sa_annotations" {
+  value = {
+    "eks.amazonaws.com/role-arn" = aws_iam_role.jupyter_notebook.arn
+  }
+}

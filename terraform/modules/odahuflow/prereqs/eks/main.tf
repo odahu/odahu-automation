@@ -179,3 +179,96 @@ resource "aws_iam_user_policy_attachment" "collector" {
 resource "aws_iam_access_key" "collector" {
   user = aws_iam_user.collector.name
 }
+
+########################################################
+# AWS IAM User for Jupyterhub
+########################################################
+
+data "aws_iam_policy_document" "jupyter_notebook_assume" {
+  statement {
+    actions = ["sts:AssumeRoleWithWebIdentity"]
+    effect  = "Allow"
+
+    condition {
+      test     = "StringEquals"
+      variable = "${replace(var.openid_connect_provider.url, "https://", "")}:sub"
+      values   = var.jupyter_notebook_sa_list
+    }
+
+    principals {
+      identifiers = [var.openid_connect_provider.arn]
+      type        = "Federated"
+    }
+  }
+}
+
+data "aws_iam_policy_document" "jupyter_notebook" {
+  statement {
+    actions   = [
+      "s3:GetObject",
+      "s3:GetObjectVersion",
+      "s3:GetBucketLocation",
+      "s3:GetObjectAcl",
+      "s3:PutObjectAcl"
+    ]
+    effect    = "Allow"
+    resources = var.log_bucket == "" ? ["${aws_s3_bucket.data.arn}/*"] : ["${aws_s3_bucket.logs[0].arn}/*"]
+  }
+
+  statement {
+    actions = [
+      "s3:ListBucket"
+    ]
+    effect    = "Allow"
+    resources = var.log_bucket == "" ? ["${aws_s3_bucket.data.arn}"] : ["${aws_s3_bucket.logs[0].arn}"]
+  }
+
+  statement {
+    actions   = [
+      "ecr:GetDownloadUrlForLayer",
+      "ecr:BatchGetImage"
+    ]
+    effect    = "Allow"
+    resources = ["*"]
+  }
+
+  statement {
+    actions = [
+      "kms:Encrypt",
+      "kms:Decrypt",
+      "kms:GenerateDataKey"
+    ]
+    effect    = "Allow"
+    resources = [var.kms_key_arn]
+  }
+
+}
+
+resource "aws_iam_role" "jupyter_notebook" {
+  assume_role_policy = data.aws_iam_policy_document.jupyter_notebook_assume.json
+  name               = "${var.cluster_name}-jupyter-notebook"
+}
+
+resource "aws_iam_policy" "jupyter_notebook" {
+  name   = "${var.cluster_name}-jupyter-notebook"
+  policy = data.aws_iam_policy_document.jupyter_notebook.json
+}
+
+resource "aws_iam_role_policy_attachment" "jupyter_notebook" {
+  policy_arn = aws_iam_policy.jupyter_notebook.arn
+  role       = aws_iam_role.jupyter_notebook.name
+}
+
+resource "aws_iam_user" "jupyter_notebook" {
+  name = "${var.cluster_name}-jupyter-notebook"
+  path = "/odahuflow/"
+
+  tags = {
+    Name        = "${var.cluster_name}-jupyter-notebook"
+    ClusterName = var.cluster_name
+  }
+}
+
+resource "aws_iam_access_key" "jupyterhub" {
+  user = aws_iam_user.jupyter_notebook.name
+}

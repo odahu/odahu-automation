@@ -97,3 +97,13 @@ output "logstash_input_config" {
     container            = local.log_bucket
   })
 }
+
+output "jupyterhub_cloud_settings" {
+  value = {
+    type = "azure",
+    settings = {
+      account_name = azurerm_storage_account.odahuflow_data.name
+      sas_token    = data.azurerm_storage_account_sas.odahuflow_data.sas
+    }
+  }
+}

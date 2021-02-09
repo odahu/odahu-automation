@@ -8,7 +8,8 @@ locals {
   url_schema              = local.ingress_tls_enabled ? "https" : "http"
   ingress_tls_secret_name = "jupyterhub-tls"
 
-  jupyterhub_debug = "true"
+  jupyterhub_debug   = "true"
+  docker_secret_name = "repo-json-key"
 
   ingress_common = {
     enabled = true
@@ -86,11 +87,12 @@ resource "kubernetes_namespace" "jupyterhub" {
 }
 
 module "docker_credentials" {
-  source          = "../docker_auth"
-  docker_repo     = var.docker_repo
-  docker_username = var.docker_username
-  docker_password = var.docker_password
-  namespaces      = var.jupyterhub_enabled ? [kubernetes_namespace.jupyterhub[0].metadata[0].annotations.name] : []
+  source             = "../docker_auth"
+  docker_repo        = var.docker_repo
+  docker_secret_name = local.docker_secret_name
+  docker_username    = var.docker_username
+  docker_password    = var.docker_password
+  namespaces         = var.jupyterhub_enabled ? [kubernetes_namespace.jupyterhub[0].metadata[0].annotations.name] : []
 }
 
 resource "kubernetes_secret" "jupyterhub_tls" {
@@ -104,6 +106,20 @@ resource "kubernetes_secret" "jupyterhub_tls" {
     "tls.crt" = var.tls_secret_crt
   }
   type = "kubernetes.io/tls"
+
+  depends_on = [kubernetes_namespace.jupyterhub[0]]
+}
+
+resource "kubernetes_service_account" "single" {
+  metadata {
+    name        = "notebook"
+    namespace   = var.jupyterhub_namespace
+    annotations = var.notebook_sa_annotations
+  }
+
+  image_pull_secret {
+    name = local.docker_secret_name
+  }
 
   depends_on = [kubernetes_namespace.jupyterhub[0]]
 }
@@ -123,6 +139,14 @@ resource "helm_release" "jupyterhub" {
       ingress_tls_secret_name = local.ingress_tls_secret_name
       jupyterhub_secret_token = var.jupyterhub_secret_token == "" ? random_string.secret[0].result : var.jupyterhub_secret_token
       debug_enabled           = local.jupyterhub_debug
+      single_user_sa          = kubernetes_service_account.single.metadata[0].name
+
+      cloud_type         = var.cloud_settings.type
+      aws_key_id         = try(var.cloud_settings.settings.key_id, "")
+      aws_key            = try(var.cloud_settings.settings.key_secret, "")
+      azure_account_name = try(var.cloud_settings.settings.account_name, "")
+      azure_sas_token    = try(var.cloud_settings.settings.sas_token, "")
+      project_id         = try(var.cloud_settings.settings.project_id, "")
 
       oauth_client_id       = var.oauth_client_id
       oauth_client_secret   = var.oauth_client_secret
@@ -146,5 +170,7 @@ resource "helm_release" "jupyterhub" {
     })
   ]
 
-  depends_on = [kubernetes_secret.jupyterhub_tls[0]]
+  depends_on = [
+    kubernetes_secret.jupyterhub_tls[0]
+  ]
 }

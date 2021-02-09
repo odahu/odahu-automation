@@ -56,9 +56,24 @@ prePuller:
 
 singleuser:
   startTimeout: 900
+  serviceAccountName: "${single_user_sa}"
+  cloudMetadata:
+    enabled: true
+    ip: 169.254.169.254
+  networkPolicy:
+    enabled: false
+    egress:
+    # Required egress is handled by other rules so it's safe to modify this
+      - to:
+          - ipBlock:
+              cidr: 0.0.0.0/0
   extraEnv:
     API_AUTH_ENABLED: "false"
     DEFAULT_API_ENDPOINT: "http://odahu-flow-api.odahu-flow.svc.cluster.local:80"
+%{ if cloud_type == "azure" ~}
+    AZURE_STORAGE_ACCOUNT: "${azure_account_name}"
+    AZURE_STORAGE_SAS_TOKEN: "${azure_sas_token}"
+%{ endif ~}
   defaultUrl: "/lab"
   image:
     name: ${docker_repo}/base-notebook
@@ -75,5 +90,4 @@ singleuser:
       description: "Jupyter Notebook Scientific Python Stack w/ Tensorflow and ODAHU plugin"
       kubespawner_override:
         image: ${docker_repo}/tensorflow-notebook:${docker_tag}
-
 ${culling}

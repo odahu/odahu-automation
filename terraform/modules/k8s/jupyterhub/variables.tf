@@ -3,6 +3,29 @@ variable "docker_repo" {
   description = "ODAHU flow Docker repo url"
 }
 
+variable "notebook_sa_annotations" {
+  type    = map
+  default = {}
+}
+
+variable "cloud_settings" {
+  type = object({
+    type     = string
+    settings = any
+  })
+  default = {
+    type = "gcp"
+    settings = {
+      credentials  = ""
+      account_name = ""
+      sas_token    = ""
+      project_id   = ""
+      key_id       = ""
+      key_secret   = ""
+    }
+  }
+}
+
 variable "docker_username" {
   type        = string
   default     = ""
