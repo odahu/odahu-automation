@@ -149,6 +149,11 @@ variable "kms_key_id" {
   description = "The ID of a Cloud KMS key that will be used to encrypt cluster disks"
 }
 
+variable "uniform_bucket_level_access" {
+  type        = string
+  description = "Enable or not uniform_bucket_level_access option"
+}
+
 ##################
 # OAuth2
 ##################

@@ -43,3 +43,7 @@ variable "collector_sa_list" {
   description = "List of service accounts that should be allowed to use `collector` IAM role"
 }
 
+variable "uniform_bucket_level_access" {
+  type        = string
+  description = "Enable or not uniform_bucket_level_access option"
+}

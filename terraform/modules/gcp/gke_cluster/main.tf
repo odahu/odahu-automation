@@ -140,6 +140,7 @@ resource "google_container_node_pool" "cluster_node_pools" {
 
     metadata = {
       disable-legacy-endpoints = "true"
+      block-project-ssh-keys   = var.block_project_ssh_key
     }
 
     labels = merge(lookup(each.value, "labels", {}), {
