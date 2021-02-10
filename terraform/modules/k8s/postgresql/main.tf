@@ -34,6 +34,11 @@ resource "helm_release" "pg_operator" {
     value = "postgresql-infrastructure-roles"
   }
 
+  set {
+    name  = "configGeneral.resync_period"
+    value = var.configuration.resync_period
+  }
+
   depends_on = [kubernetes_namespace.pgsql[0]]
 }
 
