@@ -6,8 +6,8 @@ providers {
   aws         = { versions = ["2.70.0"] }
   azurerm     = { versions = ["2.29.0"] }
   external    = { versions = ["1.2.0"] }
-  google-beta = { versions = ["2.20.3"] }
-  google      = { versions = ["2.20.3"] }
+  google-beta = { versions = ["3.47.0"] }
+  google      = { versions = ["3.47.0"] }
   helm        = { versions = ["1.3.1"] }
   kubernetes  = { versions = ["1.13.2"] }
   local       = { versions = ["1.4.0"] }

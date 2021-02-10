@@ -20,6 +20,8 @@ resource "google_storage_bucket" "data" {
   storage_class = "REGIONAL"
   force_destroy = true
 
+  uniform_bucket_level_access = var.uniform_bucket_level_access
+
   encryption {
     default_kms_key_name = var.kms_key_id
   }
@@ -38,6 +40,8 @@ resource "google_storage_bucket" "log" {
   location      = var.region
   storage_class = "REGIONAL"
   force_destroy = true
+
+  uniform_bucket_level_access = var.uniform_bucket_level_access
 
   encryption {
     default_kms_key_name = var.kms_key_id
