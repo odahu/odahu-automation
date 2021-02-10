@@ -3,7 +3,8 @@
 ##################
 variable "helm_repo" {
   type        = string
-  description = "ODAHU flow helm repo"
+  default     = "https://prometheus-community.github.io/helm-charts"
+  description = "Monitoring helm repo"
 }
 
 variable "helm_timeout" {
@@ -32,9 +33,10 @@ variable "db_namespace" {
   description = "Database namespace for dashboard deployment"
 }
 
-variable "odahu_infra_version" {
+variable "monitoring_chart_version" {
   type        = string
-  description = "ODAHU flow infra release version"
+  default     = "13.4.1"
+  description = "Monitoring chart version"
 }
 
 variable "grafana_admin" {
@@ -53,15 +55,9 @@ variable "grafana_storage_size" {
   description = "Grafana PVC size"
 }
 
-variable "grafana_image_tag" {
-  type        = string
-  default     = "7.1.5"
-  description = "Default Grafana docker image tag"
-}
-
 variable "prom_storage_size" {
   type        = string
-  default     = "20Gi"
+  default     = "30Gi"
   description = "Prometheus PVC size"
 }
 

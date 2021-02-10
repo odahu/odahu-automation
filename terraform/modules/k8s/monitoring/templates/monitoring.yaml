@@ -1,76 +1,386 @@
-namespace: "${monitoring_namespace}"
-prometheus-operator:
-  createCustomResource: "false"
-  alertmanager:
-    templateFiles:
-      default.tmpl: |-
-        {{ define "__alertmanager" }}Cluster: CLUSTER_NAME{{ end }}
-        {{ define "__alertmanagerURL" }}{{ .ExternalURL }}/#/alerts?receiver={{ .Receiver }}{{ end }}
+defaultRules:
+  create: true
+  rules:
+    alertmanager: true
+    etcd: true
+    general: true
+    k8s: true
+    kubeApiserver: true
+    kubeApiserverAvailability: true
+    kubeApiserverError: true
+    kubeApiserverSlos: true
+    kubelet: true
+    kubePrometheusGeneral: true
+    kubePrometheusNodeAlerting: true
+    kubePrometheusNodeRecording: true
+    kubernetesAbsent: true
+    kubernetesApps: true
+    kubernetesResources: true
+    kubernetesStorage: true
+    kubernetesSystem: true
+    kubeScheduler: true
+    kubeStateMetrics: true
+    network: true
+    node: true
+    prometheus: true
+    prometheusOperator: true
+    time: true
 
-        {{ define "__subject" }}[{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ .GroupLabels.SortedPairs.Values | join " " }} {{ if gt (len .CommonLabels) (len .GroupLabels) }}({{ with .CommonLabels.Remove .GroupLabels.Names }}{{ .Values | join " " }}{{ end }}){{ end }}{{ end }}
-        {{ define "__description" }}{{ end }}
+alertmanager:
+  enabled: true
+  templateFiles:
+    default.tmpl: |-
+      {{ define "__alertmanager" }}Cluster: CLUSTER_NAME{{ end }}
+      {{ define "__alertmanagerURL" }}{{ .ExternalURL }}/#/alerts?receiver={{ .Receiver }}{{ end }}
 
-        {{ define "__text_alert_list" }}{{ range . }}Labels:
-        {{ range .Labels.SortedPairs }} - {{ .Name }} = {{ .Value }}
-        {{ end }}Annotations:
-        {{ range .Annotations.SortedPairs }} - {{ .Name }} = {{ .Value }}
-        {{ end }}Source: {{ .GeneratorURL }}
-        {{ end }}{{ end }}
+      {{ define "__subject" }}[{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ .GroupLabels.SortedPairs.Values | join " " }} {{ if gt (len .CommonLabels) (len .GroupLabels) }}({{ with .CommonLabels.Remove .GroupLabels.Names }}{{ .Values | join " " }}{{ end }}){{ end }}{{ end }}
+      {{ define "__description" }}{{ end }}
 
-        {{ define "slack.default.title" }}{{ template "__subject" . }}{{ end }}
-        {{ define "slack.default.username" }}{{ template "__alertmanager" . }}{{ end }}
-        {{ define "slack.default.fallback" }}{{ template "slack.default.title" . }} | {{ template "slack.default.titlelink" . }}{{ end }}
-        {{ define "slack.default.pretext" }}{{ end }}
-        {{ define "slack.default.titlelink" }}{{ template "__alertmanagerURL" . }}{{ end }}
-        {{ define "slack.default.iconemoji" }}{{ end }}
-        {{ define "slack.default.iconurl" }}{{ end }}
-        {{ define "slack.default.text" }}{{ end }}
-        {{ define "slack.default.footer" }}{{ end }}
-    alertmanagerSpec:
-      externalUrl: "https://${cluster_domain}/alertmanager"
-      routePrefix: "/"
-    ingress:
-      paths:
-      - "/alertmanager"
-      hosts:
-      - "${cluster_domain}"
-      tls:
-      - secretName: "${ingress_tls_secret_name}"
-        hosts: ["${cluster_domain}"]
-      ${indent(6, nginx_annotations)}
+      {{ define "__text_alert_list" }}{{ range . }}Labels:
+      {{ range .Labels.SortedPairs }} - {{ .Name }} = {{ .Value }}
+      {{ end }}Annotations:
+      {{ range .Annotations.SortedPairs }} - {{ .Name }} = {{ .Value }}
+      {{ end }}Source: {{ .GeneratorURL }}
+      {{ end }}{{ end }}
 
-  prometheus:
-    prometheusSpec:
-      externalUrl: "https://${cluster_domain}/prometheus"
-      routePrefix: "/"
-      storageSpec:
-        volumeClaimTemplate:
-          spec:
-            resources:
-              requests:
-                storage: "${prom_storage_size}"
-      retention: "${prom_retention_time}"
-      retentionSize: "${prom_retention_size}"
-      resources:
-        limits:
-          cpu: "2"
-          memory: "2.5Gi"
-        requests:
-          cpu: "1"
-          memory: "2Gi"
-    ingress:
-      paths:
-      - "/prometheus"
-      hosts:
-      - "${cluster_domain}"
-      tls:
-      - secretName: "${ingress_tls_secret_name}"
-        hosts: ["${cluster_domain}"]
-      ${indent(6, nginx_annotations)}
+      {{ define "slack.default.title" }}{{ template "__subject" . }}{{ end }}
+      {{ define "slack.default.username" }}{{ template "__alertmanager" . }}{{ end }}
+      {{ define "slack.default.fallback" }}{{ template "slack.default.title" . }} | {{ template "slack.default.titlelink" . }}{{ end }}
+      {{ define "slack.default.pretext" }}{{ end }}
+      {{ define "slack.default.titlelink" }}{{ template "__alertmanagerURL" . }}{{ end }}
+      {{ define "slack.default.iconemoji" }}{{ end }}
+      {{ define "slack.default.iconurl" }}{{ end }}
+      {{ define "slack.default.text" }}{{ end }}
+      {{ define "slack.default.footer" }}{{ end }}
+  alertmanagerSpec:
+    externalUrl: "https://${cluster_domain}/alertmanager"
+    routePrefix: "/"
+  ingress:
+    enabled: true
+    paths:
+    - "/alertmanager"
+    hosts:
+    - "${cluster_domain}"
+    tls:
+    - secretName: "${ingress_tls_secret_name}"
+      hosts: ["${cluster_domain}"]
+    ${indent(6, nginx_annotations)}
 
-odahuflow-grafana:
+prometheusOperator:
+  enabled: true
+  tls:
+    enabled: true
+    tlsMinVersion: VersionTLS13
+  admissionWebhooks:
+    failurePolicy: Fail
+    enabled: true
+    patch:
+      enabled: true
+      image:
+        repository: jettech/kube-webhook-certgen
+        tag: v1.5.0
+        pullPolicy: IfNotPresent
+    certManager:
+      enabled: false
+  service:
+    nodePort: 30080
+    nodePortTls: 30443
+  kubeletService:
+    enabled: true
+    namespace: kube-system
+  serviceMonitor:
+    selfMonitor: true
+  hostNetwork: false
+  securityContext:
+    fsGroup: 65534
+    runAsGroup: 65534
+    runAsNonRoot: true
+    runAsUser: 65534
   image:
-    tag: "${grafana_image_tag}"
+    repository: quay.io/prometheus-operator/prometheus-operator
+    tag: v0.44.0
+    pullPolicy: IfNotPresent
+  configmapReloadImage:
+    repository: docker.io/jimmidyson/configmap-reload
+    tag: v0.4.0
+  prometheusConfigReloaderImage:
+    repository: quay.io/prometheus-operator/prometheus-config-reloader
+    tag: v0.44.0
+  configReloaderCpu: 100m
+  configReloaderMemory: 50Mi
+
+prometheus:
+  enabled: true
+  service:
+    port: 9090
+    targetPort: 9090
+    nodePort: 30090
+  ingress:
+    enabled: true
+    paths:
+    - "/prometheus"
+    hosts:
+    - "${cluster_domain}"
+    tls:
+    - secretName: "${ingress_tls_secret_name}"
+      hosts: ["${cluster_domain}"]
+    ${indent(6, nginx_annotations)}
+  prometheusSpec:
+    ruleSelectorNilUsesHelmValues: false
+    ruleNamespaceSelector:
+      matchLabels:
+        k8s-component: monitoring
+    serviceMonitorSelectorNilUsesHelmValues: false
+    serviceMonitorNamespaceSelector:
+      matchLabels:
+        k8s-component: monitoring
+    podMonitorSelectorNilUsesHelmValues: false
+    podMonitorNamespaceSelector:
+      matchLabels:
+        k8s-component: monitoring
+    probeSelectorNilUsesHelmValues: false
+    probeNamespaceSelector:
+      matchLabels:
+        k8s-component: monitoring
+    externalUrl: "https://${cluster_domain}/prometheus"
+    routePrefix: "/"
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          resources:
+            requests:
+              storage: "${prom_storage_size}"
+    retention: "${prom_retention_time}"
+    retentionSize: "${prom_retention_size}"
+    resources:
+      limits:
+        cpu: "2"
+        memory: "4Gi"
+      requests:
+        cpu: "1"
+        memory: "3Gi"
+    additionalScrapeConfigs:
+      # Controller endpoint
+      - job_name: controller
+        scrape_interval: 3s
+        scrape_timeout: 3s
+        kubernetes_sd_configs:
+          - role: pod
+        relabel_configs:
+          # Scrape only the targets matching the following metadata
+          - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_pod_label_app, __meta_kubernetes_pod_container_port_name]
+            action: keep
+            regex: knative-serving;controller;metrics
+          # Rename metadata labels to be reader friendly
+          - source_labels: [__meta_kubernetes_namespace]
+            target_label: namespace
+          - source_labels: [__meta_kubernetes_pod_name]
+            target_label: pod
+          - source_labels: [__meta_kubernetes_service_name]
+            target_label: service
+      # Autoscaler endpoint
+      - job_name: autoscaler
+        scrape_interval: 3s
+        scrape_timeout: 3s
+        kubernetes_sd_configs:
+          - role: pod
+        relabel_configs:
+          # Scrape only the targets matching the following metadata
+          - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_pod_label_app, __meta_kubernetes_pod_container_port_name]
+            action: keep
+            regex: knative-serving;autoscaler;metrics
+          # Rename metadata labels to be reader friendly
+          - source_labels: [__meta_kubernetes_namespace]
+            target_label: namespace
+          - source_labels: [__meta_kubernetes_pod_name]
+            target_label: pod
+          - source_labels: [__meta_kubernetes_service_name]
+            target_label: service
+      # Activator pods
+      - job_name: activator
+        scrape_interval: 3s
+        scrape_timeout: 3s
+        kubernetes_sd_configs:
+          - role: pod
+        relabel_configs:
+          # Scrape only the targets matching the following metadata
+          - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_pod_label_app, __meta_kubernetes_pod_container_port_name]
+            action: keep
+            regex: knative-serving;activator;metrics-port
+          # Rename metadata labels to be reader friendly
+          - source_labels: [__meta_kubernetes_namespace]
+            target_label: namespace
+          - source_labels: [__meta_kubernetes_pod_name]
+            target_label: pod
+          - source_labels: [__meta_kubernetes_service_name]
+            target_label: service
+      # Istio config
+      - job_name: 'istio-mesh'
+        kubernetes_sd_configs:
+          - role: endpoints
+            namespaces:
+              names:
+                - istio-system
+
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
+            action: keep
+            regex: istio-telemetry;prometheus
+
+      # Scrape config for envoy stats
+      - job_name: 'envoy-stats'
+        metrics_path: /stats/prometheus
+        kubernetes_sd_configs:
+          - role: pod
+
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_pod_container_port_name]
+            action: keep
+            regex: '.*-envoy-prom'
+          - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+            action: replace
+            regex: ([^:]+)(?::\d+)?;(\d+)
+            replacement: $1:15090
+            target_label: __address__
+          - action: labelmap
+            regex: __meta_kubernetes_pod_label_(.+)
+          - source_labels: [__meta_kubernetes_namespace]
+            action: replace
+            target_label: namespace
+          - source_labels: [__meta_kubernetes_pod_name]
+            action: replace
+            target_label: pod_name
+
+        metric_relabel_configs:
+          # Exclude some of the envoy metrics that have massive cardinality
+          # This list may need to be pruned further moving forward, as informed
+          # by performance and scalability testing.
+          - source_labels: [ cluster_name ]
+            regex: '(outbound|inbound|prometheus_stats).*'
+            action: drop
+          - source_labels: [ tcp_prefix ]
+            regex: '(outbound|inbound|prometheus_stats).*'
+            action: drop
+          - source_labels: [ listener_address ]
+            regex: '(.+)'
+            action: drop
+          - source_labels: [ http_conn_manager_listener_prefix ]
+            regex: '(.+)'
+            action: drop
+          - source_labels: [ http_conn_manager_prefix ]
+            regex: '(.+)'
+            action: drop
+          - source_labels: [ __name__ ]
+            regex: 'envoy_tls.*'
+            action: drop
+          - source_labels: [ __name__ ]
+            regex: 'envoy_tcp_downstream.*'
+            action: drop
+          - source_labels: [ __name__ ]
+            regex: 'envoy_http_(stats|admin).*'
+            action: drop
+          - source_labels: [ __name__ ]
+            regex: 'envoy_cluster_(lb|retry|bind|internal|max|original).*'
+            action: drop
+
+      - job_name: 'istio-policy'
+        kubernetes_sd_configs:
+          - role: endpoints
+            namespaces:
+              names:
+                - istio-system
+
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
+            action: keep
+            regex: istio-policy;http-monitoring
+
+      - job_name: 'istio-telemetry'
+        kubernetes_sd_configs:
+          - role: endpoints
+            namespaces:
+              names:
+                - istio-system
+
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
+            action: keep
+            regex: istio-telemetry;http-monitoring
+
+      - job_name: 'pilot'
+        kubernetes_sd_configs:
+          - role: endpoints
+            namespaces:
+              names:
+                - istio-system
+
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
+            action: keep
+            regex: istio-pilot;http-monitoring
+
+      - job_name: 'galley'
+        kubernetes_sd_configs:
+          - role: endpoints
+            namespaces:
+              names:
+                - istio-system
+
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
+            action: keep
+            regex: istio-galley;http-monitoring
+
+      - job_name: 'citadel'
+        kubernetes_sd_configs:
+          - role: endpoints
+            namespaces:
+              names:
+                - istio-system
+
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
+            action: keep
+            regex: istio-citadel;http-monitoring
+
+      - job_name: prometheus
+        static_configs:
+          - targets:
+            - localhost:9090
+      - job_name: 'kubernetes-cadvisor'
+        scheme: https
+        tls_config:
+          ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+        bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+        kubernetes_sd_configs:
+          - role: node
+        relabel_configs:
+          - action: labelmap
+            regex: __meta_kubernetes_node_label_(.+)
+          - target_label: __address__
+            replacement: kubernetes.default.svc:443
+          - source_labels: [__meta_kubernetes_node_name]
+            regex: (.+)
+            target_label: __metrics_path__
+            replacement: /api/v1/nodes/${1}/proxy/metrics/cadvisor
+
+  additionalServiceMonitors:
+  - name: pg-exporter
+    additionalLabels:
+      app: pg-exporter
+      monitoring: prometheus
+    selector:
+      matchLabels:
+        app: pg-exporter
+    endpoints:
+    - port: exporter
+      path: /metrics
+    namespaceSelector:
+      matchNames:
+      - "${db_namespace}"
+
+grafana:
+  enabled: true
   adminUser: "${grafana_admin}"
   adminPassword: "${grafana_pass}"
   deploymentStrategy:
@@ -84,6 +394,7 @@ odahuflow-grafana:
     size: "${grafana_storage_size}"
 %{ endif ~}
   ingress:
+    enabled: true
     path: "/grafana"
     hosts:
     - "${cluster_domain}"
@@ -91,6 +402,11 @@ odahuflow-grafana:
     - secretName: "${ingress_tls_secret_name}"
       hosts: ["${cluster_domain}"]
     ${indent(4, nginx_annotations)}
+  sidecar:
+    dashboards:
+      enabled: true
+      label: grafana_dashboard
+      defaultFolderName: k8s
   grafana.ini:
 %{ if grafana_pgsql_enabled }
     database:
@@ -111,3 +427,39 @@ odahuflow-grafana:
       serve_from_sub_path: true
     dashboards:
       default_home_dashboard_path: /tmp/dashboards/k8s/nodes.json
+  dashboardProviders:
+    dashboardproviders.yaml:
+      apiVersion: 1
+      providers:
+      - name: 'postgresql'
+        orgId: 1
+        folder: 'PostgreSQL'
+        type: file
+        disableDeletion: false
+        editable: true
+        options:
+          path: /tmp/dashboards/postgresql
+      - name: 'istio'
+        orgId: 1
+        folder: 'Istio'
+        type: file
+        disableDeletion: false
+        editable: true
+        options:
+          path: /tmp/dashboards/istio
+      - name: 'knative'
+        orgId: 1
+        folder: 'Knative'
+        type: file
+        disableDeletion: false
+        editable: true
+        options:
+          path: /tmp/dashboards/knative
+      - name: 'monitoring'
+        orgId: 1
+        folder: 'Monitoring'
+        type: file
+        disableDeletion: false
+        editable: true
+        options:
+          path: /tmp/dashboards/monitoring

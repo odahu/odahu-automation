@@ -50,7 +50,7 @@ resource "kubernetes_config_map" "grafana_dashboard" {
   }
 
   data = {
-    "gpu-dashboard.json" = file("${path.module}/files/grafana-gpu-dashboard.json")
+    "gpu-dashboard.json" = file("${path.module}/files/grafana-gpu-dashboard.json.dashboard")
   }
 
   depends_on = [

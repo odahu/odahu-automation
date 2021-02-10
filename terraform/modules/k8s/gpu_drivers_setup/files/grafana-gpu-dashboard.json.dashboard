@@ -283,7 +283,7 @@
       "options": {
         "fieldOptions": {
           "calcs": [
-            "sum"
+            "mean"
           ],
           "defaults": {
             "color": {
