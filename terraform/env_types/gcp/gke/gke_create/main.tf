@@ -77,6 +77,8 @@ module "gke_cluster" {
   bastion_gcp_tags     = local.bastion_gcp_tags
   bastion_labels       = var.bastion_labels
 
+  block_project_ssh_key = var.block_project_ssh_key
+
   depends_on = [
     module.iam,
     module.vpc

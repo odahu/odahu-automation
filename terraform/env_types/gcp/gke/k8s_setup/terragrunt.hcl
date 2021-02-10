@@ -33,6 +33,8 @@ locals {
   cmd_k8s_fwrules_cleanup = "${local.scripts_dir}/gcp_k8s_fw_cleanup.sh"
   cmd_k8s_config_fetch    = "gcloud container clusters get-credentials \"${local.cluster_name}\" --region \"${local.gcp_region}\" --project \"${local.gcp_project_id}\""
   cmd_check_dns           = "${local.scripts_dir}/check_dns.sh"
+
+  uniform_bucket_level_access = lookup(local.config, "uniform_bucket_level_access", "true")
 }
 
 remote_state {
@@ -89,4 +91,6 @@ inputs = {
   cluster_domain_name = local.cluster_domain_name
   managed_zone        = lookup(local.config.dns, "zone_name", "")
   domain              = local.cluster_fqdn
+
+  uniform_bucket_level_access = local.uniform_bucket_level_access
 }

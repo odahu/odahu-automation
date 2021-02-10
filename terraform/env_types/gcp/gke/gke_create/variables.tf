@@ -97,6 +97,11 @@ variable "kms_key_id" {
   description = "The ID of a Cloud KMS key that will be used to encrypt cluster disks"
 }
 
+variable "block_project_ssh_key" {
+  type        = string
+  description = "Should project-wide ssh keys be blocked for nodes"
+}
+
 #############
 # Node pool
 #############
