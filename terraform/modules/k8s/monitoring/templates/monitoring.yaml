@@ -463,3 +463,7 @@ grafana:
         editable: true
         options:
           path: /tmp/dashboards/monitoring
+
+kubelet:
+  serviceMonitor:
+    https: false
