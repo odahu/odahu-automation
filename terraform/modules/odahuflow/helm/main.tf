@@ -266,9 +266,6 @@ locals {
   packagers = {
     triton = {
       targets = {
-        docker_pull = {
-          default = lookup(local.odahu_docker_creds_connection[0], "id", "")
-        }
         docker_push = {
           default = local.default_model_docker_connection_id
         }
