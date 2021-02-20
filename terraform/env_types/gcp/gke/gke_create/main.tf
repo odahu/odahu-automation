@@ -71,12 +71,11 @@ module "gke_cluster" {
   ssh_public_key = var.ssh_key
   kms_key_id     = var.kms_key_id
 
-  bastion_enabled      = var.bastion_enabled
-  bastion_hostname     = var.bastion_hostname
-  bastion_machine_type = var.bastion_machine_type
-  bastion_gcp_tags     = local.bastion_gcp_tags
-  bastion_labels       = var.bastion_labels
-
+  bastion_enabled       = var.bastion_enabled
+  bastion_hostname      = var.bastion_hostname
+  bastion_machine_type  = var.bastion_machine_type
+  bastion_gcp_tags      = local.bastion_gcp_tags
+  bastion_labels        = var.bastion_labels
   block_project_ssh_key = var.block_project_ssh_key
 
   depends_on = [

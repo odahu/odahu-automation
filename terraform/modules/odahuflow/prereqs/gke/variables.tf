@@ -45,5 +45,6 @@ variable "collector_sa_list" {
 
 variable "uniform_bucket_level_access" {
   type        = string
+  default     = "true"
   description = "Enable or not uniform_bucket_level_access option"
 }

@@ -103,6 +103,7 @@ variable "service_cidr" {
 
 variable "block_project_ssh_key" {
   type        = string
+  default     = "true"
   description = "Should project-wide ssh keys be blocked for nodes"
 }
 

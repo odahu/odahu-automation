@@ -29,11 +29,10 @@ locals {
   config_context_cluster   = lookup(local.config, "config_context_cluster", local.kube_context_user)
   cluster_domain_name      = lookup(local.config.dns, "domain", null)
 
-  scripts_dir             = "${get_terragrunt_dir()}/../../../../../scripts"
-  cmd_k8s_fwrules_cleanup = "${local.scripts_dir}/gcp_k8s_fw_cleanup.sh"
-  cmd_k8s_config_fetch    = "gcloud container clusters get-credentials \"${local.cluster_name}\" --region \"${local.gcp_region}\" --project \"${local.gcp_project_id}\""
-  cmd_check_dns           = "${local.scripts_dir}/check_dns.sh"
-
+  scripts_dir                 = "${get_terragrunt_dir()}/../../../../../scripts"
+  cmd_k8s_fwrules_cleanup     = "${local.scripts_dir}/gcp_k8s_fw_cleanup.sh"
+  cmd_k8s_config_fetch        = "gcloud container clusters get-credentials \"${local.cluster_name}\" --region \"${local.gcp_region}\" --project \"${local.gcp_project_id}\""
+  cmd_check_dns               = "${local.scripts_dir}/check_dns.sh"
   uniform_bucket_level_access = lookup(local.config, "uniform_bucket_level_access", "true")
 }
 
@@ -88,9 +87,8 @@ inputs = {
   config_context_auth_info = local.config_context_auth_info
   config_context_cluster   = local.config_context_cluster
 
-  cluster_domain_name = local.cluster_domain_name
-  managed_zone        = lookup(local.config.dns, "zone_name", "")
-  domain              = local.cluster_fqdn
-
+  cluster_domain_name         = local.cluster_domain_name
+  managed_zone                = lookup(local.config.dns, "zone_name", "")
+  domain                      = local.cluster_fqdn
   uniform_bucket_level_access = local.uniform_bucket_level_access
 }
