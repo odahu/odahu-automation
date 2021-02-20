@@ -33,7 +33,7 @@ locals {
   cmd_k8s_fwrules_cleanup     = "${local.scripts_dir}/gcp_k8s_fw_cleanup.sh"
   cmd_k8s_config_fetch        = "gcloud container clusters get-credentials \"${local.cluster_name}\" --region \"${local.gcp_region}\" --project \"${local.gcp_project_id}\""
   cmd_check_dns               = "${local.scripts_dir}/check_dns.sh"
-  uniform_bucket_level_access = lookup(local.config, "uniform_bucket_level_access", "true")
+  uniform_bucket_level_access = lookup(lookup(local.config.cloud, "gcp", {}), "uniform_bucket_level_access", "true")
 }
 
 remote_state {
