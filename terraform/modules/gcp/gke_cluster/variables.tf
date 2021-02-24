@@ -101,6 +101,12 @@ variable "service_cidr" {
   description = "GKE service CIDR"
 }
 
+variable "block_project_ssh_key" {
+  type        = string
+  default     = "true"
+  description = "Should project-wide ssh keys be blocked for nodes"
+}
+
 #############
 # Node pools
 #############

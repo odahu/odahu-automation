@@ -159,14 +159,15 @@ module "pg_backup" {
 }
 
 module "odahuflow_prereqs" {
-  source              = "../../../../modules/odahuflow/prereqs/gke"
-  project_id          = var.project_id
-  region              = var.region
-  cluster_name        = var.cluster_name
-  kms_key_id          = var.kms_key_id
-  data_bucket         = var.data_bucket
-  log_bucket          = var.log_bucket
-  log_expiration_days = var.log_expiration_days
+  source                      = "../../../../modules/odahuflow/prereqs/gke"
+  project_id                  = var.project_id
+  region                      = var.region
+  cluster_name                = var.cluster_name
+  kms_key_id                  = var.kms_key_id
+  data_bucket                 = var.data_bucket
+  log_bucket                  = var.log_bucket
+  log_expiration_days         = var.log_expiration_days
+  uniform_bucket_level_access = var.uniform_bucket_level_access
   collector_sa_list = [
     "serviceAccount:${var.project_id}.svc.id.goog[${var.logging_namespace}/fluentd-daemonset]",
     "serviceAccount:${var.project_id}.svc.id.goog[${var.fluentd_namespace}/fluentd]",

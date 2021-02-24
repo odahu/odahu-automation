@@ -1,5 +1,5 @@
 locals {
-  collector_sa_key_one_line  = jsonencode(jsondecode(base64decode(google_service_account_key.collector_sa_key.private_key)))
+  collector_sa_key_one_line = jsonencode(jsondecode(base64decode(google_service_account_key.collector_sa_key.private_key)))
 
   model_docker_user        = "_json_key"
   model_docker_password    = local.collector_sa_key_one_line
@@ -16,10 +16,11 @@ locals {
 # GCS data bucket
 ########################################################
 resource "google_storage_bucket" "data" {
-  name          = var.data_bucket
-  location      = var.region
-  storage_class = "REGIONAL"
-  force_destroy = true
+  name                        = var.data_bucket
+  location                    = var.region
+  storage_class               = "REGIONAL"
+  force_destroy               = true
+  uniform_bucket_level_access = var.uniform_bucket_level_access
 
   encryption {
     default_kms_key_name = var.kms_key_id
@@ -35,10 +36,11 @@ resource "google_storage_bucket" "data" {
 # GCS log bucket
 ########################################################
 resource "google_storage_bucket" "log" {
-  name          = local.log_bucket_name
-  location      = var.region
-  storage_class = "REGIONAL"
-  force_destroy = true
+  name                        = local.log_bucket_name
+  location                    = var.region
+  storage_class               = "REGIONAL"
+  force_destroy               = true
+  uniform_bucket_level_access = var.uniform_bucket_level_access
 
   encryption {
     default_kms_key_name = var.kms_key_id
