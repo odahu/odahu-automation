@@ -71,6 +71,7 @@ module "gke_cluster" {
   ssh_public_key = var.ssh_key
   kms_key_id     = var.kms_key_id
 
+  autoscaling_profile   = var.autoscaling_profile
   bastion_enabled       = var.bastion_enabled
   bastion_hostname      = var.bastion_hostname
   bastion_machine_type  = var.bastion_machine_type

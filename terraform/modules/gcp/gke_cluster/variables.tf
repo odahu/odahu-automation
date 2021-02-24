@@ -107,6 +107,12 @@ variable "block_project_ssh_key" {
   description = "Should project-wide ssh keys be blocked for nodes"
 }
 
+variable "autoscaling_profile" {
+  type        = string
+  default     = "OPTIMIZE_UTILIZATION"
+  description = "GKE autoscaling profile, possible values: BALANCED|OPTIMIZE_UTILIZATION"
+}
+
 #############
 # Node pools
 #############

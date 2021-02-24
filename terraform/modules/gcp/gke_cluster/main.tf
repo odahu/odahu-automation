@@ -32,6 +32,11 @@ resource "google_container_cluster" "cluster" {
   remove_default_node_pool = true
   initial_node_count       = local.initial_node_count * 2 >= 4 ? local.initial_node_count * 2 : 4
 
+  cluster_autoscaling {
+    enabled             = false
+    autoscaling_profile = var.autoscaling_profile
+  }
+
   # Setting an empty username and password explicitly disables basic auth
   master_auth {
     username = ""
