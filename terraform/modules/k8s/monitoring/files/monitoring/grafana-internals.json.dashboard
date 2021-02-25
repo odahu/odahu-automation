@@ -118,7 +118,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "process_start_time_seconds{kubernetes_pod_name=\"$pod\"} * 1000",
+              "expr": "process_start_time_seconds{kubernetes_pod_name=\"$pod\", service=\"monitoring-grafana\"} * 1000",
               "format": "time_series",
               "intervalFactor": 2,
               "refId": "A"
