@@ -94,7 +94,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "round(sum(rate(istio_revision_request_count{destination_namespace=\"$namespace\", destination_revision=~\"$revision\", destination_configuration=~\"$configuration\"}[1m])), 0.001)",
+          "expr": "round(sum(rate(istio_requests_total{destination_service_namespace=\"$namespace\", destination_revision=~\"$revision\", destination_configuration=~\"$configuration\"}[1m])), 0.001)",
           "format": "time_series",
           "hide": false,
           "interval": "",
@@ -176,7 +176,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "sum(rate(istio_revision_request_count{response_code!~\"5.*\", destination_namespace=\"$namespace\", destination_revision=~\"$revision\", destination_configuration=~\"$configuration\"}[1m])) / sum(rate(istio_revision_request_count{destination_namespace=\"$namespace\", destination_revision=~\"$revision\", destination_configuration=~\"$configuration\"}[1m]))",
+          "expr": "sum(rate(istio_requests_total{response_code!~\"5.*\", destination_service_namespace=\"$namespace\", destination_revision=~\"$revision\", destination_configuration=~\"$configuration\"}[1m])) / sum(rate(istio_requests_total{destination_service_namespace=\"$namespace\", destination_revision=~\"$revision\", destination_configuration=~\"$configuration\"}[1m]))",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -257,7 +257,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "sum(rate(istio_revision_request_count{response_code=~\"4.*\", destination_namespace=\"$namespace\", destination_revision=~\"$revision\", destination_configuration=~\"$configuration\"}[1m])) ",
+          "expr": "sum(rate(istio_requests_total{response_code=~\"4.*\", destination_service_namespace=\"$namespace\", destination_revision=~\"$revision\", destination_configuration=~\"$configuration\"}[1m])) ",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -338,7 +338,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "sum(rate(istio_revision_request_count{response_code=~\"5.*\", destination_namespace=\"$namespace\", destination_revision=~\"$revision\", destination_configuration=~\"$configuration\"}[1m])) ",
+          "expr": "sum(rate(istio_requests_total{response_code=~\"5.*\", destination_service_namespace=\"$namespace\", destination_revision=~\"$revision\", destination_configuration=~\"$configuration\"}[1m])) ",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -408,7 +408,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "label_replace(round(sum(rate(istio_revision_request_count{destination_namespace=\"$namespace\", destination_configuration=~\"$configuration\",destination_revision=~\"$revision\"}[1m])) by (destination_revision), 0.001), \"destination_revision\", \"$2\", \"destination_revision\", \"$configuration(-+)(.*)\")",
+          "expr": "label_replace(round(sum(rate(istio_requests_total{destination_service_namespace=\"$namespace\", destination_configuration=~\"$configuration\",destination_revision=~\"$revision\"}[1m])) by (destination_revision), 0.001), \"destination_revision\", \"$2\", \"destination_revision\", \"$configuration(-+)(.*)\")",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -489,7 +489,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "round(sum(rate(istio_revision_request_count{destination_namespace=\"$namespace\", destination_configuration=~\"$configuration\",destination_revision=~\"$revision\"}[1m])) by (response_code), 0.001)",
+          "expr": "round(sum(rate(istio_requests_total{destination_service_namespace=\"$namespace\", destination_configuration=~\"$configuration\",destination_revision=~\"$revision\"}[1m])) by (response_code), 0.001)",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -587,28 +587,28 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "label_replace(histogram_quantile(0.50, sum(rate(istio_revision_request_duration_bucket{destination_namespace=\"$namespace\", destination_configuration=~\"$configuration\",destination_revision=~\"$revision\"}[1m])) by (destination_revision, le)), \"destination_revision\", \"$2\", \"destination_revision\", \"$configuration(-+)(.*)\")",
+          "expr": "label_replace(histogram_quantile(0.50, sum(rate(istio_request_duration_seconds_bucket{destination_service_namespace=\"$namespace\", destination_configuration=~\"$configuration\",destination_revision=~\"$revision\"}[1m])) by (destination_revision, le)), \"destination_revision\", \"$2\", \"destination_revision\", \"$configuration(-+)(.*)\")",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{ destination_revision }} (p50)",
           "refId": "A"
         },
         {
-          "expr": "label_replace(histogram_quantile(0.90, sum(rate(istio_revision_request_duration_bucket{destination_namespace=\"$namespace\", destination_configuration=~\"$configuration\",destination_revision=~\"$revision\"}[1m])) by (destination_revision, le)), \"destination_revision\", \"$2\", \"destination_revision\", \"$configuration(-+)(.*)\")",
+          "expr": "label_replace(histogram_quantile(0.90, sum(rate(istio_request_duration_seconds_bucket{destination_service_namespace=\"$namespace\", destination_configuration=~\"$configuration\",destination_revision=~\"$revision\"}[1m])) by (destination_revision, le)), \"destination_revision\", \"$2\", \"destination_revision\", \"$configuration(-+)(.*)\")",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{ destination_revision }} (p90)",
           "refId": "B"
         },
         {
-          "expr": "label_replace(histogram_quantile(0.95, sum(rate(istio_revision_request_duration_bucket{destination_namespace=\"$namespace\", destination_configuration=~\"$configuration\",destination_revision=~\"$revision\"}[1m])) by (destination_revision, le)), \"destination_revision\", \"$2\", \"destination_revision\", \"$configuration(-+)(.*)\")",
+          "expr": "label_replace(histogram_quantile(0.95, sum(rate(istio_request_duration_seconds_bucket{destination_service_namespace=\"$namespace\", destination_configuration=~\"$configuration\",destination_revision=~\"$revision\"}[1m])) by (destination_revision, le)), \"destination_revision\", \"$2\", \"destination_revision\", \"$configuration(-+)(.*)\")",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{ destination_revision }} (p95)",
           "refId": "C"
         },
         {
-          "expr": "label_replace(histogram_quantile(0.99, sum(rate(istio_revision_request_duration_bucket{destination_namespace=\"$namespace\", destination_configuration=~\"$configuration\",destination_revision=~\"$revision\"}[1m])) by (destination_revision, le)), \"destination_revision\", \"$2\", \"destination_revision\", \"$configuration(-+)(.*)\")",
+          "expr": "label_replace(histogram_quantile(0.99, sum(rate(istio_request_duration_seconds_bucket{destination_service_namespace=\"$namespace\", destination_configuration=~\"$configuration\",destination_revision=~\"$revision\"}[1m])) by (destination_revision, le)), \"destination_revision\", \"$2\", \"destination_revision\", \"$configuration(-+)(.*)\")",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{ destination_revision }} (p99)",
@@ -692,56 +692,56 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "label_replace(histogram_quantile(0.50, sum(rate(istio_revision_request_duration_bucket{destination_namespace=\"$namespace\", destination_configuration=~\"$configuration\",destination_revision=~\"$revision\",response_code=~\"2.*\"}[1m])) by (le)), \"destination_revision\", \"$2\", \"destination_revision\", \"$configuration(-+)(.*)\")",
+          "expr": "label_replace(histogram_quantile(0.50, sum(rate(istio_request_duration_seconds_bucket{destination_service_namespace=\"$namespace\", destination_configuration=~\"$configuration\",destination_revision=~\"$revision\",response_code=~\"2.*\"}[1m])) by (le)), \"destination_revision\", \"$2\", \"destination_revision\", \"$configuration(-+)(.*)\")",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "2xx (p50)",
           "refId": "C"
         },
         {
-          "expr": "label_replace(histogram_quantile(0.50, sum(rate(istio_revision_request_duration_bucket{destination_namespace=\"$namespace\", destination_configuration=~\"$configuration\",destination_revision=~\"$revision\",response_code=~\"3.*\"}[1m])) by (le)), \"destination_revision\", \"$2\", \"destination_revision\", \"$configuration(-+)(.*)\")",
+          "expr": "label_replace(histogram_quantile(0.50, sum(rate(istio_request_duration_seconds_bucket{destination_service_namespace=\"$namespace\", destination_configuration=~\"$configuration\",destination_revision=~\"$revision\",response_code=~\"3.*\"}[1m])) by (le)), \"destination_revision\", \"$2\", \"destination_revision\", \"$configuration(-+)(.*)\")",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "3xx (p50)",
           "refId": "D"
         },
         {
-          "expr": "label_replace(histogram_quantile(0.50, sum(rate(istio_revision_request_duration_bucket{destination_namespace=\"$namespace\", destination_configuration=~\"$configuration\",destination_revision=~\"$revision\",response_code=~\"4.*\"}[1m])) by (le)), \"destination_revision\", \"$2\", \"destination_revision\", \"$configuration(-+)(.*)\")",
+          "expr": "label_replace(histogram_quantile(0.50, sum(rate(istio_request_duration_seconds_bucket{destination_service_namespace=\"$namespace\", destination_configuration=~\"$configuration\",destination_revision=~\"$revision\",response_code=~\"4.*\"}[1m])) by (le)), \"destination_revision\", \"$2\", \"destination_revision\", \"$configuration(-+)(.*)\")",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "4xx (p50)",
           "refId": "A"
         },
         {
-          "expr": "label_replace(histogram_quantile(0.50, sum(rate(istio_revision_request_duration_bucket{destination_namespace=\"$namespace\", destination_configuration=~\"$configuration\",destination_revision=~\"$revision\",response_code=~\"5.*\"}[1m])) by (le)), \"destination_revision\", \"$2\", \"destination_revision\", \"$configuration(-+)(.*)\")",
+          "expr": "label_replace(histogram_quantile(0.50, sum(rate(istio_request_duration_seconds_bucket{destination_service_namespace=\"$namespace\", destination_configuration=~\"$configuration\",destination_revision=~\"$revision\",response_code=~\"5.*\"}[1m])) by (le)), \"destination_revision\", \"$2\", \"destination_revision\", \"$configuration(-+)(.*)\")",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "5xx (p50)",
           "refId": "B"
         },
         {
-          "expr": "label_replace(histogram_quantile(0.95, sum(rate(istio_revision_request_duration_bucket{destination_namespace=\"$namespace\", destination_configuration=~\"$configuration\",destination_revision=~\"$revision\",response_code=~\"2.*\"}[1m])) by (le)), \"destination_revision\", \"$2\", \"destination_revision\", \"$configuration(-+)(.*)\")",
+          "expr": "label_replace(histogram_quantile(0.95, sum(rate(istio_request_duration_seconds_bucket{destination_service_namespace=\"$namespace\", destination_configuration=~\"$configuration\",destination_revision=~\"$revision\",response_code=~\"2.*\"}[1m])) by (le)), \"destination_revision\", \"$2\", \"destination_revision\", \"$configuration(-+)(.*)\")",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "2xx (p95)",
           "refId": "E"
         },
         {
-          "expr": "label_replace(histogram_quantile(0.95, sum(rate(istio_revision_request_duration_bucket{destination_namespace=\"$namespace\", destination_configuration=~\"$configuration\",destination_revision=~\"$revision\",response_code=~\"3.*\"}[1m])) by (le)), \"destination_revision\", \"$2\", \"destination_revision\", \"$configuration(-+)(.*)\")",
+          "expr": "label_replace(histogram_quantile(0.95, sum(rate(istio_request_duration_seconds_bucket{destination_service_namespace=\"$namespace\", destination_configuration=~\"$configuration\",destination_revision=~\"$revision\",response_code=~\"3.*\"}[1m])) by (le)), \"destination_revision\", \"$2\", \"destination_revision\", \"$configuration(-+)(.*)\")",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "3xx (p95)",
           "refId": "F"
         },
         {
-          "expr": "label_replace(histogram_quantile(0.95, sum(rate(istio_revision_request_duration_bucket{destination_namespace=\"$namespace\", destination_configuration=~\"$configuration\",destination_revision=~\"$revision\",response_code=~\"4.*\"}[1m])) by (le)), \"destination_revision\", \"$2\", \"destination_revision\", \"$configuration(-+)(.*)\")",
+          "expr": "label_replace(histogram_quantile(0.95, sum(rate(istio_request_duration_seconds_bucket{destination_service_namespace=\"$namespace\", destination_configuration=~\"$configuration\",destination_revision=~\"$revision\",response_code=~\"4.*\"}[1m])) by (le)), \"destination_revision\", \"$2\", \"destination_revision\", \"$configuration(-+)(.*)\")",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "4xx (p95)",
           "refId": "G"
         },
         {
-          "expr": "label_replace(histogram_quantile(0.95, sum(rate(istio_revision_request_duration_bucket{destination_namespace=\"$namespace\", destination_configuration=~\"$configuration\",destination_revision=~\"$revision\",response_code=~\"5.*\"}[1m])) by (le)), \"destination_revision\", \"$2\", \"destination_revision\", \"$configuration(-+)(.*)\")",
+          "expr": "label_replace(histogram_quantile(0.95, sum(rate(istio_request_duration_seconds_bucket{destination_service_namespace=\"$namespace\", destination_configuration=~\"$configuration\",destination_revision=~\"$revision\",response_code=~\"5.*\"}[1m])) by (le)), \"destination_revision\", \"$2\", \"destination_revision\", \"$configuration(-+)(.*)\")",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "5xx (p95)",
@@ -834,7 +834,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "label_replace(round(sum(rate(istio_revision_response_size_sum{destination_namespace=\"$namespace\", destination_configuration=~\"$configuration\"}[1m])) by (destination_revision) / sum(rate(istio_revision_response_size_count{destination_namespace=\"$namespace\", destination_configuration=~\"$configuration\"}[1m])) by (destination_revision), 1), \"destination_revision\", \"$2\", \"destination_revision\", \"$configuration(-+)(.*)\")",
+          "expr": "label_replace(round(sum(rate(istio_mcp_message_sizes_bytes_sum{destination_service_namespace=\"$namespace\", destination_configuration=~\"$configuration\"}[1m])) by (destination_revision) / sum(rate(istio_mcp_message_sizes_bytes_count{destination_service_namespace=\"$namespace\", destination_configuration=~\"$configuration\"}[1m])) by (destination_revision), 1), \"destination_revision\", \"$2\", \"destination_revision\", \"$configuration(-+)(.*)\")",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -915,7 +915,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "label_replace(round(sum(rate(istio_revision_request_size_sum{destination_namespace=\"$namespace\", destination_configuration=~\"$configuration\"}[1m])) by (destination_revision) / sum(rate(istio_revision_request_size_count{destination_namespace=\"$namespace\", destination_configuration=~\"$configuration\"}[1m])) by (destination_revision), 1), \"destination_revision\", \"$2\", \"destination_revision\", \"$configuration(-+)(.*)\")",
+          "expr": "label_replace(round(sum(rate(istio_mcp_message_sizes_bytes_sum{destination_service_namespace=\"$namespace\", destination_configuration=~\"$configuration\"}[1m])) by (destination_revision) / sum(rate(istio_mcp_message_sizes_bytes_count{destination_service_namespace=\"$namespace\", destination_configuration=~\"$configuration\"}[1m])) by (destination_revision), 1), \"destination_revision\", \"$2\", \"destination_revision\", \"$configuration(-+)(.*)\")",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -976,7 +976,7 @@
         "multi": false,
         "name": "namespace",
         "options": [],
-        "query": "label_values(istio_revision_request_count{destination_namespace!=\"unknown\"}, destination_namespace)",
+        "query": "label_values(istio_requests_total{destination_service_namespace!=\"unknown\"}, destination_service_namespace)",
         "refresh": 1,
         "regex": "",
         "sort": 1,
@@ -996,7 +996,7 @@
         "multi": false,
         "name": "configuration",
         "options": [],
-        "query": "label_values(istio_revision_request_count{destination_namespace=\"$namespace\", destination_configuration!=\"unknown\"}, destination_configuration)",
+        "query": "label_values(istio_requests_total{destination_service_namespace=\"$namespace\", destination_configuration!=\"unknown\"}, destination_configuration)",
         "refresh": 1,
         "regex": "",
         "sort": 1,
@@ -1016,7 +1016,7 @@
         "multi": true,
         "name": "revision",
         "options": [],
-        "query": "label_values(istio_revision_request_count{destination_namespace=\"$namespace\", destination_configuration=~\"$configuration\", destination_revision!=\"unknown\"}, destination_revision)",
+        "query": "label_values(istio_requests_total{destination_service_namespace=\"$namespace\", destination_configuration=~\"$configuration\", destination_revision!=\"unknown\"}, destination_revision)",
         "refresh": 1,
         "regex": "",
         "sort": 2,

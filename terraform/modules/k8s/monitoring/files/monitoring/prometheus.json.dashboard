@@ -3395,20 +3395,6 @@
       }
     },
     {
-      "collapsed": true,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 83
-      },
-      "id": 61,
-      "panels": [],
-      "repeat": "RuleGroup",
-      "title": "Rule Group: $RuleGroup",
-      "type": "row"
-    },
-    {
       "aliasColors": {
         "Chunks": "#1F78C1",
         "Chunks to persist": "#508642",
