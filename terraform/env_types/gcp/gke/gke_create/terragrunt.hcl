@@ -11,11 +11,13 @@ locals {
   kms_key_id     = lookup(lookup(local.config.cloud, "gcp", {}), "kms_key_id", "")
   gcp_zone       = lookup(lookup(local.config.cloud, "gcp", {}), "zone", "us-east1-b")
   node_locations = lookup(lookup(local.config.cloud, "gcp", {}), "node_locations", [])
+  remain_pv_drives  = lookup(local.config, "remain_pv_drives", "")
 
   scripts_dir             = "${get_terragrunt_dir()}/../../../../../scripts"
   cmd_k8s_fwrules_cleanup = "${local.scripts_dir}/gcp_k8s_fw_cleanup.sh"
   cmd_k8s_config_fetch    = "gcloud container clusters get-credentials \"${local.cluster_name}\" --region \"${local.gcp_region}\" --project \"${local.gcp_project_id}\""
   block_project_ssh_key   = lookup(lookup(local.config.cloud, "gcp", {}), "block_project_ssh_key", "true")
+  cmd_gcp_delete_drives = "${local.scripts_dir}/destroy_pv.sh"
 }
 
 remote_state {
@@ -50,6 +52,11 @@ terraform {
     commands     = ["apply"]
     execute      = ["bash", "-c", local.cmd_k8s_config_fetch]
     run_on_error = false
+  }
+
+  after_hook "k8s_fwrules_cleanup" {
+    commands = ["destroy"]
+    execute = ["bash", local.cmd_gcp_delete_drives, local.cluster_name, local.gcp_zone, local.remain_pv_drives]
   }
 }
 
