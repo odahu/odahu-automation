@@ -9,6 +9,7 @@ CLUSTER_ZONE=$3
 disk_list=$(gcloud compute disks list --filter="labels.cluster:${CLUSTER_NAME}" --format="value(selfLink.basename())")
 
 if [[ "$REMAIN_DRIVES" == "false" ]]; then
+    echo Following drives to deleted:
     for i in $disk_list
         do
             echo $i
