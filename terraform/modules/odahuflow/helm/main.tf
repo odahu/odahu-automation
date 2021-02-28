@@ -223,6 +223,35 @@ locals {
       }
       edgeHost = var.cluster_domain
     }
+    batch = {
+      namespace = var.odahuflow_batch_namespace
+      tolerations = length(local.deployment_node_pools) != 0 ? distinct(flatten([
+        for nodepool in local.deployment_node_pools : [
+          for taint in lookup(var.node_pools[nodepool], "taints", []) : {
+            Key      = taint.key
+            Operator = "Equal"
+            Value    = taint.value
+            Effect   = replace(taint.effect, "/(?i)no_?schedule/", "NoSchedule")
+      }]])) : null
+
+      nodePools = length(local.deployment_node_pools) != 0 ? [
+        for k, v in var.node_pools :
+        merge(
+          { nodeSelector = { for key, value in v.labels : key => value } },
+          { tags = compact(distinct(concat(
+            try(v["tags"], []),
+          [k, try(v["machine_type"], ""), try(v["preemptible"], "") == true ? "preemptible" : ""]))) }
+        )
+        if contains(local.deployment_node_pools, k)
+      ] : null
+    }
+  }
+  tools_config = {
+    auth = {
+      oauthOidcTokenEndpoint = var.oauth_oidc_token_endpoint
+      clientId               = var.operator_sa.client_id
+      clientSecret           = var.operator_sa.client_secret
+    }
   }
   api_vault_volume = {
     name       = "vault-tls"
@@ -360,11 +389,22 @@ resource "kubernetes_namespace" "odahuflow_deployment" {
       name = var.odahuflow_deployment_namespace
     }
     labels = {
-      project                 = "odahu-flow"
-      istio-injection         = "enabled"
-      modeldeployment-webhook = "enabled"
+      project         = "odahu-flow"
+      istio-injection = "enabled"
     }
     name = var.odahuflow_deployment_namespace
+  }
+}
+
+resource "kubernetes_namespace" "odahuflow_batch" {
+  metadata {
+    annotations = {
+      name = var.odahuflow_batch_namespace
+    }
+    labels = {
+      project = "odahu-flow"
+    }
+    name = var.odahuflow_batch_namespace
   }
 }
 
@@ -393,6 +433,7 @@ module "docker_credentials" {
     kubernetes_namespace.odahuflow_training.metadata[0].annotations.name,
     kubernetes_namespace.odahuflow_packaging.metadata[0].annotations.name,
     kubernetes_namespace.odahuflow_deployment.metadata[0].annotations.name,
+    kubernetes_namespace.odahuflow_batch.metadata[0].annotations.name,
   ]
 }
 
@@ -461,6 +502,7 @@ resource "helm_release" "odahuflow" {
       })
       api_configuration     = yamlencode({ api = local.api_config })
       config                = yamlencode({ config = local.odahuflow_config })
+      toolsConfig           = yamlencode({ config = local.tools_config })
       resource_uploader_sa  = var.resource_uploader_sa
       oauth_oidc_issuer_url = var.oauth_oidc_issuer_url
       oauth_mesh_enabled    = var.oauth_mesh_enabled
@@ -471,6 +513,7 @@ resource "helm_release" "odahuflow" {
     kubernetes_namespace.odahuflow,
     kubernetes_namespace.odahuflow_training,
     kubernetes_namespace.odahuflow_deployment,
+    kubernetes_namespace.odahuflow_batch,
     kubernetes_namespace.odahuflow_packaging,
     kubernetes_secret.odahuflow_vault_tls,
     helm_release.opa

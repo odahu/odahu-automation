@@ -105,6 +105,12 @@ variable "odahuflow_deployment_namespace" {
   description = "ODAHU flow deployment k8s namespace"
 }
 
+variable "odahuflow_batch_namespace" {
+  type        = string
+  default     = "odahu-flow-batch"
+  description = "ODAHU flow batch k8s namespace"
+}
+
 variable "knative_namespace" {
   type        = string
   default     = "knative-serving"
