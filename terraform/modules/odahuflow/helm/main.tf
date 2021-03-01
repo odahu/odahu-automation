@@ -502,7 +502,7 @@ resource "helm_release" "odahuflow" {
       })
       api_configuration     = yamlencode({ api = local.api_config })
       config                = yamlencode({ config = local.odahuflow_config })
-      toolsConfig           = yamlencode({ config = local.tools_config })
+      toolsConfig           = yamlencode({ toolsConfig = local.tools_config })
       resource_uploader_sa  = var.resource_uploader_sa
       oauth_oidc_issuer_url = var.oauth_oidc_issuer_url
       oauth_mesh_enabled    = var.oauth_mesh_enabled
