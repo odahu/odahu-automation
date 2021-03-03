@@ -5,3 +5,11 @@ output:
     bucket: "${data_bucket}"
     AzureStorageAccount: "${azure_storage_account}"
     AzureStorageSasToken: "${azure_storage_sas_token}"
+fluentd:
+  resources:
+    limits:
+      cpu: "2"
+      memory: "3Gi"
+    requests:
+      cpu: "300m"
+      memory: "1Gi"
