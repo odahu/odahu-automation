@@ -6,4 +6,12 @@ output:
 serviceAccount:
   annotations:
     iam.gke.io/gcp-service-account: "${collector_sa}"
+fluentd:
+  resources: 
+    limits:
+      cpu: "2"
+      memory: "3Gi"
+    requests:
+      cpu: "300m"
+      memory: "1Gi"
 
