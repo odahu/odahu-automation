@@ -10,8 +10,8 @@ serviceAccount:
 fluentd:
   resources:
     limits:
-      cpu: "2"
-      memory: "3Gi"
+      cpu: "${cpu_limits}"
+      memory: "${memory_limits}"
     requests:
-      cpu: "300m"
-      memory: "1Gi"
+      cpu: "${cpu_requests}"
+      memory: "${memory_requests}"

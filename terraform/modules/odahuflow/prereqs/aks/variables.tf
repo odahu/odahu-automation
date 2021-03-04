@@ -57,3 +57,18 @@ variable "kms_vault_id" {
   description = "Specifies the ID of the Key Vault instance where the Secret resides"
 }
 
+variable "fluentd_resources" {
+  type = object({
+    cpu_requests    = string
+    memory_requests = string
+    cpu_limits      = string
+    memory_limits   = string
+  })
+  default = {
+    cpu_requests    = "300m"
+    memory_requests = "1Gi"
+    cpu_limits      = "2"
+    memory_limits   = "3Gi"
+  }
+  description = "Fluentd container resources"
+}

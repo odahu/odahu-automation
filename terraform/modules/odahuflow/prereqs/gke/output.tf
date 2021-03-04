@@ -57,8 +57,12 @@ output "odahuflow_connections" {
 
 output "fluent_helm_values" {
   value = templatefile("${path.module}/templates/fluentd.yaml", {
-    data_bucket  = google_storage_bucket.data.name,
-    collector_sa = google_service_account.collector_sa.email
+    data_bucket     = google_storage_bucket.data.name,
+    collector_sa    = google_service_account.collector_sa.email
+    cpu_requests    = var.fluentd_resources.cpu_requests
+    memory_requests = var.fluentd_resources.memory_requests
+    cpu_limits      = var.fluentd_resources.cpu_limits
+    memory_limits   = var.fluentd_resources.memory_limits
   })
 }
 
