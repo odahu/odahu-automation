@@ -132,6 +132,12 @@ variable "airflow_namespace" {
   description = "Namespace for Airflow"
 }
 
+variable "argo_namespace" {
+  type        = string
+  default     = "argo"
+  description = "Namespace for Argo"
+}
+
 variable "fluentd_namespace" {
   type        = string
   default     = "fluentd"
@@ -377,6 +383,19 @@ variable "airflow" {
     dag_bucket_path  = ""
   }
   description = "Airflow configuration"
+}
+
+########################
+# Argo
+########################
+variable "argo" {
+  type = object({
+    enabled          = bool
+  })
+  default = {
+    enabled          = true
+  }
+  description = "Argo configuration"
 }
 
 ##################

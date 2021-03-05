@@ -11,6 +11,7 @@ locals {
     "jupyterhub",
     "vault",
     var.odahu_database,
-    "grafana"
+    "grafana",
+    "argo"
   ]
 }

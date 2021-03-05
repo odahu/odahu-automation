@@ -232,6 +232,25 @@ module "airflow" {
   depends_on = [module.airflow_prereqs, module.postgresql]
 }
 
+module "argo-workflows" {
+  source         = "../../../../modules/k8s/argo"
+  cluster_domain = var.cluster_domain_name
+  namespace      = var.argo_namespace
+  configuration  = var.argo
+  tls_secret_crt = var.tls_crt
+  tls_secret_key = var.tls_key
+  pgsql = {
+    enabled          = var.postgres.enabled
+    db_host          = module.postgresql.pgsql_endpoint
+    db_name          = "argo"
+    db_user          = ""
+    db_password      = ""
+    secret_namespace = module.postgresql.pgsql_credentials["argo"].namespace
+    secret_name      = module.postgresql.pgsql_credentials["argo"].secret
+  }
+  depends_on = [module.postgresql]
+}
+
 module "storage-syncer" {
   source = "../../../../modules/k8s/syncer"
 

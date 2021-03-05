@@ -166,4 +166,3 @@ resource "null_resource" "airflow_logrotate" {
   }
   depends_on = [helm_release.airflow]
 }
-
