@@ -45,6 +45,11 @@ locals {
       url      = "${local.url_schema}://${var.cluster_domain}/grafana",
       imageUrl = "/img/logo/grafana.png"
     },
+    {
+      name     = "Argo Workflows",
+      url      = "${local.url_schema}://${var.cluster_domain}/workflows",
+      imageUrl = "/img/logo/grafana.png"
+    },
   ]
 
   default_model_docker_connection_id = "docker-ci"
