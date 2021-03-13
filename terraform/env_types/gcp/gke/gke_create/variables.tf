@@ -62,6 +62,17 @@ variable "service_cidr" {
   description = "GKE service CIDR"
 }
 
+variable "master_ipv4_cidr_block" {
+  type        = string
+  default     = "172.25.100.0/28"
+  description = "GKE master CIDR"
+}
+
+variable "nat_enabled" {
+  type        = bool
+  default     = true
+  description = "If NAT should be created"
+}
 #############
 # GKE
 #############
