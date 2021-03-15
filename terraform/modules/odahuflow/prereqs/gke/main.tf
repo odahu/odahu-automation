@@ -10,6 +10,21 @@ locals {
   gsa_jupyterhub_name      = substr("${var.cluster_name}-jupyter-notebook",0, 30)
   gcp_bucket_registry_name = "artifacts.${var.project_id}.appspot.com"
   log_bucket_name          = var.log_bucket == "" ? "${var.cluster_name}-log-storage" : var.log_bucket
+
+  fluentd = {
+    "fluentd" = {
+      "resources" = {
+        "limits" = {
+          "cpu": var.fluentd_resources.cpu_limits
+          "memory": var.fluentd_resources.memory_limits
+        }
+        "requests" = {
+          "cpu": var.fluentd_resources.cpu_requests
+          "memory": var.fluentd_resources.memory_requests
+        }
+      }
+    }
+  }
 }
 
 ########################################################

@@ -49,10 +49,7 @@ output "fluent_helm_values" {
     data_bucket        = aws_s3_bucket.data.id
     data_bucket_region = aws_s3_bucket.data.region
     collector_iam_role = aws_iam_role.collector.arn
-    cpu_requests       = var.fluentd_resources.cpu_requests
-    memory_requests    = var.fluentd_resources.memory_requests
-    cpu_limits         = var.fluentd_resources.cpu_limits
-    memory_limits      = var.fluentd_resources.memory_limits
+    fluentd            = yamlencode(local.fluentd)
   })
 }
 

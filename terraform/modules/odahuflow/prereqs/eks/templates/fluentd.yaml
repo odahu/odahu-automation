@@ -7,11 +7,5 @@ output:
 serviceAccount:
   annotations:
     eks.amazonaws.com/role-arn: "${collector_iam_role}"
-fluentd:
-  resources:
-    limits:
-      cpu: "${cpu_limits}"
-      memory: "${memory_limits}"
-    requests:
-      cpu: "${cpu_requests}"
-      memory: "${memory_requests}"
+
+${fluentd}
