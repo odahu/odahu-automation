@@ -30,3 +30,9 @@ variable "subnet_name" {
   default     = ""
   description = "Subnet name"
 }
+
+variable "nat_enabled" {
+  type        = bool
+  default     = true
+  description = "If NAT should be created"
+}

@@ -6,6 +6,7 @@ module "vpc" {
   project_id   = var.project_id
   region       = var.region
   cluster_name = var.cluster_name
+  nat_enabled  = var.nat_enabled
   subnet_cidr  = var.gcp_cidr
   subnet_name  = var.subnet_name
   vpc_name     = var.vpc_name
@@ -20,6 +21,8 @@ module "firewall" {
 
   bastion_enabled  = var.bastion_enabled
   bastion_gcp_tags = local.bastion_gcp_tags
+
+  master_ipv4_cidr_block = var.master_ipv4_cidr_block
 
   depends_on = [module.vpc]
 }
@@ -71,13 +74,14 @@ module "gke_cluster" {
   ssh_public_key = var.ssh_key
   kms_key_id     = var.kms_key_id
 
-  autoscaling_profile   = var.autoscaling_profile
-  bastion_enabled       = var.bastion_enabled
-  bastion_hostname      = var.bastion_hostname
-  bastion_machine_type  = var.bastion_machine_type
-  bastion_gcp_tags      = local.bastion_gcp_tags
-  bastion_labels        = var.bastion_labels
-  block_project_ssh_key = var.block_project_ssh_key
+  autoscaling_profile    = var.autoscaling_profile
+  master_ipv4_cidr_block = var.master_ipv4_cidr_block
+  bastion_enabled        = var.bastion_enabled
+  bastion_hostname       = var.bastion_hostname
+  bastion_machine_type   = var.bastion_machine_type
+  bastion_gcp_tags       = local.bastion_gcp_tags
+  bastion_labels         = var.bastion_labels
+  block_project_ssh_key  = var.block_project_ssh_key
 
   depends_on = [
     module.iam,

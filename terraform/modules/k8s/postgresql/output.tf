@@ -3,7 +3,7 @@ output "pgsql_credentials" {
     for db in var.databases :
     db => {
       namespace = var.namespace
-      secret    = "${db}.${var.configuration.cluster_name}.credentials.postgresql.acid.zalan.do"
+      secret    = replace("${db}.${var.configuration.cluster_name}.credentials.postgresql.acid.zalan.do", "_", "-")
     }
   } : {}
   sensitive = true

@@ -7,7 +7,7 @@ locals {
   model_docker_repo        = "${data.google_container_registry_repository.odahuflow_registry.repository_url}/${var.cluster_name}"
 
   gsa_collector_name       = "${var.cluster_name}-collector"
-  gsa_jupyterhub_name      = "${var.cluster_name}-jupyter-notebook"
+  gsa_jupyterhub_name      = substr("${var.cluster_name}-jupyter-notebook",0, 30)
   gcp_bucket_registry_name = "artifacts.${var.project_id}.appspot.com"
   log_bucket_name          = var.log_bucket == "" ? "${var.cluster_name}-log-storage" : var.log_bucket
 }
