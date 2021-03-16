@@ -59,10 +59,9 @@ locals {
   ingress_config = merge(local.ingress_common, { web = merge(local.ingress_web, local.ingress_tls) })
 
   odahu_conn = {
-    "auth_url"      = var.oauth_oidc_token_endpoint,
-    "client_id"     = var.service_account.client_id,
-    "client_secret" = var.service_account.client_secret,
-    "scope"         = "openid profile offline_access groups"
+    "auth_url"  = var.oauth_oidc_token_endpoint,
+    "client_id" = var.service_account.client_id,
+    "scope"     = "openid profile offline_access groups"
   }
 }
 
@@ -144,6 +143,7 @@ resource "helm_release" "airflow" {
       log_storage_size  = var.configuration.log_storage_size
       namespace         = var.namespace
       odahu_conn        = jsonencode(local.odahu_conn)
+      client_secret     = var.service_account.client_secret,
       storage_size      = var.configuration.storage_size
 
       odahu_airflow_plugin_version = var.odahu_airflow_plugin_version

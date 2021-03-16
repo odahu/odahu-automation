@@ -88,11 +88,13 @@ scheduler:
     - id: odahuflow_api
       type: http
       schema: https
+      password: ${client_secret}
       host: ${cluster_domain}
       extra: '${odahu_conn}'
     - id: odahuflow_model
       type: http
       schema: https
+      password: ${client_secret}
       host: ${cluster_domain}/service-catalog
     - id: wine_input
       type: google_cloud_platform
