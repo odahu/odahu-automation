@@ -111,6 +111,8 @@ resource "kubernetes_secret" "jupyterhub_tls" {
 }
 
 resource "kubernetes_service_account" "single" {
+  count = var.jupyterhub_enabled ? 1 : 0
+
   metadata {
     name        = "notebook"
     namespace   = var.jupyterhub_namespace
@@ -139,7 +141,7 @@ resource "helm_release" "jupyterhub" {
       ingress_tls_secret_name = local.ingress_tls_secret_name
       jupyterhub_secret_token = var.jupyterhub_secret_token == "" ? random_string.secret[0].result : var.jupyterhub_secret_token
       debug_enabled           = local.jupyterhub_debug
-      single_user_sa          = kubernetes_service_account.single.metadata[0].name
+      single_user_sa          = kubernetes_service_account.single[0].metadata[0].name
 
       cloud_type         = var.cloud_settings.type
       aws_key_id         = try(var.cloud_settings.settings.key_id, "")
