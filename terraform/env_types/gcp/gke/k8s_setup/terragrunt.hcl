@@ -30,7 +30,7 @@ locals {
   cluster_domain_name      = lookup(local.config.dns, "domain", null)
 
   scripts_dir                 = "${get_terragrunt_dir()}/../../../../../scripts"
-  cmd_k8s_fwrules_cleanup     = "${local.scripts_dir}/gcp_k8s_fw_cleanup.sh"
+  cmd_k8s_fwrules_cleanup     = "${local.scripts_dir}/gcp_k8s_fw_cleanup.sh ${local.cluster_name} ${local.gcp_project_id}"
   cmd_k8s_config_fetch        = "gcloud container clusters get-credentials \"${local.cluster_name}\" --region \"${local.gcp_region}\" --project \"${local.gcp_project_id}\""
   cmd_check_dns               = "${local.scripts_dir}/check_dns.sh"
   uniform_bucket_level_access = lookup(lookup(local.config.cloud, "gcp", {}), "uniform_bucket_level_access", "true")
