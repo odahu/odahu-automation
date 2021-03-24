@@ -119,6 +119,11 @@ variable "autoscaling_profile" {
   description = "GKE autoscaling profile, possible values: BALANCED|OPTIMIZE_UTILIZATION"
 }
 
+variable "logging_service" {
+  type        = string
+  default     = "logging.googleapis.com/kubernetes"
+  description = "Logging service to write logs to. Possible values: logging.googleapis.com|logging.googleapis.com/kubernetes|none"
+}
 #############
 # Node pool
 #############
