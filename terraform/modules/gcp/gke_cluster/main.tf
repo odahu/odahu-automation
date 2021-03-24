@@ -269,6 +269,8 @@ resource "null_resource" "setup_kubectl" {
 # Storage class
 ########################################################
 resource "local_file" "storage_class" {
+  count = var.kms_key_id == "" ? 0 : 1
+
   content = templatefile("${path.module}/templates/storage_class.tpl", {
     kms_key_id         = var.kms_key_id
     storage_type       = var.storage_type
@@ -281,18 +283,22 @@ resource "local_file" "storage_class" {
 }
 
 resource "null_resource" "create_storage_class" {
+  triggers = {
+    trigger = var.kms_key_id == "" ? timestamp() : local_file.storage_class[0]
+  }
+
   provisioner "local-exec" {
-    command = "timeout 90 bash -c 'until kubectl apply -f ${local_file.storage_class.filename}; do sleep 5; done'"
+    command = var.kms_key_id == "" ? "echo 'empty step'" : "timeout 90 bash -c 'until kubectl apply -f ${local_file.storage_class[0].filename}; do sleep 5; done'"
   }
   depends_on = [
     null_resource.setup_kubectl,
-    local_file.storage_class
+    local_file.storage_class[0]
   ]
 }
 
 resource "null_resource" "set_default_storage_class" {
   provisioner "local-exec" {
-    command = "bash ../../../../../scripts/set_default_storage_class.sh \"${var.storage_class_name}\""
+    command = var.kms_key_id == "" ? "echo 'empty step'" : "bash ../../../../../scripts/set_default_storage_class.sh \"${var.storage_class_name}\""
   }
 
   depends_on = [null_resource.create_storage_class]
