@@ -4,5 +4,4 @@ output {
     index => "%%{[@metadata][target_index]}"
     manage_template => false
   }
-  stdout { codec => rubydebug }
 }
