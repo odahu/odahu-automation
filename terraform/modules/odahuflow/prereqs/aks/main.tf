@@ -24,7 +24,7 @@ locals {
   )
 
   kms_key_id_split = split("/", var.kms_key_id)
-  kms_key_name     = local.kms_key_id_split[length(local.kms_key_id_split) - 2]
+  kms_key_name     = var.kms_key_id == "" ? "" : local.kms_key_id_split[length(local.kms_key_id_split) - 2]
 
   model_docker_user        = azurerm_container_registry.odahuflow.admin_username
   model_docker_password    = base64encode(azurerm_container_registry.odahuflow.admin_password)
@@ -84,10 +84,11 @@ resource "azurerm_storage_account" "odahuflow_data" {
 }
 
 resource "azurerm_key_vault_access_policy" "encrypt-data" {
-  key_vault_id = var.kms_vault_id
+  count = var.kms_key_id == "" ? 0 : 1
 
-  tenant_id = azurerm_storage_account.odahuflow_data.identity.0.tenant_id
-  object_id = azurerm_storage_account.odahuflow_data.identity.0.principal_id
+  tenant_id    = azurerm_storage_account.odahuflow_data.identity.0.tenant_id
+  object_id    = azurerm_storage_account.odahuflow_data.identity.0.principal_id
+  key_vault_id = var.kms_vault_id
 
   key_permissions = [
     "get",
@@ -99,6 +100,8 @@ resource "azurerm_key_vault_access_policy" "encrypt-data" {
 }
 
 resource "azurerm_storage_account_customer_managed_key" "data" {
+  count = var.kms_key_id == "" ? 0 : 1
+
   storage_account_id = azurerm_storage_account.odahuflow_data.id
   key_vault_id       = var.kms_vault_id
   key_name           = local.kms_key_name
