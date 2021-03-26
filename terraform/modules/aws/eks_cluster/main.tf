@@ -135,7 +135,7 @@ resource "aws_launch_template" "this" {
       device_name = "/dev/xvda"
       ebs {
         kms_key_id            = var.kms_key_arn
-        encrypted             = true
+        encrypted             = var.kms_key_arn == "" ? false : true
         volume_type           = lookup(each.value, "disk_type", "standard")
         volume_size           = size.value
         delete_on_termination = true
