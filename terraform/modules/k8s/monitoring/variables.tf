@@ -61,6 +61,12 @@ variable "prom_storage_size" {
   description = "Prometheus PVC size"
 }
 
+variable "prom_storage_class" {
+  type        = string
+  default     = ""
+  description = "Prometheus PVC storage class"
+}
+
 variable "prom_retention_size" {
   type        = string
   default     = "19GiB"

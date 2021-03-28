@@ -7,6 +7,9 @@ spec:
   teamId: "${regex("^[[:alnum:]]+", cluster_name)}"
   volume:
     size: ${storage_size}
+    %{ if storage_class != "" }
+    storageClass: "${storage_class}"
+    %{ endif }
   numberOfInstances: ${replicas}
   users:
 %{ for user in databases ~}

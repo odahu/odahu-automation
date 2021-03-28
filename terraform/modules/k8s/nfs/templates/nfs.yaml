@@ -19,4 +19,6 @@ persistence:
   enabled: true
   accessMode: ReadWriteOnce
   size: ${storage_size}
-
+  %{ if storage_class != "" }
+  storageClass: ${storage_class}
+  %{ endif }

@@ -1,8 +1,9 @@
 # Common
 variable "configuration" {
   type = object({
-    enabled      = bool
-    storage_size = string
+    enabled       = bool
+    storage_size  = string
+    storage_class = string
   })
   description = "NFS configuration"
 }

@@ -9,6 +9,7 @@ variable "configuration" {
     cluster_name  = string
     enabled       = bool
     storage_size  = string
+    storage_class = string
     replica_count = number
     resync_period = string
   })
@@ -16,6 +17,7 @@ variable "configuration" {
     cluster_name  = "odahu-db"
     enabled       = false
     storage_size  = "8Gi"
+    storage_class = ""
     replica_count = 2
     resync_period = "30m"
   }

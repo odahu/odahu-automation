@@ -150,6 +150,9 @@ prometheus:
           resources:
             requests:
               storage: "${prom_storage_size}"
+          %{ if prom_storage_class != "" }
+          storageClassName: "${prom_storage_class}"
+          %{ endif }
     retention: "${prom_retention_time}"
     retentionSize: "${prom_retention_size}"
     resources:

@@ -45,11 +45,12 @@ resource "helm_release" "pg_operator" {
 resource "local_file" "pg_cluster" {
   count = var.configuration.enabled ? 1 : 0
   content = templatefile("${path.module}/templates/pg_crd_manifest.tpl", {
-    namespace    = var.namespace
-    storage_size = var.configuration.storage_size
-    replicas     = var.configuration.replica_count
-    cluster_name = var.configuration.cluster_name
-    databases    = var.databases
+    namespace     = var.namespace
+    storage_size  = var.configuration.storage_size
+    storage_class = var.configuration.storage_class
+    replicas      = var.configuration.replica_count
+    cluster_name  = var.configuration.cluster_name
+    databases     = var.databases
   })
   filename = "/tmp/.odahu/pg_cluster.yml"
 

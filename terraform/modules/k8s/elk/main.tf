@@ -186,11 +186,12 @@ resource "helm_release" "elasticsearch" {
 
   values = [
     templatefile("${path.module}/templates/elasticsearch.yaml", {
-      cluster_name = local.es_cluster_name
-      node_group   = local.es_node_group
-      es_replicas  = var.es_replicas
-      es_mem       = var.es_memory
-      storage_size = var.storage_size
+      cluster_name  = local.es_cluster_name
+      node_group    = local.es_node_group
+      es_replicas   = var.es_replicas
+      es_mem        = var.es_memory
+      storage_size  = var.storage_size
+      storage_class = var.storage_class
 
       policies = local.policies
       indices  = local.indices

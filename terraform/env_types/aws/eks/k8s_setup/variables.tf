@@ -190,12 +190,14 @@ variable "istio_namespace" {
 ########################
 variable "nfs" {
   type = object({
-    enabled      = bool
-    storage_size = string
+    enabled       = bool
+    storage_size  = string
+    storage_class = string
   })
   default = {
-    enabled      = false
-    storage_size = "10Gi"
+    enabled       = false
+    storage_size  = "10Gi"
+    storage_class = ""
   }
   description = "NFS configuration"
 }
@@ -406,12 +408,14 @@ variable "postgres" {
     cluster_name  = string
     enabled       = bool
     storage_size  = string
+    storage_class = string
     replica_count = number
     resync_period = string
   })
   default = {
     enabled       = true
     storage_size  = "8Gi"
+    storage_class = ""
     replica_count = 1
     cluster_name  = "odahu-db"
     resync_period = "30m"
