@@ -90,7 +90,7 @@ locals {
       "json" = jsonencode({
         "policy" = {
           "phases" = {
-            "hot"    = { "min_age" = "0ms", "actions" = { "rollover" = { "max_size" = try(settings.size, "512MB") } } },
+            "hot"    = { "min_age" = "0ms", "actions" = { "rollover" = { "max_size" = try(settings.size, "512MB"), "max_age" = try(settings.age, "7d") } } },
             "delete" = { "min_age" = try(settings.age, "7d"), "actions" = { "delete" = {} } }
           }
         }
