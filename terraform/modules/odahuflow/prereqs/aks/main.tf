@@ -37,6 +37,21 @@ locals {
   log_sas_token          = var.log_bucket == "" ? data.azurerm_storage_account_sas.odahuflow_data.sas : try(data.azurerm_storage_account_sas.odahuflow_logs[0].sas, "")
   log_storage_account    = var.log_bucket == "" ? azurerm_storage_account.odahuflow_data.name : try(azurerm_storage_account.odahuflow_logs[0].name, "")
   log_storage_access_key = var.log_bucket == "" ? azurerm_storage_account.odahuflow_data.primary_access_key : try(azurerm_storage_account.odahuflow_logs[0].primary_access_key, "")
+
+  fluentd = {
+    "fluentd" = {
+      "resources" = {
+        "limits" = {
+          "cpu": var.fluentd_resources.cpu_limits
+          "memory": var.fluentd_resources.memory_limits
+        }
+        "requests" = {
+          "cpu": var.fluentd_resources.cpu_requests
+          "memory": var.fluentd_resources.memory_requests
+        }
+      }
+    }
+  }
 }
 
 ########################################################

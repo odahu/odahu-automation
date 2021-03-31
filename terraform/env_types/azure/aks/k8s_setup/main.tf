@@ -170,6 +170,7 @@ module "odahuflow_prereqs" {
   log_expiration_days = var.log_expiration_days
   kms_key_id          = var.kms_key_id
   kms_vault_id        = var.kms_vault_id
+  fluentd_resources   = var.fluentd_resources
 
   depends_on = [module.monitoring]
 }

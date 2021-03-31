@@ -49,6 +49,7 @@ output "fluent_helm_values" {
     data_bucket        = aws_s3_bucket.data.id
     data_bucket_region = aws_s3_bucket.data.region
     collector_iam_role = aws_iam_role.collector.arn
+    fluentd            = yamlencode(local.fluentd)
   })
 }
 

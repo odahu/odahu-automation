@@ -7,3 +7,5 @@ output:
 serviceAccount:
   annotations:
     eks.amazonaws.com/role-arn: "${collector_iam_role}"
+
+${fluentd}

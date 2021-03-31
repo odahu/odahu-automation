@@ -168,6 +168,7 @@ module "odahuflow_prereqs" {
   log_bucket                  = var.log_bucket
   log_expiration_days         = var.log_expiration_days
   uniform_bucket_level_access = var.uniform_bucket_level_access
+  fluentd_resources           = var.fluentd_resources
   collector_sa_list = [
     "serviceAccount:${var.project_id}.svc.id.goog[${var.logging_namespace}/fluentd-daemonset]",
     "serviceAccount:${var.project_id}.svc.id.goog[${var.fluentd_namespace}/fluentd]",

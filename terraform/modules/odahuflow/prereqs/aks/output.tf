@@ -48,6 +48,7 @@ output "fluent_helm_values" {
     data_bucket             = var.data_bucket
     azure_storage_account   = azurerm_storage_account.odahuflow_data.name
     azure_storage_sas_token = data.azurerm_storage_account_sas.odahuflow_data.sas
+    fluentd                 = yamlencode(local.fluentd)
   })
 }
 

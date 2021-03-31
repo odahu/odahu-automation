@@ -352,6 +352,22 @@ variable "vault" {
   description = "Vault configuration"
 }
 
+variable "fluentd_resources" {
+  type = object({
+    cpu_requests    = string
+    memory_requests = string
+    cpu_limits      = string
+    memory_limits   = string
+  })
+  default = {
+    cpu_requests    = "300m"
+    memory_requests = "1Gi"
+    cpu_limits      = "2"
+    memory_limits   = "3Gi"
+  }
+  description = "Fluentd container resources"
+}
+
 ########################
 # Airflow
 ########################

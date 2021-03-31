@@ -183,6 +183,7 @@ module "odahuflow_prereqs" {
   log_bucket              = var.log_bucket
   log_expiration_days     = var.log_expiration_days
   openid_connect_provider = module.irsa.openid_connect_provider
+  fluentd_resources       = var.fluentd_resources
   collector_sa_list = [
     "system:serviceaccount:${var.logging_namespace}:fluentd-daemonset",
     "system:serviceaccount:${var.fluentd_namespace}:fluentd",
