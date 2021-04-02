@@ -5,3 +5,7 @@ output "external_url" {
     imageUrl = "/img/logo/kibana.png"
   }] : []
 }
+
+output "elastic_hosts" {
+  value = var.elk_enabled ? local.es_service_url : ""
+}
