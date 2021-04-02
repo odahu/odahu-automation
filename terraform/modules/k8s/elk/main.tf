@@ -309,7 +309,7 @@ resource "kubernetes_job" "kibana_loader" {
 }
 
 resource "helm_release" "logstash" {
-  count      = var.elk_enabled ? 1 : 0
+  count      = var.elk_enabled && var.logstash_enabled ? 1 : 0
   name       = "logstash"
   repository = var.es_helm_repo
   chart      = "logstash"
