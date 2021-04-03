@@ -25,6 +25,8 @@ locals {
       }
     }
   }
+
+  argo_artifact_bucket_name = var.argo_artifact_bucket == "" ? "${var.cluster_name}-argo-artifacts" : var.argo_artifact_bucket
 }
 
 ########################################################
@@ -73,6 +75,26 @@ resource "google_storage_bucket" "log" {
     action {
       type = "Delete"
     }
+  }
+}
+
+########################################################
+# GCS Argo artifacts bucket
+########################################################
+resource "google_storage_bucket" "argo_artifacts" {
+  name                        = local.argo_artifact_bucket_name
+  location                    = var.region
+  storage_class               = "REGIONAL"
+  force_destroy               = true
+  uniform_bucket_level_access = var.uniform_bucket_level_access
+
+  encryption {
+    default_kms_key_name = var.kms_key_id
+  }
+
+  labels = {
+    project = "odahuflow"
+    env     = var.cluster_name
   }
 }
 

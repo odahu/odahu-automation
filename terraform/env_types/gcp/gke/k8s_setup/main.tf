@@ -166,6 +166,7 @@ module "odahuflow_prereqs" {
   kms_key_id                  = var.kms_key_id
   data_bucket                 = var.data_bucket
   log_bucket                  = var.log_bucket
+  argo_artifact_bucket        = var.argo.artifact_bucket
   log_expiration_days         = var.log_expiration_days
   uniform_bucket_level_access = var.uniform_bucket_level_access
   fluentd_resources           = var.fluentd_resources
@@ -232,11 +233,21 @@ module "airflow" {
   depends_on = [module.airflow_prereqs, module.postgresql]
 }
 
-module "argo-workflows" {
-  source         = "../../../../modules/k8s/argo"
+module "argo_workflow_prereqs" {
+  source       = "../../../../modules/k8s/argo/prereqs/gke"
+  cluster_name = var.cluster_name
+  bucket       = module.odahuflow_prereqs.argo_artifact_bucket_name
+  kms_key_id   = var.kms_key_id
+  project_id   = var.project_id
+
+  depends_on = [module.postgresql]
+}
+
+module "argo_workflow" {
+  source         = "../../../../modules/k8s/argo/main"
   cluster_domain = var.cluster_domain_name
-  namespace      = var.argo_namespace
-  configuration  = var.argo
+  configuration  = merge(var.argo, { artifact_bucket = module.odahuflow_prereqs.odahu_data_bucket_name })
+  workflows_sa   = module.argo_workflow_prereqs.argo_workflows_sa
   tls_secret_crt = var.tls_crt
   tls_secret_key = var.tls_key
   pgsql = {
@@ -248,7 +259,7 @@ module "argo-workflows" {
     secret_namespace = module.postgresql.pgsql_credentials["argo"].namespace
     secret_name      = module.postgresql.pgsql_credentials["argo"].secret
   }
-  depends_on = [module.postgresql]
+  depends_on = [module.postgresql, module.argo_workflow_prereqs]
 }
 
 module "storage-syncer" {
@@ -383,6 +394,7 @@ module "odahuflow_helm" {
   extra_external_urls = concat(
     module.jupyterhub.external_url,
     module.airflow.external_url,
+    module.argo_workflow.external_url,
     module.elasticsearch.external_url,
     module.odahuflow_prereqs.extra_external_urls
   )

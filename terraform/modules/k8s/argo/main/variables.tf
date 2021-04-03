@@ -21,12 +21,6 @@ variable "tls_secret_key" {
 # Argo setup
 ##################
 
-variable "namespace" {
-  type        = string
-  default     = "argo"
-  description = "Argo namespace"
-}
-
 variable "argo_wf_helm_chart_version" {
   type        = string
   default     = "0.16.6"
@@ -49,6 +43,11 @@ variable "helm_timeout" {
   type        = number
   default     = 600
   description = "Helm chart deploy timeout in seconds"
+}
+
+variable "workflows_sa" {
+  type        = string
+  description = "Cloud service account name to use when running workflows. Should be attached to k8s sa via annotation"
 }
 
 variable "pgsql" {
@@ -75,7 +74,38 @@ variable "pgsql" {
 
 variable "configuration" {
   type = object({
-    enabled          = bool
+    enabled             = bool
+    namespace           = string
+    workflows_namespace = string
+    artifact_bucket     = string
+    node_pool           = any
   })
+  default = {
+    enabled             = false
+    namespace           = "argo"
+    workflows_namespace = "argo"
+    artifact_bucket     = ""
+    node_pool = {
+      argo-workflows = {
+        init_node_count = 0
+        min_node_count  = 0
+        max_node_count  = 1
+        preemptible     = true
+        machine_type    = "n1-standard-2"
+        disk_size_gb    = 40
+        labels = {
+          machine_type = "n1-standard-2"
+          mode         = "argo-workflows"
+        }
+        taints = [
+          {
+            key    = "dedicated"
+            effect = "NO_SCHEDULE"
+            value  = "argo"
+          }
+        ]
+      }
+    }
+  }
   description = "Argo configuration"
 }

@@ -20,6 +20,10 @@ output "odahu_log_bucket_name" {
   value = google_storage_bucket.log.name
 }
 
+output "argo_artifact_bucket_name" {
+  value = google_storage_bucket.argo_artifacts.name
+}
+
 output "odahu_collector_sa_key" {
   value = local.collector_sa_key_one_line
 }
@@ -98,4 +102,3 @@ output "logstash_annotations" {
     }
   }
 }
-
