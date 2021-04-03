@@ -177,3 +177,39 @@ variable "bastion_labels" {
   default     = {}
   description = "Bastion host GCP labels"
 }
+
+variable "argo" {
+  type = object({
+    enabled         = bool
+    namespace       = string
+    artifact_bucket = string
+    node_pool       = any
+  })
+  default = {
+    enabled         = false
+    namespace       = "argo"
+    artifact_bucket = ""
+    node_pool = {
+      argo-workflows = {
+        init_node_count = 0
+        min_node_count  = 0
+        max_node_count  = 1
+        preemptible     = true
+        machine_type    = "n1-standard-2"
+        disk_size_gb    = 40
+        labels = {
+          machine_type = "n1-standard-2"
+          mode         = "argo-workflows"
+        }
+        taints = [
+          {
+            key    = "dedicated"
+            effect = "NO_SCHEDULE"
+            value  = "argo"
+          }
+        ]
+      }
+    }
+  }
+  description = "Argo configuration"
+}

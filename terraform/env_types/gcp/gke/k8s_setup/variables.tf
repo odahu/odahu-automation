@@ -132,12 +132,6 @@ variable "airflow_namespace" {
   description = "Namespace for Airflow"
 }
 
-variable "argo_namespace" {
-  type        = string
-  default     = "argo"
-  description = "Namespace for Argo"
-}
-
 variable "fluentd_namespace" {
   type        = string
   default     = "fluentd"
@@ -152,6 +146,7 @@ variable "db_namespace" {
 
 variable "kms_key_id" {
   type        = string
+  default     = ""
   description = "The ID of a Cloud KMS key that will be used to encrypt cluster disks"
 }
 
@@ -390,10 +385,38 @@ variable "airflow" {
 ########################
 variable "argo" {
   type = object({
-    enabled          = bool
+    enabled             = bool
+    namespace           = string
+    workflows_namespace = string
+    artifact_bucket     = string
+    node_pool           = any
   })
   default = {
-    enabled          = true
+    enabled             = false
+    namespace           = "argo"
+    workflows_namespace = "argo-workflows"
+    artifact_bucket     = ""
+    node_pool = {
+      argo-workflows = {
+        init_node_count = 0
+        min_node_count  = 0
+        max_node_count  = 1
+        preemptible     = true
+        machine_type    = "n1-standard-2"
+        disk_size_gb    = 40
+        labels = {
+          machine_type = "n1-standard-2"
+          mode         = "argo-workflows"
+        }
+        taints = [
+          {
+            key    = "dedicated"
+            effect = "NO_SCHEDULE"
+            value  = "argo"
+          }
+        ]
+      }
+    }
   }
   description = "Argo configuration"
 }

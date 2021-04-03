@@ -1,0 +1,8 @@
+server:
+  baseHref: /argo/
+singleNamespace: true
+useDefaultArtifactRepo: true
+%{ if pgsql_enabled }
+${controller}
+%{ endif ~}
+${workflow}
