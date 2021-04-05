@@ -23,15 +23,15 @@ locals {
     }
   }
 
-#  artifact_repository = {
-#    artifactRepository = {
-#      archiveLogs = true
-#      gcs = {
-#        bucket    = var.configuration.artifact_bucket
-#        keyFormat = "argo/{{workflow.namespace}}/{{workflow.name}}/"
-#      }
-#    }
-#  }
+  artifact_repository = {
+    artifactRepository = {
+      archiveLogs = true
+      gcs = {
+        bucket    = var.configuration.artifact_bucket
+        keyFormat = "argo/{{workflow.namespace}}/{{workflow.name}}/"
+      }
+    }
+  }
 
   controller = {
     controller = {
@@ -176,7 +176,7 @@ resource "helm_release" "argo_workflows" {
       controller    = yamlencode(local.controller)
       pgsql_enabled = var.pgsql.enabled
       workflow            = yamlencode(local.workflow)
-#      artifact_repository = yamlencode(local.artifact_repository)
+      artifact_repository = yamlencode(local.artifact_repository)
       #      workflows_namespace = local.workflows_namespace
       #      node_selector = var.configuration.node_pool[keys(var.configuration.node_pool)[0]].labels.mode
       #      node_taint    = var.configuration.node_pool[keys(var.configuration.node_pool)[0]].taints[0].value

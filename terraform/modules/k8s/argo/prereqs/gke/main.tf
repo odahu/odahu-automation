@@ -26,12 +26,12 @@ resource "google_storage_bucket_iam_member" "argo_store_legacy_write" {
   depends_on = [google_service_account.argo]
 }
 
-#resource "google_storage_bucket_iam_member" "odahu_store" {
-#  bucket     = var.bucket
-#  member     = "serviceAccount:${google_service_account.airflow.email}"
-#  role       = "roles/storage.objectAdmin"
-#  depends_on = [google_service_account.airflow]
-#}
+resource "google_storage_bucket_iam_member" "odahu_store" {
+  bucket     = var.bucket
+  member     = "serviceAccount:${google_service_account.argo.email}"
+  role       = "roles/storage.objectAdmin"
+  depends_on = [google_service_account.argo]
+}
 
 resource "google_kms_crypto_key_iam_member" "argo_kms_decrypt" {
   count = var.kms_key_id == "" ? 0 : 1
@@ -45,7 +45,7 @@ resource "google_service_account_iam_binding" "argo_web_identity" {
   service_account_id = google_service_account.argo.name
   role               = "roles/iam.workloadIdentityUser"
 
-  members = ["serviceAccount:${var.project_id}.svc.id.goog[argo-workflow]"]
+  members = ["serviceAccount:${var.project_id}.svc.id.goog[argo]"]
 }
 
 resource "google_service_account_key" "argo_sa_key" {
