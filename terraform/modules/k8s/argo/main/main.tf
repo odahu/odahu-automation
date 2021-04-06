@@ -16,6 +16,7 @@ locals {
       namespace = local.workflows_namespace
       serviceAccount = {
         create = true
+        "iam.gke.io/gcp-service-account" = var.workflows_sa
       }
       rbac = {
         create = true
@@ -35,6 +36,9 @@ locals {
 
   controller = {
     controller = {
+      serviceAccountAnnotations = {
+        "iam.gke.io/gcp-service-account" = var.workflows_sa
+      }
       workflowDefaults = {
         metadata = {
           namespace = local.workflows_namespace
