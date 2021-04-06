@@ -1,6 +1,6 @@
 server:
   baseHref: /argo/
-singleNamespace: true
+singleNamespace: false
 useDefaultArtifactRepo: true
 %{ if pgsql_enabled }
 ${controller}
