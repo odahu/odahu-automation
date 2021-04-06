@@ -45,7 +45,7 @@ resource "google_service_account_iam_binding" "argo_web_identity" {
   service_account_id = google_service_account.argo.name
   role               = "roles/iam.workloadIdentityUser"
 
-  members = ["serviceAccount:${var.project_id}.svc.id.goog[argo]"]
+  members = ["serviceAccount:${var.project_id}.svc.id.goog[argo]", "serviceAccount:${var.project_id}.svc.id.goog[argo-workflow]"]
 }
 
 resource "google_service_account_key" "argo_sa_key" {
