@@ -31,6 +31,7 @@ resource "google_container_cluster" "cluster" {
   # initial number of nodes (minimum 4 per location) and immediately delete it.
   remove_default_node_pool = true
   initial_node_count       = local.initial_node_count * 2 >= 4 ? local.initial_node_count * 2 : 4
+  logging_service          = var.logging_service
 
   cluster_autoscaling {
     enabled             = false
