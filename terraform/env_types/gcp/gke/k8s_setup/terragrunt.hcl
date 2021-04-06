@@ -1,4 +1,5 @@
 terraform_version_constraint = ">= 0.13.4"
+terraform_binary="/usr/bin/terraform134"
 
 locals {
   profile = get_env("PROFILE", "${get_terragrunt_dir()}//profile.json")
