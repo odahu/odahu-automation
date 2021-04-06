@@ -246,7 +246,7 @@ module "argo_workflow_prereqs" {
 module "argo_workflow" {
   source         = "../../../../modules/k8s/argo/main"
   cluster_domain = var.cluster_domain_name
-  configuration  = merge(var.argo, { artifact_bucket = module.odahuflow_prereqs.odahu_data_bucket_name })
+  configuration  = merge(var.argo, { artifact_bucket = module.odahuflow_prereqs.argo_artifact_bucket_name })
   workflows_sa   = module.argo_workflow_prereqs.argo_workflows_sa
   tls_secret_crt = var.tls_crt
   tls_secret_key = var.tls_key
