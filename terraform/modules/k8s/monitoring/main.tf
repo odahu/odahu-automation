@@ -97,6 +97,7 @@ resource "helm_release" "monitoring" {
       prom_retention_time     = var.prom_retention_time
       prom_retention_size     = var.prom_retention_size
       prom_storage_size       = var.prom_storage_size
+      prom_storage_class      = var.prom_storage_class
       grafana_admin           = var.grafana_admin
       grafana_pass            = var.grafana_pass
       grafana_storage_size    = var.grafana_storage_size

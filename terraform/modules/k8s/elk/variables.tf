@@ -94,6 +94,12 @@ variable "storage_size" {
   description = "Elasticsearch nodes attached PVC size"
 }
 
+variable "storage_class" {
+  type        = string
+  default     = ""
+  description = "Elasticsearch nodes attached PVC storage class"
+}
+
 variable "cluster_domain" {
   type        = string
   description = "ODAHU Flow cluster FQDN"
