@@ -23,7 +23,7 @@ variable "tls_secret_key" {
 
 variable "argo_wf_helm_chart_version" {
   type        = string
-  default     = "0.16.6"
+  default     = "0.16.7"
   description = "version of Argo Forkflows helm chart"
 }
 
