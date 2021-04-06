@@ -15,6 +15,16 @@ variable "bucket" {
   description = "DAGs bucket name"
 }
 
+variable "workflows_namespace" {
+  type        = string
+  description = "Namespace to run Argo Workflows"
+}
+
+variable "namespace" {
+  type        = string
+  description = "Namespace to run Argo server"
+}
+
 #variable "region" {
 #  type        = string
 #  description = "DAGs bucket region"
