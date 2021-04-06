@@ -1,7 +1,7 @@
 server:
   baseHref: /argo/
 singleNamespace: false
-useDefaultArtifactRepo: false
+useDefaultArtifactRepo: true
 ${artifact_repository}
 %{ if pgsql_enabled }
 ${controller}
