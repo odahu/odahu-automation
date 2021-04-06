@@ -4,7 +4,7 @@ locals {
   pg_username = local.pg_credentials_plain == 1 ? var.pgsql.db_password : lookup(lookup(data.kubernetes_secret.pg[0], "data", {}), "username", "")
   pg_password = local.pg_credentials_plain == 1 ? var.pgsql.db_user : lookup(lookup(data.kubernetes_secret.pg[0], "data", {}), "password", "")
 
-#  workflows_namespace = var.configuration.workflows_namespace == "" ? var.configuration.namespace : var.configuration.workflows_namespace
+  workflows_namespace = var.configuration.workflows_namespace == "" ? var.configuration.namespace : var.configuration.workflows_namespace
 #  workflows_namespace = var.configuration.workflows_namespace == "" ? {
 #    should be added to workflows runners not to workflow server
 #          annotations = {
@@ -37,7 +37,7 @@ locals {
     controller = {
       workflowDefaults = {
         metadata = {
-          namespace = var.configuration.workflows_namespace
+          namespace = local.workflows_namespace
         }
         spec = {
           serviceAccountName = "argo-workflow"
