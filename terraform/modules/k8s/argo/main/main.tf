@@ -13,7 +13,7 @@ locals {
 #  var.configuration.workflows_namespace == "" ? {} : {
   workflow = {
     workflow = {
-#      namespace = var.configuration.workflows_namespace
+      namespace = local.workflows_namespace
       serviceAccount = {
         create = true
       }
