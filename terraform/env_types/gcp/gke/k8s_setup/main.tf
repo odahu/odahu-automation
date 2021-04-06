@@ -234,11 +234,13 @@ module "airflow" {
 }
 
 module "argo_workflow_prereqs" {
-  source       = "../../../../modules/k8s/argo/prereqs/gke"
-  cluster_name = var.cluster_name
-  bucket       = module.odahuflow_prereqs.argo_artifact_bucket_name
-  kms_key_id   = var.kms_key_id
-  project_id   = var.project_id
+  source              = "../../../../modules/k8s/argo/prereqs/gke"
+  cluster_name        = var.cluster_name
+  bucket              = module.odahuflow_prereqs.argo_artifact_bucket_name
+  namespace           = var.argo.namespace
+  workflows_namespace = var.argo.workflows_namespace
+  kms_key_id          = var.kms_key_id
+  project_id          = var.project_id
 
   depends_on = [module.postgresql]
 }

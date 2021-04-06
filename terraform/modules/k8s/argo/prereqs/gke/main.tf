@@ -1,6 +1,6 @@
 locals {
   gsa_argo_name = "${var.cluster_name}-argo"
-  workflows_namespace = var.configuration.workflows_namespace == "" ? var.configuration.namespace : var.configuration.workflows_namespace
+  workflows_namespace = var.workflows_namespace == "" ? var.namespace : var.workflows_namespace
 }
 
 resource "google_service_account" "argo" {
@@ -46,7 +46,7 @@ resource "google_service_account_iam_binding" "argo_web_identity" {
   service_account_id = google_service_account.argo.name
   role               = "roles/iam.workloadIdentityUser"
 
-  members = ["serviceAccount:${var.project_id}.svc.id.goog[${var.configuration.namespace}|argo]", "serviceAccount:${var.project_id}.svc.id.goog[${local.workflows_namespace}|argo-workflow]"]
+  members = ["serviceAccount:${var.project_id}.svc.id.goog[${var.namespace}|argo]", "serviceAccount:${var.project_id}.svc.id.goog[${local.workflows_namespace}|argo-workflow]"]
 }
 
 resource "google_service_account_key" "argo_sa_key" {
