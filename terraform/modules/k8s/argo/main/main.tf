@@ -13,6 +13,7 @@ locals {
 #  var.configuration.workflows_namespace == "" ? {} : {
   server = {
     server = {
+      baseHref = "/argo/"
       serviceAccountAnnotations = {
         "iam.gke.io/gcp-service-account" = var.workflows_sa
       }
@@ -190,6 +191,7 @@ resource "helm_release" "argo_workflows" {
       pgsql_enabled = var.pgsql.enabled
       workflow            = yamlencode(local.workflow)
       artifact_repository = yamlencode(local.artifact_repository)
+      server              = yamlencode(local.server)
       #      workflows_namespace = local.workflows_namespace
       #      node_selector = var.configuration.node_pool[keys(var.configuration.node_pool)[0]].labels.mode
       #      node_taint    = var.configuration.node_pool[keys(var.configuration.node_pool)[0]].taints[0].value

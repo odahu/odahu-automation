@@ -1,5 +1,4 @@
-server:
-  baseHref: /argo/
+${server}
 singleNamespace: false
 useDefaultArtifactRepo: true
 ${artifact_repository}
