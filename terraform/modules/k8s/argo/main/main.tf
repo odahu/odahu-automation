@@ -11,6 +11,13 @@ locals {
 #            "iam.gke.io/gcp-service-account" = var.workflows_sa
 #          }
 #  var.configuration.workflows_namespace == "" ? {} : {
+  server = {
+    server = {
+      serviceAccountAnnotations = {
+        "iam.gke.io/gcp-service-account" = var.workflows_sa
+      }
+    }
+  }
   workflow = {
     workflow = {
       namespace = local.workflows_namespace
