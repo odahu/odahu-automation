@@ -33,6 +33,15 @@ variable "namespace" {
   description = "fluentd-daemonset namespace"
 }
 
+variable "configuration" {
+  type        = map
+  default     = {
+    elastic_hosts     = ""
+    use_cloud_storage = true
+  }
+  description = "Save logs to cloud storage. If `false` - logs will be sent directly to elasticsearch"
+}
+
 variable "pod_prefixes" {
   type = list(string)
   default = [

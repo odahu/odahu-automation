@@ -10,6 +10,12 @@ variable "namespace" {
   description = "ELK stack namespace name"
 }
 
+variable "logstash_enabled" {
+  type        = bool
+  default     = true
+  description = "Install logstash"
+}
+
 variable "odahu_helm_repo" {
   type        = string
   description = "ODAHU flow helm repo"

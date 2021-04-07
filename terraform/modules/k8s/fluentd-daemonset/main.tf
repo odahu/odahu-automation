@@ -6,11 +6,14 @@ locals {
     "extraEnvs"        = var.extra_helm_values.envs
     "extraSecrets"     = var.extra_helm_values.secrets
     "configData" = {
-      "cloud-config.inc"   = var.extra_helm_values.config
-      "filters-config.inc" = templatefile("${path.module}/templates/fluentd_filters.tpl", {})
+      "cloud-config.inc"   = var.configuration.use_cloud_storage ? var.extra_helm_values.config : ""
+      "elastic-config.inc" = var.configuration.use_cloud_storage ? "" : templatefile("${path.module}/templates/fluentd_elastic_config.tpl", {elastic_hosts = var.configuration.elastic_hosts})
+      "filters-config.inc" = var.configuration.use_cloud_storage ? templatefile("${path.module}/templates/fluentd_filters.tpl", {}) : templatefile("${path.module}/templates/fluentd_elastic_filters.tpl", {})
       "source-config.inc"  = templatefile("${path.module}/templates/fluentd_sources.tpl", {})
-      "fluent.conf" = templatefile(
+      "fluent.conf" = var.configuration.use_cloud_storage ? templatefile(
         "${path.module}/templates/fluentd_main.tpl", { pod_prefixes = var.pod_prefixes }
+      ) : templatefile(
+        "${path.module}/templates/fluentd_elastic_main.tpl", { pod_prefixes = var.pod_prefixes }
       )
     }
   }
