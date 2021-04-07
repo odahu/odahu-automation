@@ -48,13 +48,17 @@ data "aws_iam_policy_document" "syncer" {
     resources = ["*"]
   }
 
-  statement {
-    actions = [
-      "kms:Decrypt",
-      "kms:GenerateDataKey"
-    ]
-    effect    = "Allow"
-    resources = [var.kms_key_arn]
+  dynamic "statement" {
+    for_each = var.kms_key_arn == "" ? [] : [var.kms_key_arn]
+    iterator = key_arn
+    content {
+      actions = [
+        "kms:Decrypt",
+        "kms:GenerateDataKey"
+      ]
+      effect    = "Allow"
+      resources = [key_arn]
+    }
   }
 }
 

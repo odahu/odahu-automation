@@ -8,11 +8,15 @@ resource "aws_s3_bucket" "data" {
   region        = var.region
   force_destroy = true
 
-  server_side_encryption_configuration {
-    rule {
-      apply_server_side_encryption_by_default {
-        kms_master_key_id = basename(var.kms_key_arn)
-        sse_algorithm     = "aws:kms"
+  dynamic "server_side_encryption_configuration" {
+    for_each = var.kms_key_arn == "" ? [] : [var.kms_key_arn]
+    iterator = key_arn
+    content {
+      rule {
+        apply_server_side_encryption_by_default {
+          kms_master_key_id = basename(key_arn)
+          sse_algorithm     = "aws:kms"
+        }
       }
     }
   }
@@ -53,11 +57,15 @@ resource "aws_s3_bucket" "logs" {
   region        = var.region
   force_destroy = true
 
-  server_side_encryption_configuration {
-    rule {
-      apply_server_side_encryption_by_default {
-        kms_master_key_id = basename(var.kms_key_arn)
-        sse_algorithm     = "aws:kms"
+  dynamic "server_side_encryption_configuration" {
+    for_each = var.kms_key_arn == "" ? [] : [var.kms_key_arn]
+    iterator = key_arn
+    content {
+      rule {
+        apply_server_side_encryption_by_default {
+          kms_master_key_id = basename(key_arn)
+          sse_algorithm     = "aws:kms"
+        }
       }
     }
   }
@@ -117,14 +125,18 @@ data "aws_iam_policy_document" "collector" {
     resources = ["*"]
   }
 
-  statement {
-    actions = [
-      "kms:Encrypt",
-      "kms:Decrypt",
-      "kms:GenerateDataKey"
-    ]
-    effect    = "Allow"
-    resources = [var.kms_key_arn]
+  dynamic "statement" {
+    for_each = var.kms_key_arn == "" ? [] : [var.kms_key_arn]
+    iterator = key_arn
+    content {
+      actions = [
+        "kms:Encrypt",
+        "kms:Decrypt",
+        "kms:GenerateDataKey"
+      ]
+      effect    = "Allow"
+      resources = [key_arn]
+    }
   }
 }
 
@@ -232,16 +244,19 @@ data "aws_iam_policy_document" "jupyter_notebook" {
     resources = ["*"]
   }
 
-  statement {
-    actions = [
-      "kms:Encrypt",
-      "kms:Decrypt",
-      "kms:GenerateDataKey"
-    ]
-    effect    = "Allow"
-    resources = [var.kms_key_arn]
+  dynamic "statement" {
+    for_each = var.kms_key_arn == "" ? [] : [var.kms_key_arn]
+    iterator = key_arn
+    content {
+      actions = [
+        "kms:Encrypt",
+        "kms:Decrypt",
+        "kms:GenerateDataKey"
+      ]
+      effect    = "Allow"
+      resources = [key_arn]
+    }
   }
-
 }
 
 resource "aws_iam_role" "jupyter_notebook" {

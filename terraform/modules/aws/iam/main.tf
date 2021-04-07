@@ -33,12 +33,16 @@ resource "aws_iam_role_policy_attachment" "AmazonEKSServicePolicy" {
 }
 
 resource "aws_iam_role_policy_attachment" "kms_encryption" {
-  policy_arn = aws_iam_policy.kms_encryption.arn
+  count = var.kms_key_arn == "" ? 0 : 1
+
+  policy_arn = aws_iam_policy.kms_encryption[0].arn
   role       = aws_iam_role.master.name
 }
 
 resource "aws_iam_role_policy_attachment" "master_encrypted_ebs_attach" {
-  policy_arn = aws_iam_policy.encrypted_ebs_attach.arn
+  count = var.kms_key_arn == "" ? 0 : 1
+
+  policy_arn = aws_iam_policy.encrypted_ebs_attach[0].arn
   role       = aws_iam_role.master.name
 }
 
@@ -82,18 +86,24 @@ resource "aws_iam_instance_profile" "node" {
 }
 
 resource "aws_iam_policy" "kms_encryption" {
+  count = var.kms_key_arn == "" ? 0 : 1
+
   name_prefix = "kms-${var.cluster_name}"
   description = "EKS KMS Encryption policy for cluster ${var.cluster_name}"
-  policy      = data.aws_iam_policy_document.kms_encryption.json
+  policy      = data.aws_iam_policy_document.kms_encryption[0].json
 }
 
 resource "aws_iam_policy" "encrypted_ebs_attach" {
+  count = var.kms_key_arn == "" ? 0 : 1
+
   name_prefix = "volume-attachment-${var.cluster_name}"
   description = "EKS cluster manager IAM encrypted EBS attachment policy for cluster ${var.cluster_name}"
-  policy      = data.aws_iam_policy_document.encrypted_ebs_attach.json
+  policy      = data.aws_iam_policy_document.encrypted_ebs_attach[0].json
 }
 
 data "aws_iam_policy_document" "kms_encryption" {
+  count = var.kms_key_arn == "" ? 0 : 1
+
   statement {
     sid    = "eksKmsEncryption"
     effect = "Allow"
@@ -110,6 +120,8 @@ data "aws_iam_policy_document" "kms_encryption" {
 }
 
 data "aws_iam_policy_document" "encrypted_ebs_attach" {
+  count = var.kms_key_arn == "" ? 0 : 1
+
   statement {
     sid    = "encryptedEbsAttachment"
     effect = "Allow"
@@ -130,6 +142,8 @@ data "aws_iam_policy_document" "encrypted_ebs_attach" {
 }
 
 resource "aws_kms_grant" "kms_encrypt" {
+  count = var.kms_key_arn == "" ? 0 : 1
+
   name              = "${var.cluster_name}_kms_encrypt"
   key_id            = basename(var.kms_key_arn)
   grantee_principal = aws_iam_service_linked_role.autoscaling.arn

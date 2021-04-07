@@ -56,6 +56,8 @@ module "eks" {
 }
 
 module "kms_storage_class" {
+  count = var.kms_key_arn == "" ? 0 : 1
+
   source       = "../../../../modules/aws/storage"
   kms_key_arn  = var.kms_key_arn
   cluster_name = var.cluster_name

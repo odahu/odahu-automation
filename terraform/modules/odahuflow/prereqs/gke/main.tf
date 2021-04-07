@@ -126,6 +126,8 @@ resource "google_storage_bucket_iam_member" "odahuflow_registry" {
 }
 
 resource "google_kms_crypto_key_iam_member" "collector_kms_encrypt_decrypt" {
+  count = var.kms_key_id == "" ? 0 : 1
+
   crypto_key_id = var.kms_key_id
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
   member        = "serviceAccount:${google_service_account.collector_sa.email}"
@@ -154,6 +156,8 @@ resource "google_storage_bucket_iam_member" "jupyter_notebook_registry_viewer" {
 }
 
 resource "google_kms_crypto_key_iam_member" "jupyter_notebook_kms_encrypt_decrypt" {
+  count = var.kms_key_id == "" ? 0 : 1
+
   crypto_key_id = var.kms_key_id
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
   member        = "serviceAccount:${google_service_account.jupyter_notebook.email}"

@@ -34,6 +34,8 @@ resource "google_storage_bucket_iam_member" "odahu_store" {
 }
 
 resource "google_kms_crypto_key_iam_member" "airflow_kms_decrypt" {
+  count = var.kms_key_id == "" ? 0 : 1
+
   crypto_key_id = var.kms_key_id
   role          = "roles/cloudkms.cryptoKeyDecrypter"
   member        = "serviceAccount:${google_service_account.airflow.email}"
