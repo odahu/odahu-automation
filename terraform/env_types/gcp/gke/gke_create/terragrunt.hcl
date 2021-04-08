@@ -11,11 +11,12 @@ locals {
   kms_key_id     = lookup(lookup(local.config.cloud, "gcp", {}), "kms_key_id", "")
   gcp_zone       = lookup(lookup(local.config.cloud, "gcp", {}), "zone", "us-east1-b")
   node_locations = lookup(lookup(local.config.cloud, "gcp", {}), "node_locations", [])
-
+  
   scripts_dir             = "${get_terragrunt_dir()}/../../../../../scripts"
   cmd_k8s_fwrules_cleanup = "${local.scripts_dir}/gcp_k8s_fw_cleanup.sh"
   cmd_k8s_config_fetch    = "gcloud container clusters get-credentials \"${local.cluster_name}\" --region \"${local.gcp_region}\" --project \"${local.gcp_project_id}\""
   block_project_ssh_key   = lookup(lookup(local.config.cloud, "gcp", {}), "block_project_ssh_key", "true")
+  argo_configuration      = lookup(local.config.argo, "domain", "{}")
 }
 
 remote_state {
@@ -60,4 +61,5 @@ inputs = {
   kms_key_id            = local.kms_key_id
   node_locations        = local.node_locations
   block_project_ssh_key = local.block_project_ssh_key
+  argo                  = local.argo_configuration
 }
