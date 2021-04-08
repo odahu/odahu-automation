@@ -28,6 +28,7 @@ locals {
   config_context_auth_info = lookup(local.config, "config_context_auth_info", local.kube_context_name)
   config_context_cluster   = lookup(local.config, "config_context_cluster", local.kube_context_user)
   cluster_domain_name      = lookup(local.config.dns, "domain", null)
+  argo_configuration       = lookup(local.config.argo, "domain", "{}")
 
   scripts_dir                 = "${get_terragrunt_dir()}/../../../../../scripts"
   cmd_k8s_fwrules_cleanup     = "${local.scripts_dir}/gcp_k8s_fw_cleanup.sh ${local.cluster_name} ${local.gcp_project_id}"
@@ -83,6 +84,7 @@ inputs = {
   vpc_name   = local.vpc_name
   records    = local.records
   kms_key_id = local.kms_key_id
+  argo       = local.argo_configuration
 
   config_context_auth_info = local.config_context_auth_info
   config_context_cluster   = local.config_context_cluster
