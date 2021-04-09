@@ -135,7 +135,7 @@ data "aws_iam_policy_document" "collector" {
         "kms:GenerateDataKey"
       ]
       effect    = "Allow"
-      resources = [key_arn]
+      resources = [key_arn.value]
     }
   }
 }
@@ -254,7 +254,7 @@ data "aws_iam_policy_document" "jupyter_notebook" {
         "kms:GenerateDataKey"
       ]
       effect    = "Allow"
-      resources = [key_arn]
+      resources = [key_arn.value]
     }
   }
 }

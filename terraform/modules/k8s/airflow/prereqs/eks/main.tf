@@ -57,7 +57,7 @@ data "aws_iam_policy_document" "syncer" {
         "kms:GenerateDataKey"
       ]
       effect    = "Allow"
-      resources = [key_arn]
+      resources = [key_arn.value]
     }
   }
 }
