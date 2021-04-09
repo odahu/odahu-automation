@@ -285,7 +285,7 @@ resource "local_file" "storage_class" {
 
 resource "null_resource" "create_storage_class" {
   triggers = {
-    trigger = var.kms_key_id == "" ? timestamp() : local_file.storage_class[0]
+    trigger = var.kms_key_id == "" ? timestamp() : local_file.storage_class[0].filename
   }
 
   provisioner "local-exec" {
