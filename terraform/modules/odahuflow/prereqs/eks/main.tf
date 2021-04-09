@@ -126,7 +126,7 @@ data "aws_iam_policy_document" "collector" {
   }
 
   dynamic "statement" {
-    for_each = var.kms_key_arn == "" ? "" : var.kms_key_arn
+    for_each = var.kms_key_arn == "" ? [] : [var.kms_key_arn]
     iterator = key_arn
     content {
       actions = [
@@ -135,7 +135,7 @@ data "aws_iam_policy_document" "collector" {
         "kms:GenerateDataKey"
       ]
       effect    = "Allow"
-      resources = [key_arn]
+      resources = [key_arn.value]
     }
   }
 }
@@ -245,7 +245,7 @@ data "aws_iam_policy_document" "jupyter_notebook" {
   }
 
   dynamic "statement" {
-    for_each = var.kms_key_arn == "" ? "" : var.kms_key_arn
+    for_each = var.kms_key_arn == "" ? [] : [var.kms_key_arn]
     iterator = key_arn
     content {
       actions = [
@@ -254,7 +254,7 @@ data "aws_iam_policy_document" "jupyter_notebook" {
         "kms:GenerateDataKey"
       ]
       effect    = "Allow"
-      resources = [key_arn]
+      resources = [key_arn.value]
     }
   }
 }
