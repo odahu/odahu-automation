@@ -1,3 +1,5 @@
+images:
+  tag: ${argo_version}
 ${server}
 singleNamespace: false
 useDefaultArtifactRepo: true

@@ -7,7 +7,7 @@ output "argo_sa_annotations" {
 output "argo_artifact_repository_config" {
   value = {
     gcs = {
-      bucket    = var.configuration.artifact_bucket,
+      bucket    = var.bucket,
       endpoint  = "storage.googleapis.com",
       keyFormat = "argo/{{workflow.namespace}}/{{workflow.name}}/"
     }
