@@ -5,13 +5,18 @@ locals {
 
   is_lb_an_ip = length(regexall("^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$", module.nginx_ingress_prereqs.load_balancer_ip)) > 0
 
-  databases = [
+  argo_db = var.argo.enabled ? "argo" : ""
+
+  argo_bucket_name = var.argo.artifact_bucket == "" ? "${var.cluster_name}-argo-artifacts" : var.argo.artifact_bucket
+
+  argo_artifact_bucket_name = var.argo.enabled ? local.argo_bucket_name : ""
+
+  databases = compact(concat([
     "airflow",
     "mlflow",
     "jupyterhub",
     "vault",
     var.odahu_database,
-    "grafana",
-    "argo"
-  ]
+    "grafana"
+  ], [local.argo_db]))
 }

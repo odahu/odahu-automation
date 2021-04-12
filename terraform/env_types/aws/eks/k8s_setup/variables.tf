@@ -504,3 +504,42 @@ variable "opa" {
     }
   }
 }
+
+variable "argo" {
+  type = object({
+    enabled             = bool
+    namespace           = string
+    artifact_bucket     = string
+    node_pool           = any
+    workflows_namespace = string
+
+  })
+  default = {
+    enabled             = false
+    namespace           = "argo"
+    workflows_namespace = "argo-workflows"
+    artifact_bucket     = ""
+    node_pool = {
+      argo-workflows = {
+        init_node_count = 0
+        min_node_count  = 0
+        max_node_count  = 1
+        preemptible     = true
+        machine_type    = "m5.large"
+        disk_size_gb    = 40
+        labels = {
+          machine_type = "m5.large"
+          mode         = "argo-workflows"
+        }
+        taints = [
+          {
+            key    = "dedicated"
+            effect = "NO_SCHEDULE"
+            value  = "argo"
+          }
+        ]
+      }
+    }
+  }
+  description = "Argo configuration"
+}

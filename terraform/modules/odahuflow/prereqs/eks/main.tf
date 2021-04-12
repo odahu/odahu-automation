@@ -97,6 +97,33 @@ resource "aws_ecr_repository" "this" {
 }
 
 ########################################################
+# S3 Argo artifacts bucket
+########################################################
+
+resource "aws_s3_bucket" "argo_artifacts" {
+  count = var.argo_artifact_bucket == "" ? 0 : 1
+
+  bucket        = var.argo_artifact_bucket
+  acl           = "private"
+  region        = var.region
+  force_destroy = true
+
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        kms_master_key_id = basename(var.kms_key_arn)
+        sse_algorithm     = "aws:kms"
+      }
+    }
+  }
+
+  tags = {
+    Name = var.argo_artifact_bucket
+    Env  = var.cluster_name
+  }
+}
+
+########################################################
 # AWS IAM User for Fluentd
 ########################################################
 

@@ -94,3 +94,7 @@ output "jupyter_notebook_sa_annotations" {
     "eks.amazonaws.com/role-arn" = aws_iam_role.jupyter_notebook.arn
   }
 }
+
+output "argo_artifact_bucket_name" {
+  value = var.argo_artifact_bucket == "" ? "" : aws_s3_bucket.argo_artifacts[0].bucket
+}

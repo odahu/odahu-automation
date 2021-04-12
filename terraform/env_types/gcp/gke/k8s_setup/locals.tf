@@ -7,6 +7,10 @@ locals {
 
   argo_db = var.argo.enabled ? "argo" : ""
 
+  argo_bucket_name = var.argo.artifact_bucket == "" ? "${var.cluster_name}-argo-artifacts" : var.argo.artifact_bucket
+
+  argo_artifact_bucket_name = var.argo.enabled ? local.argo_bucket_name : ""
+
   databases = compact(concat([
     "airflow",
     "mlflow",

@@ -180,6 +180,7 @@ module "odahuflow_prereqs" {
   cluster_name            = var.cluster_name
   kms_key_arn             = var.kms_key_arn
   data_bucket             = var.data_bucket
+  argo_artifact_bucket    = ""
   log_bucket              = var.log_bucket
   log_expiration_days     = var.log_expiration_days
   openid_connect_provider = module.irsa.openid_connect_provider
@@ -249,6 +250,51 @@ module "storage-syncer" {
 
   depends_on = [module.airflow]
 }
+
+#module "argo_workflow_prereqs" {
+#  count  = var.argo.enabled ? 1 : 0
+#  source = "../../../../modules/k8s/argo/prereqs/eks"
+#
+#  bucket                  = module.odahuflow_prereqs.argo_artifact_bucket_name
+#  cluster_name            = var.cluster_name
+#  namespace               = var.argo.namespace
+#  workflows_namespace     = var.argo.workflows_namespace
+#  region                  = var.aws_region
+#  kms_key_arn             = var.kms_key_arn
+#  openid_connect_provider = module.irsa.openid_connect_provider
+#
+#  depends_on = [module.odahuflow_prereqs]
+#}
+
+module "minio" {
+  source = "../../../../modules/k8s/minio"
+
+  cluster_domain = var.domain
+  tls_secret_key = var.tls_key
+  tls_secret_crt = var.tls_crt
+}
+
+#module "argo_workflow" {
+#  count  = var.argo.enabled ? 1 : 0
+#  source = "../../../../modules/k8s/argo/helm"
+#
+#  cluster_domain             = var.domain
+#  configuration              = merge(var.argo, { artifact_bucket = module.odahuflow_prereqs.argo_artifact_bucket_name })
+#  sa_annotations             = module.argo_workflow_prereqs[0].argo_sa_annotations
+#  artifact_repository_config = module.argo_workflow_prereqs[0].argo_artifact_repository_config
+#  tls_secret_crt             = var.tls_crt
+#  tls_secret_key             = var.tls_key
+#  pgsql = {
+#    enabled          = var.postgres.enabled
+#    db_host          = module.postgresql.pgsql_endpoint
+#    db_name          = "argo"
+#    db_user          = ""
+#    db_password      = ""
+#    secret_namespace = module.postgresql.pgsql_credentials["argo"].namespace
+#    secret_name      = module.postgresql.pgsql_credentials["argo"].secret
+#  }
+#  depends_on = [module.postgresql, module.argo_workflow_prereqs[0]]
+#}
 
 module "fluentd" {
   source = "../../../../modules/k8s/fluentd"
@@ -377,6 +423,7 @@ module "odahuflow_helm" {
   extra_external_urls = concat(
     module.jupyterhub.external_url,
     module.airflow.external_url,
+    #    module.argo_workflow[0].external_url,
     module.odahuflow_prereqs.extra_external_urls
   )
 
