@@ -25,8 +25,6 @@ locals {
       }
     }
   }
-
-  argo_artifact_bucket_name = var.argo_artifact_bucket == "" ? "${var.cluster_name}-argo-artifacts" : var.argo_artifact_bucket
 }
 
 ########################################################
@@ -82,7 +80,9 @@ resource "google_storage_bucket" "log" {
 # GCS Argo artifacts bucket
 ########################################################
 resource "google_storage_bucket" "argo_artifacts" {
-  name                        = local.argo_artifact_bucket_name
+  count = var.argo_artifact_bucket_name == "" ? 0 : 1
+
+  name                        = var.argo_artifact_bucket_name
   location                    = var.region
   storage_class               = "REGIONAL"
   force_destroy               = true
