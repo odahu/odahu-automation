@@ -1,7 +1,7 @@
 locals {
-  mode_label_value = lookup(lookup(var.argo.node_pool[keys(var.argo.node_pool)[0]], "labels", []), "mode", "")
+  mode_label_value = lookup(lookup(var.configuration.node_pool[keys(var.configuration.node_pool)[0]], "labels", []), "mode", "")
 
-  use_static_credentials = sa_annotations == {} ? false : true
+  use_static_credentials = var.sa_annotations == {} ? false : true
   pg_credentials_plain = ((length(var.pgsql.secret_namespace) != 0) && (length(var.pgsql.secret_name) != 0)) ? 0 : 1
 
   pg_username = local.pg_credentials_plain == 1 ? var.pgsql.db_password : lookup(lookup(data.kubernetes_secret.pg[0], "data", {}), "username", "")
@@ -44,12 +44,12 @@ locals {
           serviceAccountName = "argo-workflow"
 
           tolerations = length(var.configuration.node_pool) != 0 ? [
-            for taint in lookup(var.argo.node_pool[keys(var.argo.node_pool)[0]], "taints", []) : {
+            for taint in lookup(var.configuration.node_pool[keys(var.configuration.node_pool)[0]], "taints", []) : {
               Key      = taint.key
               Operator = "Equal"
               Value    = taint.value
               Effect   = replace(taint.effect, "/(?i)no_?schedule/", "NoSchedule")
-          }] : nil
+          }] : null
 
           affinity = length(local.mode_label_value) != 0 ? {
             nodeAffinity = {
@@ -184,6 +184,7 @@ resource "helm_release" "argo_workflows" {
       artifact_repository = yamlencode(local.artifact_repository)
       server              = yamlencode(local.server)
       use_static_credentials = local.use_static_credentials
+      argo_version = var.argo_version
     })
   ]
   depends_on = [kubernetes_namespace.argo, kubernetes_secret.postgres[0]]

@@ -27,6 +27,12 @@ variable "argo_wf_helm_chart_version" {
   description = "version of Argo Forkflows helm chart"
 }
 
+variable "argo_version" {
+  type        = string
+  default     = "v2.12.11"
+  description = "Version of all Argo images"
+}
+
 variable "argo_events_helm_chart_version" {
   type        = string
   default     = "1.2.3"

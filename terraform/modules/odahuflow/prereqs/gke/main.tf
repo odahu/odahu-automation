@@ -80,9 +80,9 @@ resource "google_storage_bucket" "log" {
 # GCS Argo artifacts bucket
 ########################################################
 resource "google_storage_bucket" "argo_artifacts" {
-  count = var.argo_artifact_bucket_name == "" ? 0 : 1
+  count = var.argo_artifact_bucket == "" ? 0 : 1
 
-  name                        = var.argo_artifact_bucket_name
+  name                        = var.argo_artifact_bucket
   location                    = var.region
   storage_class               = "REGIONAL"
   force_destroy               = true
