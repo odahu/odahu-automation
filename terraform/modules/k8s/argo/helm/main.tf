@@ -1,32 +1,27 @@
 locals {
+  mode_label_value = lookup(lookup(var.argo.node_pool[keys(var.argo.node_pool)[0]], "labels", []), "mode", "")
+
+  use_static_credentials = sa_annotations == {} ? false : true
   pg_credentials_plain = ((length(var.pgsql.secret_namespace) != 0) && (length(var.pgsql.secret_name) != 0)) ? 0 : 1
 
   pg_username = local.pg_credentials_plain == 1 ? var.pgsql.db_password : lookup(lookup(data.kubernetes_secret.pg[0], "data", {}), "username", "")
   pg_password = local.pg_credentials_plain == 1 ? var.pgsql.db_user : lookup(lookup(data.kubernetes_secret.pg[0], "data", {}), "password", "")
 
   workflows_namespace = var.configuration.workflows_namespace == "" ? var.configuration.namespace : var.configuration.workflows_namespace
-#  workflows_namespace = var.configuration.workflows_namespace == "" ? {
-#    should be added to workflows runners not to workflow server
-#          annotations = {
-#            "iam.gke.io/gcp-service-account" = var.workflows_sa
-#          }
-#  var.configuration.workflows_namespace == "" ? {} : {
+
   server = {
     server = {
-      baseHref = "/argo/"
-      serviceAccountAnnotations = {
-        "iam.gke.io/gcp-service-account" = var.workflows_sa
-      }
+      baseHref                  = "/argo/"
+      serviceAccountAnnotations = var.sa_annotations
     }
   }
+
   workflow = {
     workflow = {
       namespace = local.workflows_namespace
       serviceAccount = {
-        create = true
-        annotations = {
-          "iam.gke.io/gcp-service-account" = var.workflows_sa
-        }
+        create      = true
+        annotations = var.sa_annotations
       }
       rbac = {
         create = true
@@ -35,48 +30,44 @@ locals {
   }
 
   artifact_repository = {
-    artifactRepository = {
-      archiveLogs = true
-      gcs = {
-        bucket    = var.configuration.artifact_bucket
-        keyFormat = "argo/{{workflow.namespace}}/{{workflow.name}}/"
-      }
-    }
+    artifactRepository = merge({ archiveLogs = true }, var.artifact_repository_config)
   }
 
   controller = {
     controller = {
-      serviceAccountAnnotations = {
-        "iam.gke.io/gcp-service-account" = var.workflows_sa
-      }
+      serviceAccountAnnotations = var.sa_annotations
       workflowDefaults = {
         metadata = {
           namespace = local.workflows_namespace
         }
         spec = {
           serviceAccountName = "argo-workflow"
-          tolerations = [{
-            effect   = "NoSchedule"
-            key      = "dedicated"
-            operator = "Equal"
-            value    = "argo"
-          }]
-          affinity = {
+
+          tolerations = length(var.configuration.node_pool) != 0 ? [
+            for taint in lookup(var.argo.node_pool[keys(var.argo.node_pool)[0]], "taints", []) : {
+              Key      = taint.key
+              Operator = "Equal"
+              Value    = taint.value
+              Effect   = replace(taint.effect, "/(?i)no_?schedule/", "NoSchedule")
+          }] : nil
+
+          affinity = length(local.mode_label_value) != 0 ? {
             nodeAffinity = {
               requiredDuringSchedulingIgnoredDuringExecution = {
                 nodeSelectorTerms = [{
                   matchExpressions = [{
                     key      = "mode"
                     operator = "In"
-                    values   = ["argo-workflows"]
+                    values   = [local.mode_label_value]
                   }]
                 }]
               }
             }
-          }
+          } : null
         }
       }
       workflowNamespaces = var.configuration.workflows_namespace == "" ? [var.configuration.namespace] : [var.configuration.workflows_namespace]
+
       persistence = {
         postgresql = {
           host      = var.pgsql.db_host
@@ -187,14 +178,12 @@ resource "helm_release" "argo_workflows" {
   timeout       = var.helm_timeout
   values = [
     templatefile("${path.module}/templates/argo-workflows.yaml", {
-      controller    = yamlencode(local.controller)
-      pgsql_enabled = var.pgsql.enabled
+      controller          = yamlencode(local.controller)
+      pgsql_enabled       = var.pgsql.enabled
       workflow            = yamlencode(local.workflow)
       artifact_repository = yamlencode(local.artifact_repository)
       server              = yamlencode(local.server)
-      #      workflows_namespace = local.workflows_namespace
-      #      node_selector = var.configuration.node_pool[keys(var.configuration.node_pool)[0]].labels.mode
-      #      node_taint    = var.configuration.node_pool[keys(var.configuration.node_pool)[0]].taints[0].value
+      use_static_credentials = local.use_static_credentials
     })
   ]
   depends_on = [kubernetes_namespace.argo, kubernetes_secret.postgres[0]]

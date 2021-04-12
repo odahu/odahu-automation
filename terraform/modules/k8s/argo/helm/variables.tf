@@ -45,11 +45,6 @@ variable "helm_timeout" {
   description = "Helm chart deploy timeout in seconds"
 }
 
-variable "workflows_sa" {
-  type        = string
-  description = "Cloud service account name to use when running workflows. Should be attached to k8s sa via annotation"
-}
-
 variable "pgsql" {
   type = object({
     enabled          = bool
@@ -108,4 +103,16 @@ variable "configuration" {
     }
   }
   description = "Argo configuration"
+}
+
+variable "sa_annotations" {
+  type        = map
+  default     = {}
+  description = "Annotations to apply to k8s SA that Argo uses"
+}
+
+variable "artifact_repository_config" {
+  type        = map
+  default     = {}
+  description = "Artifact repository to use"
 }
