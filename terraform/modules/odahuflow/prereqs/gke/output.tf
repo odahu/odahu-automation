@@ -21,7 +21,7 @@ output "odahu_log_bucket_name" {
 }
 
 output "argo_artifact_bucket_name" {
-  value = google_storage_bucket.argo_artifacts.name
+  value = google_storage_bucket.argo_artifacts[0].name
 }
 
 output "odahu_collector_sa_key" {
