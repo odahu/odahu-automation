@@ -14,7 +14,7 @@ resource "aws_s3_bucket" "data" {
     content {
       rule {
         apply_server_side_encryption_by_default {
-          kms_master_key_id = basename(key_arn)
+          kms_master_key_id = basename(key_arn.value)
           sse_algorithm     = "aws:kms"
         }
       }
@@ -63,7 +63,7 @@ resource "aws_s3_bucket" "logs" {
     content {
       rule {
         apply_server_side_encryption_by_default {
-          kms_master_key_id = basename(key_arn)
+          kms_master_key_id = basename(key_arn.value)
           sse_algorithm     = "aws:kms"
         }
       }
