@@ -143,10 +143,16 @@ resource "google_service_account" "jupyter_notebook" {
   project      = var.project_id
 }
 
-resource "google_storage_bucket_iam_member" "jupyter_notebook_store_viewer" {
+resource "google_storage_bucket_iam_member" "jupyter_data_store_legacy_write" {
   bucket = google_storage_bucket.data.name
   member = "serviceAccount:${google_service_account.jupyter_notebook.email}"
-  role   = "roles/storage.objectViewer"
+  role   = "roles/storage.legacyBucketWriter"
+}
+
+resource "google_storage_bucket_iam_member" "jupyter_data_store_admin" {
+  bucket = google_storage_bucket.data.name
+  member = "serviceAccount:${google_service_account.jupyter_notebook.email}"
+  role   = "roles/storage.objectAdmin"
 }
 
 resource "google_storage_bucket_iam_member" "jupyter_notebook_registry_viewer" {
