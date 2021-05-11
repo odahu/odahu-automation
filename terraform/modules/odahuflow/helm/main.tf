@@ -394,6 +394,9 @@ resource "kubernetes_namespace" "odahuflow_deployment" {
     }
     name = var.odahuflow_deployment_namespace
   }
+  timeouts {
+    delete = "15m"
+  }
 }
 
 resource "kubernetes_namespace" "odahuflow_batch" {
