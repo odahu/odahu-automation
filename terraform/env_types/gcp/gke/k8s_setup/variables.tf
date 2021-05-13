@@ -401,6 +401,11 @@ variable "examples_version" {
   description = "Wine examples version"
 }
 
+variable "deploy_examples" {
+  type        = string
+  description = "Is odahuflow-examples deployment needed "
+}
+
 ########################
 # PostgreSQL
 ########################

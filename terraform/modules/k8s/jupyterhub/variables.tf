@@ -136,8 +136,8 @@ variable "helm_timeout" {
 }
 
 variable "deploy_examples" {
-  type        = bool
-  default     = false
+  type        = string
+  default     = "false"
   description = "Is odahuflow-examples deployment needed "
 }
 

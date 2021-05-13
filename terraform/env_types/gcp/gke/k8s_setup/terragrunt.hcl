@@ -20,7 +20,7 @@ locals {
   gcp_context_name = "gke_${local.gcp_project_id}_${local.gcp_region}_${local.cluster_name}"
   examples_urls    = lookup(local.config.examples, "examples_urls", null)
   examples_version = lookup(local.config.examples, "examples_version", null)
-  deploy_examples  = lookup(local.config.examples, "deploy_examples", false)
+  deploy_examples  = lookup(local.config.examples, "deploy_examples", "false")
 
   # If "config_context_auth_info", "config_context_cluster" variables are defined in $PROFILE, then we should use it,
   # otherwise we should parse kubeconfig (if exists)
