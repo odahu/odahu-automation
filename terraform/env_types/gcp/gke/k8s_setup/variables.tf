@@ -381,6 +381,12 @@ variable "airflow" {
   description = "Airflow configuration"
 }
 
+variable "examples_urls" {
+  type        = any
+  default     = {}
+  description = "Wine example file URLs"
+}
+
 ##################
 # Test
 ##################

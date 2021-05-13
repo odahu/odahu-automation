@@ -403,3 +403,9 @@ module "odahuflow_helm" {
 
   depends_on = [module.postgresql, module.odahuflow_prereqs, module.vault, module.nginx_ingress_helm, module.auth, module.knative]
 }
+
+module "bucket_files" {
+  source = "../../../../modules/k8s/bucket_files"
+  examples_urls = var.examples_urls
+  dag_bucket = local.dag_bucket
+}

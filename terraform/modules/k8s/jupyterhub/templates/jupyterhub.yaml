@@ -79,9 +79,25 @@ singleuser:
     name: ${docker_repo}/base-notebook
     tag: ${docker_tag}
   profileList:
+%{ if deploy_examples == true ~}
+    - display_name: "Base Jupyter Notebook with examples"
+      description: "Base image for Jupyter Notebook with ODAHU plugin and examples cloned to workspace"
+      default: true
+      kubespawner_override:
+        lifecycle_hooks:
+          postStart:
+            exec:
+              command:
+                - "sh"
+                - "-c"
+                - >
+                  git clone -b develop https://github.com/odahu/odahu-examples.git
+%{ endif ~}
     - display_name: "Base Jupyter Notebook"
       description: "Base image for Jupyter Notebook with ODAHU plugin"
+%{ if deploy_examples != true ~}
       default: true
+%{ endif ~}
     - display_name: "Datascience environment"
       description: "Python, R, and Julia with ODAHU plugin."
       kubespawner_override:
