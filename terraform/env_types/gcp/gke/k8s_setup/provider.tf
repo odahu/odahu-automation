@@ -3,6 +3,16 @@ provider "google" {
   region  = var.region
   zone    = var.zone
   project = var.project_id
+  credentials = var.gcp_credentials
+}
+
+provider "google" {
+  alias       = "dns"
+  version     = "3.47.0"
+  region      = var.region
+  zone        = var.zone
+  project     = var.gcp_dns_project_id
+  credentials = var.gcp_dns_credentials
 }
 
 provider "helm" {

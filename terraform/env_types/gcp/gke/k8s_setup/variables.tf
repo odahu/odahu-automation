@@ -11,6 +11,11 @@ variable "project_id" {
   description = "Target project id"
 }
 
+variable "gcp_credentials" {
+  type        = string
+  description = "Main GCP credentials"
+}
+
 variable "zone" {
   type        = string
   description = "Default zone"
@@ -448,6 +453,16 @@ variable "domain" {
 }
 
 variable "managed_zone" {
+  type    = string
+  default = ""
+}
+
+variable "gcp_dns_credentials" {
+  type    = string
+  default = ""
+}
+
+variable "gcp_dns_project_id" {
   type    = string
   default = ""
 }

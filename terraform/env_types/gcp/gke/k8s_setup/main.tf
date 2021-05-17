@@ -103,15 +103,20 @@ module "nfs" {
 module "odahu-dns" {
   source = "../../../../modules/dns/modules/gcp"
 
-  domain       = var.domain
-  managed_zone = var.managed_zone
-  records      = var.records
-
+  domain          = var.domain
+  managed_zone    = var.managed_zone
+  records         = var.records
+  gcp_project_id  = var.gcp_dns_project_id
+  
   lb_record = {
     "name"  = regex("^[^.]*", var.domain)
     "value" = local.is_lb_an_ip ? module.nginx_ingress_prereqs.helm_values["controller.service.loadBalancerIP"] : "${module.nginx_ingress_prereqs.helm_values["controller.service.loadBalancerIP"]}."
     "type"  = local.is_lb_an_ip ? "A" : "CNAME"
     "ttl"   = var.lb_record.ttl
+  }
+  
+  providers = {
+    google = google.dns
   }
 
   depends_on = [module.nginx_ingress_helm]
