@@ -18,9 +18,6 @@ locals {
   gcp_region       = lookup(lookup(local.config.cloud, "gcp", {}), "region", "us-east1")
   gcp_zone         = lookup(lookup(local.config.cloud, "gcp", {}), "zone", "us-east1-b")
   gcp_context_name = "gke_${local.gcp_project_id}_${local.gcp_region}_${local.cluster_name}"
-  examples_urls    = lookup(local.config.examples, "examples_urls", null)
-  examples_version = lookup(local.config.examples, "examples_version", null)
-  deploy_examples  = lookup(local.config.examples, "deploy_examples", "false")
 
   # If "config_context_auth_info", "config_context_cluster" variables are defined in $PROFILE, then we should use it,
   # otherwise we should parse kubeconfig (if exists)
@@ -86,10 +83,6 @@ inputs = {
   vpc_name   = local.vpc_name
   records    = local.records
   kms_key_id = local.kms_key_id
-
-  examples_urls    = local.examples_urls
-  examples_version = local.examples_version
-  deploy_examples  = local.deploy_examples
 
   config_context_auth_info = local.config_context_auth_info
   config_context_cluster   = local.config_context_cluster

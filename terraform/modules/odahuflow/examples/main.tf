@@ -1,6 +1,6 @@
 locals {
   dag_bucket = var.dag_bucket
-  examples_urls = {for remotePath, templateHttpLink in var.examples_urls : remotePath => replace(templateHttpLink, "{EXAMPLES_VERSION}", var.examples_version)}
+  examples_urls = {for remotePath, templateHttpLink in var.examples.examples_urls : remotePath => replace(templateHttpLink, "{EXAMPLES_VERSION}", var.examples.examples_version)}
 }
 
 data "http" "links" {
