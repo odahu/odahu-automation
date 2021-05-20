@@ -30,7 +30,7 @@ provider "template" {
 }
 
 provider "google" {
-  version     = "3.47.0"
+  version     = "3.68.0"
   project     = var.gcp_project_id
   credentials = var.gcp_credentials
 }
