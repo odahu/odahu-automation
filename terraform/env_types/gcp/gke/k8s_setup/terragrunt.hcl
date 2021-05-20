@@ -13,11 +13,14 @@ locals {
   records      = lookup(local.config.dns, "records", get_env("TF_VAR_records", "[]"))
   records_str  = join(" ", [for rec in jsondecode(local.records) : "${rec.name}:${rec.value}" if rec.value != "null"])
 
-  vpc_name         = lookup(local.config, "vpc_name", "${local.cluster_name}-vpc")
-  gcp_project_id   = lookup(lookup(local.config.cloud, "gcp", {}), "project_id", "")
-  gcp_region       = lookup(lookup(local.config.cloud, "gcp", {}), "region", "us-east1")
-  gcp_zone         = lookup(lookup(local.config.cloud, "gcp", {}), "zone", "us-east1-b")
-  gcp_context_name = "gke_${local.gcp_project_id}_${local.gcp_region}_${local.cluster_name}"
+  vpc_name            = lookup(local.config, "vpc_name", "${local.cluster_name}-vpc")
+  gcp_project_id      = lookup(lookup(local.config.cloud, "gcp", {}), "project_id", "")
+  gcp_region          = lookup(lookup(local.config.cloud, "gcp", {}), "region", "us-east1")
+  gcp_zone            = lookup(lookup(local.config.cloud, "gcp", {}), "zone", "us-east1-b")
+  gcp_context_name    = "gke_${local.gcp_project_id}_${local.gcp_region}_${local.cluster_name}"
+  gcp_credentials     = lookup(lookup(local.config.cloud.gcp, "credentials", {}), "GOOGLE_CREDENTIALS", get_env("GOOGLE_CREDENTIALS", ""))
+  gcp_dns_credentials = lookup(local.config.dns, "gcp_credentials", get_env("GOOGLE_CREDENTIALS", ""))
+  gcp_dns_project_id  = lookup(local.config.dns, "gcp_project_id", local.gcp_project_id)
 
   # If "config_context_auth_info", "config_context_cluster" variables are defined in $PROFILE, then we should use it,
   # otherwise we should parse kubeconfig (if exists)
@@ -77,12 +80,15 @@ terraform {
 }
 
 inputs = {
-  project_id = local.gcp_project_id
-  region     = local.gcp_region
-  zone       = local.gcp_zone
-  vpc_name   = local.vpc_name
-  records    = local.records
-  kms_key_id = local.kms_key_id
+  project_id          = local.gcp_project_id
+  region              = local.gcp_region
+  zone                = local.gcp_zone
+  vpc_name            = local.vpc_name
+  records             = local.records
+  kms_key_id          = local.kms_key_id
+  gcp_credentials     = local.gcp_credentials
+  gcp_dns_credentials = local.gcp_dns_credentials
+  gcp_dns_project_id  = local.gcp_dns_project_id
 
   config_context_auth_info = local.config_context_auth_info
   config_context_cluster   = local.config_context_cluster
