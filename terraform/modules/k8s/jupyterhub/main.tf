@@ -142,6 +142,7 @@ resource "helm_release" "jupyterhub" {
       jupyterhub_secret_token = var.jupyterhub_secret_token == "" ? random_string.secret[0].result : var.jupyterhub_secret_token
       debug_enabled           = local.jupyterhub_debug
       single_user_sa          = kubernetes_service_account.single[0].metadata[0].name
+      deploy_examples         = var.deploy_examples
 
       cloud_type         = var.cloud_settings.type
       aws_key_id         = try(var.cloud_settings.settings.key_id, "")

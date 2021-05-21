@@ -200,7 +200,7 @@ module "airflow_test_data" {
   source = "../../../../modules/k8s/airflow/test_data/gke"
 
   wine_bucket      = module.odahuflow_prereqs.odahu_data_bucket_name
-  examples_version = var.examples_version
+  examples_version = var.examples.examples_version
   wine_data_url    = var.wine_data_url
 
   depends_on = [module.odahuflow_prereqs]
@@ -214,7 +214,7 @@ module "airflow" {
   cluster_name                 = var.cluster_name
   cluster_domain               = var.cluster_domain_name
   airflow_variables            = module.airflow_prereqs.airflow_variables
-  examples_version             = var.examples_version
+  examples_version             = var.examples.examples_version
   oauth_oidc_token_endpoint    = var.oauth_oidc_token_endpoint
   wine_connection              = module.airflow_prereqs.wine_connection
   service_account              = var.service_accounts.airflow
@@ -292,6 +292,7 @@ module "jupyterhub" {
   docker_tag      = var.jupyterlab_version
   docker_username = var.docker_username
   docker_password = var.docker_password
+  deploy_examples = var.examples.deploy_examples
 
   oauth_client_id       = var.oauth_client_id
   oauth_client_secret   = var.oauth_client_secret
@@ -407,4 +408,10 @@ module "odahuflow_helm" {
   }
 
   depends_on = [module.postgresql, module.odahuflow_prereqs, module.vault, module.nginx_ingress_helm, module.auth, module.knative]
+}
+
+module "odahuflow_examples" {
+  source     = "../../../../modules/odahuflow/examples"
+  examples   = var.examples
+  dag_bucket = local.dag_bucket
 }

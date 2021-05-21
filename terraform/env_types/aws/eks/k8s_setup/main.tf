@@ -216,7 +216,7 @@ module "airflow" {
   cluster_domain               = var.domain
   oauth_oidc_token_endpoint    = var.oauth_oidc_token_endpoint
   airflow_variables            = {}
-  examples_version             = var.examples_version
+  examples_version             = var.examples.examples_version
   wine_connection              = {}
   service_account              = var.service_accounts.airflow
   docker_repo                  = var.docker_repo

@@ -390,14 +390,23 @@ variable "airflow" {
 # Test
 ##################
 
+variable "examples" {
+  type = object({
+    examples_urls    = any
+    examples_version = string
+    deploy_examples  = string
+  })
+  default = {
+    examples_urls    = {}
+    examples_version = ""
+    deploy_examples  = "false"
+  }
+  description = "ODAHU Examples configuration"
+}
+
 variable "wine_data_url" {
   type        = string
   description = "Wine example data URL"
-}
-
-variable "examples_version" {
-  type        = string
-  description = "Wine examples version"
 }
 
 ########################

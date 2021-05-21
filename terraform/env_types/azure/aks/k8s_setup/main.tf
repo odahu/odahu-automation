@@ -197,7 +197,7 @@ module "airflow" {
   cluster_domain               = var.domain
   oauth_oidc_token_endpoint    = var.oauth_oidc_token_endpoint
   airflow_variables            = {}
-  examples_version             = var.examples_version
+  examples_version             = var.examples.examples_version
   wine_connection              = {}
   helm_timeout                 = 900
   service_account              = var.service_accounts.airflow

@@ -135,6 +135,12 @@ variable "helm_timeout" {
   description = "Helm chart deploy timeout in seconds"
 }
 
+variable "deploy_examples" {
+  type        = string
+  default     = "false"
+  description = "Is odahuflow-examples deployment needed "
+}
+
 variable "pgsql" {
   type = object({
     enabled          = bool
