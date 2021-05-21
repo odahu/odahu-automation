@@ -85,6 +85,14 @@ variable "jupyterhub_culling_frequency" {
   description = "Period in seconds with which JupyterHub pings browser session to check whether it is open"
 }
 
+variable "service_account" {
+  type = object({
+    client_id     = string
+    client_secret = string
+  })
+  description = "Service account that Jupyterhub should use to connect ODAHU"
+}
+
 variable "oauth_client_id" {
   type        = string
   description = "OAuth 2 Client ID"

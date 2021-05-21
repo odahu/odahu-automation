@@ -70,6 +70,10 @@ singleuser:
   extraEnv:
     API_AUTH_ENABLED: "false"
     DEFAULT_API_ENDPOINT: "http://odahu-flow-api.odahu-flow.svc.cluster.local:80"
+    ODAHUFLOWCTL_OAUTH_CLIENT_ID: "${odahuflowctl_id}"
+    ODAHUFLOWCTL_OAUTH_CLIENT_SECRET: "${odahuflowctl_secret}"
+    API_URL: "https://${cluster_domain}"
+    ISSUER_URL: "${oauth_oidc_issuer_url}"
 %{ if cloud_type == "azure" ~}
     AZURE_STORAGE_ACCOUNT: "${azure_account_name}"
     AZURE_STORAGE_SAS_TOKEN: "${azure_sas_token}"
