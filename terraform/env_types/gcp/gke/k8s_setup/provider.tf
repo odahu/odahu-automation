@@ -1,5 +1,5 @@
 provider "google" {
-  version     = "3.47.0"
+  version     = "3.68.0"
   region      = var.region
   zone        = var.zone
   project     = var.project_id
@@ -8,7 +8,7 @@ provider "google" {
 
 provider "google" {
   alias       = "dns"
-  version     = "3.47.0"
+  version     = "3.68.0"
   region      = var.region
   zone        = var.zone
   project     = var.gcp_dns_project_id

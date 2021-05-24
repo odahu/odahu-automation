@@ -1,12 +1,12 @@
 provider "google" {
-  version = "3.47.0"
+  version = "3.68.0"
   region  = var.region
   zone    = var.zone
   project = var.project_id
 }
 
 provider "google-beta" {
-  version = "3.47.0"
+  version = "3.68.0"
   region  = var.region
   zone    = var.zone
   project = var.project_id
