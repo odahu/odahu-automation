@@ -400,9 +400,18 @@ variable "odahu_airflow_plugin_version" {
   description = "ODAHU flow Airflow plugn version"
 }
 
-variable "examples_version" {
-  type        = string
-  description = "Wine examples version"
+variable "examples" {
+  type = object({
+    examples_urls    = any
+    examples_version = string
+    deploy_examples  = string
+  })
+  default = {
+    examples_urls    = {}
+    examples_version = ""
+    deploy_examples  = "false"
+  }
+  description = "ODAHU Examples configuration"
 }
 
 ########################
