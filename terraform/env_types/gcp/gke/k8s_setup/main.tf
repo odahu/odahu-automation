@@ -171,6 +171,7 @@ module "odahuflow_prereqs" {
   kms_key_id                  = var.kms_key_id
   data_bucket                 = var.data_bucket
   log_bucket                  = var.log_bucket
+  argo_artifact_bucket        = local.argo_artifact_bucket_name
   log_expiration_days         = var.log_expiration_days
   uniform_bucket_level_access = var.uniform_bucket_level_access
   fluentd_resources           = var.fluentd_resources
@@ -235,6 +236,42 @@ module "airflow" {
   }
 
   depends_on = [module.airflow_prereqs, module.postgresql]
+}
+
+module "argo_workflow_prereqs" {
+  count = var.argo.enabled ? 1 : 0
+
+  source              = "../../../../modules/k8s/argo/prereqs/gke"
+  cluster_name        = var.cluster_name
+  bucket              = module.odahuflow_prereqs.argo_artifact_bucket_name
+  namespace           = var.argo.namespace
+  workflows_namespace = var.argo.workflows_namespace
+  kms_key_id          = var.kms_key_id
+  project_id          = var.project_id
+
+  depends_on = [module.postgresql]
+}
+
+module "argo_workflow" {
+  count = var.argo.enabled ? 1 : 0
+
+  source         = "../../../../modules/k8s/argo/helm"
+  cluster_domain = var.cluster_domain_name
+  configuration  = merge(var.argo, { artifact_bucket = module.odahuflow_prereqs.argo_artifact_bucket_name })
+  sa_annotations             = module.argo_workflow_prereqs[0].argo_sa_annotations
+  artifact_repository_config = module.argo_workflow_prereqs[0].argo_artifact_repository_config
+  tls_secret_crt = var.tls_crt
+  tls_secret_key = var.tls_key
+  pgsql = {
+    enabled          = var.postgres.enabled
+    db_host          = module.postgresql.pgsql_endpoint
+    db_name          = "argo"
+    db_user          = ""
+    db_password      = ""
+    secret_namespace = module.postgresql.pgsql_credentials["argo"].namespace
+    secret_name      = module.postgresql.pgsql_credentials["argo"].secret
+  }
+  depends_on = [module.postgresql, module.argo_workflow_prereqs[0]]
 }
 
 module "storage-syncer" {
@@ -371,6 +408,7 @@ module "odahuflow_helm" {
   extra_external_urls = concat(
     module.jupyterhub.external_url,
     module.airflow.external_url,
+    module.argo_workflow[0].external_url,
     module.elasticsearch.external_url,
     module.odahuflow_prereqs.extra_external_urls
   )

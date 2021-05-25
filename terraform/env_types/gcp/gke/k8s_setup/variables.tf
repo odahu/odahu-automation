@@ -151,6 +151,7 @@ variable "db_namespace" {
 
 variable "kms_key_id" {
   type        = string
+  default     = ""
   description = "The ID of a Cloud KMS key that will be used to encrypt cluster disks"
 }
 
@@ -390,23 +391,50 @@ variable "airflow" {
   description = "Airflow configuration"
 }
 
+########################
+# Argo
+########################
+variable "argo" {
+  type = object({
+    enabled             = bool
+    namespace           = string
+    workflows_namespace = string
+    artifact_bucket     = string
+    node_pool           = any
+  })
+  default = {
+    enabled             = false
+    namespace           = "argo"
+    workflows_namespace = "argo-workflows"
+    artifact_bucket     = ""
+    node_pool = {
+      argo-workflows = {
+        init_node_count = 0
+        min_node_count  = 0
+        max_node_count  = 1
+        preemptible     = true
+        machine_type    = "n1-standard-2"
+        disk_size_gb    = 40
+        labels = {
+          machine_type = "n1-standard-2"
+          mode         = "argo-workflows"
+        }
+        taints = [
+          {
+            key    = "dedicated"
+            effect = "NO_SCHEDULE"
+            value  = "argo"
+          }
+        ]
+      }
+    }
+  }
+  description = "Argo configuration"
+}
+
 ##################
 # Test
 ##################
-
-variable "examples" {
-  type = object({
-    examples_urls    = any
-    examples_version = string
-    deploy_examples  = string
-  })
-  default = {
-    examples_urls    = {}
-    examples_version = ""
-    deploy_examples  = "false"
-  }
-  description = "ODAHU Examples configuration"
-}
 
 variable "wine_data_url" {
   type        = string
