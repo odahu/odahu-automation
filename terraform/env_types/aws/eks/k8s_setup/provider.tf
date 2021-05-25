@@ -13,7 +13,7 @@ provider "kubernetes" {
 }
 
 provider "aws" {
-  version = "2.70.0"
+  version = "3.42.0"
   region  = var.aws_region
 }
 

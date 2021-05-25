@@ -3,7 +3,7 @@ terraform {
 }
 
 providers {
-  aws         = { versions = ["2.70.0"] }
+  aws         = { versions = ["3.42.0"] }
   azurerm     = { versions = ["2.29.0"] }
   external    = { versions = ["1.2.0"] }
   google-beta = { versions = ["3.68.0"] }
