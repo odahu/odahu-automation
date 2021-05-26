@@ -272,6 +272,7 @@ module "jupyterhub" {
   docker_tag      = var.jupyterlab_version
   docker_username = var.docker_username
   docker_password = var.docker_password
+  service_account = var.service_accounts.jupyterhub
 
   oauth_client_id       = var.oauth_client_id
   oauth_client_secret   = var.oauth_client_secret
