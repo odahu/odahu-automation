@@ -406,12 +406,13 @@ module "odahuflow_helm" {
   )
 
   extra_external_urls = concat(
-    module.jupyterhub.external_url,
-    module.airflow.external_url,
-    module.argo_workflow[0].external_url,
-    module.elasticsearch.external_url,
-    module.odahuflow_prereqs.extra_external_urls
-  )
+    var.argo.enabled ? module.argo_workflow[0].external_url : [],
+    concat(
+      module.jupyterhub.external_url,
+      module.airflow.external_url,
+      module.elasticsearch.external_url,
+      module.odahuflow_prereqs.extra_external_urls
+  ))
 
   odahuflow_training_timeout  = var.odahuflow_training_timeout
   resource_uploader_sa        = var.service_accounts.resource_uploader
