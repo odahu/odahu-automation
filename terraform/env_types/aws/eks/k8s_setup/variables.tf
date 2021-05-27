@@ -351,7 +351,11 @@ variable "service_accounts" {
       client_id     = string
       client_secret = string
     })
-  })
+      jupyterhub = object({
+      client_id     = string
+      client_secret = string
+    })
+})
   description = "Service accounts credentials"
 }
 
