@@ -318,29 +318,34 @@ function SuspendCluster() {
 						kubectl cordon "$node"
 					done
 
-					gcloud beta container clusters update "${cluster_name}" \
-						--node-pool "main" \
+					for ((i=0;i<${#NodePools[@]};++i)); do
+					  gcloud beta container clusters update "${cluster_name}" \
+						--node-pool "${NodePools[i]}" \
 						--min-nodes 0 --max-nodes "$(GetParam 'node_pools.main.max_node_count')" \
 						--node-locations "$(GetParam 'cloud.gcp.node_locations | join(",")')" \
 						--region "$(GetParam 'cloud.gcp.region')" \
 						--quiet
 
-					# Here we limit the maximum node pool count to existing nodes count (divided by locations count)
-					gcloud beta container clusters update "${cluster_name}" \
+					  # Here we limit the maximum node pool count to existing nodes count (divided by locations count)
+					  gcloud beta container clusters update "${cluster_name}" \
 						--region "$(GetParam 'cloud.gcp.region')" \
-						--node-pool "main" \
+						--node-pool "${NodePools[i]}" \
 						--enable-autoscaling \
 						--max-nodes $(( "$(echo "${k_nodes}" | wc -w)" / $(GetParam 'cloud.gcp.node_locations | length') )) \
 						--quiet
+					done
+
 
 					kubectl get pods --no-headers=true --all-namespaces | \
 						sed -r 's/(\S+)\s+(\S+).*/kubectl --namespace \1 delete pod --grace-period=0 --force \2 2>\/dev\/null/e'
 
-					gcloud beta container clusters resize "${cluster_name}" \
+					for ((i=0;i<${#NodePools[@]};++i)); do
+					  gcloud beta container clusters resize "${cluster_name}" \
 						--region "$(GetParam 'cloud.gcp.region')" \
-						--node-pool "main" \
+						--node-pool "${NodePools[i]}" \
 						--num-nodes 0 \
 						--quiet
+					done
 
 					gcloud compute instances list --format="csv[no-heading](name,zone)" \
 						--filter="labels.cluster_name:${cluster_name} AND name ~ ^bastion" | \
@@ -377,23 +382,27 @@ function ResumeCluster() {
 						--filter="labels.cluster_name:${cluster_name} AND name ~ ^bastion" | \
 						sed -r 's/(\S+),(\S+).*/gcloud compute instances start \1 --zone \2/e'
 
-					gcloud beta container clusters resize "${cluster_name}" \
+					for ((i=0;i<${#NodePools[@]};++i)); do
+					  gcloud beta container clusters resize "${cluster_name}" \
 						--region "$(GetParam 'cloud.gcp.region')" \
-						--node-pool "main" \
+						--node-pool "${NodePools[i]}" \
 						--num-nodes "$(GetParam 'node_pools.main.init_node_count')" \
 						--quiet
+					done
 
 					until [[ -z "$(kubectl get pods --no-headers=true --all-namespaces --field-selector=status.phase==Pending 2>/dev/null)" ]]; do
 						sleep 5
 					done
 
-					gcloud beta container clusters update "${cluster_name}" \
+					for ((i=0;i<${#NodePools[@]};++i)); do
+					  gcloud beta container clusters update "${cluster_name}" \
 						--region "$(GetParam 'cloud.gcp.region')" \
-						--node-pool "main" \
+						--node-pool "${NodePools[i]}" \
 						--enable-autoscaling \
 						--min-nodes "$(GetParam 'node_pools.main.min_node_count')" \
 						--max-nodes "$(GetParam 'node_pools.main.max_node_count')" \
 						--quiet
+					done
 
 				else
 					echo "ERROR: List of cluster nodes is not empty - it seems that cluster is already resumed"
@@ -419,6 +428,7 @@ function CleanUp() {
 ReadArguments "$@"
 MODULES_ROOT="/opt/odahu-flow/terraform/env_types/$(GetParam 'cluster_type')"
 BACKEND_FILENAME="backend_credentials.json"
+NodePools=("main" "model-deployment")
 SetupCloudAccess
 
 export TF_IN_AUTOMATION=true
