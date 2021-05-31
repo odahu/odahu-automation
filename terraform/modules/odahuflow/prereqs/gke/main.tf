@@ -77,6 +77,28 @@ resource "google_storage_bucket" "log" {
 }
 
 ########################################################
+# GCS Argo artifacts bucket
+########################################################
+resource "google_storage_bucket" "argo_artifacts" {
+  count = var.argo_artifact_bucket == "" ? 0 : 1
+
+  name                        = var.argo_artifact_bucket
+  location                    = var.region
+  storage_class               = "REGIONAL"
+  force_destroy               = true
+  uniform_bucket_level_access = var.uniform_bucket_level_access
+
+  encryption {
+    default_kms_key_name = var.kms_key_id
+  }
+
+  labels = {
+    project = "odahuflow"
+    env     = var.cluster_name
+  }
+}
+
+########################################################
 # Google Cloud Collector Service Account
 ########################################################
 resource "google_service_account" "collector_sa" {

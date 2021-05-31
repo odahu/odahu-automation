@@ -1,0 +1,11 @@
+images:
+  tag: ${argo_version}
+${server}
+singleNamespace: false
+useDefaultArtifactRepo: true
+useStaticCredentials: ${use_static_credentials}
+${artifact_repository}
+%{ if pgsql_enabled }
+${controller}
+%{ endif ~}
+${workflow}

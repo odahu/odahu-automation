@@ -60,7 +60,7 @@ module "gke_cluster" {
   zone           = var.zone
   allowed_ips    = var.allowed_ips
   nodes_sa       = module.iam.service_account
-  node_pools     = var.node_pools
+  node_pools     = try(merge(var.node_pools, var.argo.node_pool), var.node_pools)
   pods_cidr      = var.pods_cidr
   service_cidr   = var.service_cidr
   location       = var.region
