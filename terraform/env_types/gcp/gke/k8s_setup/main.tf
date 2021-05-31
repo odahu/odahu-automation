@@ -103,18 +103,18 @@ module "nfs" {
 module "odahu-dns" {
   source = "../../../../modules/dns/modules/gcp"
 
-  domain          = var.domain
-  managed_zone    = var.managed_zone
-  records         = var.records
-  gcp_project_id  = var.gcp_dns_project_id
-  
+  domain         = var.domain
+  managed_zone   = var.managed_zone
+  records        = var.records
+  gcp_project_id = var.gcp_dns_project_id
+
   lb_record = {
     "name"  = regex("^[^.]*", var.domain)
     "value" = local.is_lb_an_ip ? module.nginx_ingress_prereqs.helm_values["controller.service.loadBalancerIP"] : "${module.nginx_ingress_prereqs.helm_values["controller.service.loadBalancerIP"]}."
     "type"  = local.is_lb_an_ip ? "A" : "CNAME"
     "ttl"   = var.lb_record.ttl
   }
-  
+
   providers = {
     google = google.dns
   }
@@ -255,13 +255,13 @@ module "argo_workflow_prereqs" {
 module "argo_workflow" {
   count = var.argo.enabled ? 1 : 0
 
-  source         = "../../../../modules/k8s/argo/helm"
-  cluster_domain = var.cluster_domain_name
-  configuration  = merge(var.argo, { artifact_bucket = module.odahuflow_prereqs.argo_artifact_bucket_name })
+  source                     = "../../../../modules/k8s/argo/helm"
+  cluster_domain             = var.cluster_domain_name
+  configuration              = merge(var.argo, { artifact_bucket = module.odahuflow_prereqs.argo_artifact_bucket_name })
   sa_annotations             = module.argo_workflow_prereqs[0].argo_sa_annotations
   artifact_repository_config = module.argo_workflow_prereqs[0].argo_artifact_repository_config
-  tls_secret_crt = var.tls_crt
-  tls_secret_key = var.tls_key
+  tls_secret_crt             = var.tls_crt
+  tls_secret_key             = var.tls_key
   pgsql = {
     enabled          = var.postgres.enabled
     db_host          = module.postgresql.pgsql_endpoint

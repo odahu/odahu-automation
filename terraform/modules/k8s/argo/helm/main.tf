@@ -2,7 +2,7 @@ locals {
   mode_label_value = lookup(lookup(var.configuration.node_pool[keys(var.configuration.node_pool)[0]], "labels", []), "mode", "")
 
   use_static_credentials = var.sa_annotations == {} ? false : true
-  pg_credentials_plain = ((length(var.pgsql.secret_namespace) != 0) && (length(var.pgsql.secret_name) != 0)) ? 0 : 1
+  pg_credentials_plain   = ((length(var.pgsql.secret_namespace) != 0) && (length(var.pgsql.secret_name) != 0)) ? 0 : 1
 
   pg_username = local.pg_credentials_plain == 1 ? var.pgsql.db_password : lookup(lookup(data.kubernetes_secret.pg[0], "data", {}), "username", "")
   pg_password = local.pg_credentials_plain == 1 ? var.pgsql.db_user : lookup(lookup(data.kubernetes_secret.pg[0], "data", {}), "password", "")
@@ -178,13 +178,13 @@ resource "helm_release" "argo_workflows" {
   timeout       = var.helm_timeout
   values = [
     templatefile("${path.module}/templates/argo-workflows.yaml", {
-      controller          = yamlencode(local.controller)
-      pgsql_enabled       = var.pgsql.enabled
-      workflow            = yamlencode(local.workflow)
-      artifact_repository = yamlencode(local.artifact_repository)
-      server              = yamlencode(local.server)
+      controller             = yamlencode(local.controller)
+      pgsql_enabled          = var.pgsql.enabled
+      workflow               = yamlencode(local.workflow)
+      artifact_repository    = yamlencode(local.artifact_repository)
+      server                 = yamlencode(local.server)
       use_static_credentials = local.use_static_credentials
-      argo_version = var.argo_version
+      argo_version           = var.argo_version
     })
   ]
   depends_on = [kubernetes_namespace.argo, kubernetes_secret.postgres[0]]
