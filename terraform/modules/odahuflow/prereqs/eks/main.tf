@@ -221,7 +221,10 @@ data "aws_iam_policy_document" "jupyter_notebook" {
       "s3:GetObjectVersion",
       "s3:GetBucketLocation",
       "s3:GetObjectAcl",
-      "s3:PutObjectAcl"
+      "s3:PutObjectAcl",
+      "s3:PutObject",
+      "s3:DeleteObject",
+      "s3:DeleteObjectVersion"
     ]
     effect    = "Allow"
     resources = var.log_bucket == "" ? ["${aws_s3_bucket.data.arn}/*"] : ["${aws_s3_bucket.logs[0].arn}/*"]
