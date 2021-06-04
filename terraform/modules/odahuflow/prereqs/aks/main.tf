@@ -147,7 +147,7 @@ data "azurerm_storage_account_sas" "odahuflow_data" {
   permissions {
     read    = true
     write   = true
-    delete  = false
+    delete  = true
     list    = true
     add     = true
     create  = true
