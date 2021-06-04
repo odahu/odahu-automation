@@ -78,10 +78,6 @@ singleuser:
     AZURE_STORAGE_ACCOUNT: "${azure_account_name}"
     AZURE_STORAGE_SAS_TOKEN: "${azure_sas_token}"
 %{ endif ~}
-%{ if cloud_type == "aws" ~}
-    AWS_ACCESS_KEY_ID: "${aws_key_id}"
-    AWS_SECRET_ACCESS_KEY: "${aws_key}"
-%{ endif ~}
   defaultUrl: "/lab"
   image:
     name: ${docker_repo}/base-notebook
