@@ -310,7 +310,7 @@ function SuspendCluster() {
 		"gcp/gke")
 			if CheckCluster; then
 				FetchKubeConfig
-                NodePools=$(GetParam "node_pools" | jq '. |= keys | .[]')
+                NodePools=( $(GetParam "node_pools" | jq -r '. |= keys | .[]' | tr '_' '-') )
 
 				local k_nodes
 				k_nodes=$(kubectl get nodes --no-headers=true 2>/dev/null | awk '{print $1}')
@@ -375,7 +375,7 @@ function ResumeCluster() {
 		"gcp/gke")
 			if CheckCluster; then
 				FetchKubeConfig
-                NodePools=$(GetParam "node_pools" | jq '. |= keys | .[]')
+                NodePools=( $(GetParam "node_pools" | jq -r '. |= keys | .[]' | tr '_' '-') )
 
 				local k_nodes
 				k_nodes=$(kubectl get nodes --no-headers=true 2>/dev/null | awk '{print $1}')
@@ -430,7 +430,6 @@ function CleanUp() {
 ReadArguments "$@"
 MODULES_ROOT="/opt/odahu-flow/terraform/env_types/$(GetParam 'cluster_type')"
 BACKEND_FILENAME="backend_credentials.json"
-#NodePools=("main" "model-deployment")
 SetupCloudAccess
 
 export TF_IN_AUTOMATION=true
