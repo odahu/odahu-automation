@@ -225,6 +225,7 @@ module "airflow" {
   odahu_airflow_plugin_version = var.odahu_airflow_plugin_version
   tls_secret_crt               = var.tls_crt
   tls_secret_key               = var.tls_key
+  airflow_tolerations          = var.airflow_tolerations
   pgsql = {
     enabled          = var.postgres.enabled
     db_host          = module.postgresql.pgsql_endpoint

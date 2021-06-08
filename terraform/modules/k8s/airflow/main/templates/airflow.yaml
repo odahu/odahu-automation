@@ -24,6 +24,12 @@ web:
   extraPipPackages:
     - "airflow-exporter==1.3.0"
 
+  tolerations:
+  - key: ${tolerations.key}
+    operator: ${tolerations.operator}
+    value: ${tolerations.value}
+    effect: ${tolerations.effect}
+
 airflow:
   image:
     repository: ${docker_repo}/odahu-airflow
@@ -41,6 +47,11 @@ airflow:
         secretKeyRef:
           name: airflow-postgres
           key: postgresql-password
+    - name: AIRFLOW__KUBERNETES__TOLERATIONS
+      valueFrom:
+        configMapKeyRef:
+          name: airflow-cm
+          key: k8spodstolerations
 
   config:
     # https://airflow.apache.org/docs/apache-airflow/stable/security/api.html#disable-authentication
@@ -99,6 +110,12 @@ scheduler:
     - id: wine_input
       type: google_cloud_platform
       extra: '${wine_conn}'
+
+  tolerations:
+  - key: ${tolerations.key}
+    operator: ${tolerations.operator}
+    value: ${tolerations.value}
+    effect: ${tolerations.effect}
 
 logs:
   path: /opt/airflow/logs
