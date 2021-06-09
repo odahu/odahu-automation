@@ -310,7 +310,8 @@ function SuspendCluster() {
 		"gcp/gke")
 			if CheckCluster; then
 				FetchKubeConfig
-                NodePools=( $(GetParam "node_pools" | jq -r '. |= keys | .[]' | tr '_' '-') )
+				NodePools=( $(GetParam "node_pools" | jq -r '. |= keys | .[]') )
+				NodePoolsDashed=( $(echo ${NodePools[*]} | tr '_' '-') )
 
 				local k_nodes
 				k_nodes=$(kubectl get nodes --no-headers=true 2>/dev/null | awk '{print $1}')
@@ -320,9 +321,13 @@ function SuspendCluster() {
 					done
 
 					for ((i=0;i<${#NodePools[@]};++i)); do
+					  MaxNodesCount=$(GetParam "node_pools" | jq -r ".${NodePools[i]}.max_node_count")
+					  if [[ "$MaxNodesCount" == "null" ]]; then
+					    MaxNodesCount=2
+					  fi
 					  gcloud beta container clusters update "${cluster_name}" \
-						--node-pool "${NodePools[i]}" \
-						--min-nodes 0 --max-nodes "$(GetParam 'node_pools.main.max_node_count')" \
+						--node-pool "${NodePoolsDashed[i]}" \
+						--min-nodes 0 --max-nodes "$MaxNodesCount" \
 						--node-locations "$(GetParam 'cloud.gcp.node_locations | join(",")')" \
 						--region "$(GetParam 'cloud.gcp.region')" \
 						--quiet
@@ -330,7 +335,7 @@ function SuspendCluster() {
 					  # Here we limit the maximum node pool count to existing nodes count (divided by locations count)
 					  gcloud beta container clusters update "${cluster_name}" \
 						--region "$(GetParam 'cloud.gcp.region')" \
-						--node-pool "${NodePools[i]}" \
+						--node-pool "${NodePoolsDashed[i]}" \
 						--enable-autoscaling \
 						--max-nodes $(( "$(echo "${k_nodes}" | wc -w)" / $(GetParam 'cloud.gcp.node_locations | length') )) \
 						--quiet
@@ -343,7 +348,7 @@ function SuspendCluster() {
 					for ((i=0;i<${#NodePools[@]};++i)); do
 					  gcloud beta container clusters resize "${cluster_name}" \
 						--region "$(GetParam 'cloud.gcp.region')" \
-						--node-pool "${NodePools[i]}" \
+						--node-pool "${NodePoolsDashed[i]}" \
 						--num-nodes 0 \
 						--quiet
 					done
@@ -375,7 +380,8 @@ function ResumeCluster() {
 		"gcp/gke")
 			if CheckCluster; then
 				FetchKubeConfig
-                NodePools=( $(GetParam "node_pools" | jq -r '. |= keys | .[]' | tr '_' '-') )
+ 				NodePools=( $(GetParam "node_pools" | jq -r '. |= keys | .[]') )
+				NodePoolsDashed=( $(echo ${NodePools[*]} | tr '_' '-') )
 
 				local k_nodes
 				k_nodes=$(kubectl get nodes --no-headers=true 2>/dev/null | awk '{print $1}')
@@ -385,10 +391,14 @@ function ResumeCluster() {
 						sed -r 's/(\S+),(\S+).*/gcloud compute instances start \1 --zone \2/e'
 
 					for ((i=0;i<${#NodePools[@]};++i)); do
+					  InitNodesCount=$(GetParam "node_pools" | jq -r ".${NodePools[i]}.max_node_count")
+					  if [[ "$InitNodesCount" == "null" ]]; then
+					    InitNodesCount=0
+					  fi
 					  gcloud beta container clusters resize "${cluster_name}" \
 						--region "$(GetParam 'cloud.gcp.region')" \
-						--node-pool "${NodePools[i]}" \
-						--num-nodes "$(GetParam 'node_pools.main.init_node_count')" \
+						--node-pool "${NodePoolsDashed[i]}" \
+						--num-nodes "$InitNodesCount" \
 						--quiet
 					done
 
@@ -397,12 +407,20 @@ function ResumeCluster() {
 					done
 
 					for ((i=0;i<${#NodePools[@]};++i)); do
+					  MinNodesCount=$(GetParam "node_pools" | jq -r ".${NodePools[i]}.max_node_count")
+					  if [[ "$MinNodesCount" == "null" ]]; then
+					    MinNodesCount=0
+					  fi
+					  MaxNodesCount=$(GetParam "node_pools" | jq -r ".${NodePools[i]}.max_node_count")
+					  if [[ "$MaxNodesCount" == "null" ]]; then
+					    MaxNodesCount=2
+					  fi
 					  gcloud beta container clusters update "${cluster_name}" \
 						--region "$(GetParam 'cloud.gcp.region')" \
-						--node-pool "${NodePools[i]}" \
+						--node-pool "${NodePoolsDashed[i]}" \
 						--enable-autoscaling \
-						--min-nodes "$(GetParam 'node_pools.main.min_node_count')" \
-						--max-nodes "$(GetParam 'node_pools.main.max_node_count')" \
+						--min-nodes "$MinNodesCount" \
+						--max-nodes "$MaxNodesCount" \
 						--quiet
 					done
 
