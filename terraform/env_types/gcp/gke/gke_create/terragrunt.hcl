@@ -4,20 +4,20 @@ locals {
   profile = get_env("PROFILE", "${get_terragrunt_dir()}//profile.json")
   config  = jsondecode(file(local.profile))
 
-  cluster_name   = lookup(local.config, "cluster_name", "")
-  vpc_name       = lookup(local.config, "vpc_name", "${local.cluster_name}-vpc")
-  gcp_project_id = lookup(lookup(local.config.cloud, "gcp", {}), "project_id", "")
-  gcp_region     = lookup(lookup(local.config.cloud, "gcp", {}), "region", "us-east1")
-  kms_key_id     = lookup(lookup(local.config.cloud, "gcp", {}), "kms_key_id", "")
-  gcp_zone       = lookup(lookup(local.config.cloud, "gcp", {}), "zone", "us-east1-b")
-  node_locations = lookup(lookup(local.config.cloud, "gcp", {}), "node_locations", [])
+  cluster_name      = lookup(local.config, "cluster_name", "")
+  vpc_name          = lookup(local.config, "vpc_name", "${local.cluster_name}-vpc")
+  gcp_project_id    = lookup(lookup(local.config.cloud, "gcp", {}), "project_id", "")
+  gcp_region        = lookup(lookup(local.config.cloud, "gcp", {}), "region", "us-east1")
+  kms_key_id        = lookup(lookup(local.config.cloud, "gcp", {}), "kms_key_id", "")
+  gcp_zone          = lookup(lookup(local.config.cloud, "gcp", {}), "zone", "us-east1-b")
+  node_locations    = lookup(lookup(local.config.cloud, "gcp", {}), "node_locations", [])
   remain_pv_drives  = lookup(local.config, "remain_pv_drives", "")
 
   scripts_dir             = "${get_terragrunt_dir()}/../../../../../scripts"
   cmd_k8s_fwrules_cleanup = "${local.scripts_dir}/gcp_k8s_fw_cleanup.sh"
   cmd_k8s_config_fetch    = "gcloud container clusters get-credentials \"${local.cluster_name}\" --region \"${local.gcp_region}\" --project \"${local.gcp_project_id}\""
   block_project_ssh_key   = lookup(lookup(local.config.cloud, "gcp", {}), "block_project_ssh_key", "true")
-  cmd_gcp_delete_drives = "${local.scripts_dir}/destroy_pv.sh"
+  cmd_gcp_delete_drives   = "${local.scripts_dir}/destroy_pv.sh"
 }
 
 remote_state {
@@ -54,9 +54,9 @@ terraform {
     run_on_error = false
   }
 
-  after_hook "k8s_fwrules_cleanup" {
+  after_hook "k8s_disks_cleanup" {
     commands = ["destroy"]
-    execute = ["bash", local.cmd_gcp_delete_drives, local.cluster_name, local.gcp_zone, local.remain_pv_drives]
+    execute  = ["bash", local.cmd_gcp_delete_drives, local.cluster_name, local.remain_pv_drives]
   }
 }
 
