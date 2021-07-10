@@ -17,7 +17,7 @@ locals {
   cmd_k8s_fwrules_cleanup = "${local.scripts_dir}/gcp_k8s_fw_cleanup.sh"
   cmd_k8s_config_fetch    = "gcloud container clusters get-credentials \"${local.cluster_name}\" --region \"${local.gcp_region}\" --project \"${local.gcp_project_id}\""
   block_project_ssh_key   = lookup(lookup(local.config.cloud, "gcp", {}), "block_project_ssh_key", "true")
-  cmd_gcp_delete_drives   = "${local.scripts_dir}/destroy_pv.sh"
+  cmd_gcp_delete_drives   = "${local.scripts_dir}/destroy_gcp_pv.sh"
 }
 
 remote_state {
