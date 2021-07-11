@@ -4,14 +4,14 @@ locals {
   profile = get_env("PROFILE", "${get_terragrunt_dir()}//profile.json")
   config  = jsondecode(file(local.profile))
 
-  cluster_name      = lookup(local.config, "cluster_name", "")
-  vpc_name          = lookup(local.config, "vpc_name", "${local.cluster_name}-vpc")
-  gcp_project_id    = lookup(lookup(local.config.cloud, "gcp", {}), "project_id", "")
-  gcp_region        = lookup(lookup(local.config.cloud, "gcp", {}), "region", "us-east1")
-  kms_key_id        = lookup(lookup(local.config.cloud, "gcp", {}), "kms_key_id", "")
-  gcp_zone          = lookup(lookup(local.config.cloud, "gcp", {}), "zone", "us-east1-b")
-  node_locations    = lookup(lookup(local.config.cloud, "gcp", {}), "node_locations", [])
-  remain_pv_drives  = lookup(local.config, "remain_pv_drives", "")
+  cluster_name     = lookup(local.config, "cluster_name", "")
+  vpc_name         = lookup(local.config, "vpc_name", "${local.cluster_name}-vpc")
+  gcp_project_id   = lookup(lookup(local.config.cloud, "gcp", {}), "project_id", "")
+  gcp_region       = lookup(lookup(local.config.cloud, "gcp", {}), "region", "us-east1")
+  kms_key_id       = lookup(lookup(local.config.cloud, "gcp", {}), "kms_key_id", "")
+  gcp_zone         = lookup(lookup(local.config.cloud, "gcp", {}), "zone", "us-east1-b")
+  node_locations   = lookup(lookup(local.config.cloud, "gcp", {}), "node_locations", [])
+  remain_pv_drives = lookup(local.config, "remain_pv_drives", "")
 
   scripts_dir             = "${get_terragrunt_dir()}/../../../../../scripts"
   cmd_k8s_fwrules_cleanup = "${local.scripts_dir}/gcp_k8s_fw_cleanup.sh"
