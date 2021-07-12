@@ -171,11 +171,6 @@ resource "google_storage_bucket_iam_member" "jupyter_data_store_legacy_write" {
   role   = "roles/storage.legacyBucketWriter"
 }
 
-resource "google_storage_bucket_iam_member" "jupyter_data_store_legacy_read" {
-  member = "serviceAccount:${google_service_account.jupyter_notebook.email}"
-  role   = "roles/storage.legacyBucketReader"
-}
-
 resource "google_storage_bucket_iam_member" "jupyter_data_store_admin" {
   bucket = google_storage_bucket.data.name
   member = "serviceAccount:${google_service_account.jupyter_notebook.email}"
