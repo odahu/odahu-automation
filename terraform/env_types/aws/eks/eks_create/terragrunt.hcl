@@ -4,12 +4,15 @@ locals {
   profile = get_env("PROFILE", "${get_terragrunt_dir()}//profile.json")
   config  = jsondecode(file(local.profile))
 
-  cluster_name = lookup(local.config, "cluster_name", "odahuflow")
-  aws_region   = lookup(lookup(local.config.cloud, "aws", {}), "region", "eu-central-1")
-  az_list      = lookup(lookup(local.config.cloud, "aws", {}), "az_list", [])
-  kms_key_arn  = lookup(lookup(local.config.cloud, "aws", {}), "kms_key_arn", "")
+  cluster_name      = lookup(local.config, "cluster_name", "odahuflow")
+  aws_region        = lookup(lookup(local.config.cloud, "aws", {}), "region", "eu-central-1")
+  az_list           = lookup(lookup(local.config.cloud, "aws", {}), "az_list", [])
+  kms_key_arn       = lookup(lookup(local.config.cloud, "aws", {}), "kms_key_arn", "")
+  remain_pv_drives  = lookup(local.config, "remain_pv_drives", "")
 
-  cmd_k8s_config_fetch = "aws eks update-kubeconfig --name \"${local.cluster_name}\" --region \"${local.aws_region}\""
+  scripts_dir           = "${get_terragrunt_dir()}/../../../../../scripts"
+  cmd_aws_delete_drives = "${local.scripts_dir}/destroy_aws_pv.sh"
+  cmd_k8s_config_fetch  = "aws eks update-kubeconfig --name \"${local.cluster_name}\" --region \"${local.aws_region}\""
 }
 
 remote_state {
@@ -39,6 +42,11 @@ terraform {
     commands     = ["apply"]
     execute      = ["bash", "-c", local.cmd_k8s_config_fetch]
     run_on_error = false
+  }
+
+  after_hook "k8s_disks_cleanup" {
+    commands = ["destroy"]
+    execute  = ["bash", local.cmd_aws_delete_drives, local.cluster_name, local.remain_pv_drives]
   }
 }
 

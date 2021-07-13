@@ -1,6 +1,6 @@
 FROM golang:alpine AS terraform-bundler
 
-ENV TERRAFORM_VERSION=0.13.4
+ENV TERRAFORM_VERSION=0.13.5
 ENV CGO_ENABLED=0
 
 RUN apk --no-cache add git unzip && \
