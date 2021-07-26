@@ -418,6 +418,8 @@ module "odahuflow_helm" {
   resource_uploader_sa        = var.service_accounts.resource_uploader
   operator_sa                 = var.service_accounts.operator
   service_catalog_sa          = var.service_accounts.service_catalog
+  mlflow_sa_annotations       = module.odahuflow_prereqs.mlflow_sa_annotations
+  mlflow_artifact_root        = "gs://${module.odahuflow_prereqs.odahu_mlflow_bucket_name}/"
   oauth_oidc_token_endpoint   = var.oauth_oidc_token_endpoint
   oauth_oidc_signout_endpoint = var.oauth_oidc_signout_endpoint
   oauth_oidc_issuer_url       = var.oauth_oidc_issuer_url

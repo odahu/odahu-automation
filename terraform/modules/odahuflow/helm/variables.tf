@@ -249,6 +249,12 @@ variable "mlflow_artifact_root" {
   description = "Mlflow artifact path"
 }
 
+variable "mlflow_sa_annotations" {
+  type        = map(any)
+  default     = {}
+  description = "Mlflow k8s SA annotations"
+}
+
 variable "pgsql_odahu" {
   type = object({
     enabled          = bool

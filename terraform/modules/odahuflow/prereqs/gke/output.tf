@@ -16,6 +16,10 @@ output "odahu_data_bucket_name" {
   value = google_storage_bucket.data.name
 }
 
+output "odahu_mlflow_bucket_name" {
+  value = google_storage_bucket.mlflow.name
+}
+
 output "odahu_log_bucket_name" {
   value = google_storage_bucket.log.name
 }
@@ -86,6 +90,12 @@ output "fluent_daemonset_helm_values" {
 output "jupyter_notebook_sa_annotations" {
   value = {
     "iam.gke.io/gcp-service-account" = google_service_account.jupyter_notebook.email
+  }
+}
+
+output "mlflow_sa_annotations" {
+  value = {
+    "iam.gke.io/gcp-service-account" = google_service_account.mlflow.email
   }
 }
 

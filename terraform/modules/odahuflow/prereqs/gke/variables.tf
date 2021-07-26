@@ -33,6 +33,12 @@ variable "argo_artifact_bucket" {
   description = "Argo artifacts bucket"
 }
 
+variable "mlflow_artifact_bucket" {
+  type        = string
+  default     = ""
+  description = "MLFlow artifacts bucket"
+}
+
 variable "log_expiration_days" {
   type        = number
   default     = 1
