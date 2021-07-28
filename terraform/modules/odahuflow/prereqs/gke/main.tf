@@ -257,7 +257,10 @@ resource "google_kms_crypto_key_iam_member" "mlflow_kms_encrypt_decrypt" {
 resource "google_service_account_iam_binding" "mlflow_web_identity" {
   service_account_id = google_service_account.mlflow.name
   role               = "roles/iam.workloadIdentityUser"
-  members            = ["serviceAccount:${var.project_id}.svc.id.goog[odahu-flow/mlflow]"]
+  members            = [
+                         "serviceAccount:${var.project_id}.svc.id.goog[odahu-flow/mlflow]",
+                         "serviceAccount:${var.project_id}.svc.id.goog[odahu-flow-training/default]"
+                       ]
 }
 
 ########################################################

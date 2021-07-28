@@ -372,6 +372,17 @@ resource "kubernetes_namespace" "odahuflow_training" {
   }
 }
 
+resource "kubernetes_default_service_account" "training_default" {
+  count = length(var.training_sa_annotations) == 0 ? 0 : 1
+
+  metadata {
+    namespace   = var.odahuflow_training_namespace
+    annotations = var.training_sa_annotations
+  }
+
+  depends_on = [kubernetes_namespace.odahuflow_training]
+}
+
 resource "kubernetes_namespace" "odahuflow_packaging" {
   metadata {
     annotations = {

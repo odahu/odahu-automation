@@ -99,6 +99,12 @@ output "mlflow_sa_annotations" {
   }
 }
 
+output "training_sa_annotations" {
+  value = {
+    "iam.gke.io/gcp-service-account" = google_service_account.mlflow.email
+  }
+}
+
 output "logstash_input_config" {
   value = templatefile("${path.module}/templates/logstash.yaml", {
     bucket = google_storage_bucket.log.name

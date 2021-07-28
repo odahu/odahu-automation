@@ -255,6 +255,12 @@ variable "mlflow_sa_annotations" {
   description = "Mlflow k8s SA annotations"
 }
 
+variable "training_sa_annotations" {
+  type        = map(any)
+  default     = {}
+  description = "Training NS k8s SA annotations"
+}
+
 variable "pgsql_odahu" {
   type = object({
     enabled          = bool

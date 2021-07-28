@@ -415,6 +415,7 @@ module "odahuflow_helm" {
   ))
 
   odahuflow_training_timeout  = var.odahuflow_training_timeout
+  training_sa_annotations     = module.odahuflow_prereqs.training_sa_annotations
   resource_uploader_sa        = var.service_accounts.resource_uploader
   operator_sa                 = var.service_accounts.operator
   service_catalog_sa          = var.service_accounts.service_catalog
