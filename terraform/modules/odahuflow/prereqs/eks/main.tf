@@ -46,6 +46,35 @@ resource "aws_s3_bucket" "data" {
 }
 
 ########################################################
+# S3 MLFlow artifacts bucket
+########################################################
+
+resource "aws_s3_bucket" "mlflow" {
+  bucket        = local.mlflow_bucket_name
+  acl           = "private"
+  region        = var.region
+  force_destroy = true
+
+  dynamic "server_side_encryption_configuration" {
+    for_each = var.kms_key_arn == "" ? [] : [var.kms_key_arn]
+    iterator = key_arn
+    content {
+      rule {
+        apply_server_side_encryption_by_default {
+          kms_master_key_id = basename(key_arn.value)
+          sse_algorithm     = "aws:kms"
+        }
+      }
+    }
+  }
+
+  tags = {
+    Name = local.mlflow_bucket_name
+    Env  = var.cluster_name
+  }
+}
+
+########################################################
 # S3 logs bucket
 ########################################################
 
@@ -289,4 +318,104 @@ resource "aws_iam_user" "jupyter_notebook" {
 
 resource "aws_iam_access_key" "jupyterhub" {
   user = aws_iam_user.jupyter_notebook.name
+}
+
+########################################################
+# AWS IAM User for MLFlow
+########################################################
+
+data "aws_iam_policy_document" "mlflow_assume" {
+  statement {
+    actions = ["sts:AssumeRoleWithWebIdentity"]
+    effect  = "Allow"
+
+    condition {
+      test     = "StringEquals"
+      variable = "${replace(var.openid_connect_provider.url, "https://", "")}:sub"
+      values   = ["system:serviceaccount:odahu-flow/mlflow",
+                  "system:serviceaccount:odahu-flow-training/default"]
+    }
+
+    principals {
+      identifiers = [var.openid_connect_provider.arn]
+      type        = "Federated"
+    }
+  }
+}
+
+data "aws_iam_policy_document" "mlflow" {
+  statement {
+    actions = [
+      "s3:GetObject",
+      "s3:GetObjectVersion",
+      "s3:GetBucketLocation",
+      "s3:GetObjectAcl",
+      "s3:PutObjectAcl",
+      "s3:PutObject",
+      "s3:DeleteObject",
+      "s3:DeleteObjectVersion"
+    ]
+    effect    = "Allow"
+    resources = ["${aws_s3_bucket.mlflow.arn}/*"]
+  }
+
+  statement {
+    actions = [
+      "s3:ListBucket"
+    ]
+    effect    = "Allow"
+    resources = ["${aws_s3_bucket.mlflow.arn}"]
+  }
+
+  statement {
+    actions = [
+      "ecr:GetDownloadUrlForLayer",
+      "ecr:BatchGetImage"
+    ]
+    effect    = "Allow"
+    resources = ["*"]
+  }
+
+  dynamic "statement" {
+    for_each = var.kms_key_arn == "" ? [] : [var.kms_key_arn]
+    iterator = key_arn
+    content {
+      actions = [
+        "kms:Encrypt",
+        "kms:Decrypt",
+        "kms:GenerateDataKey"
+      ]
+      effect    = "Allow"
+      resources = [key_arn.value]
+    }
+  }
+}
+
+resource "aws_iam_role" "mlflow" {
+  assume_role_policy = data.aws_iam_policy_document.mlflow_assume.json
+  name               = local.mlflow_iam_name
+}
+
+resource "aws_iam_policy" "mlflow" {
+  name   = local.mlflow_iam_name
+  policy = data.aws_iam_policy_document.mlflow.json
+}
+
+resource "aws_iam_role_policy_attachment" "mlflow" {
+  policy_arn = aws_iam_policy.mlflow.arn
+  role       = aws_iam_role.mlflow.name
+}
+
+resource "aws_iam_user" "mlflow" {
+  name = local.mlflow_iam_name
+  path = "/odahuflow/"
+
+  tags = {
+    Name        = local.mlflow_iam_name
+    ClusterName = var.cluster_name
+  }
+}
+
+resource "aws_iam_access_key" "mlflow" {
+  user = aws_iam_user.mlflow.name
 }

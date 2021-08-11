@@ -21,6 +21,12 @@ variable "log_bucket" {
   description = "ODAHU flow logs storage bucket"
 }
 
+variable "mlflow_artifact_bucket" {
+  type        = string
+  default     = ""
+  description = "MLFlow artifacts bucket"
+}
+
 variable "log_expiration_days" {
   type        = number
   default     = 1
