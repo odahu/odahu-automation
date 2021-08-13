@@ -5,6 +5,8 @@ ingress:
   enabled: true
   tlsEnabled: ${ingress_tls_enabled}
   tlsSecretName: "${ingress_tls_secret_name}"
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
 
 security:
   enabled: true
