@@ -12,6 +12,10 @@ output "odahu_data_bucket_name" {
   value = aws_s3_bucket.data.bucket
 }
 
+output "odahu_mlflow_bucket_name" {
+  value = aws_s3_bucket.mlflow.bucket
+}
+
 output "odahu_log_bucket_name" {
   value = var.log_bucket == "" ? "" : aws_s3_bucket.logs[0].bucket
 }
@@ -92,5 +96,17 @@ output "logstash_annotations" {
 output "jupyter_notebook_sa_annotations" {
   value = {
     "eks.amazonaws.com/role-arn" = aws_iam_role.jupyter_notebook.arn
+  }
+}
+
+output "training_sa_annotations" {
+  value = {
+    "eks.amazonaws.com/role-arn" = aws_iam_role.mlflow.arn
+  }
+}
+
+output "mlflow_sa_annotations" {
+  value = {
+    "eks.amazonaws.com/role-arn" = aws_iam_role.mlflow.arn
   }
 }

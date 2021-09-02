@@ -5,6 +5,8 @@ ingress:
   enabled: true
   tlsEnabled: ${ingress_tls_enabled}
   tlsSecretName: "${ingress_tls_secret_name}"
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
 
 security:
   enabled: true
@@ -36,3 +38,7 @@ oauth_oidc_issuer_url: ${oauth_oidc_issuer_url}
 
 mlflow_backend_store: "${mlflow_backend_store}"
 mlflow_artifact_root: "${mlflow_artifact_root}"
+
+${image_pull_secrets}
+
+${sa}

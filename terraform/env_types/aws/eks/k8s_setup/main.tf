@@ -369,6 +369,9 @@ module "odahuflow_helm" {
   node_pools = var.node_pools
 
   odahuflow_training_timeout = var.odahuflow_training_timeout
+  training_sa_annotations    = module.odahuflow_prereqs.training_sa_annotations
+  mlflow_sa_annotations      = module.odahuflow_prereqs.mlflow_sa_annotations
+  mlflow_artifact_root       = "s3://${module.odahuflow_prereqs.odahu_mlflow_bucket_name}/"
 
   odahuflow_connections = concat(
     var.odahuflow_connections,
