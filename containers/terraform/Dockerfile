@@ -23,7 +23,7 @@ FROM ubuntu:18.04
 ENV DEBIAN_FRONTEND=noninteractive \
     KUBECTL_VERSION=v1.16.10 \
     TERRAGRUNT_VERSION=v0.25.1 \
-    HELM_VERSION=v3.2.4 \
+    HELM_VERSION=v3.6.3 \
     TF_PLUGIN_CACHE_DIR=/tmp/.terraform/cache
 
 # install system utilities

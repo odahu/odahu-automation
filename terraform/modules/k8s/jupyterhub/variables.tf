@@ -127,7 +127,7 @@ variable "tls_secret_key" {
 
 variable "helm_chart_version" {
   type        = string
-  default     = "0.8.2"
+  default     = "1.1.3"
   description = "JupyterHub chart version"
 }
 

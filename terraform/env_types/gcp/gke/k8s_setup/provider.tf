@@ -16,10 +16,11 @@ provider "google" {
 }
 
 provider "helm" {
-  version = "1.3.2"
+  version = "2.3.0"
 
   kubernetes {
     config_context = var.config_context_auth_info
+    config_path = "~/.kube/config"
   }
 }
 
