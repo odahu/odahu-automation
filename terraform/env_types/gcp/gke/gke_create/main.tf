@@ -84,6 +84,8 @@ module "gke_cluster" {
   block_project_ssh_key  = var.block_project_ssh_key
   logging_service        = var.logging_service
 
+  resource_usage_export_config = var.resource_usage_export_config
+
   depends_on = [
     module.iam,
     module.vpc
