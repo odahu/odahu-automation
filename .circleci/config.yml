@@ -12,7 +12,7 @@ jobs:
       - image: cimg/base:2021.04
     steps:
       - checkout
-      - run: sudo apt install -y shellcheck
+      - run: sudo apt-get update && sudo apt install -y shellcheck
       - run: make shellcheck
   build-lint-validate:
     docker:
