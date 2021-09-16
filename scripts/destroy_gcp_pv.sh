@@ -11,10 +11,10 @@ if [[ "$REMAIN_DRIVES" == "false" ]]; then
     echo PV drives will be deleted
     for i in $disk_list
         do
-            echo Deleting $i
+            echo "Deleting $i"
             DRIVE_LOCATION=$(gcloud compute disks list --filter="name:${i}" --format="value(location())")
-            gcloud compute disks delete $i --zone=${DRIVE_LOCATION} --quiet
-            echo $i deleted
+            gcloud compute disks delete "$i" --zone=${DRIVE_LOCATION} --quiet
+            echo "$i deleted"
         done
 else
     echo "Drives will remain: ${disk_list}"
