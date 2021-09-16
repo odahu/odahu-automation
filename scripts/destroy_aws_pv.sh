@@ -5,7 +5,7 @@ set -e
 CLUSTER_NAME=$1
 REMAIN_DRIVES=$2
 
-disk_list=$(aws ec2 describe-volumes --filters Name=tag:kubernetes.io/cluster/${CLUSTER_NAME},Values=owned | jq -r '.[]|.[]|.VolumeId')
+disk_list=$(aws ec2 describe-volumes --filters Name=tag:kubernetes.io/cluster/"${CLUSTER_NAME}",Values=owned | jq -r '.[]|.[]|.VolumeId')
 
 if [[ "$REMAIN_DRIVES" == "false" ]]; then
     echo "PV drives will be deleted"
