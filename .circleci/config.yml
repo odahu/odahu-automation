@@ -23,9 +23,9 @@ jobs:
       - checkout
       - setup_remote_docker
       - run: make docker-build-terraform
-      - docker run --rm odahu/odahu-flow-automation:latest make terraform-fmt-check
-      - docker run --rm odahu/odahu-flow-automation:latest make terraform-validate
-      - docker run --rm odahu/odahu-flow-automation:latest make terragrunt-fmt-check
+      - run: docker run --rm odahu/odahu-flow-automation:latest make terraform-fmt-check
+      - run: docker run --rm odahu/odahu-flow-automation:latest make terraform-validate
+      - run: docker run --rm odahu/odahu-flow-automation:latest make terragrunt-fmt-check
 workflows:
   main:
     jobs:
