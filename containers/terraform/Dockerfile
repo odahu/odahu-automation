@@ -73,6 +73,7 @@ RUN curl -sL https://bootstrap.pypa.io/get-pip.py | python3 && \
 COPY terraform /opt/odahu-flow/terraform
 COPY scripts /opt/odahu-flow/scripts
 COPY version.info /opt/odahu-flow/version.info
+COPY Makefile /opt/odahu-flow/Makefile
 
 RUN mv /opt/odahu-flow/scripts/tf_runner.sh /usr/bin/tf_runner && \
     chmod a+x /usr/bin/tf_runner

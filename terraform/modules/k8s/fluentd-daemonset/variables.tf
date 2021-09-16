@@ -34,8 +34,8 @@ variable "namespace" {
 }
 
 variable "configuration" {
-  type        = map
-  default     = {
+  type = map
+  default = {
     elastic_hosts     = ""
     use_cloud_storage = true
   }

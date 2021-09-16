@@ -17,12 +17,12 @@ locals {
     "fluentd" = {
       "resources" = {
         "limits" = {
-          "cpu": var.fluentd_resources.cpu_limits
-          "memory": var.fluentd_resources.memory_limits
+          "cpu" : var.fluentd_resources.cpu_limits
+          "memory" : var.fluentd_resources.memory_limits
         }
         "requests" = {
-          "cpu": var.fluentd_resources.cpu_requests
-          "memory": var.fluentd_resources.memory_requests
+          "cpu" : var.fluentd_resources.cpu_requests
+          "memory" : var.fluentd_resources.memory_requests
         }
       }
     }
@@ -53,10 +53,10 @@ resource "google_storage_bucket" "data" {
 # GCS MLFlow bucket
 ########################################################
 resource "google_storage_bucket" "mlflow" {
-  name                        = local.mlflow_bucket_name
-  location                    = var.region
-  storage_class               = "REGIONAL"
-  force_destroy               = true
+  name          = local.mlflow_bucket_name
+  location      = var.region
+  storage_class = "REGIONAL"
+  force_destroy = true
 
   encryption {
     default_kms_key_name = var.kms_key_id
@@ -257,10 +257,10 @@ resource "google_kms_crypto_key_iam_member" "mlflow_kms_encrypt_decrypt" {
 resource "google_service_account_iam_binding" "mlflow_web_identity" {
   service_account_id = google_service_account.mlflow.name
   role               = "roles/iam.workloadIdentityUser"
-  members            = [
-                         "serviceAccount:${var.project_id}.svc.id.goog[odahu-flow/mlflow]",
-                         "serviceAccount:${var.project_id}.svc.id.goog[odahu-flow-training/default]"
-                       ]
+  members = [
+    "serviceAccount:${var.project_id}.svc.id.goog[odahu-flow/mlflow]",
+    "serviceAccount:${var.project_id}.svc.id.goog[odahu-flow-training/default]"
+  ]
 }
 
 ########################################################

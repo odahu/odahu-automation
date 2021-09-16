@@ -332,8 +332,8 @@ data "aws_iam_policy_document" "mlflow_assume" {
     condition {
       test     = "StringEquals"
       variable = "${replace(var.openid_connect_provider.url, "https://", "")}:sub"
-      values   = ["system:serviceaccount:odahu-flow/mlflow",
-                  "system:serviceaccount:odahu-flow-training/default"]
+      values = ["system:serviceaccount:odahu-flow/mlflow",
+      "system:serviceaccount:odahu-flow-training/default"]
     }
 
     principals {
