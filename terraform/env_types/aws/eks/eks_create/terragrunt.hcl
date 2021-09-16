@@ -4,11 +4,11 @@ locals {
   profile = get_env("PROFILE", "${get_terragrunt_dir()}//profile.json")
   config  = jsondecode(file(local.profile))
 
-  cluster_name      = lookup(local.config, "cluster_name", "odahuflow")
-  aws_region        = lookup(lookup(local.config.cloud, "aws", {}), "region", "eu-central-1")
-  az_list           = lookup(lookup(local.config.cloud, "aws", {}), "az_list", [])
-  kms_key_arn       = lookup(lookup(local.config.cloud, "aws", {}), "kms_key_arn", "")
-  remain_pv_drives  = lookup(local.config, "remain_pv_drives", "")
+  cluster_name     = lookup(local.config, "cluster_name", "odahuflow")
+  aws_region       = lookup(lookup(local.config.cloud, "aws", {}), "region", "eu-central-1")
+  az_list          = lookup(lookup(local.config.cloud, "aws", {}), "az_list", [])
+  kms_key_arn      = lookup(lookup(local.config.cloud, "aws", {}), "kms_key_arn", "")
+  remain_pv_drives = lookup(local.config, "remain_pv_drives", "")
 
   scripts_dir           = "${get_terragrunt_dir()}/../../../../../scripts"
   cmd_aws_delete_drives = "${local.scripts_dir}/destroy_aws_pv.sh"
