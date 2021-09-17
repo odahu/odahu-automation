@@ -61,8 +61,8 @@ locals {
   odahu_db_connection_string  = var.pgsql_odahu.enabled ? "postgresql://${local.pg_odahu_username}:${local.pg_odahu_password}@${var.pgsql_odahu.db_host}/${var.pgsql_odahu.db_name}" : null
   mlflow_db_connection_string = var.pgsql_mlflow.enabled ? "postgresql://${local.pg_mlflow_username}:${local.pg_mlflow_password}@${var.pgsql_mlflow.db_host}/${var.pgsql_mlflow.db_name}" : null
   mlflow_artifact_root        = var.mlflow_artifact_root
-  mlflow_sa                   = length(var.mlflow_sa_annotations) == 0 ? {"serviceAccount" = {"annotations" = {}}} : { "serviceAccount" = { "annotations" = var.mlflow_sa_annotations } }
-  mlflow_image_pull_secrets   = { "imagePullSecrets" = [{"name" = var.docker_secret_name}] }
+  mlflow_sa                   = length(var.mlflow_sa_annotations) == 0 ? { "serviceAccount" = { "annotations" = {} } } : { "serviceAccount" = { "annotations" = var.mlflow_sa_annotations } }
+  mlflow_image_pull_secrets   = { "imagePullSecrets" = [{ "name" = var.docker_secret_name }] }
 
   odahuflow_config = {
     common = {

@@ -1,0 +1,41 @@
+version: 2.1
+jobs:
+  vulnerabilities:
+    docker:
+      - image: cimg/base:2021.04
+    steps:
+      - checkout
+      - run: sudo make install-vulnerabilities-checker
+      - run: make check-vulnerabilities
+  shellcheck:
+    docker:
+      - image: cimg/base:2021.04
+    steps:
+      - checkout
+      - run: sudo apt-get update && sudo apt install -y shellcheck
+      - run: make shellcheck
+  build-lint-validate:
+    docker:
+      - image: cimg/base:2021.01
+        auth:
+          username: $DOCKERHUB_USERNAME
+          password: $DOCKERHUB_TOKEN
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run: make docker-build-terraform
+      - run: docker run --rm odahu/odahu-flow-automation:latest make terraform-fmt-check
+      - run: docker run --rm odahu/odahu-flow-automation:latest make terraform-validate
+      - run: docker run --rm odahu/odahu-flow-automation:latest make terragrunt-fmt-check
+workflows:
+  main:
+    jobs:
+      - vulnerabilities
+      - shellcheck
+      - build-lint-validate:
+          context:
+            - hub.docker.com
+          requires:
+            - vulnerabilities
+            - shellcheck
+    

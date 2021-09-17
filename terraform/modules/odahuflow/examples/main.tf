@@ -1,11 +1,11 @@
 locals {
-  dag_bucket = var.dag_bucket
-  examples_urls = {for remotePath, templateHttpLink in var.examples.examples_urls : remotePath => replace(templateHttpLink, "{EXAMPLES_VERSION}", var.examples.examples_version)}
+  dag_bucket    = var.dag_bucket
+  examples_urls = { for remotePath, templateHttpLink in var.examples.examples_urls : remotePath => replace(templateHttpLink, "{EXAMPLES_VERSION}", var.examples.examples_version) }
 }
 
 data "http" "links" {
   for_each = toset(values(local.examples_urls))
-  url = each.value
+  url      = each.value
 }
 
 resource "local_file" "files" {

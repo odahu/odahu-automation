@@ -65,9 +65,9 @@ output "odahuflow_connections" {
 
 output "fluent_helm_values" {
   value = templatefile("${path.module}/templates/fluentd.yaml", {
-    data_bucket     = google_storage_bucket.data.name,
-    collector_sa    = google_service_account.collector_sa.email
-    fluentd         = yamlencode(local.fluentd)
+    data_bucket  = google_storage_bucket.data.name,
+    collector_sa = google_service_account.collector_sa.email
+    fluentd      = yamlencode(local.fluentd)
   })
 }
 
