@@ -38,6 +38,18 @@ resource "google_container_cluster" "cluster" {
     autoscaling_profile = var.autoscaling_profile
   }
 
+  dynamic resource_usage_export_config {
+    for_each = length(var.resource_usage_export_config.dataset_id) == 0 ? [] : [1]
+    content {
+      enable_network_egress_metering       = var.resource_usage_export_config.enable_network_egress_metering
+      enable_resource_consumption_metering = var.resource_usage_export_config.enable_resource_consumption_metering
+
+      bigquery_destination {
+        dataset_id = var.resource_usage_export_config.dataset_id
+      }
+    }
+  }
+
   # Setting an empty username and password explicitly disables basic auth
   master_auth {
     username = ""

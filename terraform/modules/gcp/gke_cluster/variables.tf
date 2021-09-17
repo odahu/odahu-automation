@@ -118,6 +118,17 @@ variable "logging_service" {
   default     = "none"
   description = "Logging service to write logs to. Possible values: logging.googleapis.com|logging.googleapis.com/kubernetes|none"
 }
+
+variable "resource_usage_export_config" {
+  type = map
+  default = {
+    enable_network_egress_metering       = false
+    enable_resource_consumption_metering = false
+    dataset_id                           = ""
+  }
+  description = "Resource consumption metrics configuration"
+}
+
 #############
 # Node pools
 #############
