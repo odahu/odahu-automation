@@ -153,7 +153,7 @@ variable "node_gcp_tags" {
 }
 
 variable "resource_usage_export_config" {
-  type    = map
+  type = map
   default = {
     enable_network_egress_metering       = false
     enable_resource_consumption_metering = false
