@@ -10,8 +10,8 @@ resources:
     cpu: "500m"
     memory: "512Mi"
   limits:
-    cpu: "1500Mi"
-    memory: "1Gi"
+    cpu: "1"
+    memory: "1564Mi"
 
 kibanaConfig:
   kibana.yml: |
