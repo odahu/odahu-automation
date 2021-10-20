@@ -81,6 +81,7 @@ module "istio" {
   source          = "../../../../modules/k8s/istio"
   tls_secret_key  = var.tls_key
   tls_secret_crt  = var.tls_crt
+  helm_timeout    = 900
   docker_repo     = var.docker_repo
   docker_username = var.docker_username
   docker_password = var.docker_password
@@ -332,6 +333,7 @@ module "elasticsearch" {
   source                = "../../../../modules/k8s/elk"
   cluster_domain        = var.domain
   namespace             = var.elk_namespace
+  helm_timeout          = 1200
   tls_secret_key        = var.tls_key
   tls_secret_crt        = var.tls_crt
   docker_repo           = var.docker_repo
