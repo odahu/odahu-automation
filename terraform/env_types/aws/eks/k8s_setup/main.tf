@@ -103,7 +103,10 @@ module "tekton" {
   helm_repo           = var.helm_repo
   odahu_infra_version = var.odahu_infra_version
 
-  depends_on = [module.cluster_autoscaler]
+  depends_on = [
+    module.istio,
+    module.cluster_autoscaler
+  ]
 }
 
 module "nfs" {
@@ -345,6 +348,7 @@ module "elasticsearch" {
   odahu_helm_repo       = var.helm_repo
 
   depends_on = [
+    module.istio,
     module.nginx_ingress_helm,
     module.irsa,
     module.cluster_autoscaler,
