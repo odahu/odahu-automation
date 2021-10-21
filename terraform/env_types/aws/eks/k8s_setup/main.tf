@@ -81,6 +81,7 @@ module "istio" {
   source          = "../../../../modules/k8s/istio"
   tls_secret_key  = var.tls_key
   tls_secret_crt  = var.tls_crt
+  helm_timeout    = 900
   docker_repo     = var.docker_repo
   docker_username = var.docker_username
   docker_password = var.docker_password
@@ -102,7 +103,10 @@ module "tekton" {
   helm_repo           = var.helm_repo
   odahu_infra_version = var.odahu_infra_version
 
-  depends_on = [module.cluster_autoscaler]
+  depends_on = [
+    module.istio,
+    module.cluster_autoscaler
+  ]
 }
 
 module "nfs" {
@@ -332,6 +336,7 @@ module "elasticsearch" {
   source                = "../../../../modules/k8s/elk"
   cluster_domain        = var.domain
   namespace             = var.elk_namespace
+  helm_timeout          = 1200
   tls_secret_key        = var.tls_key
   tls_secret_crt        = var.tls_crt
   docker_repo           = var.docker_repo
@@ -343,6 +348,7 @@ module "elasticsearch" {
   odahu_helm_repo       = var.helm_repo
 
   depends_on = [
+    module.istio,
     module.nginx_ingress_helm,
     module.irsa,
     module.cluster_autoscaler,
