@@ -19,6 +19,7 @@ hub:
     OAUTH2_AUTHORIZE_URL: ${oauth_oidc_issuer_url}/protocol/openid-connect/auth
     OAUTH2_TOKEN_URL: ${oauth_oidc_issuer_url}/protocol/openid-connect/token
     OAUTH_CALLBACK_URL: https://${cluster_domain}/jupyterhub/hub/oauth_callback
+    OAUTH2_TLS_VERIFY: false
 %{ if pgsql_enabled }
   db:
     type: postgres
