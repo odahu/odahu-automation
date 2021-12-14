@@ -82,7 +82,7 @@ scheduler:
   podDisruptionBudget:
     enabled: true
     maxUnavailable: "100%"
-    minAvailable: ""
+#    minAvailable: ""
 
   connections:
     - id: odahuflow_api
