@@ -4,7 +4,7 @@ locals {
   pg_username = local.pg_credentials_plain == 1 ? var.pgsql.db_password : lookup(lookup(data.kubernetes_secret.pg[0], "data", {}), "username", "")
   pg_password = local.pg_credentials_plain == 1 ? var.pgsql.db_user : lookup(lookup(data.kubernetes_secret.pg[0], "data", {}), "password", "")
 
-  airflow_helm_version = "11.1.11"
+  airflow_helm_version = "8.5.2"
   debug_log_level      = "true"
 
   ingress_tls_enabled     = var.tls_secret_crt != "" && var.tls_secret_key != ""
