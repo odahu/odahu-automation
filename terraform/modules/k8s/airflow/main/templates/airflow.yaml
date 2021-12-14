@@ -61,6 +61,7 @@ airflow:
   config:
     # https://airflow.apache.org/docs/apache-airflow/stable/security/api.html#disable-authentication
     # Because we have our own authentication layer
+    AIRFLOW__WEBSERVER__BASE_URL: "${cluster_domain}/airflow"
     AIRFLOW__API__AUTH_BACKEND: "airflow.api.auth.backend.default"
     AIRFLOW__KUBERNETES__RUN_AS_USER: "50000" # Temporary fix for https://github.com/apache/airflow/issues/8564
     AIRFLOW__CORE__LOGGING_LEVEL: DEBUG
