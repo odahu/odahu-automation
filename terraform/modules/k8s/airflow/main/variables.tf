@@ -125,3 +125,18 @@ variable "pgsql" {
   }
   description = "PostgreSQL settings for Airflow"
 }
+
+variable "airflow_tolerations" {
+  type = object({
+    key      = string
+    operator = string
+    value    = string
+    effect   = string
+  })
+  default = {
+    key      = "dedicated"
+    operator = "Equal"
+    value    = "airflow"
+    effect   = "NoSchedule"
+  }
+}

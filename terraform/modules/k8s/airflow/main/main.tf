@@ -83,6 +83,18 @@ resource "kubernetes_namespace" "airflow" {
   }
 }
 
+resource "kubernetes_config_map" "airflow_configmap" {
+  metadata {
+    name      = "airflow-cm"
+    namespace = var.namespace
+  }
+
+  data = {
+    k8spodstolerations = jsonencode([var.airflow_tolerations])
+  }
+  depends_on = [kubernetes_namespace.airflow]
+}
+
 resource "kubernetes_secret" "postgres" {
   count = var.configuration.enabled && var.pgsql.enabled ? 1 : 0
 
@@ -145,7 +157,8 @@ resource "helm_release" "airflow" {
       odahu_conn        = jsonencode(local.odahu_conn)
       client_secret     = var.service_account.client_secret,
       storage_size      = var.configuration.storage_size
-
+      tolerations       = var.airflow_tolerations
+      
       odahu_airflow_plugin_version = var.odahu_airflow_plugin_version
 
       pgsql_enabled = var.pgsql.enabled
