@@ -165,8 +165,6 @@ resource "google_container_node_pool" "cluster_node_pools" {
       "project" = "odahu-flow"
     })
 
-    resource_labels = merge(lookup(each.value, "labels", {}), local.node_labels)
-
     dynamic taint {
       for_each = lookup(each.value, "taints", [])
       content {
