@@ -145,17 +145,18 @@ dags:
 #    mountPath: "/dags"
 #    syncSubPath: ""
 #  %{ endif }
-  %{ if ("${dag_repo}" != "" && "${dag_rev}" != "") }
-  gitSync:
-    enabled: true
-    repo: "${dag_repo}"
-    branch: "${dag_rev}"
-    image:
-      repository: alpine/git
-      tag: v2.32.0
-      pullPolicy: IfNotPresent
 
-  %{ endif }
+#  %{ if ("${dag_repo}" != "" && "${dag_rev}" != "") }
+#  gitSync:
+#    enabled: true
+#    repo: "${dag_repo}"
+#    branch: "${dag_rev}"
+#    image:
+#      repository: alpine/git
+#      tag: v2.32.0
+#      pullPolicy: IfNotPresent
+#
+#  %{ endif }
 
 ${ingress}
 
