@@ -1,4 +1,4 @@
-trainerIntegrationVersion: "${mlflow_trainer_integration_version}"
+trainingIntegrationVersion: "${mlflow_training_integration_version}"
 imagesRegistry: "${docker_repo}/"
 ingress:
   globalDomain: "${cluster_domain}"
@@ -27,7 +27,7 @@ tracking_server:
       cpu: "250m"
       memory: "512Mi"
 
-trainer_integration:
+training_integration:
   enabled: true
 
 resource_uploader_sa:

@@ -171,7 +171,7 @@ locals {
       metricUrl          = "${local.url_schema}://${var.cluster_domain}/mlflow"
       timeout            = length(var.odahuflow_training_timeout) == 0 ? null : var.odahuflow_training_timeout
 
-      trainerIntegrationRepositoryType = var.pgsql_odahu.enabled ? "postgres" : "kubernetes"
+      trainingIntegrationRepositoryType = var.pgsql_odahu.enabled ? "postgres" : "kubernetes"
     }
     trainer = {
       auth = {
@@ -543,7 +543,7 @@ resource "helm_release" "odahuflow" {
 resource "helm_release" "mlflow" {
   name       = "odahu-flow-mlflow"
   chart      = "odahu-flow-mlflow"
-  version    = var.mlflow_trainer_integration_version
+  version    = var.mlflow_training_integration_version
   namespace  = var.odahuflow_namespace
   repository = var.helm_repo
   timeout    = var.helm_timeout
@@ -555,7 +555,7 @@ resource "helm_release" "mlflow" {
       ingress_tls_enabled     = local.ingress_tls_enabled
 
       docker_repo              = var.docker_repo
-      mlflow_trainer_integration_version = var.mlflow_trainer_integration_version
+      mlflow_training_integration_version = var.mlflow_training_integration_version
 
       odahuflow_version     = var.odahuflow_version
       resource_uploader_sa  = var.resource_uploader_sa

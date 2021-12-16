@@ -46,7 +46,7 @@ variable "packager_version" {
   description = "Packager version"
 }
 
-variable "mlflow_trainer_integration_version" {
+variable "mlflow_training_integration_version" {
   type        = string
   description = "Version of odahu-flow-mlflow helm chart"
 }

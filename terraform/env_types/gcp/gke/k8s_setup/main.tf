@@ -395,7 +395,7 @@ module "odahuflow_helm" {
   docker_password          = var.docker_password
   odahuflow_version        = var.odahuflow_version
   packager_version         = var.packager_version
-  mlflow_trainer_integration_version = var.mlflow_trainer_integration_version
+  mlflow_training_integration_version = var.mlflow_training_integration_version
   odahu_ui_version         = var.odahu_ui_version
 
   node_pools = var.node_pools

@@ -274,7 +274,7 @@ variable "log_expiration_days" {
   description = "ODAHU flow logs expiration days"
 }
 
-variable "mlflow_trainer_integration_version" {
+variable "mlflow_training_integration_version" {
   type        = string
   description = "Version of odahuflow-mlflow helm chart"
 }
