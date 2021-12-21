@@ -31,6 +31,7 @@ output "odahuflow_connections" {
         uri         = aws_ecr_repository.this.repository_url
         description = "Default ECR docker repository for model packaging"
         webUILink   = "https://${var.region}.console.aws.amazon.com/ecr/repositories/${aws_ecr_repository.this.name}/?region=${var.region}"
+        vital       = true
       }
     },
     {
@@ -43,6 +44,7 @@ output "odahuflow_connections" {
         region      = aws_s3_bucket.data.region
         description = ""
         webUILink   = "Storage for trained artifacts"
+        vital       = true
       }
     }
   ]
