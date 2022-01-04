@@ -14,19 +14,19 @@ web:
   extraPipPackages:
     - "airflow-exporter==1.5.3"
 
-#  webserverConfig:
-#    stringOverride: |-
-#      from airflow import configuration as conf
-#      from flask_appbuilder.security.manager import AUTH_DB
-#
-#      # the SQLAlchemy connection string
-#      SQLALCHEMY_DATABASE_URI = conf.get('core', 'SQL_ALCHEMY_CONN')
-#
-#      # use embedded DB for auth
-#      AUTH_TYPE = AUTH_DB
-#
-#      # setup Public role name, no authentication needed
-#      AUTH_ROLE_PUBLIC = 'Admin'
+  webserverConfig:
+    stringOverride: |-
+      from airflow import configuration as conf
+      from flask_appbuilder.security.manager import AUTH_DB
+
+      # the SQLAlchemy connection string
+      SQLALCHEMY_DATABASE_URI = conf.get('core', 'SQL_ALCHEMY_CONN')
+
+      # use embedded DB for auth
+      AUTH_TYPE = AUTH_DB
+
+      # setup Public role name, no authentication needed
+      AUTH_ROLE_PUBLIC = 'Admin'
 
   resources:
      requests:
@@ -136,7 +136,6 @@ dags:
     %{ endif }
     storageClass: "nfs"
     accessMode: ReadWriteMany
-    existingClaim: airflow-dags
     size: ${storage_size}
 
   %{ if ("${dag_repo}" != "" && "${dag_rev}" != "") }
@@ -199,8 +198,8 @@ serviceMonitor:
 prometheusRule:
   enabled: false
 
-# pgbouncer:
-#   enabled: false
-#
-# dbMigrations:
-#   enabled: false
+pgbouncer:
+  enabled: false
+
+dbMigrations:
+  enabled: false
