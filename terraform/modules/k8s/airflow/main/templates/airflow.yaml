@@ -199,8 +199,8 @@ serviceMonitor:
 prometheusRule:
   enabled: false
 
-pgbouncer:
-  enabled: false
-
-dbMigrations:
-  enabled: false
+# pgbouncer:
+#   enabled: false
+#
+# dbMigrations:
+#   enabled: false
