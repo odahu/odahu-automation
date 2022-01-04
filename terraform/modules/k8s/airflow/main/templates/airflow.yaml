@@ -87,7 +87,7 @@ airflow:
     AIRFLOW__KUBERNETES__GIT_SYNC_CONTAINER_TAG: 0.0.3
     AIRFLOW__KUBERNETES__GIT_SYNC_INIT_CONTAINER_NAME: git-sync-clone
 %{ else ~}
-    AIRFLOW__KUBERNETES__DAGS_VOLUME_CLAIM: airflow
+    AIRFLOW__KUBERNETES__DAGS_VOLUME_CLAIM: airflow-dags
 %{ endif ~}
 
 scheduler:
@@ -123,28 +123,28 @@ dags:
     accessMode: ReadWriteMany
     size: ${storage_size}
 
-#  %{ if ("${dag_repo}" != "" && "${dag_rev}" != "") }
-#
-#  git:
-#    url: "${dag_repo}"
-#    ref: "${dag_rev}"
-#    repoHost: ""
-#    gitSync:
-#      enabled: true
-#      image:
-#        repository: alpine/git
-#        tag: v2.24.1
-#        pullPolicy: IfNotPresent
-#      refreshTime: 30
-#  initContainer:
-#    enabled: true
-#    image:
-#      repository: alpine/git
-#      tag: v2.24.1
-#      pullPolicy: IfNotPresent
-#    mountPath: "/dags"
-#    syncSubPath: ""
-#  %{ endif }
+  %{ if ("${dag_repo}" != "" && "${dag_rev}" != "") }
+
+  git:
+    url: "${dag_repo}"
+    ref: "${dag_rev}"
+    repoHost: ""
+    gitSync:
+      enabled: true
+      image:
+        repository: alpine/git
+        tag: v2.24.1
+        pullPolicy: IfNotPresent
+      refreshTime: 30
+  initContainer:
+    enabled: true
+    image:
+      repository: alpine/git
+      tag: v2.24.1
+      pullPolicy: IfNotPresent
+    mountPath: "/dags"
+    syncSubPath: ""
+  %{ endif }
 
   %{ if ("${dag_repo}" != "" && "${dag_rev}" != "") }
   gitSync:
