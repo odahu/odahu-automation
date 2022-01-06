@@ -53,8 +53,6 @@ airflow:
           name: airflow-postgres
           key: postgresql-password
 
-  dbMigrations:
-    enabled: false
 
   connections:
     - id: odahuflow_api
