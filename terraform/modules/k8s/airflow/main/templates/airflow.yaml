@@ -56,8 +56,6 @@ airflow:
   dbMigrations:
     enabled: false
 
-  usersUpdate: false
-
   connections:
     - id: odahuflow_api
       type: http
@@ -80,7 +78,7 @@ airflow:
     AIRFLOW__WEBSERVER__BASE_URL: "https://${cluster_domain}/airflow"
     AIRFLOW__API__AUTH_BACKEND: "airflow.api.auth.backend.default"
     #AIRFLOW__CORE__DEFAULT_IMPERSONATION
-    #AIRFLOW__KUBERNETES__RUN_AS_USER: "50000" # Temporary fix for https://github.com/apache/airflow/issues/8564
+    AIRFLOW__KUBERNETES__RUN_AS_USER: "50000" # Temporary fix for https://github.com/apache/airflow/issues/8564
     AIRFLOW__LOGGING__LOGGING_LEVEL: DEBUG
     AIRFLOW__CORE__LOAD_EXAMPLES: True
     AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: False
