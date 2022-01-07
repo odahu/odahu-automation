@@ -53,6 +53,8 @@ airflow:
           name: airflow-postgres
           key: postgresql-password
 
+  usersUpdate:
+    enabled: false
 
   connections:
     - id: odahuflow_api
@@ -60,7 +62,8 @@ airflow:
       schema: https
       password: ${client_secret}
       host: ${cluster_domain}
-      extra: '${odahu_conn}'
+      extra: |-
+        ${odahu_conn}
     - id: odahuflow_model
       type: http
       schema: https
@@ -68,7 +71,8 @@ airflow:
       host: ${cluster_domain}/service-catalog
     - id: wine_input
       type: google_cloud_platform
-      extra: '${wine_conn}'
+      extra: |-
+        ${wine_conn}
 
   config:
     # https://airflow.apache.org/docs/apache-airflow/stable/security/api.html#disable-authentication
@@ -76,7 +80,7 @@ airflow:
     AIRFLOW__WEBSERVER__BASE_URL: "https://${cluster_domain}/airflow"
     AIRFLOW__API__AUTH_BACKEND: "airflow.api.auth.backend.default"
     #AIRFLOW__CORE__DEFAULT_IMPERSONATION
-    AIRFLOW__KUBERNETES__RUN_AS_USER: "50000" # Temporary fix for https://github.com/apache/airflow/issues/8564
+    #AIRFLOW__KUBERNETES__RUN_AS_USER: "50000" # Temporary fix for https://github.com/apache/airflow/issues/8564
     AIRFLOW__LOGGING__LOGGING_LEVEL: DEBUG
     AIRFLOW__CORE__LOAD_EXAMPLES: True
     AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: False
@@ -162,6 +166,8 @@ dags:
     enabled: true
     repo: "${dag_repo}"
     branch: "${dag_rev}"
+    revision : "HEAD"
+    syncWait: 60
     image:
       repository: alpine/git
       tag: v2.32.0
