@@ -169,10 +169,10 @@ dags:
     branch: "${dag_rev}"
     revision : "HEAD"
     syncWait: 60
-    image:
-      repository: alpine/git
-      tag: v2.32.0
-      pullPolicy: IfNotPresent
+#    image:
+#      repository: alpine/git
+#      tag: v2.32.0
+#      pullPolicy: IfNotPresent
 
   %{ endif }
 
