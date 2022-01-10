@@ -93,7 +93,8 @@ airflow:
     AIRFLOW__KUBERNETES__WORKER_CONTAINER_REPOSITORY: ${docker_repo}/odahu-airflow
     AIRFLOW__KUBERNETES__WORKER_CONTAINER_TAG: ${odahu_airflow_plugin_version}
     AIRFLOW__KUBERNETES__DELETE_WORKER_PODS: True
-#%{ if ("${dag_repo}" != "" && "${dag_rev}" != "") ~}
+%{ if ("${dag_repo}" != "" && "${dag_rev}" != "") ~}
+    AIRFLOW__SCHEDULER__DAG_DIR_LIST_INTERVAL: 60
     #AIRFLOW__KUBERNETES__GIT_REPO: "${dag_repo}"
     #AIRFLOW__KUBERNETES__GIT_BRANCH: "${dag_rev}"
     #AIRFLOW__KUBERNETES__GIT_DAGS_FOLDER_MOUNT_POINT: "/opt/airflow/dags"
@@ -105,7 +106,7 @@ airflow:
     #AIRFLOW__KUBERNETES__GIT_SYNC_INIT_CONTAINER_NAME: git-sync-clone
 #%{ else ~}
     #AIRFLOW__KUBERNETES__DAGS_VOLUME_CLAIM: airflow-dags
-#%{ endif ~}
+%{ endif ~}
 
 scheduler:
   resources:
