@@ -166,8 +166,8 @@ dags:
   %{ if ("${dag_repo}" != "" && "${dag_rev}" != "") }
   gitSync:
     enabled: true
-    repo: ${dag_repo}
-    branch: ${dag_rev}
+    repo: "https://github.com/owlleg6/airflow-dags.git" #${dag_repo}
+    branch: "master" #${dag_rev}
     subPath: ""
     revision : "HEAD"
     syncWait: 60
