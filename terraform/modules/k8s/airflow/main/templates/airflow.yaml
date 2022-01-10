@@ -131,11 +131,11 @@ logs:
 dags:
   path: /opt/airflow/dags
   persistence:
-    %{ if ("${dag_repo}" != "" && "${dag_rev}" != "") }
-    enabled: false
-    %{ else }
+    #%{ if ("${dag_repo}" != "" && "${dag_rev}" != "") }
+    #enabled: false
+    #%{ else }
     enabled: true
-    %{ endif }
+    #%{ endif }
     storageClass: "nfs"
     accessMode: ReadWriteMany
     size: ${storage_size}
