@@ -75,38 +75,18 @@ airflow:
         ${wine_conn}
 
   config:
-    # https://airflow.apache.org/docs/apache-airflow/stable/security/api.html#disable-authentication
-    # Because we have our own authentication layer
     AIRFLOW__WEBSERVER__BASE_URL: "https://${cluster_domain}/airflow"
     AIRFLOW__API__AUTH_BACKEND: "airflow.api.auth.backend.default"
-    #AIRFLOW__CORE__DEFAULT_IMPERSONATION
-    #AIRFLOW__KUBERNETES__RUN_AS_USER: "50000" # Temporary fix for https://github.com/apache/airflow/issues/8564
     AIRFLOW__LOGGING__LOGGING_LEVEL: DEBUG
     AIRFLOW__CORE__LOAD_EXAMPLES: True
     AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: False
     AIRFLOW__CORE__FERNET_KEY: ${fernet_key}
-    #AIRFLOW__KUBERNETES__LOGS_VOLUME_CLAIM: airflow-logs
-    #AIRFLOW__KUBERNETES__WORKER_CONTAINER_IMAGE_PULL_POLICY: IfNotPresent
-    #AIRFLOW__KUBERNETES__WORKER_SERVICE_ACCOUNT_NAME: default
     AIRFLOW__KUBERNETES__NAMESPACE: ${namespace}
-    #AIRFLOW__KUBERNETES__ENV_FROM_CONFIGMAP_REF: airflow-env
     AIRFLOW__KUBERNETES__WORKER_CONTAINER_REPOSITORY: ${docker_repo}/odahu-airflow
     AIRFLOW__KUBERNETES__WORKER_CONTAINER_TAG: ${odahu_airflow_plugin_version}
     AIRFLOW__KUBERNETES__DELETE_WORKER_PODS: True
 %{ if ("${dag_repo}" != "" && "${dag_rev}" != "") ~}
     AIRFLOW__SCHEDULER__DAG_DIR_LIST_INTERVAL: 60
-#   AIRFLOW__SCHEDULER__DAG_DIR_LIST_INTERVAL: 60
-    #AIRFLOW__KUBERNETES__GIT_REPO: "${dag_repo}"
-    #AIRFLOW__KUBERNETES__GIT_BRANCH: "${dag_rev}"
-    #AIRFLOW__KUBERNETES__GIT_DAGS_FOLDER_MOUNT_POINT: "/opt/airflow/dags"
-    #AIRFLOW__KUBERNETES__GIT_SYNC_BRANCH: "${dag_rev}"
-    #AIRFLOW__KUBERNETES__GIT_SYNC_ROOT: "/opt/airflow/dags"
-    #AIRFLOW__KUBERNETES__GIT_SYNC_DEST: "/opt/airflow/dags"
-    #AIRFLOW__KUBERNETES__GIT_SYNC_CONTAINER_REPOSITORY: gcr.io/or2-msq-epmd-legn-t1iylu/odahu/git-sync
-    #AIRFLOW__KUBERNETES__GIT_SYNC_CONTAINER_TAG: 0.0.3
-    #AIRFLOW__KUBERNETES__GIT_SYNC_INIT_CONTAINER_NAME: git-sync-clone
-#%{ else ~}
-    #AIRFLOW__KUBERNETES__DAGS_VOLUME_CLAIM: airflow-dags
 %{ endif ~}
 
 scheduler:
@@ -140,41 +120,13 @@ dags:
     size: ${storage_size}
     %{ endif }
 
-#  %{ if ("${dag_repo}" != "" && "${dag_rev}" != "") }
-#
-#  git:
-#    url: "${dag_repo}"
-#    ref: "${dag_rev}"
-#    repoHost: ""
-#    gitSync:
-#      enabled: true
-#      image:
-#        repository: alpine/git
-#        tag: v2.24.1
-#        pullPolicy: IfNotPresent
-#      refreshTime: 30
-#  initContainer:
-#    enabled: true
-#    image:
-#      repository: alpine/git
-#      tag: v2.24.1
-#      pullPolicy: IfNotPresent
-#    mountPath: "/dags"
-#    syncSubPath: ""
-#  %{ endif }
-
   %{ if ("${dag_repo}" != "" && "${dag_rev}" != "") }
   gitSync:
     enabled: true
-    repo: https://github.com/owlleg6/airflow-dags.git #${dag_repo}
-    branch: master #${dag_rev}
+    repo: ${dag_repo}
+    branch: ${dag_rev}
     subPath: ""
     syncWait: 60
-#    image:
-#      repository: alpine/git
-#      tag: v2.32.0
-#      pullPolicy: IfNotPresent
-
   %{ endif }
 
 ${ingress}
