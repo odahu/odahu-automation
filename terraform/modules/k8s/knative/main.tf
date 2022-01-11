@@ -23,7 +23,6 @@ resource "helm_release" "knative" {
   ]
 
   depends_on = [
-    kubernetes_namespace.knative,
-    var.module_dependency
+    kubernetes_namespace.knative
   ]
 }
