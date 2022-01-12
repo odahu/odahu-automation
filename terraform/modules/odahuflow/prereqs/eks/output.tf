@@ -26,8 +26,8 @@ output "odahuflow_connections" {
       id = "docker-ci"
       spec = {
         type        = "ecr"
-        keyID       = base64encode(aws_iam_access_key.collector.id)
-        keySecret   = base64encode(aws_iam_access_key.collector.secret)
+#        keyID       = base64encode(aws_iam_access_key.collector.id)
+#        keySecret   = base64encode(aws_iam_access_key.collector.secret)
         uri         = aws_ecr_repository.this.repository_url
         description = "Default ECR docker repository for model packaging"
         webUILink   = "https://${var.region}.console.aws.amazon.com/ecr/repositories/${aws_ecr_repository.this.name}/?region=${var.region}"
@@ -37,8 +37,8 @@ output "odahuflow_connections" {
       id = "models-output"
       spec = {
         type        = "s3"
-        keyID       = base64encode(aws_iam_access_key.collector.id)
-        keySecret   = base64encode(aws_iam_access_key.collector.secret)
+#        keyID       = base64encode(aws_iam_access_key.collector.id)
+#        keySecret   = base64encode(aws_iam_access_key.collector.secret)
         uri         = "s3://${aws_s3_bucket.data.id}/output"
         region      = aws_s3_bucket.data.region
         description = ""
@@ -80,8 +80,8 @@ output "logstash_input_config" {
   value = templatefile("${path.module}/templates/logstash.yaml", {
     bucket            = local.log_bucket
     region            = local.log_bucket_region
-    access_key_id     = aws_iam_access_key.collector.id
-    secret_access_key = aws_iam_access_key.collector.secret
+#    access_key_id     = aws_iam_access_key.collector.id
+#    secret_access_key = aws_iam_access_key.collector.secret
   })
 }
 
