@@ -64,24 +64,24 @@ resource "aws_iam_policy_attachment" "backup" {
   policy_arn = aws_iam_policy.backup[0].arn
 }
 
-resource "aws_iam_user" "backup" {
-  count = var.backup_settings.enabled ? 1 : 0
-  name  = "${var.cluster_name}-backup"
-  path  = "/odahuflow/"
-  tags = {
-    Name        = "${var.cluster_name}-backup"
-    ClusterName = var.cluster_name
-  }
-}
-
-resource "aws_iam_user_policy" "backup" {
-  count  = var.backup_settings.enabled ? 1 : 0
-  name   = "backup"
-  user   = aws_iam_user.backup[0].name
-  policy = data.aws_iam_policy_document.backup[0].json
-}
-
-resource "aws_iam_access_key" "backup" {
-  count = var.backup_settings.enabled ? 1 : 0
-  user  = aws_iam_user.backup[0].name
-}
+#resource "aws_iam_user" "backup" {
+#  count = var.backup_settings.enabled ? 1 : 0
+#  name  = "${var.cluster_name}-backup"
+#  path  = "/odahuflow/"
+#  tags = {
+#    Name        = "${var.cluster_name}-backup"
+#    ClusterName = var.cluster_name
+#  }
+#}
+#
+#resource "aws_iam_user_policy" "backup" {
+#  count  = var.backup_settings.enabled ? 1 : 0
+#  name   = "backup"
+#  user   = aws_iam_user.backup[0].name
+#  policy = data.aws_iam_policy_document.backup[0].json
+#}
+#
+#resource "aws_iam_access_key" "backup" {
+#  count = var.backup_settings.enabled ? 1 : 0
+#  user  = aws_iam_user.backup[0].name
+#}

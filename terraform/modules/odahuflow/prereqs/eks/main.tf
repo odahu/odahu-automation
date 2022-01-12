@@ -202,24 +202,24 @@ resource "aws_iam_role_policy_attachment" "collector" {
   role       = aws_iam_role.collector.name
 }
 
-resource "aws_iam_user" "collector" {
-  name = "${var.cluster_name}-collector"
-  path = "/odahuflow/"
-
-  tags = {
-    Name        = "${var.cluster_name}-collector"
-    ClusterName = var.cluster_name
-  }
-}
-
-resource "aws_iam_user_policy_attachment" "collector" {
-  user       = aws_iam_user.collector.name
-  policy_arn = aws_iam_policy.collector.arn
-}
-
-resource "aws_iam_access_key" "collector" {
-  user = aws_iam_user.collector.name
-}
+#resource "aws_iam_user" "collector" {
+#  name = "${var.cluster_name}-collector"
+#  path = "/odahuflow/"
+#
+#  tags = {
+#    Name        = "${var.cluster_name}-collector"
+#    ClusterName = var.cluster_name
+#  }
+#}
+#
+#resource "aws_iam_user_policy_attachment" "collector" {
+#  user       = aws_iam_user.collector.name
+#  policy_arn = aws_iam_policy.collector.arn
+#}
+#
+#resource "aws_iam_access_key" "collector" {
+#  user = aws_iam_user.collector.name
+#}
 
 ########################################################
 # AWS IAM User for Jupyterhub
@@ -306,19 +306,19 @@ resource "aws_iam_role_policy_attachment" "jupyter_notebook" {
   role       = aws_iam_role.jupyter_notebook.name
 }
 
-resource "aws_iam_user" "jupyter_notebook" {
-  name = "${var.cluster_name}-jupyter-notebook"
-  path = "/odahuflow/"
-
-  tags = {
-    Name        = "${var.cluster_name}-jupyter-notebook"
-    ClusterName = var.cluster_name
-  }
-}
-
-resource "aws_iam_access_key" "jupyterhub" {
-  user = aws_iam_user.jupyter_notebook.name
-}
+#resource "aws_iam_user" "jupyter_notebook" {
+#  name = "${var.cluster_name}-jupyter-notebook"
+#  path = "/odahuflow/"
+#
+#  tags = {
+#    Name        = "${var.cluster_name}-jupyter-notebook"
+#    ClusterName = var.cluster_name
+#  }
+#}
+#
+#resource "aws_iam_access_key" "jupyterhub" {
+#  user = aws_iam_user.jupyter_notebook.name
+#}
 
 ########################################################
 # AWS IAM User for MLFlow
@@ -406,16 +406,16 @@ resource "aws_iam_role_policy_attachment" "mlflow" {
   role       = aws_iam_role.mlflow.name
 }
 
-resource "aws_iam_user" "mlflow" {
-  name = local.mlflow_iam_name
-  path = "/odahuflow/"
-
-  tags = {
-    Name        = local.mlflow_iam_name
-    ClusterName = var.cluster_name
-  }
-}
-
-resource "aws_iam_access_key" "mlflow" {
-  user = aws_iam_user.mlflow.name
-}
+#resource "aws_iam_user" "mlflow" {
+#  name = local.mlflow_iam_name
+#  path = "/odahuflow/"
+#
+#  tags = {
+#    Name        = local.mlflow_iam_name
+#    ClusterName = var.cluster_name
+#  }
+#}
+#
+#resource "aws_iam_access_key" "mlflow" {
+#  user = aws_iam_user.mlflow.name
+#}
