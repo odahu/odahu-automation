@@ -53,8 +53,8 @@ airflow:
           name: airflow-postgres
           key: postgresql-password
 
-  usersUpdate:
-    enabled: false
+#  usersUpdate:
+#    enabled: false
 
   connections:
     - id: odahuflow_api
