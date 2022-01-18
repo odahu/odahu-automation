@@ -13,6 +13,7 @@ flower:
 web:
   extraPipPackages:
     - "airflow-exporter==1.5.3"
+    - "plyvel==1.4.0"
 
   webserverConfig:
     stringOverride: |-
@@ -53,8 +54,11 @@ airflow:
           name: airflow-postgres
           key: postgresql-password
 
-#  usersUpdate:
-#    enabled: false
+  usersUpdate:
+    enabled: false
+
+  users:
+    {}
 
   connections:
     - id: odahuflow_api
