@@ -1,5 +1,5 @@
 sync:
-  volume: "airflow"
+  volume: "airflow-dags"
   subPath: "${subpath}"   
   target: "s3"
   s3:

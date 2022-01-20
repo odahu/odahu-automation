@@ -94,7 +94,7 @@ variable "examples_version" {
 
 variable "helm_repo" {
   type        = string
-  default     = "https://charts.helm.sh/stable"
+  default     = "https://airflow-helm.github.io/charts"
   description = "URL of used Helm chart repository"
 }
 

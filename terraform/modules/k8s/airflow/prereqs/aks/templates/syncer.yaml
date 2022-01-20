@@ -1,5 +1,5 @@
 sync:
-  volume: "airflow"
+  volume: "airflow-dags"
   subPath: "${subpath}"
   target: "azureblob"
   azureblob:

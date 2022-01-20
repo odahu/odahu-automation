@@ -11,18 +11,30 @@ flower:
   enabled: false
 
 web:
+  extraPipPackages:
+    - "airflow-exporter==1.5.3"
+    - "plyvel==1.4.0"
+
+  webserverConfig:
+    stringOverride: |-
+      from airflow import configuration as conf
+      from flask_appbuilder.security.manager import AUTH_DB
+
+      # the SQLAlchemy connection string
+      SQLALCHEMY_DATABASE_URI = conf.get('core', 'SQL_ALCHEMY_CONN')
+
+      # use embedded DB for auth
+      AUTH_TYPE = AUTH_DB
+
+      # setup Public role name, no authentication needed
+      AUTH_ROLE_PUBLIC = 'Admin'
+
   resources:
      requests:
        cpu: "500m"
        memory: "512Mi"
 
   replicas: 1
-
-  baseUrl: "http://localhost:8080/airflow"
-  serializeDAGs: false
-
-  extraPipPackages:
-    - "airflow-exporter==1.3.0"
 
 airflow:
   image:
@@ -42,35 +54,43 @@ airflow:
           name: airflow-postgres
           key: postgresql-password
 
+  usersUpdate:
+    enabled: false
+
+  users:
+    {}
+
+  connections:
+    - id: odahuflow_api
+      type: http
+      schema: https
+      password: ${client_secret}
+      host: ${cluster_domain}
+      extra: |-
+        ${odahu_conn}
+    - id: odahuflow_model
+      type: http
+      schema: https
+      password: ${client_secret}
+      host: ${cluster_domain}/service-catalog
+    - id: wine_input
+      type: google_cloud_platform
+      extra: |-
+        ${wine_conn}
+
   config:
-    # https://airflow.apache.org/docs/apache-airflow/stable/security/api.html#disable-authentication
-    # Because we have our own authentication layer
+    AIRFLOW__WEBSERVER__BASE_URL: "https://${cluster_domain}/airflow"
     AIRFLOW__API__AUTH_BACKEND: "airflow.api.auth.backend.default"
-    AIRFLOW__KUBERNETES__RUN_AS_USER: "50000" # Temporary fix for https://github.com/apache/airflow/issues/8564
-    AIRFLOW__CORE__LOGGING_LEVEL: DEBUG
+    AIRFLOW__LOGGING__LOGGING_LEVEL: DEBUG
     AIRFLOW__CORE__LOAD_EXAMPLES: True
     AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: False
     AIRFLOW__CORE__FERNET_KEY: ${fernet_key}
-    AIRFLOW__KUBERNETES__LOGS_VOLUME_CLAIM: airflow-logs
-    AIRFLOW__KUBERNETES__WORKER_CONTAINER_IMAGE_PULL_POLICY: IfNotPresent
-    AIRFLOW__KUBERNETES__WORKER_SERVICE_ACCOUNT_NAME: default
     AIRFLOW__KUBERNETES__NAMESPACE: ${namespace}
-    AIRFLOW__KUBERNETES__ENV_FROM_CONFIGMAP_REF: airflow-env
     AIRFLOW__KUBERNETES__WORKER_CONTAINER_REPOSITORY: ${docker_repo}/odahu-airflow
     AIRFLOW__KUBERNETES__WORKER_CONTAINER_TAG: ${odahu_airflow_plugin_version}
     AIRFLOW__KUBERNETES__DELETE_WORKER_PODS: True
 %{ if ("${dag_repo}" != "" && "${dag_rev}" != "") ~}
-    AIRFLOW__KUBERNETES__GIT_REPO: "${dag_repo}"
-    AIRFLOW__KUBERNETES__GIT_BRANCH: "${dag_rev}"
-    AIRFLOW__KUBERNETES__GIT_DAGS_FOLDER_MOUNT_POINT: "/opt/airflow/dags"
-    AIRFLOW__KUBERNETES__GIT_SYNC_BRANCH: "${dag_rev}"
-    AIRFLOW__KUBERNETES__GIT_SYNC_ROOT: "/opt/airflow/dags"
-    AIRFLOW__KUBERNETES__GIT_SYNC_DEST: "/opt/airflow/dags"
-    AIRFLOW__KUBERNETES__GIT_SYNC_CONTAINER_REPOSITORY: gcr.io/or2-msq-epmd-legn-t1iylu/odahu/git-sync
-    AIRFLOW__KUBERNETES__GIT_SYNC_CONTAINER_TAG: 0.0.3
-    AIRFLOW__KUBERNETES__GIT_SYNC_INIT_CONTAINER_NAME: git-sync-clone
-%{ else ~}
-    AIRFLOW__KUBERNETES__DAGS_VOLUME_CLAIM: airflow
+    AIRFLOW__SCHEDULER__DAG_DIR_LIST_INTERVAL: 60
 %{ endif ~}
 
 scheduler:
@@ -84,22 +104,6 @@ scheduler:
     maxUnavailable: "100%"
     minAvailable: ""
 
-  connections:
-    - id: odahuflow_api
-      type: http
-      schema: https
-      password: ${client_secret}
-      host: ${cluster_domain}
-      extra: '${odahu_conn}'
-    - id: odahuflow_model
-      type: http
-      schema: https
-      password: ${client_secret}
-      host: ${cluster_domain}/service-catalog
-    - id: wine_input
-      type: google_cloud_platform
-      extra: '${wine_conn}'
-
 logs:
   path: /opt/airflow/logs
   persistence:
@@ -110,38 +114,23 @@ logs:
 
 dags:
   path: /opt/airflow/dags
-  doNotPickle: true
-  installRequirements: false
   persistence:
     %{ if ("${dag_repo}" != "" && "${dag_rev}" != "") }
     enabled: false
     %{ else }
     enabled: true
-    %{ endif }
     storageClass: "nfs"
     accessMode: ReadWriteMany
     size: ${storage_size}
+    %{ endif }
 
   %{ if ("${dag_repo}" != "" && "${dag_rev}" != "") }
-  git:
-    url: "${dag_repo}"
-    ref: "${dag_rev}"
-    repoHost: ""
-    gitSync:
-      enabled: true
-      image:
-        repository: alpine/git
-        tag: v2.24.1
-        pullPolicy: IfNotPresent
-      refreshTime: 30
-  initContainer:
+  gitSync:
     enabled: true
-    image:
-      repository: alpine/git
-      tag: v2.24.1
-      pullPolicy: IfNotPresent
-    mountPath: "/dags"
-    syncSubPath: ""
+    repo: ${dag_repo}
+    branch: ${dag_rev}
+    subPath: ""
+    syncWait: 60
   %{ endif }
 
 ${ingress}
@@ -167,4 +156,7 @@ serviceMonitor:
   enabled: false
 
 prometheusRule:
+  enabled: false
+
+pgbouncer:
   enabled: false
