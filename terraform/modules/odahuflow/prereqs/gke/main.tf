@@ -43,6 +43,10 @@ resource "google_storage_bucket" "data" {
     default_kms_key_name = var.kms_key_id
   }
 
+  versioning {
+    enabled = true
+  }
+
   labels = {
     project = "odahuflow"
     env     = var.cluster_name
@@ -60,6 +64,10 @@ resource "google_storage_bucket" "mlflow" {
 
   encryption {
     default_kms_key_name = var.kms_key_id
+  }
+
+  versioning {
+    enabled = true
   }
 
   labels = {
@@ -80,6 +88,10 @@ resource "google_storage_bucket" "log" {
 
   encryption {
     default_kms_key_name = var.kms_key_id
+  }
+
+  versioning {
+    enabled = true
   }
 
   labels = {
@@ -111,6 +123,10 @@ resource "google_storage_bucket" "argo_artifacts" {
 
   encryption {
     default_kms_key_name = var.kms_key_id
+  }
+
+  versioning {
+    enabled = true
   }
 
   labels = {
