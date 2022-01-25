@@ -164,21 +164,21 @@ module "pg_backup" {
 }
 
 module "odahuflow_prereqs" {
-  source                      = "../../../../modules/odahuflow/prereqs/gke"
-  project_id                  = var.project_id
-  region                      = var.region
-  cluster_name                = var.cluster_name
-  kms_key_id                  = var.kms_key_id
-  data_bucket                 = var.data_bucket
-  log_bucket                  = var.log_bucket
-  argo_artifact_bucket        = local.argo_artifact_bucket_name
-  log_expiration_days         = var.log_expiration_days
-  data_enable_versioning      = var.data_enable_versioning
-  log_enable_versioning       = var.log_enable_versioning
-  mlflow_enable_versioning    = var.mlflow_enable_versioning
+  source                           = "../../../../modules/odahuflow/prereqs/gke"
+  project_id                       = var.project_id
+  region                           = var.region
+  cluster_name                     = var.cluster_name
+  kms_key_id                       = var.kms_key_id
+  data_bucket                      = var.data_bucket
+  log_bucket                       = var.log_bucket
+  argo_artifact_bucket             = local.argo_artifact_bucket_name
+  log_expiration_days              = var.log_expiration_days
+  data_enable_versioning           = var.data_enable_versioning
+  log_enable_versioning            = var.log_enable_versioning
+  mlflow_enable_versioning         = var.mlflow_enable_versioning
   argo_artifacts_enable_versioning = var.argo_artifacts_enable_versioning
-  uniform_bucket_level_access = var.uniform_bucket_level_access
-  fluentd_resources           = var.fluentd_resources
+  uniform_bucket_level_access      = var.uniform_bucket_level_access
+  fluentd_resources                = var.fluentd_resources
   collector_sa_list = [
     "serviceAccount:${var.project_id}.svc.id.goog[${var.logging_namespace}/fluentd-daemonset]",
     "serviceAccount:${var.project_id}.svc.id.goog[${var.fluentd_namespace}/fluentd]",

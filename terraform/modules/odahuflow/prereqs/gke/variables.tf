@@ -47,26 +47,26 @@ variable "log_expiration_days" {
 
 # Bucket versioning
 variable "data_enable_versioning" {
-  type = bool
-  default = true
+  type        = bool
+  default     = true
   description = "Enable versioning for data bucket"
 }
 
 variable "log_enable_versioning" {
-  type = bool
-  default = true
+  type        = bool
+  default     = true
   description = "Enable versioning for log bucket"
 }
 
 variable "mlflow_enable_versioning" {
-  type = bool
-  default = true
+  type        = bool
+  default     = true
   description = "Enable versioning for mlflow bucket"
 }
 
 variable "argo_artifacts_enable_versioning" {
-  type = bool
-  default = true
+  type        = bool
+  default     = true
   description = "Enable versioning for argo artifacts bucket"
 }
 ########################
