@@ -54,7 +54,7 @@ output "odahuflow_connections" {
         uri         = "${google_storage_bucket.data.url}/output"
         region      = var.project_id
         description = "Storage for trained artifacts"
-        webUILink   = format(
+        webUILink = format(
           "https://console.cloud.google.com/storage/browser/%s/output?project=%s",
           google_storage_bucket.data.name,
           var.project_id
