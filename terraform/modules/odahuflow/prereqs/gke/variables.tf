@@ -55,6 +55,12 @@ variable "collector_sa_list" {
   description = "List of service accounts that should be allowed to use `collector` IAM role"
 }
 
+variable "vital_enable" {
+  type        = bool
+  default     = true
+  description = "Enable vital parameter in odahuflow connections"
+}
+
 variable "uniform_bucket_level_access" {
   type        = string
   default     = "true"

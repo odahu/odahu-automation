@@ -43,7 +43,7 @@ output "odahuflow_connections" {
         uri         = "${data.google_container_registry_repository.odahuflow_registry.repository_url}/${var.cluster_name}"
         description = "Default GCR docker repository for model packaging"
         webUILink   = local.model_docker_web_ui_link
-        vital       = true
+        vital       = var.vital_enable
       }
     },
     {
@@ -54,12 +54,12 @@ output "odahuflow_connections" {
         uri         = "${google_storage_bucket.data.url}/output"
         region      = var.project_id
         description = "Storage for trained artifacts"
-        webUILink = format(
+        webUILink   = format(
           "https://console.cloud.google.com/storage/browser/%s/output?project=%s",
           google_storage_bucket.data.name,
           var.project_id
         )
-        vital = true
+        vital = var.vital_enable
       }
     }
   ]
