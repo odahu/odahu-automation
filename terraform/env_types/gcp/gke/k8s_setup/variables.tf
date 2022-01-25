@@ -254,6 +254,12 @@ variable "data_bucket" {
   description = "ODAHU flow data storage bucket"
 }
 
+variable "data_enable_versioning" {
+  type = bool
+  default = true
+  description = "Enable versioning for data bucket"
+}
+
 variable "log_bucket" {
   type        = string
   default     = ""
@@ -264,6 +270,24 @@ variable "log_expiration_days" {
   type        = number
   default     = 1
   description = "ODAHU flow logs expiration days"
+}
+
+variable "log_enable_versioning" {
+  type = bool
+  default = true
+  description = "Enable versioning for log bucket"
+}
+
+variable "mlflow_enable_versioning" {
+  type = bool
+  default = true
+  description = "Enable versioning for mlflow bucket"
+}
+
+variable "argo_artifacts_enable_versioning" {
+  type = bool
+  default = true
+  description = "Enable versioning for argo artifacts bucket"
 }
 
 variable "mlflow_toolchain_version" {

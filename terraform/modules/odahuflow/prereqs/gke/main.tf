@@ -44,7 +44,7 @@ resource "google_storage_bucket" "data" {
   }
 
   versioning {
-    enabled = true
+    enabled = var.data_enable_versioning
   }
 
   labels = {
@@ -67,7 +67,7 @@ resource "google_storage_bucket" "mlflow" {
   }
 
   versioning {
-    enabled = true
+    enabled = var.mlflow_enable_versioning
   }
 
   labels = {
@@ -91,7 +91,7 @@ resource "google_storage_bucket" "log" {
   }
 
   versioning {
-    enabled = true
+    enabled = var.log_enable_versioning
   }
 
   labels = {
@@ -126,7 +126,7 @@ resource "google_storage_bucket" "argo_artifacts" {
   }
 
   versioning {
-    enabled = true
+    enabled = var.argo_artifacts_enable_versioning
   }
 
   labels = {

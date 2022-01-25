@@ -45,6 +45,32 @@ variable "log_expiration_days" {
   description = "ODAHU flow logs expiration days"
 }
 
+# Bucket versioning
+variable "data_enable_versioning" {
+  type = bool
+  default = true
+  description = "Enable versioning for data bucket"
+}
+
+variable "log_enable_versioning" {
+  type = bool
+  default = true
+  description = "Enable versioning for log bucket"
+}
+
+variable "mlflow_enable_versioning" {
+  type = bool
+  default = true
+  description = "Enable versioning for mlflow bucket"
+}
+
+variable "argo_artifacts_enable_versioning" {
+  type = bool
+  default = true
+  description = "Enable versioning for argo artifacts bucket"
+}
+########################
+
 variable "kms_key_id" {
   type        = string
   description = "The id of a Cloud KMS key that will be used to encrypt objects inserted into this bucket"

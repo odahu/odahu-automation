@@ -173,6 +173,10 @@ module "odahuflow_prereqs" {
   log_bucket                  = var.log_bucket
   argo_artifact_bucket        = local.argo_artifact_bucket_name
   log_expiration_days         = var.log_expiration_days
+  data_enable_versioning      = var.data_enable_versioning
+  log_enable_versioning       = var.log_enable_versioning
+  mlflow_enable_versioning    = var.mlflow_enable_versioning
+  argo_artifacts_enable_versioning = var.argo_artifacts_enable_versioning
   uniform_bucket_level_access = var.uniform_bucket_level_access
   fluentd_resources           = var.fluentd_resources
   collector_sa_list = [
