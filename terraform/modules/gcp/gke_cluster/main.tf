@@ -116,7 +116,7 @@ resource "google_container_cluster" "cluster" {
       disabled = true
     }
     network_policy_config {
-      disabled = true
+      disabled = false
     }
   }
 
