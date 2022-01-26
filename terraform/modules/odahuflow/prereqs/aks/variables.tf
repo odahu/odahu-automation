@@ -57,6 +57,12 @@ variable "kms_vault_id" {
   description = "Specifies the ID of the Key Vault instance where the Secret resides"
 }
 
+variable "vital_enable" {
+  type        = bool
+  default     = true
+  description = "Enable vital parameter in odahuflow connections"
+}
+
 variable "fluentd_resources" {
   type = object({
     cpu_requests    = string

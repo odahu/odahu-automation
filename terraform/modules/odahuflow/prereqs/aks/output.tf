@@ -28,7 +28,7 @@ output "odahuflow_connections" {
         uri         = local.model_docker_repo
         description = "Default ACR docker repository for model packaging"
         webUILink   = local.model_docker_web_ui_link
-        vital       = true
+        vital       = var.vital_enable
       }
     },
     {
@@ -39,7 +39,7 @@ output "odahuflow_connections" {
         uri         = "${var.data_bucket}/output"
         description = ""
         webUILink   = "${azurerm_storage_container.odahuflow_data_bucket.id}/output"
-        vital       = true
+        vital       = var.vital_enable
       }
     }
   ]
