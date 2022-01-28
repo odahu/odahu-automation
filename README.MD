@@ -1,7 +1,7 @@
 
 ## Overview
 This repository contains automation for ODAHU provisioning and configuration.
-For more details and technical documentation see the ODAHU documentation repository https://odahu.org/docs/latest/index.html
+For more details and technical documentation see the ODAHU documentation repository https://odahu.epam.com/docs/latest/index.html
 
 
 ## ODAHU infrastructure setup with Terraform
@@ -73,7 +73,7 @@ This will generate Terraform compatible variables json file which should be used
 
 In order to activate security system that provides authentication and authorization cluster profile parameters below should be filled.
 
-(For more information see docs about [security](https://docs.odahu.org/gen_security.html) and docs about [odahu helm charts configuration](https://docs.odahu.org/odahu/odahu-docs/out/tutorials_installation.html#install-open-policy-agent-optional))
+(For more information see docs about [security](https://docs.odahu.epam.com/gen_security.html) and docs about [odahu helm charts configuration](https://docs.odahu.epam.com/odahu/odahu-docs/out/tutorials_installation.html#install-open-policy-agent-optional))
 
 
 Security subsystem activation parameters:

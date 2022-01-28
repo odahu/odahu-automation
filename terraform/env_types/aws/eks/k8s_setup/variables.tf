@@ -300,7 +300,7 @@ variable "oauth_oidc_signout_endpoint" {
 variable "odahuflow_connections" {
   type        = any
   default     = []
-  description = "Initial list of ODAHU flow connections (https://docs.odahu.org/ref_connections.html)"
+  description = "Initial list of ODAHU flow connections (https://docs.odahu.epam.com/ref_connections.html)"
 }
 
 ###################################################################################
