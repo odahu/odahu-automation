@@ -22,7 +22,7 @@ locals {
   default_external_urls = [
     {
       name     = "Docs",
-      url      = "https://docs.odahu.org",
+      url      = "https://docs.odahu.epam.com",
       imageUrl = "/img/logo/documentation.png"
     },
     {

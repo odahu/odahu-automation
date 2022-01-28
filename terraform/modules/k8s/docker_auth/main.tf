@@ -2,7 +2,7 @@ locals {
   dockerconfigjson = (length(var.docker_username) != 0 && length(var.docker_password) != 0) ? {
     "auths" : {
       "${var.docker_repo}" = {
-        email    = "admin@odahu.org"
+        email    = "admin@odahu.epam.com"
         username = var.docker_username
         password = var.docker_password
         auth     = base64encode(join(":", [var.docker_username, var.docker_password]))
