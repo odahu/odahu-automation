@@ -73,7 +73,7 @@ This will generate Terraform compatible variables json file which should be used
 
 In order to activate security system that provides authentication and authorization cluster profile parameters below should be filled.
 
-(For more information see docs about [security](https://docs.odahu.epam.com/gen_security.html) and docs about [odahu helm charts configuration](https://docs.odahu.epam.com/odahu/odahu-docs/out/tutorials_installation.html#install-open-policy-agent-optional))
+(For more information see docs about [security](http://docs.odahu.epam.com/gen_security.html) and docs about [odahu helm charts configuration](http://docs.odahu.epam.com/odahu/odahu-docs/out/tutorials_installation.html#install-open-policy-agent-optional))
 
 
 Security subsystem activation parameters:
