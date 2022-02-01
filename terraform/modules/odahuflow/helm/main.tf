@@ -288,6 +288,7 @@ locals {
       username    = var.docker_username
       password    = base64encode(var.docker_password)
       uri         = var.docker_repo
+      vital       = true
       description = "Docker repository for ODAHU services"
     }
   }

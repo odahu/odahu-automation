@@ -43,6 +43,7 @@ output "odahuflow_connections" {
         uri         = "${data.google_container_registry_repository.odahuflow_registry.repository_url}/${var.cluster_name}"
         description = "Default GCR docker repository for model packaging"
         webUILink   = local.model_docker_web_ui_link
+        vital       = var.vital_enable
       }
     },
     {
@@ -58,6 +59,7 @@ output "odahuflow_connections" {
           google_storage_bucket.data.name,
           var.project_id
         )
+        vital = var.vital_enable
       }
     }
   ]
