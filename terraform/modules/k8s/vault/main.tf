@@ -111,6 +111,10 @@ resource "kubernetes_job" "vault_pgsql_init" {
 
   wait_for_completion = true
 
+  timeouts {
+    create = "5m"
+  }
+
   depends_on = [
     kubernetes_config_map.vault_pgsql_init[0],
     kubernetes_secret.postgres[0]
