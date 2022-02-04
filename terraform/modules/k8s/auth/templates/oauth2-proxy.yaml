@@ -53,6 +53,11 @@ resources:
 
 httpScheme: http
 
+livenessProbe:
+  enabled: true
+  initialDelaySeconds: 30
+  livenessProbe: 30
+  
 readinessProbe:
   enabled: true
   initialDelaySeconds: 30
