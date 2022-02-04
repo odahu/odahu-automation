@@ -50,3 +50,10 @@ resources:
   requests:
     cpu: 200m
     memory: 128Mi
+
+httpScheme: http
+
+readinessProbe:
+  enabled: true
+  initialDelaySeconds: 30
+  timeoutSeconds: 30
