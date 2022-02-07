@@ -22,3 +22,10 @@ provider "tls" {
 provider "external" {
   version = "1.2.0"
 }
+
+
+resource "azurerm_network_security_group" "nsg_dev01" {
+  location            = "northeurope"
+  name                = "aks-dev01-ingress"
+  resource_group_name = "aks-dev01"
+}
