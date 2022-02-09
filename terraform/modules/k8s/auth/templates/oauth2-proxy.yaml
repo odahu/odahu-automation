@@ -56,7 +56,7 @@ httpScheme: http
 livenessProbe:
   enabled: true
   initialDelaySeconds: 30
-  livenessProbe: 30
+  timeoutSeconds: 30
   
 readinessProbe:
   enabled: true
