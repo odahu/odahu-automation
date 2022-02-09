@@ -38,3 +38,15 @@ provider "google" {
 provider "random" {
   version = "2.2.1"
 }
+
+#resource "azurerm_network_security_group" "nsg_ci_agentpool" {
+#  location            = "eastus"
+#  name                = "aks-agentpool-67207258-nsg"
+#  resource_group_name = "aks-ci-k8s"
+#}
+#
+#resource "azurerm_lb" "lb_ci" {
+#  location            = "eastus"
+#  name                = "kubernetes"
+#  resource_group_name = "aks-ci-k8s"
+#}
