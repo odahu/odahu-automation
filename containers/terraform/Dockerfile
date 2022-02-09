@@ -67,7 +67,7 @@ RUN DIST="$(awk -F= '/VERSION_CODENAME/ {print $2}' /etc/os-release)" && \
     apt-get update -qqy && apt-get install google-cloud-sdk azure-cli -y && rm -rf /var/lib/apt/lists/*
 
 # Install AWS CLI
-RUN curl -sL https://bootstrap.pypa.io/get-pip.py | python3 && \
+RUN curl -sL  https://bootstrap.pypa.io/pip/3.6/get-pip.py | python3 && \
     pip3 install awscli
 
 COPY terraform /opt/odahu-flow/terraform
