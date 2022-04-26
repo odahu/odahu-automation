@@ -1,5 +1,5 @@
 locals {
-  helm_version = "1.5.0"
+  helm_version = "1.6.0"
 
   kube_pg_status_cmd = "kubectl -n ${var.namespace} get postgresql ${var.configuration.cluster_name} -ojsonpath='{.status.PostgresClusterStatus}'"
 }
